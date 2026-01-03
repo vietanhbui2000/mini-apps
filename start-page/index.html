@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your new day starts here.">
     <title>Start Page</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -23,10 +25,10 @@
             }
         }
     </script>
-    
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -34,15 +36,24 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        
+
         /* Smooth fade in animation */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0; /* Ensure hidden before animation starts */
+            opacity: 0;
+            /* Ensure hidden before animation starts */
         }
 
         /* Modal Transitions */
@@ -50,13 +61,16 @@
             opacity: 0;
             pointer-events: none;
         }
+
         .modal-enter .modal-content {
             transform: scale(0.95);
         }
+
         .modal-active {
             opacity: 1;
             pointer-events: auto;
         }
+
         .modal-active .modal-content {
             transform: scale(1);
         }
@@ -65,9 +79,11 @@
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
         }
+
         .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
+
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background-color: rgba(113, 113, 122, 0.3);
             border-radius: 20px;
@@ -81,105 +97,127 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 selection:bg-zinc-200 dark:selection:bg-zinc-800 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
 
-    <!-- Help Button (Fixed Bottom Left) -->
-    <div class="fixed bottom-6 left-6 z-30 animate-fade-in" style="animation-delay: 300ms;">
-        <button id="help-toggle" class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all" aria-label="Help">
-            <i data-lucide="help-circle" class="w-4 h-4"></i>
-        </button>
-    </div>
+<body
+    class="min-h-screen bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 selection:bg-zinc-200 dark:selection:bg-zinc-800 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
 
-    <!-- Theme & Settings Buttons (Fixed Bottom Right) -->
-    <div class="fixed bottom-6 right-6 z-30 flex gap-2 animate-fade-in" style="animation-delay: 300ms;">
-        <button id="theme-toggle" class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all" aria-label="Toggle Theme">
-            <!-- Icon injected via JS -->
-        </button>
-        <button id="settings-toggle" class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all" aria-label="Settings">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-        </button>
-    </div>
+
 
     <div class="w-full max-w-3xl space-y-12 mb-12">
-        
-        <!-- Header Section -->
-        <header class="space-y-2 animate-fade-in">
-            <div class="flex items-center gap-3 ml-1 text-zinc-500 font-medium text-sm tracking-wide uppercase">
+
+        <!-- Header Section (Second Priority - Delayed) -->
+        <header class="space-y-2 animate-fade-in flex flex-col items-center" style="animation-delay: 100ms;">
+            <div class="flex items-center gap-3 text-zinc-500 font-medium text-sm tracking-wide uppercase">
                 <p id="date-display">Loading date...</p>
                 <span class="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
                 <p id="clock-display">00:00</p>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight transition-colors">
-                <span id="greeting-display">Hello</span><span id="username-container" class="hidden">, <span id="username-display">User</span></span>
+            <h1
+                class="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight transition-colors text-center">
+                <span id="greeting-display">Hello</span><span id="username-container" class="hidden">, <span
+                        id="username-display">User</span></span>
             </h1>
         </header>
 
-        <!-- Search Area -->
-        <form id="search-form" class="w-full z-20 flex gap-3 relative animate-fade-in" style="animation-delay: 100ms;">
-            
+        <!-- Search Area (First Priority - Instant) -->
+        <form id="search-form" class="w-full z-20 flex gap-3 relative">
+
             <!-- Main Input (Separate Box) -->
-            <div class="relative flex-1 group">
-                <input
-                    id="search-input"
-                    type="text"
-                    placeholder="Search / Ask anything..."
-                    autocomplete="off"
-                    class="w-full h-16 bg-white/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white text-lg rounded-2xl px-6 pr-24 focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:focus:ring-zinc-700 focus:border-transparent transition-[box-shadow,border-color] duration-300 ease-out shadow-sm dark:shadow-lg placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
-                    autofocus
-                />
-                
+            <div
+                class="relative flex-1 group flex items-center w-full h-16 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl focus-within:border-zinc-300/80 dark:focus-within:border-zinc-600/80 transition-all duration-300 ease-out shadow-md dark:shadow-lg focus-within:shadow-xl dark:focus-within:shadow-2xl">
+                <input id="search-input" type="text" placeholder="Search / Ask anything..." autocomplete="off"
+                    class="flex-1 w-0 bg-transparent border-none text-zinc-900 dark:text-white text-lg px-5 h-full focus:outline-none focus:ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" />
+
                 <!-- Right Side Indicator -->
-                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                <div class="shrink-0 pr-5 flex items-center h-full pointer-events-none">
                     <!-- Slash Shortcut -->
-                    <kbd id="shortcut-slash" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700/50 transition-colors">
+                    <kbd id="shortcut-slash"
+                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700/50 transition-colors">
                         /
                     </kbd>
                     <!-- Enter Indicator -->
-                    <span id="shortcut-enter" class="hidden items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border transition-all">
+                    <span id="shortcut-enter"
+                        class="hidden items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border transition-all">
                         <!-- Content injected via JS -->
                     </span>
                 </div>
             </div>
         </form>
 
-        <!-- Links Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 animate-fade-in" id="links-container" style="animation-delay: 200ms;">
+        <!-- Links Grid (Third Priority) -->
+        <div class="animate-fade-in" id="links-container" style="animation-delay: 300ms;">
             <!-- Links will be injected here by JavaScript -->
         </div>
 
     </div>
 
+
+    <!-- Help Button (Fixed Bottom Left) -->
+    <div class="fixed bottom-6 left-6 z-30">
+        <button id="help-toggle"
+            class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all"
+            aria-label="Help">
+            <i data-lucide="help-circle" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <!-- Theme & Settings Buttons (Fixed Bottom Right) -->
+    <div class="fixed bottom-6 right-6 z-30 flex gap-2">
+        <button id="theme-toggle"
+            class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all"
+            aria-label="Toggle Theme">
+            <!-- Icon injected via JS -->
+        </button>
+        <button id="settings-toggle"
+            class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all"
+            aria-label="Settings">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+    </div>
+
     <!-- Help Modal -->
-    <div id="help-modal" class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
-        <div class="modal-content bg-white dark:bg-zinc-900 w-full max-w-lg p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-200 ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col max-h-[85vh]">
-            
+    <div id="help-modal"
+        class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
+        <div
+            class="modal-content bg-white dark:bg-zinc-900 w-full max-w-lg p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-200 ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col max-h-[85vh]">
+
             <div class="flex justify-between items-center mb-6 shrink-0">
                 <h2 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                     <i data-lucide="info" class="w-5 h-5 text-blue-500"></i> Usage Guide
                 </h2>
-                <button id="close-help" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
+                <button id="close-help"
+                    class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
-            <div class="space-y-6 overflow-y-auto custom-scrollbar px-2">
-                
+
+            <div class="space-y-6 overflow-y-auto custom-scrollbar px-2 pb-4">
+
                 <!-- Search Shortcuts -->
                 <div class="space-y-3">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                    <h3
+                        class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
                         <i data-lucide="search" class="w-4 h-4"></i> Smart Search
                     </h3>
-                    <div class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
+                    <div
+                        class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
                         <div class="flex items-start gap-3">
-                            <span class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">g query</span>
+                            <span
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">g
+                                query</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Engine Shortcuts:</strong> Type a shortcut (e.g., 'g') followed by Space/Tab to switch engines instantly.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Engine Shortcuts:</strong> Type a
+                                shortcut (e.g., 'g') followed by Space/Tab to switch engines instantly.
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
-                            <span class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">query ?</span>
+                            <span
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">query
+                                ?</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Ask Mode:</strong> End any query with a <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">?</code> to send it to your default AI engine.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Ask Mode:</strong> End any query with a
+                                <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">?</code> to send it to your
+                                default AI engine.
                             </div>
                         </div>
                     </div>
@@ -187,20 +225,27 @@
 
                 <!-- Speed Dial -->
                 <div class="space-y-3">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                    <h3
+                        class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
                         <i data-lucide="zap" class="w-4 h-4"></i> Speed Dial
                     </h3>
-                    <div class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
+                    <div
+                        class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
                         <div class="flex items-start gap-3">
-                            <span class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">1 - 9</span>
+                            <span
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">1
+                                - 0</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Hotkeys:</strong> Press number keys 1 through 9 on your keyboard to instantly open the corresponding top link.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Hotkeys:</strong> Press number keys 1
+                                through 9, and 0 for the 10th item, to instantly open links.
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
-                            <span class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">yt</span>
+                            <span
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">yt</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Keywords:</strong> Type a custom shortcut (e.g., 'yt') in the search box and hit Enter to open that site.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Keywords:</strong> Type a custom
+                                shortcut (e.g., 'yt') in the search box and hit Enter to open that site.
                             </div>
                         </div>
                     </div>
@@ -208,12 +253,15 @@
 
                 <!-- Navigation -->
                 <div class="space-y-3">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                    <h3
+                        class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
                         <i data-lucide="keyboard" class="w-4 h-4"></i> Navigation
                     </h3>
-                    <div class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800">
-                         <div class="flex items-start gap-3">
-                            <span class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">/</span>
+                    <div
+                        class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800">
+                        <div class="flex items-start gap-3">
+                            <span
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">/</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
                                 Press slash to instantly focus the search bar from anywhere.
                             </div>
@@ -222,62 +270,92 @@
                 </div>
 
             </div>
-            
-            <div class="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end shrink-0">
-                <button id="dismiss-help" class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-6 py-2 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
-                    Got it
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
-        <div class="modal-content bg-white dark:bg-zinc-900 w-full max-w-lg p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-200 ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col max-h-[85vh]">
-            
+    <div id="settings-modal"
+        class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
+        <div
+            class="modal-content bg-white dark:bg-zinc-900 w-full max-w-lg p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-200 ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col max-h-[85vh]">
+
             <div class="flex justify-between items-center mb-6 shrink-0">
                 <h2 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                     <i data-lucide="sliders-horizontal" class="w-5 h-5 text-zinc-500 dark:text-zinc-400"></i> Settings
                 </h2>
-                <button id="close-settings" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
+                <button id="close-settings"
+                    class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
-            <div class="space-y-8 overflow-y-auto custom-scrollbar px-2">
-                
+
+            <div class="space-y-8 overflow-y-auto custom-scrollbar px-2 pb-2">
+
                 <!-- General Settings -->
                 <div class="space-y-4">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">General</h3>
-                    
+                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">General
+                    </h3>
+
                     <div class="space-y-2">
                         <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Name</label>
-                        <input type="text" id="setting-username" placeholder="Enter your name" 
+                        <input type="text" id="setting-username" placeholder="Enter your name"
                             class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="setting-enable-greetings"
+                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Enable Greetings</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="setting-autofocus-search"
+                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-focus Search</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="setting-open-query-new-tab"
+                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Open Queries in New
+                                Tab</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="setting-open-link-new-tab"
+                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Open Links in New
+                                Tab</span>
+                        </label>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Time Format</label>
                             <div class="grid grid-cols-2 gap-2 mb-2">
-                                <button class="format-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-sm font-medium transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800" data-type="time" data-value="12">12h</button>
-                                <button class="format-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-sm font-medium transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800" data-type="time" data-value="24">24h</button>
+                                <button
+                                    class="format-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-sm font-medium transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                    data-type="time" data-value="12">12-hour</button>
+                                <button
+                                    class="format-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-sm font-medium transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                    data-type="time" data-value="24">24-hour</button>
                             </div>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="setting-show-seconds" class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                                <input type="checkbox" id="setting-show-seconds"
+                                    class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
                                 <span class="text-xs text-zinc-500 dark:text-zinc-400">Show seconds</span>
                             </label>
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Date Format</label>
-                            <select id="setting-date-format" class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer mb-2">
+                            <select id="setting-date-format"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer mb-2">
                                 <option value="full">Default</option>
                                 <option value="long">Long Date</option>
                                 <option value="short">Short (1/1)</option>
                                 <option value="iso">ISO</option>
                             </select>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="setting-show-weekday" class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                                <input type="checkbox" id="setting-show-weekday"
+                                    class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
                                 <span class="text-xs text-zinc-500 dark:text-zinc-400">Show day of week</span>
                             </label>
                         </div>
@@ -286,45 +364,48 @@
 
                 <!-- Search & Ask Engines Settings -->
                 <div class="space-y-4" id="settings-engines-section">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">Search & Ask Engines</h3>
-                    
+                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">Search &
+                        Ask Engines</h3>
+
                     <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                        Use shortcuts (e.g., type "g cat" for Google). Default <i data-lucide="search" class="inline w-3 h-3"></i>. Ask <i data-lucide="message-circle-question" class="inline w-3 h-3"></i> for "?".
+                        The engines you choose here will be used for features like searching and asking from the input
+                        box.
                     </p>
 
-                    <!-- Shortcut Trigger Setting -->
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Shortcut Trigger Key</label>
-                        <select id="setting-shortcut-trigger" class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
-                            <option value="space">Spacebar (Default)</option>
-                            <option value="tab">Tab Key</option>
-                            <option value="both">Both (Space or Tab)</option>
-                        </select>
-                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
-                            Choose which key activates a shortcut (e.g. typing "g" then pressing Space/Tab).
-                        </p>
-                    </div>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                        By default, queries will be searched and routed to the Search Engine <i data-lucide="search"
+                            class="inline w-3 h-3"></i>. Queries ending with "?" will be "asked" and routed to the Ask
+                        Engine <i data-lucide="search-slash" class="inline w-3 h-3"></i>.
+                    </p>
+
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                        You can use shortcuts in the input box to use a different engine or to quickly search a specific
+                        site.
+                    </p>
 
                     <!-- Add/Edit Engine Form -->
-                    <div id="engine-form" class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <input type="text" id="engine-name" placeholder="Name" 
+                    <div id="engine-form"
+                        class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input type="text" id="engine-name" placeholder="Name (e.g. Google)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                            <input type="text" id="engine-shortcut" placeholder="Shortcut (e.g. g)" 
+                            <input type="text" id="engine-shortcut" placeholder="Shortcut (e.g. g)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         </div>
-                        <input type="url" id="engine-url" placeholder="Query URL (e.g. google.com/search?q=%s)" 
+                        <input type="url" id="engine-url" placeholder="Query URL (e.g. google.com/search?q=%s)"
                             class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                        
+
                         <div class="flex gap-2">
-                             <button id="save-engine-btn" class="flex-1 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                            <button id="save-engine-btn"
+                                class="flex-1 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                                 Add Engine
                             </button>
-                             <button id="cancel-engine-edit" class="hidden px-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                            <button id="cancel-engine-edit"
+                                class="hidden px-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                                 Cancel
                             </button>
                         </div>
-                         <!-- Error message for Engine Form -->
+                        <!-- Error message for Engine Form -->
                         <p id="engine-error" class="text-red-500 text-xs hidden pt-1"></p>
                     </div>
 
@@ -332,33 +413,93 @@
                     <div id="settings-engines-list" class="space-y-2">
                         <!-- Engines injected via JS -->
                     </div>
+
+                    <!-- Shortcut Trigger Setting -->
+                    <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Shortcut Trigger Key</label>
+                        <select id="setting-shortcut-trigger"
+                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option value="both">Space or Tab</option>
+                            <option value="space">Space</option>
+                            <option value="tab">Tab</option>
+                        </select>
+                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                            Choose which key activates a shortcut (e.g. typing "g" then pressing Space/Tab).
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Speed Dial Settings -->
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">Speed Dial <span id="shortcut-count" class="ml-1 text-xs text-zinc-500 font-normal"></span></h3>
+                        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">
+                            Speed Dial <span id="shortcut-count" class="ml-1 text-xs text-zinc-500 font-normal"></span>
+                        </h3>
+                    </div>
+
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                        Quickly go to a site or open a page using shortcut.
+                    </p>
+
+                    <!-- New Toggles -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="setting-show-speed-dial"
+                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Show on Start Page</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="setting-enable-hotkeys"
+                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Enable Hotkeys
+                                (0-9)</span>
+                        </label>
+                    </div>
+
+                    <!-- Advanced Shortcut Settings -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open Speed
+                                Dial</label>
+                            <select id="setting-auto-open"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="disabled">Disabled (Wait for Enter)</option>
+                                <option value="immediate">Immediately</option>
+                                <option value="delay">After 1s Delay</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hotkey Modifier</label>
+                            <select id="setting-hotkey-modifier"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                <option value="alt">Alt / Option + 0-9</option>
+                                <option value="none">None (0-9)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Add New Shortcut Form -->
-                    <div id="add-shortcut-form" class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                    <div id="add-shortcut-form"
+                        class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input type="text" id="new-link-name" placeholder="Name (e.g. YouTube)" 
+                            <input type="text" id="new-link-name" placeholder="Name (e.g. YouTube)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                             <input type="text" id="new-link-shortcut" placeholder="Shortcut (e.g. yt)" 
+                            <input type="text" id="new-link-shortcut" placeholder="Shortcut (e.g. yt)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         </div>
-                        <input type="url" id="new-link-url" placeholder="URL (e.g. youtube.com)" 
-                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        <input type="url" id="new-link-url" placeholder="URL (e.g. youtube.com)"
+                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         <div class="flex gap-2">
-                            <button id="save-link-btn" class="flex-1 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
-                                Add Shortcut
+                            <button id="save-link-btn"
+                                class="flex-1 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                                Add Link
                             </button>
-                             <button id="cancel-link-edit" class="hidden px-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+                            <button id="cancel-link-edit"
+                                class="hidden px-4 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                                 Cancel
                             </button>
                         </div>
-                         <!-- Error message for Link Form -->
+                        <!-- Error message for Link Form -->
                         <p id="link-error" class="text-red-500 text-xs hidden pt-1"></p>
                     </div>
 
@@ -366,38 +507,66 @@
                     <div id="settings-links-list" class="space-y-2">
                         <!-- Items injected via JS -->
                     </div>
+
+                    <!-- Layout Selector -->
+                    <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Layout View</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button
+                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                data-value="list">
+                                <i data-lucide="layout-list" class="w-4 h-4"></i>
+                                <span class="text-sm">List</span>
+                            </button>
+                            <button
+                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                data-value="grid">
+                                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                                <span class="text-sm">Grid (Icon only)</span>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
 
-            <!-- Footer with Reset, Import, Export, Done -->
-            <div class="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center shrink-0">
+            <!-- Footer with Reset, Import, Export, Save -->
+            <div
+                class="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center shrink-0">
                 <div class="flex gap-2">
-                    <button id="reset-settings-btn" class="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all" title="Reset to Defaults">
+                    <button id="reset-settings-btn"
+                        class="p-2 rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        title="Reset to Defaults">
                         <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                     </button>
                     <div class="h-8 w-px bg-zinc-100 dark:bg-zinc-800 mx-1"></div>
-                    <button id="import-settings-btn" class="p-2 rounded-lg text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" title="Import Settings (JSON)">
+                    <button id="import-settings-btn"
+                        class="p-2 rounded-lg text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                        title="Import Settings (JSON)">
                         <i data-lucide="upload" class="w-4 h-4"></i>
                     </button>
-                    <button id="export-settings-btn" class="p-2 rounded-lg text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all" title="Export Settings (JSON)">
+                    <button id="export-settings-btn"
+                        class="p-2 rounded-lg text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                        title="Export Settings (JSON)">
                         <i data-lucide="download" class="w-4 h-4"></i>
                     </button>
                 </div>
-                <button id="save-settings" class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-6 py-2 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity">
-                    Done
+                <!-- Save button now uses conditional classes in JS -->
+                <button id="save-settings" class="px-6 py-2 rounded-lg font-medium text-sm transition-all duration-200">
+                    Save
                 </button>
             </div>
         </div>
     </div>
-    
+
     <!-- Hidden File Input for Import -->
     <input type="file" id="import-file-input" accept=".json" class="hidden" />
 
     <script>
         // --- Configuration & State ---
-        const DISPLAY_LIMIT = 9; // Only show first 9 on main screen
-        
+        const DISPLAY_LIMIT = 10; // Show first 10 on main screen
+
         const defaultEngines = [
             { name: 'Google', url: 'https://www.google.com/search?q=%s', shortcut: 'g' },
             { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s', shortcut: 'ddg' },
@@ -412,18 +581,27 @@
             showSeconds: localStorage.getItem('showSeconds') === 'true',
             dateFormat: localStorage.getItem('dateFormat') || 'full',
             showWeekday: localStorage.getItem('showWeekday') !== 'false',
-            links: JSON.parse(localStorage.getItem('links') || '[]'),
-            searchEngines: JSON.parse(localStorage.getItem('searchEngines') || JSON.stringify(defaultEngines)),
+            links: safeJsonParse(localStorage.getItem('links'), []),
+            searchEngines: safeJsonParse(localStorage.getItem('searchEngines'), defaultEngines),
             defaultSearchEngine: parseInt(localStorage.getItem('defaultSearchEngine') || '0'),
             defaultAskEngine: parseInt(localStorage.getItem('defaultAskEngine') || '0'),
-            shortcutTrigger: localStorage.getItem('shortcutTrigger') || 'space', // 'space', 'tab', 'both'
+            shortcutTrigger: localStorage.getItem('shortcutTrigger') || 'both', //  'both', 'space', 'tab'
+            linkLayout: localStorage.getItem('linkLayout') || 'list', // 'list' or 'grid'
+            showSpeedDial: localStorage.getItem('showSpeedDial') !== 'false', // Default true
+            enableHotkeys: localStorage.getItem('enableHotkeys') !== 'false', // Default true
+            autofocusSearch: localStorage.getItem('autofocusSearch') === 'true', // Default false
+            enableGreetings: localStorage.getItem('enableGreetings') === 'true', // Default false
+            hotkeyModifier: localStorage.getItem('hotkeyModifier') || 'alt', // 'none' or 'alt'
+            autoOpenSpeedDial: localStorage.getItem('autoOpenSpeedDial') || 'disabled', // 'disabled', 'immediate', 'delay'
+            openQueryNewTab: localStorage.getItem('openQueryNewTab') === 'true', // Default false
+            openLinkNewTab: localStorage.getItem('openLinkNewTab') === 'true', // Default false
         };
-        
+
         // Backwards compatibility for engines without shortcuts
-        preferences.searchEngines = preferences.searchEngines.map(e => ({...e, shortcut: e.shortcut || ''}));
-        
+        preferences.searchEngines = preferences.searchEngines.map(e => ({ ...e, shortcut: e.shortcut || '' }));
+
         // Backwards compatibility for links without shortcuts
-        preferences.links = preferences.links.map(l => ({...l, shortcut: l.shortcut || ''}));
+        preferences.links = preferences.links.map(l => ({ ...l, shortcut: l.shortcut || '' }));
 
         // Runtime State
         let draggedItem = null;
@@ -431,7 +609,12 @@
         let editingEngineIndex = null;
         let editingLinkIndex = null;
         let resetConfirmTimeout = null;
-        
+        let autoOpenTimeout = null;
+
+        // Settings Temporary State (for Dirty Checking)
+        let tempPreferences = null;
+        let originalPreferencesSnapshot = null;
+
         // This tracks the engine that was explicitly triggered by a valid keystroke sequence
         let activeShortcutEngine = null;
 
@@ -441,7 +624,7 @@
         const usernameContainer = document.getElementById('username-container');
         const usernameDisplay = document.getElementById('username-display');
         const clockDisplay = document.getElementById('clock-display');
-        
+
         // Search Elements
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
@@ -450,7 +633,7 @@
 
         const linksContainer = document.getElementById('links-container');
         const themeToggle = document.getElementById('theme-toggle');
-        
+
         // Modal Elements
         const settingsToggle = document.getElementById('settings-toggle');
         const settingsModal = document.getElementById('settings-modal');
@@ -467,15 +650,18 @@
         const helpToggle = document.getElementById('help-toggle');
         const helpModal = document.getElementById('help-modal');
         const closeHelpBtn = document.getElementById('close-help');
-        const dismissHelpBtn = document.getElementById('dismiss-help');
 
         const settingUsername = document.getElementById('setting-username');
         const settingDateFormat = document.getElementById('setting-date-format');
         const settingShowSeconds = document.getElementById('setting-show-seconds');
+        const settingAutofocusSearch = document.getElementById('setting-autofocus-search');
+        const settingEnableGreetings = document.getElementById('setting-enable-greetings');
+        const settingOpenQueryNewTab = document.getElementById('setting-open-query-new-tab');
+        const settingOpenLinkNewTab = document.getElementById('setting-open-link-new-tab');
         const settingShowWeekday = document.getElementById('setting-show-weekday');
         const settingShortcutTrigger = document.getElementById('setting-shortcut-trigger');
         const formatBtns = document.querySelectorAll('.format-btn');
-        
+
         // Settings - Search Engines
         const engineNameInput = document.getElementById('engine-name');
         const engineUrlInput = document.getElementById('engine-url');
@@ -496,25 +682,63 @@
         const linkError = document.getElementById('link-error');
         const addShortcutForm = document.getElementById('add-shortcut-form');
 
+        // Layout Settings
+        const layoutBtns = document.querySelectorAll('.layout-btn');
+        const settingShowSpeedDial = document.getElementById('setting-show-speed-dial');
+        const settingEnableHotkeys = document.getElementById('setting-enable-hotkeys');
+        const settingHotkeyModifier = document.getElementById('setting-hotkey-modifier');
+        const settingAutoOpen = document.getElementById('setting-auto-open');
+
         // --- Helper Functions ---
-        
+
         function getFavicon(url) {
             try {
                 // Handle %s case where url might not be a valid URL without replacement
                 const cleanUrl = url.replace('%s', '');
                 const domain = new URL(cleanUrl).hostname;
-                return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                // Increased size to 128 for better quality
+                return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             } catch (e) {
-                return 'https://www.google.com/s2/favicons?domain=google.com&sz=64'; 
+                return 'https://www.google.com/s2/favicons?domain=google.com&sz=128';
             }
         }
 
         function formatUrl(url) {
             if (!url) return '';
-            if (!/^https?:\/\//i.test(url)) {
-                return 'https://' + url;
+            let formatted = url.trim();
+            if (!/^https?:\/\//i.test(formatted)) {
+                formatted = 'https://' + formatted;
             }
-            return url;
+            // Validate URL structure
+            try {
+                new URL(formatted);
+                return formatted;
+            } catch (e) {
+                // If invalid, return as-is and let the browser handle it
+                return formatted;
+            }
+        }
+
+        function safeJsonParse(jsonString, fallback) {
+            if (!jsonString) return fallback;
+            try {
+                return JSON.parse(jsonString);
+            } catch (e) {
+                console.warn('Failed to parse JSON from localStorage:', e);
+                return fallback;
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
 
         function showError(element, message) {
@@ -530,25 +754,25 @@
 
         function updateTime() {
             const now = new Date();
-            
+
             // Time Format
-            const timeOptions = { 
-                hour: 'numeric', 
-                minute: '2-digit', 
+            const timeOptions = {
+                hour: 'numeric',
+                minute: '2-digit',
                 hour12: preferences.timeFormat === '12',
             };
-            
+
             if (preferences.showSeconds) {
                 timeOptions.second = '2-digit';
             }
-            
+
             clockDisplay.textContent = now.toLocaleTimeString('en-US', timeOptions);
 
             // Date Format
             let dateText = '';
             const d = now;
-            
-            switch(preferences.dateFormat) {
+
+            switch (preferences.dateFormat) {
                 case 'long':
                     dateText = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                     break;
@@ -571,16 +795,25 @@
 
             dateDisplay.textContent = dateText;
 
-            // Greeting
+            // Update Greeting via dedicated function to respect preferences
+            updateGreetingUI();
+        }
+
+        function updateGreetingUI() {
+            if (!preferences.enableGreetings) {
+                greetingDisplay.textContent = 'Start Page';
+                usernameContainer.classList.add('hidden');
+                return;
+            }
+
+            const now = new Date();
             const hour = now.getHours();
             let greeting = 'Good evening';
             if (hour < 12) greeting = 'Good morning';
             else if (hour < 18) greeting = 'Good afternoon';
-            
-            greetingDisplay.textContent = greeting;
-        }
 
-        function updateGreetingUI() {
+            greetingDisplay.textContent = greeting;
+
             if (preferences.username && preferences.username.trim() !== '') {
                 usernameContainer.classList.remove('hidden');
                 usernameDisplay.textContent = preferences.username;
@@ -592,34 +825,92 @@
         // --- Links/Speed Dial Rendering ---
 
         function renderLinks() {
-            // Only show the first 9 links on the dashboard
-            const linksToShow = preferences.links.slice(0, DISPLAY_LIMIT);
-            
-            if (linksToShow.length === 0) {
+            // Check if speed dial is enabled
+            if (!preferences.showSpeedDial) {
                 linksContainer.innerHTML = '';
+                linksContainer.className = "hidden";
                 return;
             }
 
-            let html = linksToShow.map((link, index) => `
-                <a href="${link.url}" 
-                   class="group flex items-center gap-3 p-3 rounded-xl 
-                          bg-white/50 dark:bg-zinc-900/30 
-                          border border-zinc-200/50 dark:border-zinc-800/50 
-                          hover:bg-white/80 dark:hover:bg-zinc-800/50 
-                          hover:border-zinc-300 dark:hover:border-zinc-700 
-                          transition-all duration-200 shadow-sm dark:shadow-none relative">
-                    <div class="absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
-                        ${index + 1}
-                    </div>
-                    <div class="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow-sm shrink-0">
-                        <img src="${getFavicon(link.url)}" alt="${link.name}" class="w-4 h-4 rounded-sm opacity-90 group-hover:opacity-100">
-                    </div>
-                    <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 truncate pr-4">
-                        ${link.name}
-                    </span>
-                </a>
-            `).join('');
-            
+            // Only show the first 10 links on the dashboard
+            const linksToShow = preferences.links.slice(0, DISPLAY_LIMIT);
+            const isIconMode = preferences.linkLayout === 'grid';
+            const showHotkeys = preferences.enableHotkeys;
+
+            if (linksToShow.length === 0) {
+                linksContainer.innerHTML = '';
+                linksContainer.className = "animate-fade-in"; // Reset classes
+                return;
+            }
+
+            // Define Container Classes based on Layout
+            if (isIconMode) {
+                // Grid Mode
+                // Mobile: grid-cols-4. Center 9th item (and thus 10th) in last row if present.
+                // Desktop: Grid with 10 columns to perfectly align first and last items to edges.
+                linksContainer.className = "animate-fade-in grid grid-cols-4 gap-4 [&>*:nth-child(9)]:col-start-2 md:grid md:grid-cols-10 md:gap-4 md:[&>*:nth-child(9)]:col-start-auto";
+            } else {
+                // List Mode (Default)
+                // Mobile: grid-cols-2 (2x5 for 10 items)
+                // Desktop: sm:grid-cols-3 (3x3 + 1 centered). Center 10th item in last row.
+                linksContainer.className = "animate-fade-in grid grid-cols-2 sm:grid-cols-3 gap-3 [&>*:nth-child(10)]:sm:col-start-2";
+            }
+
+            let html = linksToShow.map((link, index) => {
+                let displayIndex = index + 1;
+                if (displayIndex === 10) displayIndex = 0; // Use 0 for the 10th item
+
+                // Build the hotkey display string based on modifier setting
+                const hotkeyModifier = preferences.hotkeyModifier;
+                const hotkeyDisplay = hotkeyModifier === 'none' ? `${displayIndex}` : `Alt/Opt + ${displayIndex}`;
+
+                if (isIconMode) {
+                    // Grid Layout HTML
+                    // Updated Style: Solid background, mimicking the list view's inner icon box.
+                    return `
+                    <a href="${link.url}" ${preferences.openLinkNewTab ? 'target="_blank"' : ''}
+                       class="group relative flex items-center justify-center p-3 rounded-xl 
+                              bg-white dark:bg-zinc-800 
+                              border border-zinc-200 dark:border-zinc-700 
+                              hover:border-zinc-300 dark:hover:border-zinc-600
+                              hover:scale-110 transition-all duration-300 shadow-sm
+                              aspect-square w-full focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 group-hover:opacity-100" aria-hidden="true">
+                         
+                        <span class="sr-only">${link.name}</span>
+                        <!-- Tooltip (hover only, not on focus) -->
+                        <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-focus:opacity-0 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 group-hover:translate-y-0 flex flex-col items-center gap-0.5">
+                            <span>${link.name}</span>
+                            ${showHotkeys ? `<span class="text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
+                        </div>
+                    </a>
+                    `;
+                } else {
+                    // List Layout HTML (Default)
+                    return `
+                    <a href="${link.url}" ${preferences.openLinkNewTab ? 'target="_blank"' : ''}
+                       class="group flex items-center gap-3 p-3 rounded-xl 
+                              bg-white/50 dark:bg-zinc-900/30 
+                              border border-zinc-200/50 dark:border-zinc-800/50 
+                              hover:bg-white/80 dark:hover:bg-zinc-800/50 
+                              hover:border-zinc-300 dark:hover:border-zinc-700 
+                              transition-all duration-200 shadow-sm dark:shadow-none relative
+                              focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        ${showHotkeys ? `
+                        <div class="absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 group-hover:opacity-100 transition-opacity">
+                            ${hotkeyDisplay}
+                        </div>` : ''}
+                        <div class="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow-sm shrink-0">
+                            <img src="${getFavicon(link.url)}" alt="${link.name}" class="w-4 h-4 rounded-sm opacity-90 group-hover:opacity-100">
+                        </div>
+                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 truncate pr-4">
+                            ${link.name}
+                        </span>
+                    </a>
+                    `;
+                }
+            }).join('');
+
             linksContainer.innerHTML = html;
             lucide.createIcons();
         }
@@ -627,23 +918,43 @@
         // --- Settings: Shortcut Management ---
 
         function renderSettingsLinks() {
-            shortcutCount.textContent = `(${preferences.links.length})`;
-            
+            // Use tempPreferences if modal is open/active, otherwise fall back to main preferences
+            const sourceLinks = tempPreferences ? tempPreferences.links : preferences.links;
+            const sourceEnableHotkeys = tempPreferences ? tempPreferences.enableHotkeys : preferences.enableHotkeys;
+
+            shortcutCount.textContent = `(${sourceLinks.length})`;
+
             // Reset disabled state since we have no limit now
             saveLinkBtn.disabled = false;
-            if(editingLinkIndex === null) {
-                saveLinkBtn.textContent = "Add Shortcut";
+            if (editingLinkIndex === null) {
+                saveLinkBtn.textContent = "Add Link";
             }
             newLinkName.disabled = false;
             newLinkUrl.disabled = false;
 
-            if (preferences.links.length === 0) {
+            if (sourceLinks.length === 0) {
                 settingsLinksList.innerHTML = `<p class="text-center text-sm text-zinc-400 py-4 italic">No speed dial links added.</p>`;
                 return;
             }
 
-            settingsLinksList.innerHTML = preferences.links.map((link, index) => `
-                <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 group"
+            settingsLinksList.innerHTML = sourceLinks.map((link, index) => {
+                const isEditing = index === editingLinkIndex;
+                let displayIndex = index + 1;
+                if (index === 9) displayIndex = 0; // Show 0 for 10th item
+
+                // Styles for Container - Always standard now
+                let containerClass = "flex items-center justify-between p-3 rounded-lg border group transition-all duration-200 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800";
+
+                // Styles for Edit Button - Highlighted only when editing
+                let editBtnClass = "p-2 rounded-md transition-colors";
+                if (isEditing) {
+                    editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
+                } else {
+                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20";
+                }
+
+                return `
+                <div class="${containerClass}"
                      draggable="true"
                      data-index="${index}">
                     
@@ -652,8 +963,8 @@
                         <div class="flex flex-col overflow-hidden">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium text-zinc-900 dark:text-zinc-200 truncate">${link.name}</span>
-                                ${index < 9 ? `<span class="text-xs text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded">${index + 1}</span>` : ''}
-                                ${link.shortcut ? `<span class="text-xs text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded">${link.shortcut}</span>` : ''}
+                                ${(index < 10 && sourceEnableHotkeys) ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${displayIndex}</span>` : ''}
+                                ${link.shortcut ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${link.shortcut}</span>` : ''}
                             </div>
                             <span class="text-xs text-zinc-400 truncate">${link.url}</span>
                         </div>
@@ -663,16 +974,16 @@
                         <div class="drag-handle p-2 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing transition-colors">
                             <i data-lucide="grip-vertical" class="w-4 h-4"></i>
                         </div>
-                        <button onclick="editLink(${index})" class="p-2 text-zinc-300 hover:text-yellow-600 dark:text-zinc-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-md transition-colors">
+                        <button onclick="editLink(${index})" class="${editBtnClass}" title="Edit Link">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteLink(${index})" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                        <button onclick="deleteLink(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete Link">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </div>
-            `).join('');
-            
+            `}).join('');
+
             lucide.createIcons();
             attachDragListeners();
         }
@@ -680,13 +991,19 @@
         // --- Settings: Engine Management ---
 
         function renderSettingsEngines() {
-            settingsEnginesList.innerHTML = preferences.searchEngines.map((eng, index) => {
-                const isSearch = index === preferences.defaultSearchEngine;
-                const isAsk = index === preferences.defaultAskEngine;
-                
+            const sourceEngines = tempPreferences ? tempPreferences.searchEngines : preferences.searchEngines;
+            const sourceDefaultSearch = tempPreferences ? tempPreferences.defaultSearchEngine : preferences.defaultSearchEngine;
+            const sourceDefaultAsk = tempPreferences ? tempPreferences.defaultAskEngine : preferences.defaultAskEngine;
+
+            settingsEnginesList.innerHTML = sourceEngines.map((eng, index) => {
+                const isSearch = index === sourceDefaultSearch;
+                const isAsk = index === sourceDefaultAsk;
+                const isEditing = index === editingEngineIndex;
+
                 let borderClass = 'border-zinc-100 dark:border-zinc-800';
-                
+
                 // Logic for border colors: Green if BOTH, Purple for Ask, Blue for Search
+                // Always show status borders even if editing
                 if (isSearch && isAsk) {
                     borderClass = 'border-green-200 dark:border-green-900/30';
                 } else if (isSearch) {
@@ -695,14 +1012,25 @@
                     borderClass = 'border-purple-200 dark:border-purple-900/30';
                 }
 
+                // Styles for Container - Always standard background, specific border
+                let containerClass = `flex items-center justify-between p-3 rounded-lg border group transition-all duration-200 bg-zinc-50 dark:bg-zinc-800/50 ${borderClass}`;
+
+                // Styles for Edit Button - Highlighted only when editing
+                let editBtnClass = "p-2 rounded-md transition-colors";
+                if (isEditing) {
+                    editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
+                } else {
+                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20";
+                }
+
                 return `
-                <div class="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border ${borderClass} group">
+                <div class="${containerClass}">
                     <div class="flex items-center gap-3 overflow-hidden">
                         <img src="${getFavicon(eng.url)}" class="w-5 h-5 rounded-sm shrink-0">
                         <div class="flex flex-col overflow-hidden">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium text-zinc-900 dark:text-zinc-200 truncate">${eng.name}</span>
-                                ${eng.shortcut ? `<span class="text-xs text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded">${eng.shortcut}</span>` : ''}
+                                ${eng.shortcut ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${eng.shortcut}</span>` : ''}
                             </div>
                             <span class="text-xs text-zinc-400 truncate">${eng.url}</span>
                         </div>
@@ -710,25 +1038,25 @@
                     
                     <div class="flex items-center gap-1">
                          <!-- Search Default Toggle -->
-                        <button onclick="setDefaultSearch(${index})" class="p-2 rounded-md transition-colors ${isSearch ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400'}" title="Set as Search Default">
+                        <button onclick="setDefaultSearch(${index})" class="p-2 rounded-md transition-colors ${isSearch ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-zinc-300 hover:text-blue-600 dark:text-zinc-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'}" title="Set as default Search Engine">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </button>
                         
                         <!-- Ask Default Toggle -->
-                        <button onclick="setDefaultAsk(${index})" class="p-2 rounded-md transition-colors ${isAsk ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400'}" title="Set as Ask Default">
-                            <i data-lucide="message-circle-question" class="w-4 h-4"></i>
+                        <button onclick="setDefaultAsk(${index})" class="p-2 rounded-md transition-colors ${isAsk ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'text-zinc-300 hover:text-purple-600 dark:text-zinc-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'}" title="Set as default Ask Engine">
+                            <i data-lucide="search-slash" class="w-4 h-4"></i>
                         </button>
 
                         <div class="w-px h-4 bg-zinc-200 dark:bg-zinc-700 mx-1"></div>
                         
-                        <!-- Edit Button (Yellow styling on hover) -->
-                        <button onclick="editEngine(${index})" class="p-2 text-zinc-300 hover:text-yellow-600 dark:text-zinc-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-md transition-colors">
+                        <!-- Edit Button -->
+                        <button onclick="editEngine(${index})" class="${editBtnClass}" title="Edit Engine">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
 
                         <!-- Delete Button -->
-                        ${preferences.searchEngines.length > 1 ? `
-                        <button onclick="deleteEngine(${index})" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                        ${sourceEngines.length > 1 ? `
+                        <button onclick="deleteEngine(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete Engine">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                         ` : ''}
@@ -737,62 +1065,89 @@
             `}).join('');
             lucide.createIcons();
         }
-        
-        window.setDefaultSearch = function(index) {
-            preferences.defaultSearchEngine = index;
-            // FIXED: Immediately save on change
-            localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
+
+        window.setDefaultSearch = function (index) {
+            tempPreferences.defaultSearchEngine = index;
             renderSettingsEngines();
+            checkDirtyState();
         };
 
-        window.setDefaultAsk = function(index) {
-            preferences.defaultAskEngine = index;
-            // FIXED: Immediately save on change
-            localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
+        window.setDefaultAsk = function (index) {
+            tempPreferences.defaultAskEngine = index;
             renderSettingsEngines();
+            checkDirtyState();
         };
-        
-        window.deleteEngine = function(index) {
-            if (preferences.searchEngines.length <= 1) return;
-            
-            // If editing this one, cancel edit
-            if (editingEngineIndex === index) cancelEngineEdit();
-            // If editing one after this, shift index
-            else if (editingEngineIndex > index) editingEngineIndex--;
 
-            preferences.searchEngines.splice(index, 1);
-            
+        window.deleteEngine = function (index, btn) {
+            const currentEngines = tempPreferences.searchEngines;
+
+            // If we're editing this engine, cancel edit first and find the new button after re-render
+            if (editingEngineIndex === index) {
+                cancelEngineEdit();
+                // The DOM was re-rendered, so btn is stale. Find the new delete button.
+                const engineItems = settingsEnginesList.querySelectorAll(':scope > div');
+                if (engineItems[index]) {
+                    btn = engineItems[index].querySelector('button[title="Delete Engine"]');
+                    if (!btn) return;
+                } else {
+                    return;
+                }
+            }
+
+            // Confirmation Logic
+            if (!btn.dataset.confirm || btn.dataset.confirm === 'false') {
+                btn.dataset.confirm = 'true';
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+                btn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-600', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    if (document.body.contains(btn)) {
+                        btn.dataset.confirm = 'false';
+                        btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
+                        btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+                        btn.classList.add('text-zinc-300', 'dark:text-zinc-600', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                        lucide.createIcons();
+                    }
+                }, 3000);
+                return;
+            }
+
+            // Actual Delete Logic
+            if (currentEngines.length <= 1) return;
+
+            if (editingEngineIndex > index) editingEngineIndex--;
+
+            currentEngines.splice(index, 1);
+
             // Adjust indices if needed
-            if (preferences.defaultSearchEngine === index) preferences.defaultSearchEngine = 0;
-            else if (preferences.defaultSearchEngine > index) preferences.defaultSearchEngine--;
-            
-            if (preferences.defaultAskEngine === index) preferences.defaultAskEngine = 0;
-            else if (preferences.defaultAskEngine > index) preferences.defaultAskEngine--;
+            if (tempPreferences.defaultSearchEngine === index) tempPreferences.defaultSearchEngine = 0;
+            else if (tempPreferences.defaultSearchEngine > index) tempPreferences.defaultSearchEngine--;
 
-            // FIXED: Immediately save changes
-            localStorage.setItem('searchEngines', JSON.stringify(preferences.searchEngines));
-            localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
-            localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
+            if (tempPreferences.defaultAskEngine === index) tempPreferences.defaultAskEngine = 0;
+            else if (tempPreferences.defaultAskEngine > index) tempPreferences.defaultAskEngine--;
 
             renderSettingsEngines();
+            checkDirtyState();
         };
 
-        window.editEngine = function(index) {
-            const engine = preferences.searchEngines[index];
+        window.editEngine = function (index) {
+            const engine = tempPreferences.searchEngines[index];
             engineNameInput.value = engine.name;
             engineUrlInput.value = engine.url;
             engineShortcutInput.value = engine.shortcut || '';
-            
+
             editingEngineIndex = index;
             saveEngineBtn.textContent = 'Update Engine';
             cancelEngineEditBtn.classList.remove('hidden');
             hideError(engineError);
-            
-            // Scroll to form
+
             document.getElementById('engine-form').scrollIntoView({ behavior: 'smooth' });
+            renderSettingsEngines();
         };
 
-        window.cancelEngineEdit = function() {
+        window.cancelEngineEdit = function () {
             engineNameInput.value = '';
             engineUrlInput.value = '';
             engineShortcutInput.value = '';
@@ -800,61 +1155,43 @@
             saveEngineBtn.textContent = 'Add Engine';
             cancelEngineEditBtn.classList.add('hidden');
             hideError(engineError);
+            renderSettingsEngines();
         };
-        
+
         function saveEngine() {
             const name = engineNameInput.value.trim();
             let url = engineUrlInput.value.trim();
             const shortcut = engineShortcutInput.value.trim();
-            
-            if(!name || !url) return;
-            
-            // Format URL first to ensure duplicate check matches the actual saved value
+
+            if (!name || !url) return;
+
             if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
             hideError(engineError);
 
-            // Duplicate Name Check REMOVED per user request
+            // Use tempPreferences for validation and saving
+            const currentEngines = tempPreferences.searchEngines;
 
-            // Duplicate Shortcut Check (Check BOTH Engines and Links)
             if (shortcut) {
-                // Check Engines
-                const duplicateShortcut = preferences.searchEngines.find((e, i) => (editingEngineIndex === null || i !== editingEngineIndex) && e.shortcut === shortcut);
+                const duplicateShortcut = currentEngines.find((e, i) => (editingEngineIndex === null || i !== editingEngineIndex) && e.shortcut === shortcut);
                 if (duplicateShortcut) {
-                    showError(engineError, `Shortcut '${shortcut}' already taken by engine '${duplicateShortcut.name}'.`);
-                    return;
-                }
-                // Check Links (Cross-check)
-                const duplicateLinkShortcut = preferences.links.find(l => l.shortcut === shortcut);
-                if (duplicateLinkShortcut) {
-                    showError(engineError, `Shortcut '${shortcut}' already taken by speed dial '${duplicateLinkShortcut.name}'.`);
+                    showError(engineError, `Shortcut '${shortcut}' already taken by the engine '${duplicateShortcut.name}'.`);
                     return;
                 }
             }
 
-            // Duplicate URL Check
-            const duplicateUrl = preferences.searchEngines.find((e, i) => (editingEngineIndex === null || i !== editingEngineIndex) && e.url === url);
-            if (duplicateUrl) {
-                showError(engineError, 'URL already exists in search engines.');
-                return;
-            }
-            
             if (editingEngineIndex !== null) {
-                // Update
-                preferences.searchEngines[editingEngineIndex] = { name, url, shortcut };
+                currentEngines[editingEngineIndex] = { name, url, shortcut };
                 cancelEngineEdit();
             } else {
-                // Add
-                preferences.searchEngines.push({ name, url, shortcut });
+                currentEngines.push({ name, url, shortcut });
                 engineNameInput.value = '';
                 engineUrlInput.value = '';
                 engineShortcutInput.value = '';
             }
-            
-            // FIXED: Immediately save to localStorage
-            localStorage.setItem('searchEngines', JSON.stringify(preferences.searchEngines));
 
             renderSettingsEngines();
+            checkDirtyState();
         }
 
         // --- Drag & Drop Logic (Speed Dial) ---
@@ -903,7 +1240,7 @@
         function handleDrop(e) {
             e.stopPropagation();
             const targetItem = e.target.closest('[draggable]');
-            
+
             if (draggedItem) { draggedItem.classList.remove('dragging'); draggedItem.style.opacity = '1'; }
             document.querySelectorAll('.bg-zinc-100, .dark\\:bg-zinc-800').forEach(el => {
                 if (el !== draggedItem) el.classList.remove('bg-zinc-100', 'dark:bg-zinc-800');
@@ -912,130 +1249,136 @@
             if (draggedItem && targetItem && draggedItem !== targetItem) {
                 const fromIndex = parseInt(draggedItem.getAttribute('data-index'));
                 const toIndex = parseInt(targetItem.getAttribute('data-index'));
-                const itemToMove = preferences.links[fromIndex];
-                preferences.links.splice(fromIndex, 1);
-                preferences.links.splice(toIndex, 0, itemToMove);
-                
-                // If the moved item was being edited, update index
-                if(editingLinkIndex === fromIndex) editingLinkIndex = toIndex;
 
-                // FIXED: Immediately save to localStorage when reordering
-                localStorage.setItem('links', JSON.stringify(preferences.links));
+                // Use tempPreferences
+                const currentLinks = tempPreferences.links;
+                const itemToMove = currentLinks[fromIndex];
+                currentLinks.splice(fromIndex, 1);
+                currentLinks.splice(toIndex, 0, itemToMove);
+
+                if (editingLinkIndex === fromIndex) editingLinkIndex = toIndex;
 
                 renderSettingsLinks();
-                renderLinks();
+                checkDirtyState();
             }
             return false;
         }
 
-        window.editLink = function(index) {
-            const link = preferences.links[index];
+        window.editLink = function (index) {
+            const link = tempPreferences.links[index];
             newLinkName.value = link.name;
             newLinkUrl.value = link.url;
             newLinkShortcut.value = link.shortcut || '';
-            
+
             editingLinkIndex = index;
-            saveLinkBtn.textContent = "Update Shortcut";
+            saveLinkBtn.textContent = "Update Link";
             saveLinkBtn.disabled = false;
             newLinkName.disabled = false;
             newLinkUrl.disabled = false;
-            
+
             cancelLinkEditBtn.classList.remove('hidden');
             hideError(linkError);
             document.getElementById('add-shortcut-form').scrollIntoView({ behavior: 'smooth' });
+
+            renderSettingsLinks();
         }
 
-        window.cancelLinkEdit = function() {
+        window.cancelLinkEdit = function () {
             newLinkName.value = '';
             newLinkUrl.value = '';
             newLinkShortcut.value = '';
             editingLinkIndex = null;
-            saveLinkBtn.textContent = "Add Shortcut";
+            saveLinkBtn.textContent = "Add Link";
             cancelLinkEditBtn.classList.add('hidden');
             hideError(linkError);
-            renderSettingsLinks(); // Refreshes disabled state if needed
+            renderSettingsLinks();
         }
 
         function saveLink() {
             const name = newLinkName.value.trim();
             let url = newLinkUrl.value.trim();
             const shortcut = newLinkShortcut.value.trim();
-            
-            if (!name || !url) { 
+
+            if (!name || !url) {
                 showError(linkError, 'Please enter a valid Name and URL.');
-                return; 
+                return;
             }
-            
-            // Format URL first
+
             url = formatUrl(url);
 
             hideError(linkError);
 
-             // Duplicate Name Validation REMOVED per user request
+            const currentLinks = tempPreferences.links;
 
-            // Duplicate Shortcut Validation (Check BOTH Links and Engines)
             if (shortcut) {
-                // Check Links
-                const duplicateShortcut = preferences.links.find((l, i) => (editingLinkIndex === null || i !== editingLinkIndex) && l.shortcut === shortcut);
+                const duplicateShortcut = currentLinks.find((l, i) => (editingLinkIndex === null || i !== editingLinkIndex) && l.shortcut === shortcut);
                 if (duplicateShortcut) {
-                    showError(linkError, `Shortcut '${shortcut}' already taken by '${duplicateShortcut.name}'.`);
+                    showError(linkError, `Shortcut '${shortcut}' already taken by the link '${duplicateShortcut.name}'.`);
                     return;
                 }
-                // Check Engines (Cross-check)
-                const duplicateEngineShortcut = preferences.searchEngines.find(e => e.shortcut === shortcut);
-                if (duplicateEngineShortcut) {
-                    showError(linkError, `Shortcut '${shortcut}' already taken by engine '${duplicateEngineShortcut.name}'.`);
-                    return;
-                }
-            }
-
-            // Duplicate URL Validation
-            const duplicateUrl = preferences.links.find((l, i) => (editingLinkIndex === null || i !== editingLinkIndex) && l.url === url);
-            if (duplicateUrl) {
-                showError(linkError, 'URL already exists in speed dial.');
-                return;
             }
 
             if (editingLinkIndex !== null) {
-                // Update
-                preferences.links[editingLinkIndex] = { name, url, shortcut };
+                currentLinks[editingLinkIndex] = { name, url, shortcut };
                 cancelLinkEdit();
             } else {
-                // Add (No limit check anymore)
-                preferences.links.push({ name, url, shortcut });
+                currentLinks.push({ name, url, shortcut });
                 newLinkName.value = '';
                 newLinkUrl.value = '';
                 newLinkShortcut.value = '';
             }
-            
-            // FIXED: Immediately save to localStorage
-            localStorage.setItem('links', JSON.stringify(preferences.links));
-            
+
             renderSettingsLinks();
-            renderLinks();
+            checkDirtyState();
         }
 
-        window.deleteLink = function(index) {
-             // If editing this one, cancel edit
-            if (editingLinkIndex === index) cancelLinkEdit();
-            // If editing one after this, shift index
-            else if (editingLinkIndex > index) editingLinkIndex--;
+        window.deleteLink = function (index, btn) {
+            // If we're editing this link, cancel edit first and find the new button after re-render
+            if (editingLinkIndex === index) {
+                cancelLinkEdit();
+                // The DOM was re-rendered, so btn is stale. Find the new delete button.
+                const linkItems = settingsLinksList.querySelectorAll(':scope > div[draggable="true"]');
+                if (linkItems[index]) {
+                    btn = linkItems[index].querySelector('button[title="Delete Link"]');
+                    if (!btn) return;
+                } else {
+                    return;
+                }
+            }
 
-            preferences.links.splice(index, 1);
-            
-            // FIXED: Immediately save to localStorage
-            localStorage.setItem('links', JSON.stringify(preferences.links));
-            
+            if (!btn.dataset.confirm || btn.dataset.confirm === 'false') {
+                btn.dataset.confirm = 'true';
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+                btn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-600', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    if (document.body.contains(btn)) {
+                        btn.dataset.confirm = 'false';
+                        btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
+                        btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+                        btn.classList.add('text-zinc-300', 'dark:text-zinc-600', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                        lucide.createIcons();
+                    }
+                }, 3000);
+                return;
+            }
+
+            if (editingLinkIndex > index) editingLinkIndex--;
+
+            tempPreferences.links.splice(index, 1);
+
             renderSettingsLinks();
-            renderLinks();
+            checkDirtyState();
         };
 
         // --- Theme Handling ---
-        
+
         function applyTheme() {
-            const isDark = preferences.theme === 'dark' || 
-                          (preferences.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            
+            const isDark = preferences.theme === 'dark' ||
+                (preferences.theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
             if (isDark) document.documentElement.classList.add('dark');
             else document.documentElement.classList.remove('dark');
             updateThemeIcon();
@@ -1044,7 +1387,7 @@
         function updateThemeIcon() {
             let iconName = 'moon';
             if (preferences.theme === 'light') iconName = 'sun';
-            if (preferences.theme === 'auto') iconName = 'monitor';
+            if (preferences.theme === 'auto') iconName = 'sun-moon';
             themeToggle.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
             lucide.createIcons();
         }
@@ -1067,15 +1410,27 @@
             } else {
                 // First click: Request Confirmation
                 resetSettingsBtn.dataset.confirm = 'true';
-                resetSettingsBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-red-500"></i>`;
-                resetSettingsBtn.classList.add('bg-red-50', 'dark:bg-red-900/20');
+
+                // Match Delete Button Visuals
+                resetSettingsBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+
+                // Add the "active" red styles
+                resetSettingsBtn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+
+                // Remove base text color and hover effects
+                resetSettingsBtn.classList.remove('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+
                 lucide.createIcons();
-                
+
                 // Reset to normal after 5 seconds if not confirmed
                 resetConfirmTimeout = setTimeout(() => {
                     resetSettingsBtn.dataset.confirm = 'false';
                     resetSettingsBtn.innerHTML = `<i data-lucide="rotate-ccw" class="w-4 h-4"></i>`;
-                    resetSettingsBtn.classList.remove('bg-red-50', 'dark:bg-red-900/20');
+
+                    resetSettingsBtn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+
+                    resetSettingsBtn.classList.add('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+
                     lucide.createIcons();
                 }, 5000);
             }
@@ -1100,112 +1455,180 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    
-                    // Basic validation: Check if essential keys exist
+
                     if (imported && typeof imported === 'object') {
-                        // Merge strategies could vary, but for "Restore", usually we replace.
-                        // However, let's just merge keys to be safe.
                         preferences = { ...preferences, ...imported };
-                        
+
                         // Force update of all UI
                         settingUsername.value = preferences.username;
                         settingDateFormat.value = preferences.dateFormat;
                         settingShowSeconds.checked = preferences.showSeconds;
+                        settingAutofocusSearch.checked = preferences.autofocusSearch;
+                        settingEnableGreetings.checked = preferences.enableGreetings;
+                        settingOpenQueryNewTab.checked = preferences.openQueryNewTab;
+                        settingOpenLinkNewTab.checked = preferences.openLinkNewTab;
                         settingShowWeekday.checked = preferences.showWeekday;
-                        settingShortcutTrigger.value = preferences.shortcutTrigger || 'space';
-
-                        // Save everything to localStorage
+                        settingShortcutTrigger.value = preferences.shortcutTrigger || 'both';
+                        settingHotkeyModifier.value = preferences.hotkeyModifier || 'alt';
+                        settingAutoOpen.value = preferences.autoOpenSpeedDial || 'disabled';
+                        settingShowSpeedDial.checked = preferences.showSpeedDial;
                         saveSettings();
-                        
-                        // Refresh
                         window.location.reload();
                     } else {
                         alert("Invalid settings file.");
                     }
-                } catch(err) {
+                } catch (err) {
                     console.error("Error parsing settings file:", err);
                     alert("Error parsing settings file.");
                 }
             };
             reader.readAsText(file);
-            
-            // Clear input so same file can be selected again if needed
             importFileInput.value = '';
         });
 
 
         // --- Settings Modal Handling ---
 
-        window.openSettings = function(section) {
-            // General
-            settingUsername.value = preferences.username;
-            settingDateFormat.value = preferences.dateFormat;
-            settingShowSeconds.checked = preferences.showSeconds;
-            settingShowWeekday.checked = preferences.showWeekday;
-            settingShortcutTrigger.value = preferences.shortcutTrigger || 'space';
-            
-            // Format Buttons Active State
-            formatBtns.forEach(btn => {
-                const isActive = btn.dataset.value === preferences.timeFormat;
-                btn.className = `format-btn p-2 rounded-lg border text-sm font-medium transition-all ${
-                    isActive 
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white' 
-                    : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-                }`;
-            });
+        function checkDirtyState() {
+            if (!tempPreferences) return false;
 
+            const isDirty = JSON.stringify(tempPreferences) !== originalPreferencesSnapshot;
+
+            if (isDirty) {
+                // Active/Colored State
+                saveSettingsBtn.classList.remove('bg-zinc-200', 'dark:bg-zinc-700', 'text-zinc-400', 'dark:text-zinc-500', 'cursor-not-allowed');
+                saveSettingsBtn.classList.add('bg-zinc-900', 'dark:bg-white', 'text-white', 'dark:text-zinc-900', 'hover:opacity-90', 'cursor-pointer');
+            } else {
+                // Gray/Inactive State (but still clickable to close)
+                saveSettingsBtn.classList.remove('bg-zinc-900', 'dark:bg-white', 'text-white', 'dark:text-zinc-900', 'hover:opacity-90');
+                saveSettingsBtn.classList.add('bg-zinc-200', 'dark:bg-zinc-700', 'text-zinc-400', 'dark:text-zinc-500');
+            }
+
+            return isDirty;
+        }
+
+        window.openSettings = function (section) {
+            // 1. Create a deep copy for temporary editing
+            tempPreferences = JSON.parse(JSON.stringify(preferences));
+            originalPreferencesSnapshot = JSON.stringify(preferences);
+
+            // 2. Populate Form Inputs from tempPreferences
+            settingUsername.value = tempPreferences.username;
+            settingDateFormat.value = tempPreferences.dateFormat;
+            settingShowSeconds.checked = tempPreferences.showSeconds;
+            settingAutofocusSearch.checked = tempPreferences.autofocusSearch;
+            settingEnableGreetings.checked = tempPreferences.enableGreetings;
+            settingOpenQueryNewTab.checked = tempPreferences.openQueryNewTab;
+            settingOpenLinkNewTab.checked = tempPreferences.openLinkNewTab;
+            settingShowWeekday.checked = tempPreferences.showWeekday;
+            settingShortcutTrigger.value = tempPreferences.shortcutTrigger;
+            settingShowSpeedDial.checked = tempPreferences.showSpeedDial;
+            settingEnableHotkeys.checked = tempPreferences.enableHotkeys;
+            settingHotkeyModifier.value = tempPreferences.hotkeyModifier || 'alt';
+            settingAutoOpen.value = tempPreferences.autoOpenSpeedDial || 'disabled';
+
+            // Update Modifier State based on Hotkeys
+            settingHotkeyModifier.disabled = !tempPreferences.enableHotkeys;
+
+            // 3. Update Visuals for Buttons
+            updateFormatButtonsUI();
+            updateLayoutButtonsUI();
+
+            // 4. Render Lists (using tempPreferences)
             renderSettingsLinks();
             renderSettingsEngines();
-            
-            // Reset Edit Mode
+
+            // 5. Reset internal states
             cancelEngineEdit();
             cancelLinkEdit();
+            checkDirtyState(); // Initialize button state
 
             settingsModal.classList.remove('hidden');
             setTimeout(() => settingsModal.classList.add('modal-active'), 10);
-            
-            // Scroll to section if specified
-            if(section === 'engines') {
+
+            if (section === 'engines') {
                 document.getElementById('settings-engines-section').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
+        function updateFormatButtonsUI() {
+            formatBtns.forEach(btn => {
+                const isActive = btn.dataset.value === tempPreferences.timeFormat;
+                btn.className = `format-btn p-2 rounded-lg border text-sm font-medium transition-all ${isActive
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white'
+                    : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    }`;
+            });
+        }
+
+        function updateLayoutButtonsUI() {
+            layoutBtns.forEach(btn => {
+                const isActive = btn.dataset.value === tempPreferences.linkLayout;
+                btn.className = `layout-btn p-3 rounded-lg border flex items-center justify-center gap-2 transition-all ${isActive
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white'
+                    : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    }`;
+            });
+        }
+
         function closeSettings() {
+            // Discard changes
+            tempPreferences = null;
+            originalPreferencesSnapshot = null;
+
             settingsModal.classList.remove('modal-active');
             setTimeout(() => settingsModal.classList.add('hidden'), 200);
-            
-            // Reset "Reset Button" state if modal closes
+
             if (resetConfirmTimeout) clearTimeout(resetConfirmTimeout);
             resetSettingsBtn.dataset.confirm = 'false';
             resetSettingsBtn.innerHTML = `<i data-lucide="rotate-ccw" class="w-4 h-4"></i>`;
-            resetSettingsBtn.classList.remove('bg-red-50', 'dark:bg-red-900/20');
+            resetSettingsBtn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+            resetSettingsBtn.classList.add('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
             lucide.createIcons();
         }
 
         function saveSettings() {
-            preferences.username = settingUsername.value.trim();
-            preferences.dateFormat = settingDateFormat.value;
-            preferences.showSeconds = settingShowSeconds.checked;
-            preferences.showWeekday = settingShowWeekday.checked;
-            preferences.shortcutTrigger = settingShortcutTrigger.value;
-            
-            // Note: links and engines are modified in memory already, just save to LS
+            // 1. If no changes, just close
+            if (!checkDirtyState()) {
+                closeSettings();
+                return;
+            }
+
+            // 2. Commit tempPreferences to actual preferences
+            preferences = JSON.parse(JSON.stringify(tempPreferences));
+
+            // 3. Persist to LocalStorage
             localStorage.setItem('username', preferences.username);
             localStorage.setItem('dateFormat', preferences.dateFormat);
             localStorage.setItem('timeFormat', preferences.timeFormat);
             localStorage.setItem('showSeconds', preferences.showSeconds);
+            localStorage.setItem('autofocusSearch', preferences.autofocusSearch);
+            localStorage.setItem('enableGreetings', preferences.enableGreetings);
+            localStorage.setItem('openQueryNewTab', preferences.openQueryNewTab);
+            localStorage.setItem('openLinkNewTab', preferences.openLinkNewTab);
             localStorage.setItem('showWeekday', preferences.showWeekday);
             localStorage.setItem('links', JSON.stringify(preferences.links));
             localStorage.setItem('searchEngines', JSON.stringify(preferences.searchEngines));
             localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
             localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
             localStorage.setItem('shortcutTrigger', preferences.shortcutTrigger);
+            localStorage.setItem('linkLayout', preferences.linkLayout);
+            localStorage.setItem('showSpeedDial', preferences.showSpeedDial);
+            localStorage.setItem('enableHotkeys', preferences.enableHotkeys);
+            localStorage.setItem('hotkeyModifier', preferences.hotkeyModifier);
+            localStorage.setItem('autoOpenSpeedDial', preferences.autoOpenSpeedDial);
 
+            // 4. Update Main UI
             updateGreetingUI();
             updateTime();
+            renderLinks();
+
+            // 5. Close
+            // We manually clear dirty state just to be safe so closeSettings doesn't think we are abandoning changes
+            tempPreferences = null;
             closeSettings();
         }
 
@@ -1223,10 +1646,18 @@
         // --- Event Listeners ---
 
         applyTheme();
-        renderLinks();
-        updateGreetingUI();
+        // Initialize
         updateTime();
         setInterval(updateTime, 1000);
+        updateGreetingUI();
+        renderLinks();
+
+        // Auto-focus Logic
+        if (preferences.autofocusSearch) {
+            searchInput.focus();
+        }
+
+        lucide.createIcons();
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (preferences.theme === 'auto') applyTheme();
@@ -1236,38 +1667,65 @@
             e.preventDefault();
             let query = searchInput.value.trim();
             if (query) {
-                // 1. Check for Speed Dial Shortcuts first (Exact Match)
+                // 1. Check for Speed Dial Shortcuts (Exact or Numeric)
                 const speedDialLink = preferences.links.find(l => l.shortcut === query);
+                let numericLink = null;
+
+                if (!speedDialLink && preferences.enableHotkeys) {
+                    const num = parseInt(query);
+                    if (!isNaN(num)) {
+                        let index = num - 1;
+                        if (num === 0) index = 9;
+                        if (index >= 0 && index < preferences.links.length) {
+                            numericLink = preferences.links[index];
+                        }
+                    }
+                }
+
                 if (speedDialLink) {
-                    window.location.href = speedDialLink.url;
+                    if (preferences.openLinkNewTab) {
+                        window.open(speedDialLink.url, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.location.href = speedDialLink.url;
+                    }
+                    return;
+                }
+
+                if (numericLink) {
+                    if (preferences.openLinkNewTab) {
+                        window.open(numericLink.url, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.location.href = numericLink.url;
+                    }
                     return;
                 }
 
                 // 2. Check for Search Engine logic
                 let engineIndex;
-                let usedShortcut = false;
 
                 // Priority: Active Shortcut Engine (from Tab or validated Space)
                 if (activeShortcutEngine && query.startsWith(activeShortcutEngine.shortcut)) {
                     // Re-validate that the query actually matches the pattern "shortcut + space"
                     const parts = query.split(' ');
                     if (parts[0] === activeShortcutEngine.shortcut && parts.length > 1) {
-                         const engine = activeShortcutEngine;
-                         query = parts.slice(1).join(' '); // Remove shortcut
-                         let url = engine.url;
-                         if (url.includes('%s')) {
+                        const engine = activeShortcutEngine;
+                        query = parts.slice(1).join(' '); // Remove shortcut
+                        let url = engine.url;
+                        if (url.includes('%s')) {
                             url = url.replace('%s', encodeURIComponent(query));
-                         } else {
+                        } else {
                             url = url + encodeURIComponent(query);
-                         }
-                         window.location.href = url;
-                         return;
+                        }
+                        if (preferences.openQueryNewTab) {
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                        } else {
+                            window.location.href = url;
+                        }
+                        return;
                     }
                 }
 
                 // Standard Parsing Logic (Fallback or Default Behavior)
-                // If we didn't use the activeShortcutEngine, check preference
-                
                 const parts = query.split(' ');
                 if (parts.length > 1 && (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both')) {
                     const firstWord = parts[0];
@@ -1275,23 +1733,23 @@
                     if (shortcutEngineIndex !== -1) {
                         engineIndex = shortcutEngineIndex;
                         query = parts.slice(1).join(' '); // Remove shortcut from query
-                        usedShortcut = true;
                     }
                 }
 
-                if (!usedShortcut) {
+                // If no shortcut was used, determine engine by Ask vs Search mode
+                if (engineIndex === undefined) {
                     if (query.endsWith('?')) {
-                         // Ask Mode
-                         engineIndex = preferences.defaultAskEngine;
+                        // Ask Mode
+                        engineIndex = preferences.defaultAskEngine;
                     } else {
-                         // Search Mode
-                         engineIndex = preferences.defaultSearchEngine;
+                        // Search Mode
+                        engineIndex = preferences.defaultSearchEngine;
                     }
                 }
-                
+
                 // Fallback if index invalid
                 const engine = preferences.searchEngines[engineIndex] || preferences.searchEngines[0];
-                
+
                 let url = engine.url;
                 if (url.includes('%s')) {
                     url = url.replace('%s', encodeURIComponent(query));
@@ -1299,53 +1757,61 @@
                     // Fallback for legacy URLs without %s
                     url = url + encodeURIComponent(query);
                 }
-                
-                window.location.href = url;
+
+                if (preferences.openQueryNewTab) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                } else {
+                    window.location.href = url;
+                }
             }
         });
-        
+
         // Input listener for Enter vs Slash vs Shortcut Detection
         searchInput.addEventListener('input', (e) => {
             const val = e.target.value;
-            const parts = val.trim().split(' ');
+            const parts = val.trim().split(/\s+/); // Better whitespace split
             const potentialShortcut = parts[0];
-            
+            const hasTrailingSpace = val.endsWith(' ');
+
+            // Clear any pending auto-open
+            if (autoOpenTimeout) {
+                clearTimeout(autoOpenTimeout);
+                autoOpenTimeout = null;
+            }
+
             // --- State Management for Shortcuts ---
-            
+
             // 1. Invalidate active engine if text no longer matches
             if (activeShortcutEngine) {
                 if (!val.startsWith(activeShortcutEngine.shortcut + ' ')) {
                     activeShortcutEngine = null;
                 }
             }
-            
+
             // 2. Detect Space Trigger
             if (!activeShortcutEngine && (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both')) {
-                 if (val.endsWith(' ') && parts.length >= 1) {
-                     // Check if the word before the space is a shortcut
-                     const words = val.split(' '); 
-                     if (words.length >= 2 && words[words.length - 1] === '') {
-                         const candidate = words[words.length - 2];
-                         const found = preferences.searchEngines.find(e => e.shortcut === candidate);
-                         if (found) {
-                             activeShortcutEngine = found;
-                         }
-                     }
-                 }
+                // Check if input is exactly "shortcut " (shortcut followed by space)
+                if (val.endsWith(' ') && parts.length === 1 && parts[0].length > 0) {
+                    const candidate = parts[0];
+                    const found = preferences.searchEngines.find(e => e.shortcut === candidate);
+                    if (found) {
+                        activeShortcutEngine = found;
+                    }
+                }
             }
 
             // --- UI Updates ---
-            
-            if(val.length > 0) {
+
+            if (val.length > 0) {
                 shortcutSlash.classList.add('hidden');
-                shortcutSlash.classList.remove('sm:inline-flex'); 
-                
+                shortcutSlash.classList.remove('sm:inline-flex');
+
                 shortcutEnter.classList.remove('hidden');
                 shortcutEnter.classList.add('flex');
-                
+
                 // Base classes
-                const baseClasses = ['items-center', 'gap-1', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex'];
-                
+                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex'];
+
                 // Colors
                 const searchClasses = ['text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20', 'border-blue-100', 'dark:border-blue-900/30'];
                 const askClasses = ['text-purple-600', 'dark:text-purple-400', 'bg-purple-50', 'dark:bg-purple-900/20', 'border-purple-100', 'dark:border-purple-900/30'];
@@ -1355,46 +1821,80 @@
                 // Determine what to show in the UI
                 let engineToShow = null;
                 let linkToShow = null;
-                
-                // Check for Speed Dial Link Shortcut (Exact match)
-                if (parts.length === 1) {
+
+                // Check for Speed Dial Link Shortcut (Exact match AND strict - no trailing space if trying to search)
+                if (parts.length === 1 && !hasTrailingSpace) {
+                    // 1. Exact string match
                     linkToShow = preferences.links.find(l => l.shortcut === parts[0]);
+
+                    // 2. Numeric match (if hotkeys enabled)
+                    if (!linkToShow && preferences.enableHotkeys) {
+                        const num = parseInt(parts[0]);
+                        if (!isNaN(num)) {
+                            let index = num - 1;
+                            if (num === 0) index = 9;
+                            if (index >= 0 && index < preferences.links.length) {
+                                linkToShow = preferences.links[index];
+                            }
+                        }
+                    }
+
+                    // Handle Auto-Open
+                    if (linkToShow && preferences.autoOpenSpeedDial !== 'disabled') {
+                        if (preferences.autoOpenSpeedDial === 'immediate') {
+                            if (preferences.openLinkNewTab) {
+                                window.open(linkToShow.url, '_blank', 'noopener,noreferrer');
+                            } else {
+                                window.location.href = linkToShow.url;
+                            }
+                        } else if (preferences.autoOpenSpeedDial === 'delay') {
+                            autoOpenTimeout = setTimeout(() => {
+                                if (preferences.openLinkNewTab) {
+                                    window.open(linkToShow.url, '_blank', 'noopener,noreferrer');
+                                } else {
+                                    window.location.href = linkToShow.url;
+                                }
+                            }, 1000);
+                        }
+                    }
                 }
 
                 // A. Explicitly active engine (via Tab or Space trigger)
                 if (activeShortcutEngine) {
                     engineToShow = activeShortcutEngine;
-                } 
+                }
                 // B. Implicit detection (Preview)
                 else if (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both') {
-                     engineToShow = preferences.searchEngines.find(e => e.shortcut === potentialShortcut && parts.length > 1);
+                    engineToShow = preferences.searchEngines.find(e => e.shortcut === potentialShortcut && parts.length > 1);
                 }
 
                 if (linkToShow) {
-                     // Link Match takes visual priority if exact match
-                     shortcutEnter.className = [...baseClasses, ...linkClasses].join(' ');
-                     shortcutEnter.innerHTML = `Open ${linkToShow.name} <span class="font-sans">↵</span>`;
+                    // Link Match takes visual priority if exact match
+                    shortcutEnter.className = [...baseClasses, ...linkClasses].join(' ');
+                    shortcutEnter.innerHTML = `Open ${linkToShow.name} <i data-lucide="external-link" class="w-3 h-3"></i>`;
                 } else if (engineToShow) {
-                     // Shortcut Match
-                     shortcutEnter.className = [...baseClasses, ...shortcutClasses].join(' ');
-                     shortcutEnter.innerHTML = `Search ${engineToShow.name} <span class="font-sans">↵</span>`;
+                    // Shortcut Match
+                    shortcutEnter.className = [...baseClasses, ...shortcutClasses].join(' ');
+                    shortcutEnter.innerHTML = `<i data-lucide="search-code" class="w-3 h-3"></i> Search ${engineToShow.name}`;
                 } else {
                     // Standard Logic
                     const isAsk = val.trim().endsWith('?');
                     if (isAsk) {
                         shortcutEnter.className = [...baseClasses, ...askClasses].join(' ');
-                        shortcutEnter.innerHTML = `Ask <span class="font-sans">↵</span>`;
+                        shortcutEnter.innerHTML = `<i data-lucide="search-slash" class="w-3 h-3"></i> Ask`;
                     } else {
                         shortcutEnter.className = [...baseClasses, ...searchClasses].join(' ');
-                        shortcutEnter.innerHTML = `Search <span class="font-sans">↵</span>`;
+                        shortcutEnter.innerHTML = `<i data-lucide="search" class="w-3 h-3"></i> Search`;
                     }
                 }
-                
+
+                lucide.createIcons();
+
             } else {
                 activeShortcutEngine = null;
                 shortcutSlash.classList.remove('hidden');
-                shortcutSlash.classList.add('sm:inline-flex'); 
-                
+                shortcutSlash.classList.add('sm:inline-flex');
+
                 shortcutEnter.classList.add('hidden');
                 shortcutEnter.classList.remove('flex');
             }
@@ -1409,28 +1909,98 @@
         saveEngineBtn.addEventListener('click', saveEngine);
         cancelEngineEditBtn.addEventListener('click', cancelEngineEdit);
         cancelLinkEditBtn.addEventListener('click', cancelLinkEdit);
-        
+
         // Data listeners
         resetSettingsBtn.addEventListener('click', handleResetSettings);
         importSettingsBtn.addEventListener('click', handleImportSettings);
         exportSettingsBtn.addEventListener('click', handleExportSettings);
-        
-        closeHelpBtn.addEventListener('click', closeHelp);
-        dismissHelpBtn.addEventListener('click', closeHelp);
 
-        // Fix: Prevent modal from closing when selecting text and dragging outside
+        // --- Input Listeners for Dirty Checking ---
+
+        const attachInputListener = (elem, key, isCheckbox = false) => {
+            const evt = isCheckbox ? 'change' : 'input';
+            elem.addEventListener(evt, (e) => {
+                if (!tempPreferences) return; // Should not happen if modal hidden
+                const val = isCheckbox ? e.target.checked : e.target.value;
+                tempPreferences[key] = val;
+                checkDirtyState();
+            });
+        };
+
+        attachInputListener(settingUsername, 'username');
+        attachInputListener(settingDateFormat, 'dateFormat');
+        attachInputListener(settingShowSeconds, 'showSeconds', true);
+        attachInputListener(settingAutofocusSearch, 'autofocusSearch', true);
+        attachInputListener(settingEnableGreetings, 'enableGreetings', true);
+        attachInputListener(settingShowWeekday, 'showWeekday', true);
+        attachInputListener(settingShortcutTrigger, 'shortcutTrigger');
+        attachInputListener(settingHotkeyModifier, 'hotkeyModifier');
+        attachInputListener(settingAutoOpen, 'autoOpenSpeedDial');
+        attachInputListener(settingOpenQueryNewTab, 'openQueryNewTab', true);
+        attachInputListener(settingOpenLinkNewTab, 'openLinkNewTab', true);
+
+        // Modified Toggles - Now just update temp state
+        settingEnableHotkeys.addEventListener('change', (e) => {
+            if (!tempPreferences) return;
+            tempPreferences.enableHotkeys = e.target.checked;
+
+            // Toggle modifier visual state
+            settingHotkeyModifier.disabled = !e.target.checked;
+
+            renderSettingsLinks(); // Updates the PREVIEW list in settings (show/hide badges)
+            checkDirtyState();
+        });
+
+        settingShowSpeedDial.addEventListener('change', (e) => {
+            if (!tempPreferences) return;
+            tempPreferences.showSpeedDial = e.target.checked;
+            checkDirtyState();
+        });
+
+        // Layout Buttons
+        layoutBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!tempPreferences) return;
+                tempPreferences.linkLayout = e.currentTarget.dataset.value;
+                updateLayoutButtonsUI();
+                checkDirtyState();
+            });
+        });
+
+        // Time Format Buttons
+        formatBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!tempPreferences) return;
+                tempPreferences.timeFormat = e.currentTarget.dataset.value;
+                updateFormatButtonsUI();
+                checkDirtyState();
+            });
+        });
+
+        closeHelpBtn.addEventListener('click', closeHelp);
+
+        // Modal Backdrop Click Handling
         let modalMouseDownTarget = null;
         settingsModal.addEventListener('mousedown', (e) => {
             modalMouseDownTarget = e.target;
         });
 
         settingsModal.addEventListener('click', (e) => {
+            // Only consider closing if clicked strictly on the backdrop
             if (e.target === settingsModal && modalMouseDownTarget === settingsModal) {
+                // CRITICAL REQUIREMENT: Do not allow close if changes are made
+                if (checkDirtyState()) {
+                    // Visual feedback (shake) could go here
+                    const content = settingsModal.querySelector('.modal-content');
+                    content.classList.add('animate-pulse'); // Simple feedback using tailwind
+                    setTimeout(() => content.classList.remove('animate-pulse'), 200);
+                    return;
+                }
                 closeSettings();
             }
             modalMouseDownTarget = null;
         });
-        
+
         let helpModalMouseDownTarget = null;
         helpModal.addEventListener('mousedown', (e) => {
             helpModalMouseDownTarget = e.target;
@@ -1443,26 +2013,27 @@
             helpModalMouseDownTarget = null;
         });
 
-        formatBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                preferences.timeFormat = e.target.dataset.value;
-                openSettings(); 
-            });
-        });
-
         document.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement.tagName;
-            
+
             // Search Focus
             if (e.key === '/' && activeTag !== 'INPUT') {
                 e.preventDefault();
                 searchInput.focus();
             }
-            
+
             // Escape Modal
             if (e.key === 'Escape') {
-                 if (!settingsModal.classList.contains('hidden')) closeSettings();
-                 if (!helpModal.classList.contains('hidden')) closeHelp();
+                if (!settingsModal.classList.contains('hidden')) {
+                    // Check dirty before allowing Escape to close
+                    if (checkDirtyState()) {
+                        // Maybe show alert? Or just block.
+                        // For now blocking is consistent with backdrop behavior.
+                        return;
+                    }
+                    closeSettings();
+                }
+                if (!helpModal.classList.contains('hidden')) closeHelp();
             }
 
             // Tab Key Trigger for Search Shortcuts
@@ -1471,11 +2042,11 @@
                 if (preferences.shortcutTrigger === 'tab' || preferences.shortcutTrigger === 'both') {
                     const val = searchInput.value;
                     const parts = val.trim().split(' ');
-                    
+
                     if (parts.length === 1 && parts[0].length > 0) {
                         const candidate = parts[0];
                         const found = preferences.searchEngines.find(e => e.shortcut === candidate);
-                        
+
                         if (found) {
                             e.preventDefault(); // Stop focus move
                             activeShortcutEngine = found;
@@ -1486,18 +2057,35 @@
                 }
             }
 
-            // Speed Dial Keys (1-9)
-            if (activeTag !== 'INPUT' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-                const key = parseInt(e.key);
-                if (!isNaN(key) && key >= 1 && key <= 9) {
-                    const index = key - 1;
-                    if (index < preferences.links.length) {
-                        const url = preferences.links[index].url;
-                        window.location.href = url;
+            // Speed Dial Keys (0-9)
+            if (preferences.enableHotkeys && activeTag !== 'INPUT') {
+                const modifierRequired = preferences.hotkeyModifier === 'alt';
+
+                // Allow exact Modifier+Key or Just Key matching preference
+                // Note: e.altKey is true if Option/Alt is pressed
+
+                const isModifierPressed = e.altKey;
+                const matchesModifierConstraint = modifierRequired ? isModifierPressed : !isModifierPressed && !e.metaKey && !e.ctrlKey;
+
+                if (matchesModifierConstraint) {
+                    const key = parseInt(e.key);
+                    if (!isNaN(key) && key >= 0 && key <= 9) {
+                        let index = key - 1;
+                        if (key === 0) index = 9;
+                        if (index < preferences.links.length) {
+                            e.preventDefault(); // Prevent standard browser Alt+ behaviors if any
+                            const url = preferences.links[index].url;
+                            if (preferences.openLinkNewTab) {
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                            } else {
+                                window.location.href = url;
+                            }
+                        }
                     }
                 }
             }
         });
     </script>
 </body>
+
 </html>
