@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Secure 2FA code generator running locally in your browser.">
+    <title>2FA Authenticator</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    },
+                    transitionProperty: {
+                        'width': 'width',
+                        'spacing': 'margin, padding',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .timer-svg {
+            transform: rotate(-90deg);
+        }
+        .card-tap-highlight {
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .card-tap-highlight:active {
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 h-screen flex justify-center overflow-hidden">
+
+    <!-- Main App Container -->
+    <div class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-slate-200 sm:border">
+        
+        <!-- Header -->
+        <header class="bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 px-5 py-4 flex justify-between items-center flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
+                    <i class="fas fa-shield-alt text-sm"></i>
+                </div>
+                <h1 class="font-bold text-lg tracking-tight text-slate-900">2FA Authenticator</h1>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto relative bg-slate-50/50 scroll-smooth" id="mainScroll">
+            
+            <!-- Dynamic Sticky Header (Timer & Search) -->
+            <div class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-[2px] shadow-sm transition-shadow px-4 py-3" id="stickyHeader">
+                
+                <div class="flex items-center gap-3 h-12">
+                    
+                    <!-- Timer Container -->
+                    <div id="headerTimerBox" class="relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex-1 h-full bg-white border border-slate-200 rounded-full shadow-sm overflow-hidden group">
+                        
+                        <!-- Pill Mode Elements -->
+                        <div id="timerPillContent" class="absolute inset-0 transition-opacity duration-200 opacity-100">
+                            <div id="timerProgressBar" class="absolute left-0 top-0 bottom-0 bg-brand-50 transition-all duration-1000 ease-linear w-full origin-left"></div>
+                            <div class="relative z-10 flex justify-between items-center w-full h-full px-4">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Refreshing in</span>
+                                <span id="countdownTimer" class="font-mono font-bold text-brand-600 text-lg">30s</span>
+                            </div>
+                        </div>
+
+                        <!-- Circle Mode Elements -->
+                        <div id="timerCircleContent" class="absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 scale-50">
+                            <svg class="w-10 h-10 timer-svg" viewBox="0 0 40 40">
+                                <circle cx="20" cy="20" r="18" fill="none" stroke-width="3" class="stroke-slate-100" />
+                                <circle id="timerCircleSvg" cx="20" cy="20" r="18" fill="none" stroke-width="3" class="stroke-brand-600 transition-all duration-1000 ease-linear" stroke-dasharray="113.1" stroke-dashoffset="0" stroke-linecap="round" />
+                            </svg>
+                            <span id="miniCountdownTimer" class="absolute font-mono font-bold text-brand-600 text-[10px]">30</span>
+                        </div>
+                    </div>
+
+                    <!-- Search Container -->
+                    <div id="headerSearchBox" class="relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] w-12 h-full bg-white border border-slate-200 rounded-full shadow-sm flex items-center justify-center overflow-hidden">
+                        
+                        <!-- Search Icon Trigger -->
+                        <button id="searchToggle" class="absolute inset-0 z-10 w-full h-full flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors bg-transparent border-none outline-none transition-opacity duration-200 opacity-100" aria-label="Open Search">
+                            <i class="fas fa-search text-lg"></i>
+                        </button>
+
+                        <!-- Search Input Field -->
+                        <div id="searchInputWrapper" class="absolute inset-0 flex items-center opacity-0 pointer-events-none transition-all duration-300 pl-4 pr-10">
+                            <i class="fas fa-search text-slate-400 mr-3 flex-shrink-0"></i>
+                            <input id="searchInput" type="text" class="w-full h-full bg-transparent border-none outline-none text-sm font-medium placeholder-slate-400" placeholder="Search accounts...">
+                            <button id="closeSearch" class="absolute right-0 top-0 h-full w-12 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Codes List -->
+            <div id="codesContainer" class="px-4 pb-24 space-y-3 pt-2">
+                <!-- Content populated by JS -->
+            </div>
+        </main>
+
+        <!-- Bottom Action Bar -->
+        <div class="bg-white border-t border-slate-200 p-3 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+            <button id="toggleAddAccount" class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
+                <i class="fas fa-plus transition-transform group-hover:rotate-90"></i>
+                <span>Add Account</span>
+            </button>
+            
+            <div class="flex gap-2">
+                <button id="importButton" class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors" title="Import">
+                    <i class="fas fa-file-import"></i>
+                </button>
+                <button id="exportButton" class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors" title="Export">
+                    <i class="fas fa-file-export"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toastContainer" class="absolute bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-2 w-max max-w-[90%] pointer-events-none"></div>
+
+        <!-- Modals Overlay -->
+        <div id="modalOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end justify-center p-0 sm:pb-6">
+            
+            <!-- Add/Edit Account Modal -->
+            <div id="accountModal" class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col" role="dialog">
+                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="modalTitle" class="text-xl font-bold text-slate-900">Add Account</h2>
+                    <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Account Name</label>
+                        <input type="text" id="accountName" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all" placeholder="e.g. Google (john@example.com)">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Secret Key</label>
+                        <input type="text" id="secretKey" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-mono text-sm" placeholder="BASE32 Key">
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-8">
+                    <button class="close-modal flex-1 py-3 px-4 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
+                    <button id="saveAccountBtn" class="flex-1 py-3 px-4 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all">Save</button>
+                </div>
+            </div>
+
+            <!-- Import/Export Modal -->
+            <div id="dataModal" class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col" role="dialog">
+                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="dataModalTitle" class="text-xl font-bold text-slate-900">Import Accounts</h2>
+                    <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-slate-500 mb-3">Format: <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">account name|secret key</code></p>
+                <textarea id="dataTextarea" class="w-full h-32 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all font-mono text-xs resize-none mb-4" spellcheck="false"></textarea>
+                <div class="flex gap-3">
+                    <button class="close-modal flex-1 py-3 px-4 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition-colors">Close</button>
+                    <button id="processDataBtn" class="flex-1 py-3 px-4 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all">Action</button>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation -->
+            <div id="deleteModal" class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden" role="dialog">
+                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">Delete Account?</h3>
+                    <p id="deleteMessage" class="text-slate-500 text-sm mb-6">This action cannot be undone.</p>
+                    <div class="flex gap-3">
+                        <button class="close-modal flex-1 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
+                        <button id="confirmDeleteBtn" class="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 shadow-lg shadow-red-500/30">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- Constants & Config ---
+        const TOTP_INTERVAL = 30;
+        const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        
+        // --- State Management ---
+        let accounts = [];
+        let editingIndex = -1;
+        let deletingIndex = -1;
+        let internalTimer = null;
+        let startupTime = Math.floor(Date.now() / 1000);
+        let startupTimeLeft = TOTP_INTERVAL - (startupTime % TOTP_INTERVAL);
+        let isPageVisible = true;
+        let currentModal = null;
+        let isSearchActive = false;
+        
+        // --- DOM Elements Cache ---
+        const els = {
+            codesContainer: document.getElementById('codesContainer'),
+            headerTimerBox: document.getElementById('headerTimerBox'),
+            headerSearchBox: document.getElementById('headerSearchBox'),
+            timerPillContent: document.getElementById('timerPillContent'),
+            timerCircleContent: document.getElementById('timerCircleContent'),
+            searchToggle: document.getElementById('searchToggle'),
+            searchInputWrapper: document.getElementById('searchInputWrapper'),
+            countdownTimer: document.getElementById('countdownTimer'),
+            miniCountdownTimer: document.getElementById('miniCountdownTimer'),
+            timerProgressBar: document.getElementById('timerProgressBar'),
+            timerCircleSvg: document.getElementById('timerCircleSvg'),
+            searchInput: document.getElementById('searchInput'),
+            closeSearch: document.getElementById('closeSearch'),
+            modalOverlay: document.getElementById('modalOverlay'),
+            accountModal: document.getElementById('accountModal'),
+            dataModal: document.getElementById('dataModal'),
+            deleteModal: document.getElementById('deleteModal'),
+            accountName: document.getElementById('accountName'),
+            secretKey: document.getElementById('secretKey'),
+            dataTextarea: document.getElementById('dataTextarea'),
+            modalTitle: document.getElementById('modalTitle'),
+            saveAccountBtn: document.getElementById('saveAccountBtn'),
+            mainScroll: document.getElementById('mainScroll'),
+            stickyHeader: document.getElementById('stickyHeader')
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAccounts();
+            initializeTiming();
+            setupEventListeners();
+            setupVisibilityHandling();
+            // Enable animation on initial load
+            updateAccountsDisplay(true);
+        });
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            document.getElementById('toggleAddAccount').onclick = () => openAccountModal();
+            document.getElementById('importButton').onclick = () => openDataModal('import');
+            document.getElementById('exportButton').onclick = () => openDataModal('export');
+            
+            els.searchToggle.onclick = toggleSearch;
+            els.closeSearch.onclick = toggleSearch;
+            els.searchInput.addEventListener('input', filterAccounts);
+            els.saveAccountBtn.onclick = saveAccount;
+            document.getElementById('processDataBtn').onclick = processDataAction;
+            document.getElementById('confirmDeleteBtn').onclick = confirmDelete;
+
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.onclick = closeAllModals;
+            });
+            els.modalOverlay.onclick = (e) => {
+                if (e.target === els.modalOverlay) closeAllModals();
+            };
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (isSearchActive) toggleSearch();
+                    closeAllModals();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    if (!isSearchActive) toggleSearch();
+                    els.searchInput.focus();
+                }
+            });
+
+            els.mainScroll.addEventListener('scroll', () => {
+                if (els.mainScroll.scrollTop > 10) {
+                    els.stickyHeader.classList.add('shadow-md');
+                } else {
+                    els.stickyHeader.classList.remove('shadow-md');
+                }
+            });
+        }
+
+        // --- Core Logic: Timing & TOTP ---
+        function initializeTiming() {
+            const now = Math.floor(Date.now() / 1000);
+            startupTime = now;
+            startupTimeLeft = TOTP_INTERVAL - (now % TOTP_INTERVAL);
+            updateTimers();
+            updateCodes();
+            startTimer();
+        }
+
+        function startTimer() {
+            if (internalTimer) clearInterval(internalTimer);
+            internalTimer = setInterval(() => {
+                if (isPageVisible) updateTimers();
+            }, 100);
+        }
+
+        function getCycleProgress() {
+            const elapsed = (Date.now() / 1000) - startupTime;
+            const currentPos = (startupTimeLeft - elapsed) % TOTP_INTERVAL;
+            const timeVal = currentPos <= 0 ? TOTP_INTERVAL + currentPos : currentPos;
+            return timeVal;
+        }
+
+        let lastTimeInt = -1;
+
+        function updateTimers() {
+            const timeLeft = getCycleProgress();
+            const timeInt = Math.ceil(timeLeft);
+            
+            if (timeInt !== lastTimeInt) {
+                els.countdownTimer.textContent = `${timeInt}s`;
+                els.miniCountdownTimer.textContent = timeInt;
+                lastTimeInt = timeInt;
+                if (timeInt === 30) {
+                    updateCodes();
+                }
+            }
+
+            const percentage = (timeLeft / TOTP_INTERVAL) * 100;
+            els.timerProgressBar.style.width = `${percentage}%`;
+            
+            const circumference = 113.1;
+            const offset = circumference - (percentage / 100) * circumference;
+            els.timerCircleSvg.style.strokeDashoffset = offset;
+            
+            const isWarning = timeInt <= 5;
+            const colorClassAdd = isWarning ? 'text-red-500' : 'text-brand-600';
+            const colorClassRemove = isWarning ? 'text-brand-600' : 'text-red-500';
+            
+            els.countdownTimer.classList.add(colorClassAdd);
+            els.countdownTimer.classList.remove(colorClassRemove);
+            els.miniCountdownTimer.classList.add(colorClassAdd);
+            els.miniCountdownTimer.classList.remove(colorClassRemove);
+
+            const barBgAdd = isWarning ? 'bg-red-100' : 'bg-brand-50';
+            const barBgRemove = isWarning ? 'bg-brand-50' : 'bg-red-100';
+            els.timerProgressBar.classList.add(barBgAdd);
+            els.timerProgressBar.classList.remove(barBgRemove);
+            
+            const strokeAdd = isWarning ? 'stroke-red-500' : 'stroke-brand-600';
+            const strokeRemove = isWarning ? 'stroke-brand-600' : 'stroke-red-500';
+            els.timerCircleSvg.classList.add(strokeAdd);
+            els.timerCircleSvg.classList.remove(strokeRemove);
+        }
+
+        // --- TOTP Generation ---
+        function generateTOTP(secret, timestamp = null) {
+            try {
+                if (typeof CryptoJS === 'undefined') return 'Error';
+                const epoch = timestamp !== null ? timestamp : Math.floor(Date.now() / 1000);
+                const time = Math.floor(epoch / TOTP_INTERVAL);
+                const timeHex = time.toString(16).padStart(16, '0');
+                const secretHex = base32ToHex(secret);
+                if (!secretHex) return 'Invalid';
+
+                const hmac = CryptoJS.HmacSHA1(
+                    CryptoJS.enc.Hex.parse(timeHex),
+                    CryptoJS.enc.Hex.parse(secretHex)
+                );
+                const hmacHex = hmac.toString();
+                const offset = parseInt(hmacHex.slice(-1), 16);
+                const codeHex = hmacHex.substring(offset * 2, offset * 2 + 8);
+                const code = parseInt(codeHex, 16) & 0x7fffffff;
+                return (code % 1000000).toString().padStart(6, '0');
+            } catch (e) {
+                console.error(e);
+                return '------';
+            }
+        }
+
+        function base32ToHex(base32) {
+            let bits = '';
+            base32 = base32.replace(/\s+/g, '').toUpperCase().replace(/[^A-Z2-7]/g, '');
+            if (base32.length < 8) return '';
+            for (let i = 0; i < base32.length; i++) {
+                const val = BASE32_CHARS.indexOf(base32[i]);
+                if (val === -1) return '';
+                bits += val.toString(2).padStart(5, '0');
+            }
+            return parseInt(bits.slice(0, Math.floor(bits.length / 8) * 8), 2).toString(16);
+        }
+
+        function formatCodeDisplay(code) {
+             return code.length === 6 ? `${code.slice(0,3)} ${code.slice(3)}` : code;
+        }
+
+        function updateCodes() {
+            const now = Math.floor(Date.now() / 1000);
+            accounts.forEach((acc, idx) => {
+                // Update Current Code
+                const codeEl = document.getElementById(`code-value-${idx}`);
+                if (codeEl) {
+                    const code = generateTOTP(acc.secret, now);
+                    codeEl.textContent = formatCodeDisplay(code);
+                }
+
+                // Update Next Code
+                const nextCodeEl = document.getElementById(`next-code-value-${idx}`);
+                if (nextCodeEl) {
+                    const nextCode = generateTOTP(acc.secret, now + TOTP_INTERVAL);
+                    nextCodeEl.textContent = formatCodeDisplay(nextCode);
+                }
+            });
+        }
+
+        // --- UI Rendering ---
+        function updateAccountsDisplay(shouldAnimate = false) {
+            const filter = els.searchInput.value.toLowerCase();
+            els.codesContainer.innerHTML = '';
+            
+            const now = Math.floor(Date.now() / 1000);
+
+            if (accounts.length === 0) {
+                els.codesContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+                            <i class="fas fa-lock text-2xl"></i>
+                        </div>
+                        <p class="text-sm">No accounts yet</p>
+                        <button onclick="openAccountModal()" class="mt-4 text-brand-600 font-medium text-sm hover:underline">Add your first account</button>
+                    </div>`;
+                return;
+            }
+
+            let visibleCount = 0;
+            accounts.forEach((acc, idx) => {
+                if (filter && !acc.name.toLowerCase().includes(filter)) return;
+                visibleCount++;
+                
+                // Codes
+                const code = generateTOTP(acc.secret, now);
+                const nextCode = generateTOTP(acc.secret, now + TOTP_INTERVAL);
+                
+                const formattedCode = formatCodeDisplay(code);
+                const formattedNextCode = formatCodeDisplay(nextCode);
+                
+                const el = document.createElement('div');
+                
+                const animationClass = shouldAnimate ? 'animate-slide-up' : '';
+                
+                // Add click handler to entire card
+                el.className = `group bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-200 relative overflow-hidden cursor-pointer select-none card-tap-highlight ${animationClass}`;
+                el.onclick = (e) => handleCardCopy(e.currentTarget, idx);
+                el.id = `account-card-${idx}`;
+
+                if (shouldAnimate) {
+                    el.style.animationDelay = `${idx * 0.05}s`;
+                }
+                
+                el.innerHTML = `
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex-1 mr-4 min-w-0">
+                                <h3 class="font-semibold text-slate-700 truncate text-sm" title="${escapeHtml(acc.name)}">
+                                    ${formatAccountName(acc.name, filter)}
+                                </h3>
+                            </div>
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                <!-- Stop propagation on buttons to prevent copying when clicking edit/delete -->
+                                <button onclick="event.stopPropagation(); editAccount(${idx})" class="text-slate-400 hover:text-yellow-500 p-1 transition-colors relative z-10" title="Edit">
+                                    <i class="fas fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); initDelete(${idx})" class="text-slate-400 hover:text-red-500 p-1 transition-colors relative z-10" title="Delete">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-end mt-2">
+                            <div class="font-mono text-3xl font-bold tracking-widest text-slate-800" 
+                                id="code-value-${idx}">
+                                ${formattedCode}
+                            </div>
+                            
+                            <!-- Next Code Display (Replaces Copy Button) -->
+                            <div class="text-right flex flex-col items-end opacity-60 group-hover:opacity-100 transition-opacity">
+                                <span class="text-[10px] uppercase text-slate-400 font-bold tracking-wider mb-0.5">Next</span>
+                                <span id="next-code-value-${idx}" class="font-mono text-sm font-medium text-slate-400 tracking-wide">${formattedNextCode}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Overlay -->
+                    <div class="absolute inset-0 z-20 bg-emerald-50/90 backdrop-blur-[1px] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-200" id="copy-overlay-${idx}">
+                        <div class="transform scale-50 transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)" id="copy-icon-${idx}">
+                            <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-sm mb-1">
+                                <i class="fas fa-check text-lg"></i>
+                            </div>
+                        </div>
+                        <span class="text-emerald-600 font-bold text-xs tracking-wide uppercase translate-y-2 opacity-0 transition-all duration-300 delay-75" id="copy-text-${idx}">Copied!</span>
+                    </div>
+
+                    <!-- Hover Effect Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-50/50 pointer-events-none"></div>
+                `;
+                els.codesContainer.appendChild(el);
+            });
+
+            if (visibleCount === 0 && filter) {
+                els.codesContainer.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <p>No matches found</p>
+                    </div>`;
+            }
+        }
+
+        // --- Actions ---
+        function openAccountModal(index = -1) {
+            editingIndex = index;
+            if (index >= 0) {
+                els.modalTitle.textContent = 'Edit Account';
+                els.accountName.value = accounts[index].name;
+                els.secretKey.value = accounts[index].secret;
+            } else {
+                els.modalTitle.textContent = 'Add Account';
+                els.accountName.value = '';
+                els.secretKey.value = '';
+            }
+            openModal('accountModal');
+            setTimeout(() => els.accountName.focus(), 100);
+        }
+
+        function saveAccount() {
+            const name = els.accountName.value.trim();
+            let secret = els.secretKey.value.trim().replace(/\s/g, '').toUpperCase();
+            if (!name) return showToast('Account name is required', 'error');
+            if (!secret) return showToast('Secret key is required', 'error');
+            const hex = base32ToHex(secret);
+            if (!hex) return showToast('Invalid Base32 Secret Key', 'error');
+            const newAcc = { name, secret };
+            if (editingIndex >= 0) {
+                accounts[editingIndex] = newAcc;
+                showToast('Account updated');
+            } else {
+                if (accounts.some(a => a.name === name)) {
+                    return showToast('Account name already exists', 'error');
+                }
+                accounts.push(newAcc);
+                showToast('Account added');
+            }
+            saveToStorage();
+            closeAllModals();
+            updateAccountsDisplay(true);
+            updateCodes();
+        }
+
+        function initDelete(index) {
+            deletingIndex = index;
+            document.getElementById('deleteMessage').textContent = `Remove "${accounts[index].name}"?`;
+            openModal('deleteModal');
+        }
+
+        function confirmDelete() {
+            if (deletingIndex >= 0) {
+                accounts.splice(deletingIndex, 1);
+                saveToStorage();
+                showToast('Account removed');
+                updateAccountsDisplay(true);
+            }
+            closeAllModals();
+        }
+
+        function handleCardCopy(cardElement, index) {
+            const codeEl = document.getElementById(`code-value-${index}`);
+            if (!codeEl) return;
+            
+            const text = codeEl.textContent.replace(/\s/g, '');
+            
+            // 1. Perform Copy
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            textArea.style.top = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    // 2. Trigger Visual Animation (Overlay + Green Border)
+                    const overlay = document.getElementById(`copy-overlay-${index}`);
+                    const icon = document.getElementById(`copy-icon-${index}`);
+                    const label = document.getElementById(`copy-text-${index}`);
+
+                    // Show Overlay
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                    
+                    // Pop Icon
+                    icon.classList.remove('scale-50');
+                    icon.classList.add('scale-100');
+                    
+                    // Slide up Text
+                    label.classList.remove('translate-y-2', 'opacity-0');
+                    
+                    // Glow Card Border
+                    cardElement.classList.add('!border-emerald-500', 'ring-1', 'ring-emerald-500');
+                    
+                    // Reset after 1.2s
+                    setTimeout(() => {
+                        overlay.classList.add('opacity-0', 'pointer-events-none');
+                        icon.classList.add('scale-50');
+                        icon.classList.remove('scale-100');
+                        label.classList.add('translate-y-2', 'opacity-0');
+                        cardElement.classList.remove('!border-emerald-500', 'ring-1', 'ring-emerald-500');
+                    }, 1200);
+
+                } else {
+                    showToast('Failed to copy', 'error');
+                }
+            } catch (err) {
+                showToast('Failed to copy', 'error');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function editAccount(index) {
+            openAccountModal(index);
+        }
+
+        // --- Import/Export ---
+        function openDataModal(type) {
+            const btn = document.getElementById('processDataBtn');
+            const title = document.getElementById('dataModalTitle');
+            if (type === 'import') {
+                title.textContent = 'Import Accounts';
+                btn.textContent = 'Import';
+                btn.dataset.action = 'import';
+                els.dataTextarea.value = '';
+                els.dataTextarea.readOnly = false;
+                els.dataTextarea.placeholder = "Google|JBSWY3DPEHPK3PXP\nGitHub|KRPGS5ABN2..."
+            } else {
+                title.textContent = 'Export Accounts';
+                btn.textContent = 'Copy to Clipboard';
+                btn.dataset.action = 'export';
+                els.dataTextarea.value = accounts.map(a => `${a.name}|${a.secret}`).join('\n');
+                els.dataTextarea.readOnly = true;
+            }
+            openModal('dataModal');
+        }
+
+        function processDataAction() {
+            const btn = document.getElementById('processDataBtn');
+            const action = btn.dataset.action;
+            if (action === 'export') {
+                els.dataTextarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Export data copied!');
+                } catch (e) {
+                    showToast('Failed to copy', 'error');
+                }
+                return;
+            }
+            const raw = els.dataTextarea.value.trim();
+            if (!raw) return;
+            const lines = raw.split('\n');
+            let added = 0;
+            let errors = 0;
+            lines.forEach(line => {
+                const [name, secret] = line.split('|').map(s => s.trim());
+                if (name && secret && base32ToHex(secret)) {
+                    if (!accounts.some(a => a.name === name)) {
+                        accounts.push({ name, secret });
+                        added++;
+                    }
+                } else {
+                    errors++;
+                }
+            });
+            if (added > 0) {
+                saveToStorage();
+                updateAccountsDisplay(true);
+                updateCodes();
+                closeAllModals();
+                showToast(`Imported ${added} accounts`);
+            }
+            if (errors > 0) showToast(`${errors} lines were invalid`, 'warning');
+        }
+
+        // --- Data Persistence ---
+        function loadAccounts() {
+            try {
+                const saved = localStorage.getItem('totpAccounts');
+                if (saved) accounts = JSON.parse(saved);
+            } catch (e) {
+                console.error('Failed to load accounts');
+                accounts = [];
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('totpAccounts', JSON.stringify(accounts));
+        }
+
+        // --- UI Utils ---
+        function toggleSearch() {
+            isSearchActive = !isSearchActive;
+            const timerBox = els.headerTimerBox;
+            const searchBox = els.headerSearchBox;
+            
+            if (isSearchActive) {
+                timerBox.classList.remove('flex-1');
+                timerBox.classList.add('w-12');
+                els.timerPillContent.classList.remove('opacity-100');
+                els.timerPillContent.classList.add('opacity-0', 'pointer-events-none');
+                els.timerCircleContent.classList.remove('opacity-0', 'scale-50');
+                els.timerCircleContent.classList.add('opacity-100', 'scale-100');
+                
+                searchBox.classList.remove('w-12');
+                searchBox.classList.add('flex-1');
+                els.searchToggle.classList.remove('opacity-100');
+                els.searchToggle.classList.add('opacity-0', 'pointer-events-none');
+                els.searchInputWrapper.classList.remove('opacity-0', 'pointer-events-none');
+                els.searchInputWrapper.classList.add('opacity-100');
+                setTimeout(() => els.searchInput.focus(), 300);
+            } else {
+                timerBox.classList.add('flex-1');
+                timerBox.classList.remove('w-12');
+                els.timerPillContent.classList.remove('opacity-0', 'pointer-events-none');
+                els.timerPillContent.classList.add('opacity-100');
+                els.timerCircleContent.classList.remove('opacity-100', 'scale-100');
+                els.timerCircleContent.classList.add('opacity-0', 'scale-50');
+                
+                searchBox.classList.add('w-12');
+                searchBox.classList.remove('flex-1');
+                els.searchToggle.classList.remove('opacity-0', 'pointer-events-none');
+                els.searchToggle.classList.add('opacity-100');
+                els.searchInputWrapper.classList.remove('opacity-100');
+                els.searchInputWrapper.classList.add('opacity-0', 'pointer-events-none');
+                
+                els.searchInput.value = '';
+                updateAccountsDisplay(false);
+            }
+        }
+
+        function filterAccounts() {
+            updateAccountsDisplay(false);
+        }
+
+        function formatAccountName(name, filter) {
+            if (filter) return highlightText(name, filter);
+            const escaped = escapeHtml(name);
+            return escaped.replace(/(\([^)]+\))/g, '<span class="text-slate-400 font-normal text-xs ml-0.5">$1</span>');
+        }
+
+        function highlightText(text, filter) {
+            if (!filter) return escapeHtml(text);
+            const lowerText = text.toLowerCase();
+            const start = lowerText.indexOf(filter);
+            if (start === -1) return escapeHtml(text);
+            const end = start + filter.length;
+            return escapeHtml(text.substring(0, start)) + 
+                   `<span class="bg-yellow-200 text-yellow-800 rounded px-0.5">${escapeHtml(text.substring(start, end))}</span>` + 
+                   escapeHtml(text.substring(end));
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // --- Modal System ---
+        function openModal(modalId) {
+            els.modalOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                els.modalOverlay.classList.remove('opacity-0');
+            }, 10);
+            document.querySelectorAll('.modal-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('translate-y-0');
+                el.classList.add('translate-y-full');
+            });
+            const modal = document.getElementById(modalId);
+            currentModal = modal;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('translate-y-full');
+                modal.classList.add('translate-y-0');
+            }, 50);
+        }
+
+        function closeAllModals() {
+            els.modalOverlay.classList.add('opacity-0');
+            if (currentModal) {
+                currentModal.classList.add('translate-y-full');
+                currentModal.classList.remove('translate-y-0');
+            }
+            setTimeout(() => {
+                els.modalOverlay.classList.add('hidden');
+                document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
+                currentModal = null;
+            }, 300);
+        }
+
+        // --- Toast System ---
+        function showToast(message, type = 'success') {
+            const el = document.createElement('div');
+            const colorClass = type === 'error' ? 'bg-red-500' : (type === 'warning' ? 'bg-amber-500' : 'bg-slate-800');
+            const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
+            el.className = `${colorClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto min-w-[200px] justify-center`;
+            el.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+            document.getElementById('toastContainer').appendChild(el);
+            requestAnimationFrame(() => {
+                el.classList.remove('translate-y-4', 'opacity-0');
+            });
+            setTimeout(() => {
+                el.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Visibility Handling ---
+        function setupVisibilityHandling() {
+            document.addEventListener('visibilitychange', () => {
+                isPageVisible = !document.hidden;
+                if (isPageVisible) {
+                    initializeTiming();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
