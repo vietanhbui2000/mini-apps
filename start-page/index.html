@@ -582,7 +582,7 @@
             dateFormat: localStorage.getItem('dateFormat') || 'full',
             showWeekday: localStorage.getItem('showWeekday') !== 'false',
             links: safeJsonParse(localStorage.getItem('links'), []),
-            searchEngines: safeJsonParse(localStorage.getItem('searchEngines'), defaultEngines),
+            engines: safeJsonParse(localStorage.getItem('engines'), defaultEngines),
             defaultSearchEngine: parseInt(localStorage.getItem('defaultSearchEngine') || '0'),
             defaultAskEngine: parseInt(localStorage.getItem('defaultAskEngine') || '0'),
             shortcutTrigger: localStorage.getItem('shortcutTrigger') || 'both', //  'both', 'space', 'tab'
@@ -596,12 +596,6 @@
             openQueryNewTab: localStorage.getItem('openQueryNewTab') === 'true', // Default false
             openLinkNewTab: localStorage.getItem('openLinkNewTab') === 'true', // Default false
         };
-
-        // Backwards compatibility for engines without shortcuts
-        preferences.searchEngines = preferences.searchEngines.map(e => ({ ...e, shortcut: e.shortcut || '' }));
-
-        // Backwards compatibility for links without shortcuts
-        preferences.links = preferences.links.map(l => ({ ...l, shortcut: l.shortcut || '' }));
 
         // Runtime State
         let draggedItem = null;
@@ -991,7 +985,7 @@
         // --- Settings: Engine Management ---
 
         function renderSettingsEngines() {
-            const sourceEngines = tempPreferences ? tempPreferences.searchEngines : preferences.searchEngines;
+            const sourceEngines = tempPreferences ? tempPreferences.engines : preferences.engines;
             const sourceDefaultSearch = tempPreferences ? tempPreferences.defaultSearchEngine : preferences.defaultSearchEngine;
             const sourceDefaultAsk = tempPreferences ? tempPreferences.defaultAskEngine : preferences.defaultAskEngine;
 
@@ -1079,7 +1073,7 @@
         };
 
         window.deleteEngine = function (index, btn) {
-            const currentEngines = tempPreferences.searchEngines;
+            const currentEngines = tempPreferences.engines;
 
             // If we're editing this engine, cancel edit first and find the new button after re-render
             if (editingEngineIndex === index) {
@@ -1133,7 +1127,7 @@
         };
 
         window.editEngine = function (index) {
-            const engine = tempPreferences.searchEngines[index];
+            const engine = tempPreferences.engines[index];
             engineNameInput.value = engine.name;
             engineUrlInput.value = engine.url;
             engineShortcutInput.value = engine.shortcut || '';
@@ -1170,7 +1164,7 @@
             hideError(engineError);
 
             // Use tempPreferences for validation and saving
-            const currentEngines = tempPreferences.searchEngines;
+            const currentEngines = tempPreferences.engines;
 
             if (shortcut) {
                 const duplicateShortcut = currentEngines.find((e, i) => (editingEngineIndex === null || i !== editingEngineIndex) && e.shortcut === shortcut);
@@ -1406,6 +1400,7 @@
             if (resetSettingsBtn.dataset.confirm === 'true') {
                 // Second click: Perform Reset
                 localStorage.clear();
+                sessionStorage.clear();
                 window.location.reload();
             } else {
                 // First click: Request Confirmation
@@ -1437,7 +1432,29 @@
         }
 
         function handleExportSettings() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(preferences, null, 2));
+            const orderedPreferences = {
+                theme: preferences.theme,
+                username: preferences.username,
+                enableGreetings: preferences.enableGreetings,
+                autofocusSearch: preferences.autofocusSearch,
+                openQueryNewTab: preferences.openQueryNewTab,
+                openLinkNewTab: preferences.openLinkNewTab,
+                timeFormat: preferences.timeFormat,
+                showSeconds: preferences.showSeconds,
+                dateFormat: preferences.dateFormat,
+                showWeekday: preferences.showWeekday,
+                engines: preferences.engines,
+                defaultSearchEngine: preferences.defaultSearchEngine,
+                defaultAskEngine: preferences.defaultAskEngine,
+                shortcutTrigger: preferences.shortcutTrigger,
+                showSpeedDial: preferences.showSpeedDial,
+                enableHotkeys: preferences.enableHotkeys,
+                autoOpenSpeedDial: preferences.autoOpenSpeedDial,
+                hotkeyModifier: preferences.hotkeyModifier,
+                links: preferences.links,
+                linkLayout: preferences.linkLayout
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orderedPreferences, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
             downloadAnchorNode.setAttribute("download", "start-page-settings.json");
@@ -1611,7 +1628,7 @@
             localStorage.setItem('openLinkNewTab', preferences.openLinkNewTab);
             localStorage.setItem('showWeekday', preferences.showWeekday);
             localStorage.setItem('links', JSON.stringify(preferences.links));
-            localStorage.setItem('searchEngines', JSON.stringify(preferences.searchEngines));
+            localStorage.setItem('engines', JSON.stringify(preferences.engines));
             localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
             localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
             localStorage.setItem('shortcutTrigger', preferences.shortcutTrigger);
@@ -1729,7 +1746,7 @@
                 const parts = query.split(' ');
                 if (parts.length > 1 && (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both')) {
                     const firstWord = parts[0];
-                    const shortcutEngineIndex = preferences.searchEngines.findIndex(e => e.shortcut === firstWord);
+                    const shortcutEngineIndex = preferences.engines.findIndex(e => e.shortcut === firstWord);
                     if (shortcutEngineIndex !== -1) {
                         engineIndex = shortcutEngineIndex;
                         query = parts.slice(1).join(' '); // Remove shortcut from query
@@ -1748,7 +1765,7 @@
                 }
 
                 // Fallback if index invalid
-                const engine = preferences.searchEngines[engineIndex] || preferences.searchEngines[0];
+                const engine = preferences.engines[engineIndex] || preferences.engines[0];
 
                 let url = engine.url;
                 if (url.includes('%s')) {
@@ -1793,7 +1810,7 @@
                 // Check if input is exactly "shortcut " (shortcut followed by space)
                 if (val.endsWith(' ') && parts.length === 1 && parts[0].length > 0) {
                     const candidate = parts[0];
-                    const found = preferences.searchEngines.find(e => e.shortcut === candidate);
+                    const found = preferences.engines.find(e => e.shortcut === candidate);
                     if (found) {
                         activeShortcutEngine = found;
                     }
@@ -1865,7 +1882,7 @@
                 }
                 // B. Implicit detection (Preview)
                 else if (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both') {
-                    engineToShow = preferences.searchEngines.find(e => e.shortcut === potentialShortcut && parts.length > 1);
+                    engineToShow = preferences.engines.find(e => e.shortcut === potentialShortcut && parts.length > 1);
                 }
 
                 if (linkToShow) {
@@ -2045,7 +2062,7 @@
 
                     if (parts.length === 1 && parts[0].length > 0) {
                         const candidate = parts[0];
-                        const found = preferences.searchEngines.find(e => e.shortcut === candidate);
+                        const found = preferences.engines.find(e => e.shortcut === candidate);
 
                         if (found) {
                             e.preventDefault(); // Stop focus move
