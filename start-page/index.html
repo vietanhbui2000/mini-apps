@@ -801,51 +801,64 @@
         }
 
         /**
-         * Checks if an engine matches the input string based on the current mode.
+         * Finds the best matching engine for the input string based on priority:
+         * 1. Exact Shortcut
+         * 2. Exact Name (if mode allows)
+         * 3. Partial URL/Match (if mode allows)
          */
-        function shouldMatchEngine(engine, input) {
+        function findMatchingEngine(input) {
             const mode = preferences.engineMatchMode; // shortcuts, shortcuts_name, shortcuts_name_url
             const lowerInput = input.toLowerCase();
-            const lowerName = engine.name.toLowerCase();
 
-            // 1. Shortcut (Always checked)
-            if (engine.shortcut === input) return true;
+            // 1. Exact Shortcut (Highest Priority - Check ALL engines first)
+            for (const engine of preferences.engines) {
+                if (engine.shortcut === input) return engine;
+            }
 
-            // 2. Name (Checked if mode is NOT shortcuts)
+            // 2. Exact Name (Medium Priority)
             if (mode !== 'shortcuts') {
-                if (lowerName === lowerInput) return true;
+                for (const engine of preferences.engines) {
+                    if (engine.name.toLowerCase() === lowerInput) return engine;
+                }
             }
 
-            // 3. URL (Checked ONLY if mode is shortcuts_name_url)
+            // 3. URL (Low Priority)
             if (mode === 'shortcuts_name_url') {
-                if (engine.url.toLowerCase().includes(lowerInput)) return true;
+                for (const engine of preferences.engines) {
+                    if (engine.url.toLowerCase().includes(lowerInput)) return engine;
+                }
             }
 
-            return false;
+            return null;
         }
 
         /**
-         * Checks if a link matches the input string based on the current mode.
+         * Finds the best matching link for the input string based on priority.
          */
-        function shouldMatchLink(link, input) {
+        function findMatchingLink(input) {
             const mode = preferences.linkMatchMode; // shortcuts, shortcuts_name, shortcuts_name_url
             const lowerInput = input.toLowerCase();
-            const lowerName = link.name.toLowerCase();
 
-            // 1. Shortcut (Always checked)
-            if (link.shortcut === input) return true;
+            // 1. Exact Shortcut
+            for (const link of preferences.links) {
+                if (link.shortcut === input) return link;
+            }
 
-            // 2. Name
+            // 2. Exact Name
             if (mode !== 'shortcuts') {
-                if (lowerName === lowerInput) return true;
+                for (const link of preferences.links) {
+                    if (link.name.toLowerCase() === lowerInput) return link;
+                }
             }
 
             // 3. URL
             if (mode === 'shortcuts_name_url') {
-                if (link.url.toLowerCase().includes(lowerInput)) return true;
+                for (const link of preferences.links) {
+                    if (link.url.toLowerCase().includes(lowerInput)) return link;
+                }
             }
 
-            return false;
+            return null;
         }
 
         /**
@@ -1896,7 +1909,8 @@
                 const parts = query.split(' ');
                 if (parts.length > 1 && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
                     const firstWord = parts[0];
-                    const shortcutEngineIndex = preferences.engines.findIndex(e => shouldMatchEngine(e, firstWord));
+                    const matchedEngine = findMatchingEngine(firstWord);
+                    const shortcutEngineIndex = matchedEngine ? preferences.engines.indexOf(matchedEngine) : -1;
                     if (shortcutEngineIndex !== -1) {
                         engineIndex = shortcutEngineIndex;
                         query = parts.slice(1).join(' '); // Remove shortcut from query
@@ -1962,7 +1976,7 @@
                 // Check if input is exactly "shortcut " (shortcut followed by space)
                 if (val.endsWith(' ') && parts.length === 1 && parts[0].length > 0) {
                     const candidate = parts[0];
-                    const found = preferences.engines.find(e => shouldMatchEngine(e, candidate));
+                    const found = findMatchingEngine(candidate);
                     if (found) {
                         activeShortcutEngine = found;
                     }
@@ -1994,7 +2008,7 @@
                 // Check for Speed Dial Link Shortcut (Exact match AND strict - no trailing space if trying to search)
                 if (parts.length === 1 && !hasTrailingSpace) {
                     // 1. Exact string match
-                    linkToShow = preferences.links.find(l => shouldMatchLink(l, parts[0]));
+                    linkToShow = findMatchingLink(parts[0]);
 
                     // 2. Numeric match (if hotkeys enabled)
                     if (!linkToShow && preferences.enableHotkeys) {
@@ -2031,7 +2045,8 @@
                 }
                 // B. Implicit detection (Preview)
                 else if (preferences.triggerKey === 'space' || preferences.triggerKey === 'both') {
-                    engineToShow = preferences.engines.find(e => shouldMatchEngine(e, potentialShortcut) && parts.length > 1);
+                    const found = findMatchingEngine(potentialShortcut);
+                    if (found && parts.length > 1) engineToShow = found;
                 }
 
                 if (linkToShow) {
@@ -2233,7 +2248,7 @@
 
                     if (parts.length === 1 && parts[0].length > 0) {
                         const candidate = parts[0];
-                        const found = preferences.engines.find(e => shouldMatchEngine(e, candidate));
+                        const found = findMatchingEngine(candidate);
 
                         if (found) {
                             e.preventDefault(); // Stop focus move
