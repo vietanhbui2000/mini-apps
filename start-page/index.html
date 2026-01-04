@@ -1851,8 +1851,8 @@
             e.preventDefault();
             let query = searchInput.value.trim();
             if (query) {
-                // 1. Check for Speed Dial Shortcuts (Exact or Numeric)
-                const speedDialLink = preferences.links.find(l => l.shortcut === query);
+                // 1. Check for Speed Dial Shortcuts (using prioritized match)
+                const speedDialLink = findMatchingLink(query);
                 let numericLink = null;
 
                 if (!speedDialLink && preferences.enableHotkeys) {
