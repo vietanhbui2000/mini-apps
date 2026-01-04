@@ -101,8 +101,6 @@
 <body
     class="min-h-screen bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 selection:bg-zinc-200 dark:selection:bg-zinc-800 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
 
-
-
     <div class="w-full max-w-3xl space-y-12 mb-12">
 
         <!-- Header Section (Second Priority - Delayed) -->
@@ -133,7 +131,7 @@
                     <!-- Slash Shortcut -->
                     <kbd id="shortcut-slash"
                         class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700/50 transition-colors">
-                        /
+                        Space
                     </kbd>
                     <!-- Enter Indicator -->
                     <span id="shortcut-enter"
@@ -150,7 +148,6 @@
         </div>
 
     </div>
-
 
     <!-- Help Button (Fixed Bottom Left) -->
     <div class="fixed bottom-6 left-6 z-30">
@@ -177,9 +174,9 @@
 
     <!-- Help Modal -->
     <div id="help-modal"
-        class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
+        class="hidden fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
         <div
-            class="modal-content bg-white dark:bg-zinc-900 w-full max-w-lg p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-200 ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col max-h-[85vh]">
+            class="modal-content bg-white dark:bg-zinc-900 w-full h-full sm:h-auto sm:max-w-lg p-4 sm:p-6 rounded-none sm:rounded-2xl border-none sm:border border-zinc-200 dark:border-zinc-800 shadow-none sm:shadow-2xl transition-transform duration-200 ring-0 sm:ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col sm:max-h-[85vh]">
 
             <div class="flex justify-between items-center mb-6 shrink-0">
                 <h2 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -261,9 +258,9 @@
                         class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800">
                         <div class="flex items-start gap-3">
                             <span
-                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">/</span>
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">Space</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                Press slash to instantly focus the search bar from anywhere.
+                                Press Space to instantly focus the search bar from anywhere.
                             </div>
                         </div>
                     </div>
@@ -275,9 +272,9 @@
 
     <!-- Settings Modal -->
     <div id="settings-modal"
-        class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
+        class="hidden fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center modal-enter transition-opacity duration-200">
         <div
-            class="modal-content bg-white dark:bg-zinc-900 w-full max-w-lg p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-transform duration-200 ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col max-h-[85vh]">
+            class="modal-content bg-white dark:bg-zinc-900 w-full h-full sm:h-auto sm:max-w-lg p-4 sm:p-6 rounded-none sm:rounded-2xl border-none sm:border border-zinc-200 dark:border-zinc-800 shadow-none sm:shadow-2xl transition-transform duration-200 ring-0 sm:ring-1 ring-zinc-900/5 dark:ring-white/10 flex flex-col sm:max-h-[85vh]">
 
             <div class="flex justify-between items-center mb-6 shrink-0">
                 <h2 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -513,16 +510,16 @@
                         <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Layout View</label>
                         <div class="grid grid-cols-2 gap-2">
                             <button
-                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                                 data-value="list">
                                 <i data-lucide="layout-list" class="w-4 h-4"></i>
-                                <span class="text-sm">List</span>
+                                <span>List</span>
                             </button>
                             <button
-                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                                 data-value="grid">
                                 <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                                <span class="text-sm">Grid (Icon only)</span>
+                                <span>Grid (Icon only)</span>
                             </button>
                         </div>
                     </div>
@@ -721,18 +718,6 @@
                 console.warn('Failed to parse JSON from localStorage:', e);
                 return fallback;
             }
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
         }
 
         function showError(element, message) {
@@ -1506,7 +1491,6 @@
             importFileInput.value = '';
         });
 
-
         // --- Settings Modal Handling ---
 
         function checkDirtyState() {
@@ -1584,7 +1568,7 @@
         function updateLayoutButtonsUI() {
             layoutBtns.forEach(btn => {
                 const isActive = btn.dataset.value === tempPreferences.linkLayout;
-                btn.className = `layout-btn p-3 rounded-lg border flex items-center justify-center gap-2 transition-all ${isActive
+                btn.className = `layout-btn p-2 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium transition-all ${isActive
                     ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white'
                     : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                     }`;
@@ -2034,23 +2018,39 @@
             const activeTag = document.activeElement.tagName;
 
             // Search Focus
-            if (e.key === '/' && activeTag !== 'INPUT') {
+            if (e.code === 'Space' && activeTag !== 'INPUT') {
                 e.preventDefault();
                 searchInput.focus();
             }
 
-            // Escape Modal
+            // Escape Actions
             if (e.key === 'Escape') {
+                // 1. Close Settings if open
                 if (!settingsModal.classList.contains('hidden')) {
-                    // Check dirty before allowing Escape to close
+                    e.preventDefault();
                     if (checkDirtyState()) {
-                        // Maybe show alert? Or just block.
-                        // For now blocking is consistent with backdrop behavior.
+                        // Provide visual feedback that action is blocked
+                        const content = settingsModal.querySelector('.modal-content');
+                        content.classList.add('animate-pulse');
+                        setTimeout(() => content.classList.remove('animate-pulse'), 200);
                         return;
                     }
                     closeSettings();
+                    return;
                 }
-                if (!helpModal.classList.contains('hidden')) closeHelp();
+
+                // 2. Close Help if open
+                if (!helpModal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    closeHelp();
+                    return;
+                }
+
+                // 3. Unfocus Search Input
+                if (document.activeElement === searchInput) {
+                    e.preventDefault();
+                    searchInput.blur();
+                }
             }
 
             // Tab Key Trigger for Search Shortcuts
