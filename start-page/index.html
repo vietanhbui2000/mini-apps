@@ -95,6 +95,23 @@
             background-color: rgba(113, 113, 122, 0.1);
             border: 2px dashed rgba(113, 113, 122, 0.3);
         }
+
+        /* Blinking Animation */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .blinking {
+            animation: blink 1s step-end infinite;
+        }
     </style>
 </head>
 
@@ -326,6 +343,30 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Date Format</label>
+                            <select id="setting-date-format"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer mb-2">
+                                <option value="short">Short (Jan 4)</option>
+                                <option value="long">Long (January 4)</option>
+                                <option value="numeric">Numeric (4/1)</option>
+                            </select>
+                            <label class="flex items-center gap-2 cursor-pointer mb-1">
+                                <input type="checkbox" id="setting-show-weekday"
+                                    class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                                <span class="text-xs text-zinc-500 dark:text-zinc-400">Show day of week</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="setting-show-year"
+                                    class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                                <span class="text-xs text-zinc-500 dark:text-zinc-400">Show year</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="setting-show-leading-zero"
+                                    class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
+                                <span class="text-xs text-zinc-500 dark:text-zinc-400">Show leading zero</span>
+                            </label>
+                        </div>
+                        <div class="space-y-2">
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Time Format</label>
                             <div class="grid grid-cols-2 gap-2 mb-2">
                                 <button
@@ -335,25 +376,20 @@
                                     class="format-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-sm font-medium transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                     data-type="time" data-value="24">24-hour</button>
                             </div>
+                            <label class="flex items-center gap-2 cursor-pointer mb-1">
+                                <input type="checkbox" id="setting-show-ampm"
+                                    class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="text-xs text-zinc-500 dark:text-zinc-400">Show AM/PM</span>
+                            </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="setting-show-seconds"
                                     class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
                                 <span class="text-xs text-zinc-500 dark:text-zinc-400">Show seconds</span>
                             </label>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Date Format</label>
-                            <select id="setting-date-format"
-                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer mb-2">
-                                <option value="full">Default</option>
-                                <option value="long">Long Date</option>
-                                <option value="short">Short (1/1)</option>
-                                <option value="iso">ISO</option>
-                            </select>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="setting-show-weekday"
+                                <input type="checkbox" id="setting-flash-separators"
                                     class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
-                                <span class="text-xs text-zinc-500 dark:text-zinc-400">Show day of week</span>
+                                <span class="text-xs text-zinc-500 dark:text-zinc-400">Flash the separators</span>
                             </label>
                         </div>
                     </div>
@@ -572,26 +608,35 @@
         ];
 
         let preferences = {
+            // General
             theme: localStorage.getItem('theme') || 'auto',
             username: localStorage.getItem('username') || '',
-            timeFormat: localStorage.getItem('timeFormat') || '12',
-            showSeconds: localStorage.getItem('showSeconds') === 'true',
-            dateFormat: localStorage.getItem('dateFormat') || 'full',
+            enableGreetings: localStorage.getItem('enableGreetings') === 'true',
+            autofocusSearch: localStorage.getItem('autofocusSearch') === 'true',
+            openQueryNewTab: localStorage.getItem('openQueryNewTab') === 'true',
+            openLinkNewTab: localStorage.getItem('openLinkNewTab') === 'true',
+            // Date
+            dateFormat: localStorage.getItem('dateFormat') || 'short',
             showWeekday: localStorage.getItem('showWeekday') !== 'false',
-            links: safeJsonParse(localStorage.getItem('links'), []),
+            showYear: localStorage.getItem('showYear') === 'true',
+            showLeadingZero: localStorage.getItem('showLeadingZero') === 'true',
+            // Time
+            timeFormat: localStorage.getItem('timeFormat') || '12',
+            showAmPm: localStorage.getItem('showAmPm') !== 'false',
+            showSeconds: localStorage.getItem('showSeconds') === 'true',
+            flashSeparators: localStorage.getItem('flashSeparators') === 'true',
+            // Engines
             engines: safeJsonParse(localStorage.getItem('engines'), defaultEngines),
-            defaultSearchEngine: parseInt(localStorage.getItem('defaultSearchEngine') || '0'),
-            defaultAskEngine: parseInt(localStorage.getItem('defaultAskEngine') || '0'),
-            shortcutTrigger: localStorage.getItem('shortcutTrigger') || 'both', //  'both', 'space', 'tab'
-            linkLayout: localStorage.getItem('linkLayout') || 'list', // 'list' or 'grid'
-            showSpeedDial: localStorage.getItem('showSpeedDial') !== 'false', // Default true
-            enableHotkeys: localStorage.getItem('enableHotkeys') !== 'false', // Default true
-            autofocusSearch: localStorage.getItem('autofocusSearch') === 'true', // Default false
-            enableGreetings: localStorage.getItem('enableGreetings') === 'true', // Default false
-            hotkeyModifier: localStorage.getItem('hotkeyModifier') || 'alt', // 'none' or 'alt'
-            autoOpenSpeedDial: localStorage.getItem('autoOpenSpeedDial') || 'disabled', // 'disabled', 'immediate', 'delay'
-            openQueryNewTab: localStorage.getItem('openQueryNewTab') === 'true', // Default false
-            openLinkNewTab: localStorage.getItem('openLinkNewTab') === 'true', // Default false
+            defaultSearchEngine: localStorage.getItem('defaultSearchEngine') || 'Google',
+            defaultAskEngine: localStorage.getItem('defaultAskEngine') || 'Google',
+            shortcutTrigger: localStorage.getItem('shortcutTrigger') || 'both',
+            // Speed Dial
+            showSpeedDial: localStorage.getItem('showSpeedDial') !== 'false',
+            enableHotkeys: localStorage.getItem('enableHotkeys') !== 'false',
+            autoOpenSpeedDial: localStorage.getItem('autoOpenSpeedDial') || 'disabled',
+            hotkeyModifier: localStorage.getItem('hotkeyModifier') || 'alt',
+            links: safeJsonParse(localStorage.getItem('links'), []),
+            linkLayout: localStorage.getItem('linkLayout') || 'list',
         };
 
         // Runtime State
@@ -650,8 +695,12 @@
         const settingOpenQueryNewTab = document.getElementById('setting-open-query-new-tab');
         const settingOpenLinkNewTab = document.getElementById('setting-open-link-new-tab');
         const settingShowWeekday = document.getElementById('setting-show-weekday');
+        const settingFlashSeparators = document.getElementById('setting-flash-separators');
+        const settingShowAmPm = document.getElementById('setting-show-ampm');
+        const settingShowYear = document.getElementById('setting-show-year');
+        const settingShowLeadingZero = document.getElementById('setting-show-leading-zero');
         const settingShortcutTrigger = document.getElementById('setting-shortcut-trigger');
-        const formatBtns = document.querySelectorAll('.format-btn');
+        const formatBtns = document.querySelectorAll('.format-btn[data-type=\"time\"]');
 
         // Settings - Search Engines
         const engineNameInput = document.getElementById('engine-name');
@@ -684,10 +733,8 @@
 
         function getFavicon(url) {
             try {
-                // Handle %s case where url might not be a valid URL without replacement
                 const cleanUrl = url.replace('%s', '');
                 const domain = new URL(cleanUrl).hostname;
-                // Increased size to 128 for better quality
                 return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             } catch (e) {
                 return 'https://www.google.com/s2/favicons?domain=google.com&sz=128';
@@ -705,7 +752,6 @@
                 new URL(formatted);
                 return formatted;
             } catch (e) {
-                // If invalid, return as-is and let the browser handle it
                 return formatted;
             }
         }
@@ -729,52 +775,90 @@
             element.classList.add('hidden');
         }
 
+        /**
+         * Converts a numeric key (0-9) to a speed dial link index.
+         * Keys 1-9 map to indices 0-8, key 0 maps to index 9.
+         * Returns -1 if the key is not a valid number or out of range.
+         */
+        function getLinkIndexFromNumericKey(key) {
+            const num = parseInt(key);
+            if (isNaN(num) || num < 0 || num > 9) return -1;
+            return num === 0 ? 9 : num - 1;
+        }
+
         // --- Core Functions ---
 
         function updateTime() {
             const now = new Date();
 
             // Time Format
-            const timeOptions = {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: preferences.timeFormat === '12',
-            };
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const s = now.getSeconds();
+            const is12 = preferences.timeFormat === '12';
 
-            if (preferences.showSeconds) {
-                timeOptions.second = '2-digit';
+            let hours = h;
+            let ampm = '';
+            if (is12) {
+                hours = h % 12 || 12;
+                ampm = h >= 12 ? ' PM' : ' AM';
             }
 
-            clockDisplay.textContent = now.toLocaleTimeString('en-US', timeOptions);
+            const pad = (n) => n.toString().padStart(2, '0');
+            const sepClass = preferences.flashSeparators ? 'blinking' : '';
+            const sep = `<span class="${sepClass}">:</span>`;
+
+            let timeHtml = `${hours}${sep}${pad(m)}`;
+            if (preferences.showSeconds) {
+                timeHtml += `${sep}${pad(s)}`;
+            }
+            if (ampm && preferences.showAmPm && is12) timeHtml += `<span class="text-sm ml-1">${ampm}</span>`;
+
+            clockDisplay.innerHTML = timeHtml;
 
             // Date Format
-            let dateText = '';
             const d = now;
+            const year = d.getFullYear();
+            const day = d.getDate();
+            const monthIndex = d.getMonth();
+
+            const formatNum = (num) => {
+                if (preferences.showLeadingZero) {
+                    return num.toString().padStart(2, '0');
+                }
+                return num.toString();
+            };
+
+            let dateText = '';
+            let weekdayFormat = 'long';
 
             switch (preferences.dateFormat) {
-                case 'long':
-                    dateText = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                    break;
                 case 'short':
-                    dateText = d.toLocaleDateString('en-US');
-                    break;
-                case 'iso':
-                    dateText = d.toISOString().split('T')[0];
-                    break;
-                case 'full':
                 default:
-                    dateText = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                    const shortMonth = d.toLocaleDateString('en-US', { month: 'short' });
+                    dateText = `${shortMonth} ${formatNum(day)}`;
+                    if (preferences.showYear) dateText += ` ${year}`;
+                    weekdayFormat = 'short';
+                    break;
+
+                case 'long':
+                    const longMonth = d.toLocaleDateString('en-US', { month: 'long' });
+                    dateText = `${longMonth} ${formatNum(day)}`;
+                    if (preferences.showYear) dateText += `, ${year}`;
+                    break;
+
+                case 'numeric':
+                    dateText = `${formatNum(day)}/${formatNum(monthIndex + 1)}`;
+                    if (preferences.showYear) dateText += `/${year}`;
                     break;
             }
 
             if (preferences.showWeekday) {
-                const weekday = d.toLocaleDateString('en-US', { weekday: 'long' });
+                const weekday = d.toLocaleDateString('en-US', { weekday: weekdayFormat });
                 dateText = `${weekday}, ${dateText}`;
             }
 
             dateDisplay.textContent = dateText;
-
-            // Update Greeting via dedicated function to respect preferences
             updateGreetingUI();
         }
 
@@ -804,48 +888,36 @@
         // --- Links/Speed Dial Rendering ---
 
         function renderLinks() {
-            // Check if speed dial is enabled
             if (!preferences.showSpeedDial) {
                 linksContainer.innerHTML = '';
                 linksContainer.className = "hidden";
                 return;
             }
 
-            // Only show the first 10 links on the dashboard
             const linksToShow = preferences.links.slice(0, DISPLAY_LIMIT);
             const isIconMode = preferences.linkLayout === 'grid';
             const showHotkeys = preferences.enableHotkeys;
 
             if (linksToShow.length === 0) {
                 linksContainer.innerHTML = '';
-                linksContainer.className = "animate-fade-in"; // Reset classes
+                linksContainer.className = "animate-fade-in";
                 return;
             }
 
-            // Define Container Classes based on Layout
             if (isIconMode) {
-                // Grid Mode
-                // Mobile: grid-cols-4. Center 9th item (and thus 10th) in last row if present.
-                // Desktop: Grid with 10 columns to perfectly align first and last items to edges.
                 linksContainer.className = "animate-fade-in grid grid-cols-4 gap-4 [&>*:nth-child(9)]:col-start-2 md:grid md:grid-cols-10 md:gap-4 md:[&>*:nth-child(9)]:col-start-auto";
             } else {
-                // List Mode (Default)
-                // Mobile: grid-cols-2 (2x5 for 10 items)
-                // Desktop: sm:grid-cols-3 (3x3 + 1 centered). Center 10th item in last row.
                 linksContainer.className = "animate-fade-in grid grid-cols-2 sm:grid-cols-3 gap-3 [&>*:nth-child(10)]:sm:col-start-2";
             }
 
             let html = linksToShow.map((link, index) => {
                 let displayIndex = index + 1;
-                if (displayIndex === 10) displayIndex = 0; // Use 0 for the 10th item
+                if (displayIndex === 10) displayIndex = 0;
 
-                // Build the hotkey display string based on modifier setting
                 const hotkeyModifier = preferences.hotkeyModifier;
                 const hotkeyDisplay = hotkeyModifier === 'none' ? `${displayIndex}` : `Alt/Opt + ${displayIndex}`;
 
                 if (isIconMode) {
-                    // Grid Layout HTML
-                    // Updated Style: Solid background, mimicking the list view's inner icon box.
                     return `
                     <a href="${link.url}" ${preferences.openLinkNewTab ? 'target="_blank"' : ''}
                        class="group relative flex items-center justify-center p-3 rounded-xl 
@@ -865,7 +937,6 @@
                     </a>
                     `;
                 } else {
-                    // List Layout HTML (Default)
                     return `
                     <a href="${link.url}" ${preferences.openLinkNewTab ? 'target="_blank"' : ''}
                        class="group flex items-center gap-3 p-3 rounded-xl 
@@ -903,7 +974,6 @@
 
             shortcutCount.textContent = `(${sourceLinks.length})`;
 
-            // Reset disabled state since we have no limit now
             saveLinkBtn.disabled = false;
             if (editingLinkIndex === null) {
                 saveLinkBtn.textContent = "Add Link";
@@ -921,10 +991,8 @@
                 let displayIndex = index + 1;
                 if (index === 9) displayIndex = 0; // Show 0 for 10th item
 
-                // Styles for Container - Always standard now
                 let containerClass = "flex items-center justify-between p-3 rounded-lg border group transition-all duration-200 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800";
 
-                // Styles for Edit Button - Highlighted only when editing
                 let editBtnClass = "p-2 rounded-md transition-colors";
                 if (isEditing) {
                     editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
@@ -975,8 +1043,8 @@
             const sourceDefaultAsk = tempPreferences ? tempPreferences.defaultAskEngine : preferences.defaultAskEngine;
 
             settingsEnginesList.innerHTML = sourceEngines.map((eng, index) => {
-                const isSearch = index === sourceDefaultSearch;
-                const isAsk = index === sourceDefaultAsk;
+                const isSearch = eng.name === sourceDefaultSearch;
+                const isAsk = eng.name === sourceDefaultAsk;
                 const isEditing = index === editingEngineIndex;
 
                 let borderClass = 'border-zinc-100 dark:border-zinc-800';
@@ -991,10 +1059,8 @@
                     borderClass = 'border-purple-200 dark:border-purple-900/30';
                 }
 
-                // Styles for Container - Always standard background, specific border
                 let containerClass = `flex items-center justify-between p-3 rounded-lg border group transition-all duration-200 bg-zinc-50 dark:bg-zinc-800/50 ${borderClass}`;
 
-                // Styles for Edit Button - Highlighted only when editing
                 let editBtnClass = "p-2 rounded-md transition-colors";
                 if (isEditing) {
                     editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
@@ -1046,13 +1112,13 @@
         }
 
         window.setDefaultSearch = function (index) {
-            tempPreferences.defaultSearchEngine = index;
+            tempPreferences.defaultSearchEngine = tempPreferences.engines[index].name;
             renderSettingsEngines();
             checkDirtyState();
         };
 
         window.setDefaultAsk = function (index) {
-            tempPreferences.defaultAskEngine = index;
+            tempPreferences.defaultAskEngine = tempPreferences.engines[index].name;
             renderSettingsEngines();
             checkDirtyState();
         };
@@ -1096,16 +1162,19 @@
             // Actual Delete Logic
             if (currentEngines.length <= 1) return;
 
+            const deletedEngineName = currentEngines[index].name;
+
             if (editingEngineIndex > index) editingEngineIndex--;
 
             currentEngines.splice(index, 1);
 
-            // Adjust indices if needed
-            if (tempPreferences.defaultSearchEngine === index) tempPreferences.defaultSearchEngine = 0;
-            else if (tempPreferences.defaultSearchEngine > index) tempPreferences.defaultSearchEngine--;
-
-            if (tempPreferences.defaultAskEngine === index) tempPreferences.defaultAskEngine = 0;
-            else if (tempPreferences.defaultAskEngine > index) tempPreferences.defaultAskEngine--;
+            // If the deleted engine was a default, fallback to first remaining engine
+            if (tempPreferences.defaultSearchEngine === deletedEngineName) {
+                tempPreferences.defaultSearchEngine = currentEngines[0].name;
+            }
+            if (tempPreferences.defaultAskEngine === deletedEngineName) {
+                tempPreferences.defaultAskEngine = currentEngines[0].name;
+            }
 
             renderSettingsEngines();
             checkDirtyState();
@@ -1175,11 +1244,19 @@
 
         // --- Drag & Drop Logic (Speed Dial) ---
 
-        function attachDragListeners() {
-            const items = settingsLinksList.querySelectorAll('div[draggable="true"]');
+        // Mousedown listener for drag detection - attached once (not in attachDragListeners to avoid memory leak)
+        let dragListenerInitialized = false;
+        function initDragListener() {
+            if (dragListenerInitialized) return;
+            dragListenerInitialized = true;
             settingsLinksList.addEventListener('mousedown', (e) => {
                 lastMouseDownTarget = e.target;
             });
+        }
+
+        function attachDragListeners() {
+            initDragListener(); // Ensure mousedown is attached only once
+            const items = settingsLinksList.querySelectorAll('div[draggable="true"]');
             items.forEach(item => {
                 item.addEventListener('dragstart', handleDragStart);
                 item.addEventListener('dragover', handleDragOver);
@@ -1424,10 +1501,14 @@
                 autofocusSearch: preferences.autofocusSearch,
                 openQueryNewTab: preferences.openQueryNewTab,
                 openLinkNewTab: preferences.openLinkNewTab,
-                timeFormat: preferences.timeFormat,
-                showSeconds: preferences.showSeconds,
                 dateFormat: preferences.dateFormat,
                 showWeekday: preferences.showWeekday,
+                showYear: preferences.showYear,
+                showLeadingZero: preferences.showLeadingZero,
+                timeFormat: preferences.timeFormat,
+                showAmPm: preferences.showAmPm,
+                showSeconds: preferences.showSeconds,
+                flashSeparators: preferences.flashSeparators,
                 engines: preferences.engines,
                 defaultSearchEngine: preferences.defaultSearchEngine,
                 defaultAskEngine: preferences.defaultAskEngine,
@@ -1466,17 +1547,22 @@
 
                         // Force update of all UI
                         settingUsername.value = preferences.username;
-                        settingDateFormat.value = preferences.dateFormat;
-                        settingShowSeconds.checked = preferences.showSeconds;
-                        settingAutofocusSearch.checked = preferences.autofocusSearch;
                         settingEnableGreetings.checked = preferences.enableGreetings;
+                        settingAutofocusSearch.checked = preferences.autofocusSearch;
                         settingOpenQueryNewTab.checked = preferences.openQueryNewTab;
                         settingOpenLinkNewTab.checked = preferences.openLinkNewTab;
+                        settingDateFormat.value = preferences.dateFormat;
                         settingShowWeekday.checked = preferences.showWeekday;
+                        settingShowYear.checked = preferences.showYear;
+                        settingShowLeadingZero.checked = preferences.showLeadingZero;
+                        settingShowAmPm.checked = preferences.showAmPm;
+                        settingShowSeconds.checked = preferences.showSeconds;
+                        settingFlashSeparators.checked = preferences.flashSeparators;
                         settingShortcutTrigger.value = preferences.shortcutTrigger || 'both';
-                        settingHotkeyModifier.value = preferences.hotkeyModifier || 'alt';
-                        settingAutoOpen.value = preferences.autoOpenSpeedDial || 'disabled';
                         settingShowSpeedDial.checked = preferences.showSpeedDial;
+                        settingEnableHotkeys.checked = preferences.enableHotkeys;
+                        settingAutoOpen.value = preferences.autoOpenSpeedDial || 'disabled';
+                        settingHotkeyModifier.value = preferences.hotkeyModifier || 'alt';
                         saveSettings();
                         window.location.reload();
                     } else {
@@ -1518,18 +1604,22 @@
 
             // 2. Populate Form Inputs from tempPreferences
             settingUsername.value = tempPreferences.username;
-            settingDateFormat.value = tempPreferences.dateFormat;
-            settingShowSeconds.checked = tempPreferences.showSeconds;
-            settingAutofocusSearch.checked = tempPreferences.autofocusSearch;
             settingEnableGreetings.checked = tempPreferences.enableGreetings;
+            settingAutofocusSearch.checked = tempPreferences.autofocusSearch;
             settingOpenQueryNewTab.checked = tempPreferences.openQueryNewTab;
             settingOpenLinkNewTab.checked = tempPreferences.openLinkNewTab;
+            settingDateFormat.value = tempPreferences.dateFormat;
             settingShowWeekday.checked = tempPreferences.showWeekday;
+            settingShowYear.checked = tempPreferences.showYear;
+            settingShowLeadingZero.checked = tempPreferences.showLeadingZero;
+            settingShowAmPm.checked = tempPreferences.showAmPm;
+            settingShowSeconds.checked = tempPreferences.showSeconds;
+            settingFlashSeparators.checked = tempPreferences.flashSeparators;
             settingShortcutTrigger.value = tempPreferences.shortcutTrigger;
             settingShowSpeedDial.checked = tempPreferences.showSpeedDial;
             settingEnableHotkeys.checked = tempPreferences.enableHotkeys;
-            settingHotkeyModifier.value = tempPreferences.hotkeyModifier || 'alt';
             settingAutoOpen.value = tempPreferences.autoOpenSpeedDial || 'disabled';
+            settingHotkeyModifier.value = tempPreferences.hotkeyModifier || 'alt';
 
             // Update Modifier State based on Hotkeys
             settingHotkeyModifier.disabled = !tempPreferences.enableHotkeys;
@@ -1563,6 +1653,17 @@
                     : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                     }`;
             });
+
+            // Update Show AM/PM Disable State
+            if (settingShowAmPm) {
+                const is24 = tempPreferences.timeFormat === '24';
+                settingShowAmPm.disabled = is24;
+                if (is24) {
+                    settingShowAmPm.parentElement.classList.add('opacity-50');
+                } else {
+                    settingShowAmPm.parentElement.classList.remove('opacity-50');
+                }
+            }
         }
 
         function updateLayoutButtonsUI() {
@@ -1603,24 +1704,28 @@
 
             // 3. Persist to LocalStorage
             localStorage.setItem('username', preferences.username);
-            localStorage.setItem('dateFormat', preferences.dateFormat);
-            localStorage.setItem('timeFormat', preferences.timeFormat);
-            localStorage.setItem('showSeconds', preferences.showSeconds);
-            localStorage.setItem('autofocusSearch', preferences.autofocusSearch);
             localStorage.setItem('enableGreetings', preferences.enableGreetings);
+            localStorage.setItem('autofocusSearch', preferences.autofocusSearch);
             localStorage.setItem('openQueryNewTab', preferences.openQueryNewTab);
             localStorage.setItem('openLinkNewTab', preferences.openLinkNewTab);
+            localStorage.setItem('dateFormat', preferences.dateFormat);
             localStorage.setItem('showWeekday', preferences.showWeekday);
-            localStorage.setItem('links', JSON.stringify(preferences.links));
+            localStorage.setItem('showYear', preferences.showYear);
+            localStorage.setItem('showLeadingZero', preferences.showLeadingZero);
+            localStorage.setItem('timeFormat', preferences.timeFormat);
+            localStorage.setItem('showAmPm', preferences.showAmPm);
+            localStorage.setItem('showSeconds', preferences.showSeconds);
+            localStorage.setItem('flashSeparators', preferences.flashSeparators);
             localStorage.setItem('engines', JSON.stringify(preferences.engines));
             localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
             localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
             localStorage.setItem('shortcutTrigger', preferences.shortcutTrigger);
-            localStorage.setItem('linkLayout', preferences.linkLayout);
             localStorage.setItem('showSpeedDial', preferences.showSpeedDial);
             localStorage.setItem('enableHotkeys', preferences.enableHotkeys);
-            localStorage.setItem('hotkeyModifier', preferences.hotkeyModifier);
             localStorage.setItem('autoOpenSpeedDial', preferences.autoOpenSpeedDial);
+            localStorage.setItem('hotkeyModifier', preferences.hotkeyModifier);
+            localStorage.setItem('links', JSON.stringify(preferences.links));
+            localStorage.setItem('linkLayout', preferences.linkLayout);
 
             // 4. Update Main UI
             updateGreetingUI();
@@ -1673,13 +1778,9 @@
                 let numericLink = null;
 
                 if (!speedDialLink && preferences.enableHotkeys) {
-                    const num = parseInt(query);
-                    if (!isNaN(num)) {
-                        let index = num - 1;
-                        if (num === 0) index = 9;
-                        if (index >= 0 && index < preferences.links.length) {
-                            numericLink = preferences.links[index];
-                        }
+                    const index = getLinkIndexFromNumericKey(query);
+                    if (index >= 0 && index < preferences.links.length) {
+                        numericLink = preferences.links[index];
                     }
                 }
 
@@ -1738,18 +1839,20 @@
                 }
 
                 // If no shortcut was used, determine engine by Ask vs Search mode
-                if (engineIndex === undefined) {
-                    if (query.endsWith('?')) {
-                        // Ask Mode
-                        engineIndex = preferences.defaultAskEngine;
-                    } else {
-                        // Search Mode
-                        engineIndex = preferences.defaultSearchEngine;
-                    }
+                let engineName;
+                if (engineIndex !== undefined) {
+                    // Shortcut was used - get the name from the matched engine
+                    engineName = preferences.engines[engineIndex]?.name;
+                } else if (query.endsWith('?')) {
+                    // Ask Mode
+                    engineName = preferences.defaultAskEngine;
+                } else {
+                    // Search Mode
+                    engineName = preferences.defaultSearchEngine;
                 }
 
-                // Fallback if index invalid
-                const engine = preferences.engines[engineIndex] || preferences.engines[0];
+                // Find engine by name, fallback to first engine
+                const engine = preferences.engines.find(e => e.name === engineName) || preferences.engines[0];
 
                 let url = engine.url;
                 if (url.includes('%s')) {
@@ -1830,30 +1933,27 @@
 
                     // 2. Numeric match (if hotkeys enabled)
                     if (!linkToShow && preferences.enableHotkeys) {
-                        const num = parseInt(parts[0]);
-                        if (!isNaN(num)) {
-                            let index = num - 1;
-                            if (num === 0) index = 9;
-                            if (index >= 0 && index < preferences.links.length) {
-                                linkToShow = preferences.links[index];
-                            }
+                        const index = getLinkIndexFromNumericKey(parts[0]);
+                        if (index >= 0 && index < preferences.links.length) {
+                            linkToShow = preferences.links[index];
                         }
                     }
 
                     // Handle Auto-Open
                     if (linkToShow && preferences.autoOpenSpeedDial !== 'disabled') {
+                        const targetUrl = linkToShow.url; // Capture URL to avoid stale reference
                         if (preferences.autoOpenSpeedDial === 'immediate') {
                             if (preferences.openLinkNewTab) {
-                                window.open(linkToShow.url, '_blank', 'noopener,noreferrer');
+                                window.open(targetUrl, '_blank', 'noopener,noreferrer');
                             } else {
-                                window.location.href = linkToShow.url;
+                                window.location.href = targetUrl;
                             }
                         } else if (preferences.autoOpenSpeedDial === 'delay') {
                             autoOpenTimeout = setTimeout(() => {
                                 if (preferences.openLinkNewTab) {
-                                    window.open(linkToShow.url, '_blank', 'noopener,noreferrer');
+                                    window.open(targetUrl, '_blank', 'noopener,noreferrer');
                                 } else {
-                                    window.location.href = linkToShow.url;
+                                    window.location.href = targetUrl;
                                 }
                             }, 1000);
                         }
@@ -1931,9 +2031,13 @@
         attachInputListener(settingUsername, 'username');
         attachInputListener(settingDateFormat, 'dateFormat');
         attachInputListener(settingShowSeconds, 'showSeconds', true);
+        attachInputListener(settingFlashSeparators, 'flashSeparators', true);
+        attachInputListener(settingShowAmPm, 'showAmPm', true);
         attachInputListener(settingAutofocusSearch, 'autofocusSearch', true);
         attachInputListener(settingEnableGreetings, 'enableGreetings', true);
         attachInputListener(settingShowWeekday, 'showWeekday', true);
+        attachInputListener(settingShowYear, 'showYear', true);
+        attachInputListener(settingShowLeadingZero, 'showLeadingZero', true);
         attachInputListener(settingShortcutTrigger, 'shortcutTrigger');
         attachInputListener(settingHotkeyModifier, 'hotkeyModifier');
         attachInputListener(settingAutoOpen, 'autoOpenSpeedDial');
@@ -2085,18 +2189,14 @@
                 const matchesModifierConstraint = modifierRequired ? isModifierPressed : !isModifierPressed && !e.metaKey && !e.ctrlKey;
 
                 if (matchesModifierConstraint) {
-                    const key = parseInt(e.key);
-                    if (!isNaN(key) && key >= 0 && key <= 9) {
-                        let index = key - 1;
-                        if (key === 0) index = 9;
-                        if (index < preferences.links.length) {
-                            e.preventDefault(); // Prevent standard browser Alt+ behaviors if any
-                            const url = preferences.links[index].url;
-                            if (preferences.openLinkNewTab) {
-                                window.open(url, '_blank', 'noopener,noreferrer');
-                            } else {
-                                window.location.href = url;
-                            }
+                    const index = getLinkIndexFromNumericKey(e.key);
+                    if (index >= 0 && index < preferences.links.length) {
+                        e.preventDefault(); // Prevent standard browser Alt+ behaviors if any
+                        const url = preferences.links[index].url;
+                        if (preferences.openLinkNewTab) {
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                        } else {
+                            window.location.href = url;
                         }
                     }
                 }
