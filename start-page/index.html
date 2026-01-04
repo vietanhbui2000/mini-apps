@@ -447,17 +447,28 @@
                         <!-- Engines injected via JS -->
                     </div>
 
-                    <!-- Shortcut Trigger Setting -->
+                    <!-- Trigger Settings -->
                     <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Shortcut Trigger Key</label>
-                        <select id="setting-shortcut-trigger"
+                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Match Mode</label>
+                        <select id="setting-engine-match-mode"
+                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option value="shortcuts">Shortcuts only</option>
+                            <option value="shortcuts_name">Shortcuts / Name</option>
+                            <option value="shortcuts_name_url">Shortcuts / Name / URL</option>
+                        </select>
+                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mb-1 pb-2">
+                            Choose how to trigger engines (e.g. by shortcut "g", name "Google", or URL).
+                        </p>
+
+                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Trigger Key</label>
+                        <select id="setting-trigger-key"
                             class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
                             <option value="both">Space or Tab</option>
                             <option value="space">Space</option>
                             <option value="tab">Tab</option>
                         </select>
                         <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
-                            Choose which key activates a shortcut (e.g. typing "g" then pressing Space/Tab).
+                            Choose which key activates an action (Search or Ask).
                         </p>
                     </div>
                 </div>
@@ -492,8 +503,7 @@
                     <!-- Advanced Shortcut Settings -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open Speed
-                                Dial</label>
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open Links</label>
                             <select id="setting-auto-open"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
                                 <option value="disabled">Disabled (Wait for Enter)</option>
@@ -543,6 +553,17 @@
 
                     <!-- Layout Selector -->
                     <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Match Mode</label>
+                        <select id="setting-link-match-mode"
+                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                            <option value="shortcuts">Shortcuts only</option>
+                            <option value="shortcuts_name">Shortcuts / Name</option>
+                            <option value="shortcuts_name_url">Shortcuts / Name / URL</option>
+                        </select>
+                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mb-1 pb-2">
+                            Choose how to trigger links (e.g. by shortcut "yt", name "YouTube", or URL).
+                        </p>
+
                         <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Layout View</label>
                         <div class="grid grid-cols-2 gap-2">
                             <button
@@ -601,10 +622,10 @@
         const DISPLAY_LIMIT = 10; // Show first 10 on main screen
 
         const defaultEngines = [
-            { name: 'Google', url: 'https://www.google.com/search?q=%s', shortcut: 'g' },
-            { name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=%s', shortcut: 'ddg' },
-            { name: 'Bing', url: 'https://www.bing.com/search?q=%s', shortcut: 'b' },
-            { name: 'ChatGPT', url: 'https://chatgpt.com/?q=%s', shortcut: 'ai' },
+            { name: 'Google', shortcut: 'g', url: 'https://www.google.com/search?q=%s' },
+            { name: 'DuckDuckGo', shortcut: 'ddg', url: 'https://duckduckgo.com/?q=%s' },
+            { name: 'Bing', shortcut: 'b', url: 'https://www.bing.com/search?q=%s' },
+            { name: 'ChatGPT', shortcut: 'ai', url: 'https://chatgpt.com/?q=%s' },
         ];
 
         let preferences = {
@@ -629,13 +650,15 @@
             engines: safeJsonParse(localStorage.getItem('engines'), defaultEngines),
             defaultSearchEngine: localStorage.getItem('defaultSearchEngine') || 'Google',
             defaultAskEngine: localStorage.getItem('defaultAskEngine') || 'Google',
-            shortcutTrigger: localStorage.getItem('shortcutTrigger') || 'both',
+            engineMatchMode: localStorage.getItem('engineMatchMode') || 'shortcuts',
+            triggerKey: localStorage.getItem('triggerKey') || 'both',
             // Speed Dial
             showSpeedDial: localStorage.getItem('showSpeedDial') !== 'false',
             enableHotkeys: localStorage.getItem('enableHotkeys') !== 'false',
-            autoOpenSpeedDial: localStorage.getItem('autoOpenSpeedDial') || 'disabled',
+            autoOpenLinks: localStorage.getItem('autoOpenLinks') || 'disabled',
             hotkeyModifier: localStorage.getItem('hotkeyModifier') || 'alt',
             links: safeJsonParse(localStorage.getItem('links'), []),
+            linkMatchMode: localStorage.getItem('linkMatchMode') || 'shortcuts',
             linkLayout: localStorage.getItem('linkLayout') || 'list',
         };
 
@@ -688,24 +711,25 @@
         const closeHelpBtn = document.getElementById('close-help');
 
         const settingUsername = document.getElementById('setting-username');
-        const settingDateFormat = document.getElementById('setting-date-format');
-        const settingShowSeconds = document.getElementById('setting-show-seconds');
-        const settingAutofocusSearch = document.getElementById('setting-autofocus-search');
         const settingEnableGreetings = document.getElementById('setting-enable-greetings');
+        const settingAutofocusSearch = document.getElementById('setting-autofocus-search');
         const settingOpenQueryNewTab = document.getElementById('setting-open-query-new-tab');
         const settingOpenLinkNewTab = document.getElementById('setting-open-link-new-tab');
+        const settingDateFormat = document.getElementById('setting-date-format');
         const settingShowWeekday = document.getElementById('setting-show-weekday');
-        const settingFlashSeparators = document.getElementById('setting-flash-separators');
-        const settingShowAmPm = document.getElementById('setting-show-ampm');
         const settingShowYear = document.getElementById('setting-show-year');
         const settingShowLeadingZero = document.getElementById('setting-show-leading-zero');
-        const settingShortcutTrigger = document.getElementById('setting-shortcut-trigger');
+        const settingShowAmPm = document.getElementById('setting-show-ampm');
+        const settingShowSeconds = document.getElementById('setting-show-seconds');
+        const settingFlashSeparators = document.getElementById('setting-flash-separators');
+        const settingEngineMatchMode = document.getElementById('setting-engine-match-mode');
+        const settingTriggerKey = document.getElementById('setting-trigger-key');
         const formatBtns = document.querySelectorAll('.format-btn[data-type=\"time\"]');
 
         // Settings - Search Engines
         const engineNameInput = document.getElementById('engine-name');
-        const engineUrlInput = document.getElementById('engine-url');
         const engineShortcutInput = document.getElementById('engine-shortcut');
+        const engineUrlInput = document.getElementById('engine-url');
         const saveEngineBtn = document.getElementById('save-engine-btn');
         const cancelEngineEditBtn = document.getElementById('cancel-engine-edit');
         const settingsEnginesList = document.getElementById('settings-engines-list');
@@ -713,8 +737,8 @@
 
         // Shortcut Settings Elements
         const newLinkName = document.getElementById('new-link-name');
-        const newLinkUrl = document.getElementById('new-link-url');
         const newLinkShortcut = document.getElementById('new-link-shortcut');
+        const newLinkUrl = document.getElementById('new-link-url');
         const saveLinkBtn = document.getElementById('save-link-btn');
         const cancelLinkEditBtn = document.getElementById('cancel-link-edit');
         const settingsLinksList = document.getElementById('settings-links-list');
@@ -726,8 +750,9 @@
         const layoutBtns = document.querySelectorAll('.layout-btn');
         const settingShowSpeedDial = document.getElementById('setting-show-speed-dial');
         const settingEnableHotkeys = document.getElementById('setting-enable-hotkeys');
-        const settingHotkeyModifier = document.getElementById('setting-hotkey-modifier');
         const settingAutoOpen = document.getElementById('setting-auto-open');
+        const settingHotkeyModifier = document.getElementById('setting-hotkey-modifier');
+        const settingLinkMatchMode = document.getElementById('setting-link-match-mode');
 
         // --- Helper Functions ---
 
@@ -776,6 +801,54 @@
         }
 
         /**
+         * Checks if an engine matches the input string based on the current mode.
+         */
+        function shouldMatchEngine(engine, input) {
+            const mode = preferences.engineMatchMode; // shortcuts, shortcuts_name, shortcuts_name_url
+            const lowerInput = input.toLowerCase();
+            const lowerName = engine.name.toLowerCase();
+
+            // 1. Shortcut (Always checked)
+            if (engine.shortcut === input) return true;
+
+            // 2. Name (Checked if mode is NOT shortcuts)
+            if (mode !== 'shortcuts') {
+                if (lowerName === lowerInput) return true;
+            }
+
+            // 3. URL (Checked ONLY if mode is shortcuts_name_url)
+            if (mode === 'shortcuts_name_url') {
+                if (engine.url.toLowerCase().includes(lowerInput)) return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Checks if a link matches the input string based on the current mode.
+         */
+        function shouldMatchLink(link, input) {
+            const mode = preferences.linkMatchMode; // shortcuts, shortcuts_name, shortcuts_name_url
+            const lowerInput = input.toLowerCase();
+            const lowerName = link.name.toLowerCase();
+
+            // 1. Shortcut (Always checked)
+            if (link.shortcut === input) return true;
+
+            // 2. Name
+            if (mode !== 'shortcuts') {
+                if (lowerName === lowerInput) return true;
+            }
+
+            // 3. URL
+            if (mode === 'shortcuts_name_url') {
+                if (link.url.toLowerCase().includes(lowerInput)) return true;
+            }
+
+            return false;
+        }
+
+        /**
          * Converts a numeric key (0-9) to a speed dial link index.
          * Keys 1-9 map to indices 0-8, key 0 maps to index 9.
          * Returns -1 if the key is not a valid number or out of range.
@@ -784,6 +857,34 @@
             const num = parseInt(key);
             if (isNaN(num) || num < 0 || num > 9) return -1;
             return num === 0 ? 9 : num - 1;
+        }
+
+        function persistPreferences() {
+            localStorage.setItem('username', preferences.username);
+            localStorage.setItem('enableGreetings', preferences.enableGreetings);
+            localStorage.setItem('autofocusSearch', preferences.autofocusSearch);
+            localStorage.setItem('openQueryNewTab', preferences.openQueryNewTab);
+            localStorage.setItem('openLinkNewTab', preferences.openLinkNewTab);
+            localStorage.setItem('dateFormat', preferences.dateFormat);
+            localStorage.setItem('showWeekday', preferences.showWeekday);
+            localStorage.setItem('showYear', preferences.showYear);
+            localStorage.setItem('showLeadingZero', preferences.showLeadingZero);
+            localStorage.setItem('timeFormat', preferences.timeFormat);
+            localStorage.setItem('showAmPm', preferences.showAmPm);
+            localStorage.setItem('showSeconds', preferences.showSeconds);
+            localStorage.setItem('flashSeparators', preferences.flashSeparators);
+            localStorage.setItem('engines', JSON.stringify(preferences.engines));
+            localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
+            localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
+            localStorage.setItem('engineMatchMode', preferences.engineMatchMode);
+            localStorage.setItem('triggerKey', preferences.triggerKey);
+            localStorage.setItem('showSpeedDial', preferences.showSpeedDial);
+            localStorage.setItem('enableHotkeys', preferences.enableHotkeys);
+            localStorage.setItem('autoOpenLinks', preferences.autoOpenLinks);
+            localStorage.setItem('hotkeyModifier', preferences.hotkeyModifier);
+            localStorage.setItem('links', JSON.stringify(preferences.links));
+            localStorage.setItem('linkMatchMode', preferences.linkMatchMode);
+            localStorage.setItem('linkLayout', preferences.linkLayout);
         }
 
         // --- Core Functions ---
@@ -1183,8 +1284,8 @@
         window.editEngine = function (index) {
             const engine = tempPreferences.engines[index];
             engineNameInput.value = engine.name;
-            engineUrlInput.value = engine.url;
             engineShortcutInput.value = engine.shortcut || '';
+            engineUrlInput.value = engine.url;
 
             editingEngineIndex = index;
             saveEngineBtn.textContent = 'Update Engine';
@@ -1197,8 +1298,8 @@
 
         window.cancelEngineEdit = function () {
             engineNameInput.value = '';
-            engineUrlInput.value = '';
             engineShortcutInput.value = '';
+            engineUrlInput.value = '';
             editingEngineIndex = null;
             saveEngineBtn.textContent = 'Add Engine';
             cancelEngineEditBtn.classList.add('hidden');
@@ -1208,8 +1309,8 @@
 
         function saveEngine() {
             const name = engineNameInput.value.trim();
-            let url = engineUrlInput.value.trim();
             const shortcut = engineShortcutInput.value.trim();
+            let url = engineUrlInput.value.trim();
 
             if (!name || !url) return;
 
@@ -1229,13 +1330,13 @@
             }
 
             if (editingEngineIndex !== null) {
-                currentEngines[editingEngineIndex] = { name, url, shortcut };
+                currentEngines[editingEngineIndex] = { name, shortcut, url };
                 cancelEngineEdit();
             } else {
-                currentEngines.push({ name, url, shortcut });
+                currentEngines.push({ name, shortcut, url });
                 engineNameInput.value = '';
-                engineUrlInput.value = '';
                 engineShortcutInput.value = '';
+                engineUrlInput.value = '';
             }
 
             renderSettingsEngines();
@@ -1323,8 +1424,8 @@
         window.editLink = function (index) {
             const link = tempPreferences.links[index];
             newLinkName.value = link.name;
-            newLinkUrl.value = link.url;
             newLinkShortcut.value = link.shortcut || '';
+            newLinkUrl.value = link.url;
 
             editingLinkIndex = index;
             saveLinkBtn.textContent = "Update Link";
@@ -1341,8 +1442,8 @@
 
         window.cancelLinkEdit = function () {
             newLinkName.value = '';
-            newLinkUrl.value = '';
             newLinkShortcut.value = '';
+            newLinkUrl.value = '';
             editingLinkIndex = null;
             saveLinkBtn.textContent = "Add Link";
             cancelLinkEditBtn.classList.add('hidden');
@@ -1352,8 +1453,8 @@
 
         function saveLink() {
             const name = newLinkName.value.trim();
-            let url = newLinkUrl.value.trim();
             const shortcut = newLinkShortcut.value.trim();
+            let url = newLinkUrl.value.trim();
 
             if (!name || !url) {
                 showError(linkError, 'Please enter a valid Name and URL.');
@@ -1375,13 +1476,13 @@
             }
 
             if (editingLinkIndex !== null) {
-                currentLinks[editingLinkIndex] = { name, url, shortcut };
+                currentLinks[editingLinkIndex] = { name, shortcut, url };
                 cancelLinkEdit();
             } else {
-                currentLinks.push({ name, url, shortcut });
+                currentLinks.push({ name, shortcut, url });
                 newLinkName.value = '';
-                newLinkUrl.value = '';
                 newLinkShortcut.value = '';
+                newLinkUrl.value = '';
             }
 
             renderSettingsLinks();
@@ -1509,15 +1610,17 @@
                 showAmPm: preferences.showAmPm,
                 showSeconds: preferences.showSeconds,
                 flashSeparators: preferences.flashSeparators,
-                engines: preferences.engines,
+                engines: preferences.engines.map(e => ({ name: e.name, shortcut: e.shortcut, url: e.url })),
                 defaultSearchEngine: preferences.defaultSearchEngine,
                 defaultAskEngine: preferences.defaultAskEngine,
-                shortcutTrigger: preferences.shortcutTrigger,
+                engineMatchMode: preferences.engineMatchMode,
+                triggerKey: preferences.triggerKey,
                 showSpeedDial: preferences.showSpeedDial,
                 enableHotkeys: preferences.enableHotkeys,
-                autoOpenSpeedDial: preferences.autoOpenSpeedDial,
+                autoOpenLinks: preferences.autoOpenLinks,
                 hotkeyModifier: preferences.hotkeyModifier,
-                links: preferences.links,
+                links: preferences.links.map(l => ({ name: l.name, shortcut: l.shortcut, url: l.url })),
+                linkMatchMode: preferences.linkMatchMode,
                 linkLayout: preferences.linkLayout
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orderedPreferences, null, 2));
@@ -1541,29 +1644,11 @@
             reader.onload = function (e) {
                 try {
                     const imported = JSON.parse(e.target.result);
-
                     if (imported && typeof imported === 'object') {
+                        // Merge imported settings
                         preferences = { ...preferences, ...imported };
-
-                        // Force update of all UI
-                        settingUsername.value = preferences.username;
-                        settingEnableGreetings.checked = preferences.enableGreetings;
-                        settingAutofocusSearch.checked = preferences.autofocusSearch;
-                        settingOpenQueryNewTab.checked = preferences.openQueryNewTab;
-                        settingOpenLinkNewTab.checked = preferences.openLinkNewTab;
-                        settingDateFormat.value = preferences.dateFormat;
-                        settingShowWeekday.checked = preferences.showWeekday;
-                        settingShowYear.checked = preferences.showYear;
-                        settingShowLeadingZero.checked = preferences.showLeadingZero;
-                        settingShowAmPm.checked = preferences.showAmPm;
-                        settingShowSeconds.checked = preferences.showSeconds;
-                        settingFlashSeparators.checked = preferences.flashSeparators;
-                        settingShortcutTrigger.value = preferences.shortcutTrigger || 'both';
-                        settingShowSpeedDial.checked = preferences.showSpeedDial;
-                        settingEnableHotkeys.checked = preferences.enableHotkeys;
-                        settingAutoOpen.value = preferences.autoOpenSpeedDial || 'disabled';
-                        settingHotkeyModifier.value = preferences.hotkeyModifier || 'alt';
-                        saveSettings();
+                        // Save and Reload
+                        persistPreferences();
                         window.location.reload();
                     } else {
                         alert("Invalid settings file.");
@@ -1615,11 +1700,13 @@
             settingShowAmPm.checked = tempPreferences.showAmPm;
             settingShowSeconds.checked = tempPreferences.showSeconds;
             settingFlashSeparators.checked = tempPreferences.flashSeparators;
-            settingShortcutTrigger.value = tempPreferences.shortcutTrigger;
+            settingEngineMatchMode.value = tempPreferences.engineMatchMode || 'shortcuts';
+            settingTriggerKey.value = tempPreferences.triggerKey || 'both';
             settingShowSpeedDial.checked = tempPreferences.showSpeedDial;
             settingEnableHotkeys.checked = tempPreferences.enableHotkeys;
-            settingAutoOpen.value = tempPreferences.autoOpenSpeedDial || 'disabled';
+            settingAutoOpen.value = tempPreferences.autoOpenLinks || 'disabled';
             settingHotkeyModifier.value = tempPreferences.hotkeyModifier || 'alt';
+            settingLinkMatchMode.value = tempPreferences.linkMatchMode || 'shortcuts';
 
             // Update Modifier State based on Hotkeys
             settingHotkeyModifier.disabled = !tempPreferences.enableHotkeys;
@@ -1703,29 +1790,7 @@
             preferences = JSON.parse(JSON.stringify(tempPreferences));
 
             // 3. Persist to LocalStorage
-            localStorage.setItem('username', preferences.username);
-            localStorage.setItem('enableGreetings', preferences.enableGreetings);
-            localStorage.setItem('autofocusSearch', preferences.autofocusSearch);
-            localStorage.setItem('openQueryNewTab', preferences.openQueryNewTab);
-            localStorage.setItem('openLinkNewTab', preferences.openLinkNewTab);
-            localStorage.setItem('dateFormat', preferences.dateFormat);
-            localStorage.setItem('showWeekday', preferences.showWeekday);
-            localStorage.setItem('showYear', preferences.showYear);
-            localStorage.setItem('showLeadingZero', preferences.showLeadingZero);
-            localStorage.setItem('timeFormat', preferences.timeFormat);
-            localStorage.setItem('showAmPm', preferences.showAmPm);
-            localStorage.setItem('showSeconds', preferences.showSeconds);
-            localStorage.setItem('flashSeparators', preferences.flashSeparators);
-            localStorage.setItem('engines', JSON.stringify(preferences.engines));
-            localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
-            localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
-            localStorage.setItem('shortcutTrigger', preferences.shortcutTrigger);
-            localStorage.setItem('showSpeedDial', preferences.showSpeedDial);
-            localStorage.setItem('enableHotkeys', preferences.enableHotkeys);
-            localStorage.setItem('autoOpenSpeedDial', preferences.autoOpenSpeedDial);
-            localStorage.setItem('hotkeyModifier', preferences.hotkeyModifier);
-            localStorage.setItem('links', JSON.stringify(preferences.links));
-            localStorage.setItem('linkLayout', preferences.linkLayout);
+            persistPreferences();
 
             // 4. Update Main UI
             updateGreetingUI();
@@ -1829,9 +1894,9 @@
 
                 // Standard Parsing Logic (Fallback or Default Behavior)
                 const parts = query.split(' ');
-                if (parts.length > 1 && (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both')) {
+                if (parts.length > 1 && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
                     const firstWord = parts[0];
-                    const shortcutEngineIndex = preferences.engines.findIndex(e => e.shortcut === firstWord);
+                    const shortcutEngineIndex = preferences.engines.findIndex(e => shouldMatchEngine(e, firstWord));
                     if (shortcutEngineIndex !== -1) {
                         engineIndex = shortcutEngineIndex;
                         query = parts.slice(1).join(' '); // Remove shortcut from query
@@ -1893,11 +1958,11 @@
             }
 
             // 2. Detect Space Trigger
-            if (!activeShortcutEngine && (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both')) {
+            if (!activeShortcutEngine && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
                 // Check if input is exactly "shortcut " (shortcut followed by space)
                 if (val.endsWith(' ') && parts.length === 1 && parts[0].length > 0) {
                     const candidate = parts[0];
-                    const found = preferences.engines.find(e => e.shortcut === candidate);
+                    const found = preferences.engines.find(e => shouldMatchEngine(e, candidate));
                     if (found) {
                         activeShortcutEngine = found;
                     }
@@ -1929,7 +1994,7 @@
                 // Check for Speed Dial Link Shortcut (Exact match AND strict - no trailing space if trying to search)
                 if (parts.length === 1 && !hasTrailingSpace) {
                     // 1. Exact string match
-                    linkToShow = preferences.links.find(l => l.shortcut === parts[0]);
+                    linkToShow = preferences.links.find(l => shouldMatchLink(l, parts[0]));
 
                     // 2. Numeric match (if hotkeys enabled)
                     if (!linkToShow && preferences.enableHotkeys) {
@@ -1940,15 +2005,15 @@
                     }
 
                     // Handle Auto-Open
-                    if (linkToShow && preferences.autoOpenSpeedDial !== 'disabled') {
+                    if (linkToShow && preferences.autoOpenLinks !== 'disabled') {
                         const targetUrl = linkToShow.url; // Capture URL to avoid stale reference
-                        if (preferences.autoOpenSpeedDial === 'immediate') {
+                        if (preferences.autoOpenLinks === 'immediate') {
                             if (preferences.openLinkNewTab) {
                                 window.open(targetUrl, '_blank', 'noopener,noreferrer');
                             } else {
                                 window.location.href = targetUrl;
                             }
-                        } else if (preferences.autoOpenSpeedDial === 'delay') {
+                        } else if (preferences.autoOpenLinks === 'delay') {
                             autoOpenTimeout = setTimeout(() => {
                                 if (preferences.openLinkNewTab) {
                                     window.open(targetUrl, '_blank', 'noopener,noreferrer');
@@ -1965,8 +2030,8 @@
                     engineToShow = activeShortcutEngine;
                 }
                 // B. Implicit detection (Preview)
-                else if (preferences.shortcutTrigger === 'space' || preferences.shortcutTrigger === 'both') {
-                    engineToShow = preferences.engines.find(e => e.shortcut === potentialShortcut && parts.length > 1);
+                else if (preferences.triggerKey === 'space' || preferences.triggerKey === 'both') {
+                    engineToShow = preferences.engines.find(e => shouldMatchEngine(e, potentialShortcut) && parts.length > 1);
                 }
 
                 if (linkToShow) {
@@ -2029,20 +2094,22 @@
         };
 
         attachInputListener(settingUsername, 'username');
-        attachInputListener(settingDateFormat, 'dateFormat');
-        attachInputListener(settingShowSeconds, 'showSeconds', true);
-        attachInputListener(settingFlashSeparators, 'flashSeparators', true);
-        attachInputListener(settingShowAmPm, 'showAmPm', true);
-        attachInputListener(settingAutofocusSearch, 'autofocusSearch', true);
         attachInputListener(settingEnableGreetings, 'enableGreetings', true);
+        attachInputListener(settingAutofocusSearch, 'autofocusSearch', true);
+        attachInputListener(settingOpenQueryNewTab, 'openQueryNewTab', true);
+        attachInputListener(settingOpenLinkNewTab, 'openLinkNewTab', true);
+        attachInputListener(settingDateFormat, 'dateFormat');
         attachInputListener(settingShowWeekday, 'showWeekday', true);
         attachInputListener(settingShowYear, 'showYear', true);
         attachInputListener(settingShowLeadingZero, 'showLeadingZero', true);
-        attachInputListener(settingShortcutTrigger, 'shortcutTrigger');
+        attachInputListener(settingShowAmPm, 'showAmPm', true);
+        attachInputListener(settingShowSeconds, 'showSeconds', true);
+        attachInputListener(settingFlashSeparators, 'flashSeparators', true);
+        attachInputListener(settingEngineMatchMode, 'engineMatchMode');
+        attachInputListener(settingTriggerKey, 'triggerKey');
+        attachInputListener(settingAutoOpen, 'autoOpenLinks');
         attachInputListener(settingHotkeyModifier, 'hotkeyModifier');
-        attachInputListener(settingAutoOpen, 'autoOpenSpeedDial');
-        attachInputListener(settingOpenQueryNewTab, 'openQueryNewTab', true);
-        attachInputListener(settingOpenLinkNewTab, 'openLinkNewTab', true);
+        attachInputListener(settingLinkMatchMode, 'linkMatchMode');
 
         // Modified Toggles - Now just update temp state
         settingEnableHotkeys.addEventListener('change', (e) => {
@@ -2160,13 +2227,13 @@
             // Tab Key Trigger for Search Shortcuts
             if (e.key === 'Tab' && activeTag === 'INPUT' && document.activeElement === searchInput) {
                 // Only handle if preference allows Tab
-                if (preferences.shortcutTrigger === 'tab' || preferences.shortcutTrigger === 'both') {
+                if (preferences.triggerKey === 'tab' || preferences.triggerKey === 'both') {
                     const val = searchInput.value;
                     const parts = val.trim().split(' ');
 
                     if (parts.length === 1 && parts[0].length > 0) {
                         const candidate = parts[0];
-                        const found = preferences.engines.find(e => e.shortcut === candidate);
+                        const found = preferences.engines.find(e => shouldMatchEngine(e, candidate));
 
                         if (found) {
                             e.preventDefault(); // Stop focus move
