@@ -802,6 +802,12 @@
             element.classList.add('hidden');
         }
 
+        function clearAndResetInput() {
+            searchInput.value = '';
+            searchInput.blur();
+            searchInput.dispatchEvent(new Event('input'));
+        }
+
         /**
          * Finds the best matching engine for the input string based on priority:
          * 1. Exact Shortcut
@@ -1853,8 +1859,7 @@
         linksContainer.addEventListener('click', (e) => {
             const link = e.target.closest('a');
             if (link && preferences.openLinkNewTab) {
-                searchInput.value = '';
-                searchInput.blur();
+                clearAndResetInput();
             }
         });
 
@@ -1889,8 +1894,7 @@
                 if (speedDialLink) {
                     if (preferences.openLinkNewTab) {
                         window.open(speedDialLink.url, '_blank', 'noopener,noreferrer');
-                        searchInput.value = '';
-                        searchInput.blur();
+                        clearAndResetInput();
                     } else {
                         window.location.href = speedDialLink.url;
                     }
@@ -1900,8 +1904,7 @@
                 if (numericLink) {
                     if (preferences.openLinkNewTab) {
                         window.open(numericLink.url, '_blank', 'noopener,noreferrer');
-                        searchInput.value = '';
-                        searchInput.blur();
+                        clearAndResetInput();
                     } else {
                         window.location.href = numericLink.url;
                     }
@@ -1926,8 +1929,7 @@
                         }
                         if (preferences.openQueryNewTab) {
                             window.open(url, '_blank', 'noopener,noreferrer');
-                            searchInput.value = '';
-                            searchInput.blur();
+                            clearAndResetInput();
                         } else {
                             window.location.href = url;
                         }
@@ -1973,8 +1975,7 @@
 
                 if (preferences.openQueryNewTab) {
                     window.open(url, '_blank', 'noopener,noreferrer');
-                    searchInput.value = '';
-                    searchInput.blur();
+                    clearAndResetInput();
                 } else {
                     window.location.href = url;
                 }
@@ -2056,8 +2057,7 @@
                         if (preferences.autoOpenLinks === 'immediate') {
                             if (preferences.openLinkNewTab) {
                                 window.open(targetUrl, '_blank', 'noopener,noreferrer');
-                                searchInput.value = '';
-                                searchInput.blur();
+                                clearAndResetInput();
                             } else {
                                 window.location.href = targetUrl;
                             }
@@ -2065,8 +2065,7 @@
                             autoOpenTimeout = setTimeout(() => {
                                 if (preferences.openLinkNewTab) {
                                     window.open(targetUrl, '_blank', 'noopener,noreferrer');
-                                    searchInput.value = '';
-                                    searchInput.blur();
+                                    clearAndResetInput();
                                 } else {
                                     window.location.href = targetUrl;
                                 }
@@ -2313,8 +2312,7 @@
                         const url = preferences.links[index].url;
                         if (preferences.openLinkNewTab) {
                             window.open(url, '_blank', 'noopener,noreferrer');
-                            searchInput.value = '';
-                            searchInput.blur();
+                            clearAndResetInput();
                         } else {
                             window.location.href = url;
                         }
