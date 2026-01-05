@@ -1,0 +1,26 @@
+{
+    "name": "Start Page",
+    "short_name": "Start Page",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f5f5f5",
+    "theme_color": "#f5f5f5",
+    "icons": [
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "favicon_128.png",
+            "sizes": "128x128",
+            "type": "image/png"
+        },
+        {
+            "src": "favicon_256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        }
+    ]
+}
