@@ -1849,6 +1849,15 @@
             if (preferences.theme === 'auto') applyTheme();
         });
 
+        // Handle clicks on Speed Dial links (delegation)
+        linksContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && preferences.openLinkNewTab) {
+                searchInput.value = '';
+                searchInput.blur();
+            }
+        });
+
         // Handle click on the action indicator
         actionBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1880,6 +1889,8 @@
                 if (speedDialLink) {
                     if (preferences.openLinkNewTab) {
                         window.open(speedDialLink.url, '_blank', 'noopener,noreferrer');
+                        searchInput.value = '';
+                        searchInput.blur();
                     } else {
                         window.location.href = speedDialLink.url;
                     }
@@ -1889,6 +1900,8 @@
                 if (numericLink) {
                     if (preferences.openLinkNewTab) {
                         window.open(numericLink.url, '_blank', 'noopener,noreferrer');
+                        searchInput.value = '';
+                        searchInput.blur();
                     } else {
                         window.location.href = numericLink.url;
                     }
@@ -1913,6 +1926,8 @@
                         }
                         if (preferences.openQueryNewTab) {
                             window.open(url, '_blank', 'noopener,noreferrer');
+                            searchInput.value = '';
+                            searchInput.blur();
                         } else {
                             window.location.href = url;
                         }
@@ -1958,6 +1973,8 @@
 
                 if (preferences.openQueryNewTab) {
                     window.open(url, '_blank', 'noopener,noreferrer');
+                    searchInput.value = '';
+                    searchInput.blur();
                 } else {
                     window.location.href = url;
                 }
@@ -2039,6 +2056,8 @@
                         if (preferences.autoOpenLinks === 'immediate') {
                             if (preferences.openLinkNewTab) {
                                 window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                                searchInput.value = '';
+                                searchInput.blur();
                             } else {
                                 window.location.href = targetUrl;
                             }
@@ -2046,6 +2065,8 @@
                             autoOpenTimeout = setTimeout(() => {
                                 if (preferences.openLinkNewTab) {
                                     window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                                    searchInput.value = '';
+                                    searchInput.blur();
                                 } else {
                                     window.location.href = targetUrl;
                                 }
@@ -2292,6 +2313,8 @@
                         const url = preferences.links[index].url;
                         if (preferences.openLinkNewTab) {
                             window.open(url, '_blank', 'noopener,noreferrer');
+                            searchInput.value = '';
+                            searchInput.blur();
                         } else {
                             window.location.href = url;
                         }
