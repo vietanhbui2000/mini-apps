@@ -5,11 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Your new day starts here.">
-    <title>Start Page</title>
+    <title>Startpage</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="icon" type="image/png" href="favicon_128.png">
-    <link rel="icon" type="image/png" href="favicon_256.png">
-    <link rel="apple-touch-icon" href="favicon_app.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="app-icon_any_x192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f5f5f5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
@@ -59,7 +58,6 @@
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out forwards;
             opacity: 0;
-            /* Ensure hidden before animation starts */
         }
 
         /* Modal Transitions */
@@ -82,17 +80,16 @@
         }
 
         /* Scrollbar for settings */
+        .custom-scrollbar {
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE 10+ */
+        }
+
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
+            width: 0px;
             background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(113, 113, 122, 0.3);
-            border-radius: 20px;
         }
 
         /* Dragging visual cue */
@@ -118,6 +115,27 @@
         .blinking {
             animation: blink 1s step-end infinite;
         }
+
+        /* Shake Animation */
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .animate-shake {
+            animation: shake 0.2s ease-in-out 2;
+        }
     </style>
 </head>
 
@@ -126,7 +144,7 @@
 
     <div class="w-full max-w-3xl space-y-12 mb-12">
 
-        <!-- Header Section (Second Priority - Delayed) -->
+        <!-- Header Section -->
         <header class="space-y-2 animate-fade-in flex flex-col items-center" style="animation-delay: 100ms;">
             <div class="flex items-center gap-3 text-zinc-500 font-medium text-sm tracking-wide uppercase">
                 <p id="date-display">Loading date...</p>
@@ -140,13 +158,14 @@
             </h1>
         </header>
 
-        <!-- Search Area (First Priority - Instant) -->
-        <form id="search-form" class="w-full z-20 flex gap-3 relative">
+        <!-- Main Area -->
+        <form id="main-form" class="w-full z-20 flex gap-3 relative">
 
-            <!-- Main Input (Separate Box) -->
+            <!-- Main Input Field -->
             <div
                 class="relative flex-1 group flex items-center w-full h-16 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl focus-within:border-zinc-300/80 dark:focus-within:border-zinc-600/80 transition-all duration-300 ease-out shadow-md dark:shadow-lg focus-within:shadow-xl dark:focus-within:shadow-2xl">
-                <input id="search-input" type="text" placeholder="Search / Ask anything..." autocomplete="off"
+                <input id="main-input" type="text" placeholder="Search / Ask anything..." autocomplete="off"
+                    autocapitalize="off" autocorrect="off" spellcheck="false"
                     class="flex-1 w-0 bg-transparent border-none text-zinc-900 dark:text-white text-lg px-5 h-full focus:outline-none focus:ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" />
 
                 <!-- Right Side Action -->
@@ -154,7 +173,7 @@
                     class="group/action shrink-0 pr-5 flex items-center h-full cursor-pointer transition-all">
                     <!-- Action Space -->
                     <kbd id="action-space"
-                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700/50 transition-all group-hover/action:border-zinc-300 dark:group-hover/action:border-zinc-500 group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-500/10 rounded border border-zinc-200 dark:border-zinc-500/20 transition-all [@media(hover:hover)]:group-hover/action:border-zinc-300 [@media(hover:hover)]:dark:group-hover/action:border-zinc-500/50 [@media(hover:hover)]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)] [@media(hover:hover)]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                         Space
                     </kbd>
                     <!-- Action Enter -->
@@ -166,31 +185,31 @@
             </div>
         </form>
 
-        <!-- Links Grid (Third Priority) -->
+        <!-- Links Grid -->
         <div class="animate-fade-in" id="links-container" style="animation-delay: 300ms;">
             <!-- Links will be injected here by JavaScript -->
         </div>
 
     </div>
 
-    <!-- Help Button (Fixed Bottom Left) -->
+    <!-- Help Button -->
     <div class="fixed bottom-6 left-6 z-30">
         <button id="help-toggle"
-            class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all"
+            class="p-2 rounded-lg text-zinc-400 [@media(hover:hover)]:hover:bg-zinc-200 [@media(hover:hover)]:dark:hover:bg-zinc-800 [@media(hover:hover)]:hover:text-zinc-800 [@media(hover:hover)]:dark:hover:text-zinc-300 transition-all"
             aria-label="Help">
             <i data-lucide="help-circle" class="w-4 h-4"></i>
         </button>
     </div>
 
-    <!-- Theme & Settings Buttons (Fixed Bottom Right) -->
+    <!-- Theme & Settings Buttons -->
     <div class="fixed bottom-6 right-6 z-30 flex gap-2">
         <button id="theme-toggle"
-            class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all"
+            class="p-2 rounded-lg text-zinc-400 [@media(hover:hover)]:hover:bg-zinc-200 [@media(hover:hover)]:dark:hover:bg-zinc-800 [@media(hover:hover)]:hover:text-zinc-800 [@media(hover:hover)]:dark:hover:text-zinc-300 transition-all"
             aria-label="Toggle Theme">
             <!-- Icon injected via JS -->
         </button>
         <button id="settings-toggle"
-            class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-800 dark:hover:text-zinc-300 transition-all"
+            class="p-2 rounded-lg text-zinc-400 [@media(hover:hover)]:hover:bg-zinc-200 [@media(hover:hover)]:dark:hover:bg-zinc-800 [@media(hover:hover)]:hover:text-zinc-800 [@media(hover:hover)]:dark:hover:text-zinc-300 transition-all"
             aria-label="Settings">
             <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
@@ -214,21 +233,21 @@
 
             <div class="space-y-6 overflow-y-auto custom-scrollbar px-2 pb-4">
 
-                <!-- Search & Ask Engines -->
+                <!-- Search & Ask -->
                 <div class="space-y-3">
                     <h3
                         class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
-                        <i data-lucide="search" class="w-4 h-4"></i> Smart Search
+                        <i data-lucide="search" class="w-4 h-4"></i> Search & Ask
                     </h3>
                     <div
                         class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
                         <div class="flex items-start gap-3">
                             <span
-                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">g
-                                query</span>
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">query
+                                .</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Engine Shortcuts:</strong> Type a
-                                shortcut (e.g., 'g') followed by Space/Tab to switch engines instantly.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Search:</strong> Type anything to
+                                search.
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -236,9 +255,18 @@
                                 class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">query
                                 ?</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Ask Mode:</strong> End any query with a
-                                <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">?</code> to send it to your
-                                default AI engine.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Ask:</strong> End with a
+                                <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">?</code> to "ask" the AI.
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">g
+                                query</span>
+                            <div class="text-sm text-zinc-600 dark:text-zinc-400">
+                                <strong class="text-zinc-900 dark:text-zinc-200">Switch Engines:</strong> Type a
+                                trigger (e.g. <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">g</code>)
+                                followed by Space/Tab to switch engines.
                             </div>
                         </div>
                     </div>
@@ -254,19 +282,20 @@
                         class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
                         <div class="flex items-start gap-3">
                             <span
-                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">1
-                                - 0</span>
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">0-9</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Hotkeys:</strong> Press number keys 1
-                                through 9, and 0 for the 10th item, to instantly open links.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Hotkeys:</strong> Press Alt/Option +
+                                Number Keys (1-9, and 0 for the 10th item) to instantly open links.
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
                             <span
-                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">yt</span>
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">yt~</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Keywords:</strong> Type a custom
-                                shortcut (e.g., 'yt') in the search box and hit Enter to open that site.
+                                <strong class="text-zinc-900 dark:text-zinc-200">Text Triggers:</strong> Type a
+                                trigger
+                                (e.g. <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">yt</code>) and hit Enter
+                                to go to a site or open a page.
                             </div>
                         </div>
                     </div>
@@ -284,7 +313,7 @@
                             <span
                                 class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">Space</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                Press Space to instantly focus the search bar from anywhere.
+                                Press Space to focus the input field from anywhere.
                             </div>
                         </div>
                     </div>
@@ -310,7 +339,7 @@
                 </button>
             </div>
 
-            <div class="space-y-8 overflow-y-auto custom-scrollbar px-2 pb-2">
+            <div class="space-y-8 overflow-y-auto custom-scrollbar px-2">
 
                 <!-- General Settings -->
                 <div class="space-y-4">
@@ -330,9 +359,10 @@
                             <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Enable Greetings</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="setting-autofocus-search"
+                            <input type="checkbox" id="setting-autofocus-input"
                                 class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
-                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-focus Search</span>
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-focus Input
+                                Field</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="setting-open-query-new-tab"
@@ -353,9 +383,9 @@
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Date Format</label>
                             <select id="setting-date-format"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer mb-2">
-                                <option value="short">Short (Jan 4)</option>
-                                <option value="long">Long (January 4)</option>
-                                <option value="numeric">Numeric (4/1)</option>
+                                <option value="short">Short (Nov 9)</option>
+                                <option value="long">Long (November 9)</option>
+                                <option value="numeric">Numeric (9/11)</option>
                             </select>
                             <label class="flex items-center gap-2 cursor-pointer mb-1">
                                 <input type="checkbox" id="setting-show-weekday"
@@ -402,37 +432,40 @@
                     </div>
                 </div>
 
-                <!-- Search & Ask Engines Settings -->
+                <!-- Search & Ask Settings -->
                 <div class="space-y-4" id="settings-engines-section">
                     <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">Search &
-                        Ask Engines</h3>
+                        Ask</h3>
 
                     <p class="text-xs text-zinc-500 dark:text-zinc-400">
                         The engines you choose here will be used for features like searching and asking from the input
-                        box.
+                        field.
                     </p>
 
                     <p class="text-xs text-zinc-500 dark:text-zinc-400">
                         By default, queries will be searched and routed to the Search Engine <i data-lucide="search"
-                            class="inline w-3 h-3"></i>. Queries ending with "?" will be "asked" and routed to the Ask
+                            class="inline w-3 h-3"></i>. Queries ending with <code
+                            class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">?</code> will be "asked" and routed to
+                        the Ask
                         Engine <i data-lucide="search-slash" class="inline w-3 h-3"></i>.
                     </p>
 
                     <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                        You can use shortcuts in the input box to use a different engine or to quickly search a specific
-                        site.
+                        You can use text triggers (Shortcut/Name/URL) in the input field to use a different engine or to
+                        quickly search a
+                        specific site.
                     </p>
 
                     <!-- Add/Edit Engine Form -->
                     <div id="engine-form"
                         class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input type="text" id="engine-name" placeholder="Name (e.g. Google)"
+                            <input type="text" id="new-engine-name" placeholder="Name (e.g. Google)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                            <input type="text" id="engine-shortcut" placeholder="Shortcut (e.g. g)"
+                            <input type="text" id="new-engine-shortcut" placeholder="Shortcut (e.g. g)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         </div>
-                        <input type="url" id="engine-url" placeholder="Query URL (e.g. google.com/search?q=%s)"
+                        <input type="url" id="new-engine-url" placeholder="Query URL (e.g. google.com/search?q=%s)"
                             class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
 
                         <div class="flex gap-2">
@@ -455,28 +488,35 @@
                     </div>
 
                     <!-- Trigger Settings -->
-                    <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Match Mode</label>
-                        <select id="setting-engine-match-mode"
-                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
-                            <option value="shortcuts">Shortcuts only</option>
-                            <option value="shortcuts_name">Shortcuts / Name</option>
-                            <option value="shortcuts_name_url">Shortcuts / Name / URL</option>
-                        </select>
-                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mb-1 pb-2">
-                            Choose how to trigger engines (e.g. by shortcut "g", name "Google", or URL).
-                        </p>
+                    <div class="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Trigger Key</label>
+                            <select id="setting-trigger-key"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="both">Space or Tab</option>
+                                <option value="space">Space</option>
+                                <option value="tab">Tab</option>
+                            </select>
+                            <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                                Choose which key triggers an action.
+                            </p>
+                        </div>
 
-                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Trigger Key</label>
-                        <select id="setting-trigger-key"
-                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
-                            <option value="both">Space or Tab</option>
-                            <option value="space">Space</option>
-                            <option value="tab">Tab</option>
-                        </select>
-                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
-                            Choose which key activates an action (Search or Ask).
-                        </p>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Input Match Mode</label>
+                            <select id="setting-engine-match-mode"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="shortcut">Shortcut only</option>
+                                <option value="shortcut_name">Shortcut / Name</option>
+                                <option value="shortcut_name_url">Shortcut / Name / URL</option>
+                            </select>
+                            <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                                Choose which text input triggers an engine (e.g. by shortcut <code
+                                    class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">g</code>, name <code
+                                    class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">google</code>, or
+                                URL).
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -489,7 +529,7 @@
                     </div>
 
                     <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                        Quickly go to a site or open a page using shortcut.
+                        Quickly go to a site or open a page using hotkey and/or trigger (Shortcut/Name/URL).
                     </p>
 
                     <!-- New Toggles -->
@@ -497,35 +537,8 @@
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="setting-show-speed-dial"
                                 class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
-                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Show on Start Page</span>
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Show on Startpage</span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="setting-enable-hotkeys"
-                                class="rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/50">
-                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Enable Hotkeys
-                                (0-9)</span>
-                        </label>
-                    </div>
-
-                    <!-- Advanced Link Settings -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open Links</label>
-                            <select id="setting-auto-open"
-                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
-                                <option value="disabled">Disabled (Wait for Enter)</option>
-                                <option value="immediate">Immediately</option>
-                                <option value="delay">After 1s Delay</option>
-                            </select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hotkey Modifier</label>
-                            <select id="setting-hotkey-modifier"
-                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                                <option value="alt">Alt / Option + 0-9</option>
-                                <option value="none">None (0-9)</option>
-                            </select>
-                        </div>
                     </div>
 
                     <!-- Add New Link Form -->
@@ -558,33 +571,72 @@
                         <!-- Items injected via JS -->
                     </div>
 
-                    <!-- Layout Selector -->
-                    <div class="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Match Mode</label>
-                        <select id="setting-link-match-mode"
-                            class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
-                            <option value="shortcuts">Shortcuts only</option>
-                            <option value="shortcuts_name">Shortcuts / Name</option>
-                            <option value="shortcuts_name_url">Shortcuts / Name / URL</option>
-                        </select>
-                        <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mb-1 pb-2">
-                            Choose how to trigger links (e.g. by shortcut "yt", name "YouTube", or URL).
-                        </p>
+                    <!-- Layout Selector & Advanced Settings -->
+                    <div class="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
 
-                        <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Layout View</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button
-                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
-                                data-value="list">
-                                <i data-lucide="layout-list" class="w-4 h-4"></i>
-                                <span>List</span>
-                            </button>
-                            <button
-                                class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
-                                data-value="grid">
-                                <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                                <span>Grid (Icon only)</span>
-                            </button>
+                        <!-- Section 1: Layout View -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Layout View</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button
+                                    class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                    data-value="list">
+                                    <i data-lucide="layout-list" class="w-4 h-4"></i>
+                                    <span>List</span>
+                                </button>
+                                <button
+                                    class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                    data-value="grid">
+                                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                                    <span>Grid</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Input Match Mode -->
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Input Match Mode</label>
+                            <select id="setting-link-match-mode"
+                                class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                                <option value="shortcut">Shortcut only</option>
+                                <option value="shortcut_name">Shortcut / Name</option>
+                                <option value="shortcut_name_url">Shortcut / Name / URL</option>
+                            </select>
+                            <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                                Choose which text input triggers a link (e.g. by shortcut <code
+                                    class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">yt</code>, name <code
+                                    class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">youtube</code>, or URL).
+                            </p>
+                        </div>
+
+                        <!-- Section 3: Hotkey Mode & Auto-open Links -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hotkey Mode</label>
+                                <select id="setting-hotkey-mode"
+                                    class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                                    <option value="alt">Alt/Option + 0-9</option>
+                                    <option value="numeric">Number Keys only (0-9)</option>
+                                    <option value="disabled">Disabled</option>
+                                </select>
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                                    Hotkeys will always open links instantly.
+                                </p>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open
+                                    Links</label>
+                                <select id="setting-auto-open"
+                                    class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                                    <option value="disabled">Disabled (Wait for Enter)</option>
+                                    <option value="immediate">Immediately</option>
+                                    <option value="delay_1s">After 1 second</option>
+                                    <option value="delay_2s">After 2 seconds</option>
+                                </select>
+                                <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
+                                    Only applies to text input triggers.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -613,8 +665,8 @@
                         <i data-lucide="download" class="w-4 h-4"></i>
                     </button>
                 </div>
-                <!-- Save button now uses conditional classes in JS -->
-                <button id="save-settings" class="px-6 py-2 rounded-lg font-medium text-sm transition-all duration-200">
+                <button id="save-settings"
+                    class="px-6 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-zinc-200 dark:bg-zinc-700 text-zinc-400 dark:text-zinc-500">
                     Save
                 </button>
             </div>
@@ -640,7 +692,7 @@
             theme: localStorage.getItem('theme') || 'auto',
             username: localStorage.getItem('username') || '',
             enableGreetings: localStorage.getItem('enableGreetings') === 'true',
-            autofocusSearch: localStorage.getItem('autofocusSearch') === 'true',
+            autofocusInput: localStorage.getItem('autofocusInput') === 'true',
             openQueryNewTab: localStorage.getItem('openQueryNewTab') === 'true',
             openLinkNewTab: localStorage.getItem('openLinkNewTab') === 'true',
             // Date
@@ -657,16 +709,15 @@
             engines: safeJsonParse(localStorage.getItem('engines'), defaultEngines),
             defaultSearchEngine: localStorage.getItem('defaultSearchEngine') || 'Google',
             defaultAskEngine: localStorage.getItem('defaultAskEngine') || 'Google',
-            engineMatchMode: localStorage.getItem('engineMatchMode') || 'shortcuts',
             triggerKey: localStorage.getItem('triggerKey') || 'both',
+            engineMatchMode: localStorage.getItem('engineMatchMode') || 'shortcut',
             // Speed Dial
             showSpeedDial: localStorage.getItem('showSpeedDial') !== 'false',
-            enableHotkeys: localStorage.getItem('enableHotkeys') !== 'false',
-            autoOpenLinks: localStorage.getItem('autoOpenLinks') || 'disabled',
-            hotkeyModifier: localStorage.getItem('hotkeyModifier') || 'alt',
             links: safeJsonParse(localStorage.getItem('links'), []),
-            linkMatchMode: localStorage.getItem('linkMatchMode') || 'shortcuts',
             linkLayout: localStorage.getItem('linkLayout') || 'list',
+            linkMatchMode: localStorage.getItem('linkMatchMode') || 'shortcut',
+            hotkeyMode: localStorage.getItem('hotkeyMode') || 'alt',
+            autoOpenLinks: localStorage.getItem('autoOpenLinks') || 'disabled',
         };
 
         // Runtime State
@@ -676,6 +727,8 @@
         let editingLinkIndex = null;
         let resetConfirmTimeout = null;
         let autoOpenTimeout = null;
+        let closeWarningActive = false;
+        let closeWarningTimeout = null;
 
         // Settings Temporary State (for Dirty Checking)
         let tempPreferences = null;
@@ -692,8 +745,8 @@
         const clockDisplay = document.getElementById('clock-display');
 
         // Search Elements
-        const searchForm = document.getElementById('search-form');
-        const searchInput = document.getElementById('search-input');
+        const mainForm = document.getElementById('main-form');
+        const mainInput = document.getElementById('main-input');
         const actionBtn = document.getElementById('action-btn');
         const actionSpace = document.getElementById('action-space');
         const actionEnter = document.getElementById('action-enter');
@@ -720,7 +773,7 @@
 
         const settingUsername = document.getElementById('setting-username');
         const settingEnableGreetings = document.getElementById('setting-enable-greetings');
-        const settingAutofocusSearch = document.getElementById('setting-autofocus-search');
+        const settingAutofocusInput = document.getElementById('setting-autofocus-input');
         const settingOpenQueryNewTab = document.getElementById('setting-open-query-new-tab');
         const settingOpenLinkNewTab = document.getElementById('setting-open-link-new-tab');
         const settingDateFormat = document.getElementById('setting-date-format');
@@ -734,10 +787,10 @@
         const settingTriggerKey = document.getElementById('setting-trigger-key');
         const formatBtns = document.querySelectorAll('.format-btn[data-type=\"time\"]');
 
-        // Settings - Search & Ask Engines
-        const engineNameInput = document.getElementById('engine-name');
-        const engineShortcutInput = document.getElementById('engine-shortcut');
-        const engineUrlInput = document.getElementById('engine-url');
+        // Settings - Search & Ask
+        const newEngineName = document.getElementById('new-engine-name');
+        const newEngineShortcut = document.getElementById('new-engine-shortcut');
+        const newEngineUrl = document.getElementById('new-engine-url');
         const saveEngineBtn = document.getElementById('save-engine-btn');
         const cancelEngineEditBtn = document.getElementById('cancel-engine-edit');
         const settingsEnginesList = document.getElementById('settings-engines-list');
@@ -757,16 +810,15 @@
         // Layout Settings
         const layoutBtns = document.querySelectorAll('.layout-btn');
         const settingShowSpeedDial = document.getElementById('setting-show-speed-dial');
-        const settingEnableHotkeys = document.getElementById('setting-enable-hotkeys');
-        const settingAutoOpen = document.getElementById('setting-auto-open');
-        const settingHotkeyModifier = document.getElementById('setting-hotkey-modifier');
         const settingLinkMatchMode = document.getElementById('setting-link-match-mode');
+        const settingHotkeyMode = document.getElementById('setting-hotkey-mode');
+        const settingAutoOpen = document.getElementById('setting-auto-open');
 
         // --- Helper Functions ---
 
         function getFavicon(url) {
             try {
-                const cleanUrl = url.replace('%s', '');
+                const cleanUrl = url.replaceAll('%s', '');
                 const domain = new URL(cleanUrl).hostname;
                 return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
             } catch (e) {
@@ -809,9 +861,9 @@
         }
 
         function clearAndResetInput() {
-            searchInput.value = '';
-            searchInput.blur();
-            searchInput.dispatchEvent(new Event('input'));
+            mainInput.value = '';
+            mainInput.blur();
+            mainInput.dispatchEvent(new Event('input'));
         }
 
         /**
@@ -821,23 +873,23 @@
          * 3. Partial URL/Match (if mode allows)
          */
         function findMatchingEngine(input) {
-            const mode = preferences.engineMatchMode; // shortcuts, shortcuts_name, shortcuts_name_url
+            const mode = preferences.engineMatchMode; // shortcut, shortcut_name, shortcut_name_url
             const lowerInput = input.toLowerCase();
 
             // 1. Exact Shortcut (Highest Priority - Check ALL engines first)
             for (const engine of preferences.engines) {
-                if (engine.shortcut === input) return engine;
+                if (engine.shortcut.toLowerCase() === lowerInput) return engine;
             }
 
             // 2. Exact Name (Medium Priority)
-            if (mode !== 'shortcuts') {
+            if (mode !== 'shortcut') {
                 for (const engine of preferences.engines) {
                     if (engine.name.toLowerCase() === lowerInput) return engine;
                 }
             }
 
             // 3. URL (Low Priority)
-            if (mode === 'shortcuts_name_url') {
+            if (mode === 'shortcut_name_url') {
                 for (const engine of preferences.engines) {
                     if (engine.url.toLowerCase().includes(lowerInput)) return engine;
                 }
@@ -850,23 +902,23 @@
          * Finds the best matching link for the input string based on priority.
          */
         function findMatchingLink(input) {
-            const mode = preferences.linkMatchMode; // shortcuts, shortcuts_name, shortcuts_name_url
+            const mode = preferences.linkMatchMode; // shortcut, shortcut_name, shortcut_name_url
             const lowerInput = input.toLowerCase();
 
             // 1. Exact Shortcut
             for (const link of preferences.links) {
-                if (link.shortcut === input) return link;
+                if (link.shortcut.toLowerCase() === lowerInput) return link;
             }
 
             // 2. Exact Name
-            if (mode !== 'shortcuts') {
+            if (mode !== 'shortcut') {
                 for (const link of preferences.links) {
                     if (link.name.toLowerCase() === lowerInput) return link;
                 }
             }
 
             // 3. URL
-            if (mode === 'shortcuts_name_url') {
+            if (mode === 'shortcut_name_url') {
                 for (const link of preferences.links) {
                     if (link.url.toLowerCase().includes(lowerInput)) return link;
                 }
@@ -889,7 +941,7 @@
         function persistPreferences() {
             localStorage.setItem('username', preferences.username);
             localStorage.setItem('enableGreetings', preferences.enableGreetings);
-            localStorage.setItem('autofocusSearch', preferences.autofocusSearch);
+            localStorage.setItem('autofocusInput', preferences.autofocusInput);
             localStorage.setItem('openQueryNewTab', preferences.openQueryNewTab);
             localStorage.setItem('openLinkNewTab', preferences.openLinkNewTab);
             localStorage.setItem('dateFormat', preferences.dateFormat);
@@ -903,15 +955,14 @@
             localStorage.setItem('engines', JSON.stringify(preferences.engines));
             localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
             localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
-            localStorage.setItem('engineMatchMode', preferences.engineMatchMode);
             localStorage.setItem('triggerKey', preferences.triggerKey);
+            localStorage.setItem('engineMatchMode', preferences.engineMatchMode);
             localStorage.setItem('showSpeedDial', preferences.showSpeedDial);
-            localStorage.setItem('enableHotkeys', preferences.enableHotkeys);
-            localStorage.setItem('autoOpenLinks', preferences.autoOpenLinks);
-            localStorage.setItem('hotkeyModifier', preferences.hotkeyModifier);
             localStorage.setItem('links', JSON.stringify(preferences.links));
-            localStorage.setItem('linkMatchMode', preferences.linkMatchMode);
             localStorage.setItem('linkLayout', preferences.linkLayout);
+            localStorage.setItem('linkMatchMode', preferences.linkMatchMode);
+            localStorage.setItem('hotkeyMode', preferences.hotkeyMode);
+            localStorage.setItem('autoOpenLinks', preferences.autoOpenLinks);
         }
 
         // --- Core Functions ---
@@ -992,7 +1043,7 @@
 
         function updateGreetingUI() {
             if (!preferences.enableGreetings) {
-                greetingDisplay.textContent = 'Start Page';
+                greetingDisplay.textContent = 'Startpage';
                 usernameContainer.classList.add('hidden');
                 return;
             }
@@ -1024,7 +1075,8 @@
 
             const linksToShow = preferences.links.slice(0, DISPLAY_LIMIT);
             const isIconMode = preferences.linkLayout === 'grid';
-            const showHotkeys = preferences.enableHotkeys;
+            const hotkeyMode = preferences.hotkeyMode;
+            const showHotkeys = hotkeyMode !== 'disabled';
 
             if (linksToShow.length === 0) {
                 linksContainer.innerHTML = '';
@@ -1042,8 +1094,7 @@
                 let displayIndex = index + 1;
                 if (displayIndex === 10) displayIndex = 0;
 
-                const hotkeyModifier = preferences.hotkeyModifier;
-                const hotkeyDisplay = hotkeyModifier === 'none' ? `${displayIndex}` : `Alt/Opt + ${displayIndex}`;
+                const hotkeyDisplay = hotkeyMode === 'numeric' ? `${displayIndex}` : `Alt/Opt + ${displayIndex}`;
 
                 if (isIconMode) {
                     return `
@@ -1098,7 +1149,8 @@
         function renderSettingsLinks() {
             // Use tempPreferences if modal is open/active, otherwise fall back to main preferences
             const sourceLinks = tempPreferences ? tempPreferences.links : preferences.links;
-            const sourceEnableHotkeys = tempPreferences ? tempPreferences.enableHotkeys : preferences.enableHotkeys;
+            const sourceHotkeyMode = tempPreferences ? tempPreferences.hotkeyMode : preferences.hotkeyMode;
+            const sourceEnableHotkeys = sourceHotkeyMode !== 'disabled';
 
             linkCount.textContent = `(${sourceLinks.length})`;
 
@@ -1125,7 +1177,7 @@
                 if (isEditing) {
                     editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
                 } else {
-                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20";
+                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-500 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 dark:hover:text-yellow-400";
                 }
 
                 return `
@@ -1152,7 +1204,7 @@
                         <button onclick="editLink(${index})" class="${editBtnClass}" title="Edit Link">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="deleteLink(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete Link">
+                        <button onclick="deleteLink(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-500 hover:bg-red-100 dark:hover:bg-red-500/20 dark:hover:text-red-400 rounded-md transition-colors" title="Delete Link">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -1177,8 +1229,6 @@
 
                 let borderClass = 'border-zinc-100 dark:border-zinc-800';
 
-                // Logic for border colors: Green if BOTH, Purple for Ask, Blue for Search
-                // Always show status borders even if editing
                 if (isSearch && isAsk) {
                     borderClass = 'border-indigo-200 dark:border-indigo-900/30';
                 } else if (isSearch) {
@@ -1193,7 +1243,7 @@
                 if (isEditing) {
                     editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
                 } else {
-                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20";
+                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-500 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 dark:hover:text-yellow-400";
                 }
 
                 return `
@@ -1211,12 +1261,12 @@
                     
                     <div class="flex items-center gap-1">
                          <!-- Search Default Toggle -->
-                        <button onclick="setDefaultSearch(${index})" class="p-2 rounded-md transition-colors ${isSearch ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-zinc-300 hover:text-blue-600 dark:text-zinc-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'}" title="Set as default Search Engine">
+                        <button onclick="setDefaultSearch(${index})" class="p-2 rounded-md transition-colors ${isSearch ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-zinc-300 hover:text-blue-600 dark:text-zinc-500 hover:bg-blue-100 dark:hover:bg-blue-500/20 dark:hover:text-blue-400'}" title="Set as default Search Engine">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </button>
                         
                         <!-- Ask Default Toggle -->
-                        <button onclick="setDefaultAsk(${index})" class="p-2 rounded-md transition-colors ${isAsk ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'text-zinc-300 hover:text-purple-600 dark:text-zinc-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'}" title="Set as default Ask Engine">
+                        <button onclick="setDefaultAsk(${index})" class="p-2 rounded-md transition-colors ${isAsk ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'text-zinc-300 hover:text-purple-600 dark:text-zinc-500 hover:bg-purple-100 dark:hover:bg-purple-500/20 dark:hover:text-purple-400'}" title="Set as default Ask Engine">
                             <i data-lucide="search-slash" class="w-4 h-4"></i>
                         </button>
 
@@ -1229,7 +1279,7 @@
 
                         <!-- Delete Button -->
                         ${sourceEngines.length > 1 ? `
-                        <button onclick="deleteEngine(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors" title="Delete Engine">
+                        <button onclick="deleteEngine(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-500 hover:bg-red-100 dark:hover:bg-red-500/20 dark:hover:text-red-400 rounded-md transition-colors" title="Delete Engine">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                         ` : ''}
@@ -1254,10 +1304,9 @@
         window.deleteEngine = function (index, btn) {
             const currentEngines = tempPreferences.engines;
 
-            // If we're editing this engine, cancel edit first and find the new button after re-render
+            // If we're editing this engine, cancel edit first and find the new button after re-render.
             if (editingEngineIndex === index) {
                 cancelEngineEdit();
-                // The DOM was re-rendered, so btn is stale. Find the new delete button.
                 const engineItems = settingsEnginesList.querySelectorAll(':scope > div');
                 if (engineItems[index]) {
                     btn = engineItems[index].querySelector('button[title="Delete Engine"]');
@@ -1272,18 +1321,17 @@
                 btn.dataset.confirm = 'true';
                 btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
                 btn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-600', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
                 lucide.createIcons();
-
                 setTimeout(() => {
                     if (document.body.contains(btn)) {
                         btn.dataset.confirm = 'false';
                         btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
                         btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                        btn.classList.add('text-zinc-300', 'dark:text-zinc-600', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                        btn.classList.add('text-zinc-300', 'dark:text-zinc-500', 'hover:text-red-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
                         lucide.createIcons();
                     }
-                }, 3000);
+                }, 2000);
                 return;
             }
 
@@ -1310,9 +1358,9 @@
 
         window.editEngine = function (index) {
             const engine = tempPreferences.engines[index];
-            engineNameInput.value = engine.name;
-            engineShortcutInput.value = engine.shortcut || '';
-            engineUrlInput.value = engine.url;
+            newEngineName.value = engine.name;
+            newEngineShortcut.value = engine.shortcut || '';
+            newEngineUrl.value = engine.url;
 
             editingEngineIndex = index;
             saveEngineBtn.textContent = 'Update Engine';
@@ -1324,9 +1372,9 @@
         };
 
         window.cancelEngineEdit = function () {
-            engineNameInput.value = '';
-            engineShortcutInput.value = '';
-            engineUrlInput.value = '';
+            newEngineName.value = '';
+            newEngineShortcut.value = '';
+            newEngineUrl.value = '';
             editingEngineIndex = null;
             saveEngineBtn.textContent = 'Add Engine';
             cancelEngineEditBtn.classList.add('hidden');
@@ -1335,9 +1383,9 @@
         };
 
         function saveEngine() {
-            const name = engineNameInput.value.trim();
-            const shortcut = engineShortcutInput.value.trim();
-            let url = engineUrlInput.value.trim();
+            const name = newEngineName.value.trim();
+            const shortcut = newEngineShortcut.value.trim();
+            let url = newEngineUrl.value.trim();
 
             if (!name || !url) return;
 
@@ -1361,9 +1409,9 @@
                 cancelEngineEdit();
             } else {
                 currentEngines.push({ name, shortcut, url });
-                engineNameInput.value = '';
-                engineShortcutInput.value = '';
-                engineUrlInput.value = '';
+                newEngineName.value = '';
+                newEngineShortcut.value = '';
+                newEngineUrl.value = '';
             }
 
             renderSettingsEngines();
@@ -1517,10 +1565,9 @@
         }
 
         window.deleteLink = function (index, btn) {
-            // If we're editing this link, cancel edit first and find the new button after re-render
+            // If we're editing this link, cancel edit first and find the new button after re-render.
             if (editingLinkIndex === index) {
                 cancelLinkEdit();
-                // The DOM was re-rendered, so btn is stale. Find the new delete button.
                 const linkItems = settingsLinksList.querySelectorAll(':scope > div[draggable="true"]');
                 if (linkItems[index]) {
                     btn = linkItems[index].querySelector('button[title="Delete Link"]');
@@ -1530,22 +1577,22 @@
                 }
             }
 
+            // Confirmation Logic
             if (!btn.dataset.confirm || btn.dataset.confirm === 'false') {
                 btn.dataset.confirm = 'true';
                 btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
                 btn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-600', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
                 lucide.createIcons();
-
                 setTimeout(() => {
                     if (document.body.contains(btn)) {
                         btn.dataset.confirm = 'false';
                         btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
                         btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                        btn.classList.add('text-zinc-300', 'dark:text-zinc-600', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
+                        btn.classList.add('text-zinc-300', 'dark:text-zinc-500', 'hover:text-red-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
                         lucide.createIcons();
                     }
-                }, 3000);
+                }, 2000);
                 return;
             }
 
@@ -1565,6 +1612,13 @@
 
             if (isDark) document.documentElement.classList.add('dark');
             else document.documentElement.classList.remove('dark');
+
+            // Update Status Bar Color
+            const themeColor = isDark ? '#09090b' : '#f5f5f5';
+            document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
+                meta.setAttribute('content', themeColor);
+            });
+
             updateThemeIcon();
         }
 
@@ -1588,36 +1642,22 @@
 
         function handleResetSettings() {
             if (resetSettingsBtn.dataset.confirm === 'true') {
-                // Second click: Perform Reset
                 localStorage.clear();
                 sessionStorage.clear();
                 window.location.reload();
             } else {
-                // First click: Request Confirmation
                 resetSettingsBtn.dataset.confirm = 'true';
-
-                // Match Delete Button Visuals
                 resetSettingsBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-
-                // Add the "active" red styles
                 resetSettingsBtn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-
-                // Remove base text color and hover effects
                 resetSettingsBtn.classList.remove('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
-
                 lucide.createIcons();
-
-                // Reset to normal after 5 seconds if not confirmed
                 resetConfirmTimeout = setTimeout(() => {
                     resetSettingsBtn.dataset.confirm = 'false';
                     resetSettingsBtn.innerHTML = `<i data-lucide="rotate-ccw" class="w-4 h-4"></i>`;
-
                     resetSettingsBtn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-
                     resetSettingsBtn.classList.add('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
-
                     lucide.createIcons();
-                }, 5000);
+                }, 2000);
             }
         }
 
@@ -1626,7 +1666,7 @@
                 theme: preferences.theme,
                 username: preferences.username,
                 enableGreetings: preferences.enableGreetings,
-                autofocusSearch: preferences.autofocusSearch,
+                autofocusInput: preferences.autofocusInput,
                 openQueryNewTab: preferences.openQueryNewTab,
                 openLinkNewTab: preferences.openLinkNewTab,
                 dateFormat: preferences.dateFormat,
@@ -1640,20 +1680,19 @@
                 engines: preferences.engines.map(e => ({ name: e.name, shortcut: e.shortcut, url: e.url })),
                 defaultSearchEngine: preferences.defaultSearchEngine,
                 defaultAskEngine: preferences.defaultAskEngine,
-                engineMatchMode: preferences.engineMatchMode,
                 triggerKey: preferences.triggerKey,
+                engineMatchMode: preferences.engineMatchMode,
                 showSpeedDial: preferences.showSpeedDial,
-                enableHotkeys: preferences.enableHotkeys,
-                autoOpenLinks: preferences.autoOpenLinks,
-                hotkeyModifier: preferences.hotkeyModifier,
                 links: preferences.links.map(l => ({ name: l.name, shortcut: l.shortcut, url: l.url })),
+                linkLayout: preferences.linkLayout,
                 linkMatchMode: preferences.linkMatchMode,
-                linkLayout: preferences.linkLayout
+                hotkeyMode: preferences.hotkeyMode,
+                autoOpenLinks: preferences.autoOpenLinks
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orderedPreferences, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "start-page-settings.json");
+            downloadAnchorNode.setAttribute("download", "startpage_settings.json");
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
@@ -1710,6 +1749,9 @@
         }
 
         window.openSettings = function (section) {
+            // Push history state
+            history.pushState({ modal: 'settings' }, '', '');
+
             // 1. Create a deep copy for temporary editing
             tempPreferences = JSON.parse(JSON.stringify(preferences));
             originalPreferencesSnapshot = JSON.stringify(preferences);
@@ -1717,7 +1759,7 @@
             // 2. Populate Form Inputs from tempPreferences
             settingUsername.value = tempPreferences.username;
             settingEnableGreetings.checked = tempPreferences.enableGreetings;
-            settingAutofocusSearch.checked = tempPreferences.autofocusSearch;
+            settingAutofocusInput.checked = tempPreferences.autofocusInput;
             settingOpenQueryNewTab.checked = tempPreferences.openQueryNewTab;
             settingOpenLinkNewTab.checked = tempPreferences.openLinkNewTab;
             settingDateFormat.value = tempPreferences.dateFormat;
@@ -1727,20 +1769,18 @@
             settingShowAmPm.checked = tempPreferences.showAmPm;
             settingShowSeconds.checked = tempPreferences.showSeconds;
             settingFlashSeparators.checked = tempPreferences.flashSeparators;
-            settingEngineMatchMode.value = tempPreferences.engineMatchMode || 'shortcuts';
             settingTriggerKey.value = tempPreferences.triggerKey || 'both';
+            settingEngineMatchMode.value = tempPreferences.engineMatchMode || 'shortcut';
             settingShowSpeedDial.checked = tempPreferences.showSpeedDial;
-            settingEnableHotkeys.checked = tempPreferences.enableHotkeys;
+            // Link layout is handled by updateLayoutButtonsUI
+            settingLinkMatchMode.value = tempPreferences.linkMatchMode || 'shortcut';
+            settingHotkeyMode.value = tempPreferences.hotkeyMode || 'alt';
             settingAutoOpen.value = tempPreferences.autoOpenLinks || 'disabled';
-            settingHotkeyModifier.value = tempPreferences.hotkeyModifier || 'alt';
-            settingLinkMatchMode.value = tempPreferences.linkMatchMode || 'shortcuts';
-
-            // Update Modifier State based on Hotkeys
-            settingHotkeyModifier.disabled = !tempPreferences.enableHotkeys;
 
             // 3. Update Visuals for Buttons
             updateFormatButtonsUI();
             updateLayoutButtonsUI();
+            updateDateFormatOptions(); // Update Date Format Options Dynamic Text
 
             // 4. Render Lists (using tempPreferences)
             renderSettingsLinks();
@@ -1749,14 +1789,18 @@
             // 5. Reset internal states
             cancelEngineEdit();
             cancelLinkEdit();
-            checkDirtyState(); // Initialize button state
-
             settingsModal.classList.remove('hidden');
             setTimeout(() => settingsModal.classList.add('modal-active'), 10);
+
+            // Reset Warning State on Open
+            closeWarningActive = false;
+            if (closeWarningTimeout) clearTimeout(closeWarningTimeout);
 
             if (section === 'engines') {
                 document.getElementById('settings-engines-section').scrollIntoView({ behavior: 'smooth' });
             }
+
+            checkDirtyState();
         }
 
         function updateFormatButtonsUI() {
@@ -1780,17 +1824,87 @@
             }
         }
 
+        function updateDateFormatOptions() {
+            if (!tempPreferences) return;
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const day = now.getDate();
+            const monthIndex = now.getMonth();
+            const shortMonth = now.toLocaleDateString('en-US', { month: 'short' });
+            const longMonth = now.toLocaleDateString('en-US', { month: 'long' });
+
+            // Determine weekday format based on rules (short for short date, long for others)
+            const shortWeekday = now.toLocaleDateString('en-US', { weekday: 'short' });
+            const longWeekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+
+            const formatNum = (num) => {
+                if (tempPreferences.showLeadingZero) {
+                    return num.toString().padStart(2, '0');
+                }
+                return num.toString();
+            };
+
+            const getFormatString = (type) => {
+                let text = '';
+                switch (type) {
+                    case 'short':
+                        text = `${shortMonth} ${formatNum(day)}`;
+                        if (tempPreferences.showYear) text += ` ${year}`;
+                        break;
+                    case 'long':
+                        text = `${longMonth} ${formatNum(day)}`;
+                        if (tempPreferences.showYear) text += `, ${year}`;
+                        break;
+                    case 'numeric':
+                        text = `${formatNum(day)}/${formatNum(monthIndex + 1)}`;
+                        if (tempPreferences.showYear) text += `/${year}`;
+                        break;
+                }
+
+                if (tempPreferences.showWeekday) {
+                    const weekday = type === 'short' ? shortWeekday : longWeekday;
+                    text = `${weekday}, ${text}`;
+                }
+                return text;
+            };
+
+            // Update Options
+            const options = settingDateFormat.options;
+            for (let i = 0; i < options.length; i++) {
+                const opt = options[i];
+                let label = '';
+                if (opt.value === 'short') label = 'Short';
+                else if (opt.value === 'long') label = 'Long';
+                else if (opt.value === 'numeric') label = 'Numeric';
+
+                opt.textContent = `${label} (${getFormatString(opt.value)})`;
+            }
+        }
+
         function updateLayoutButtonsUI() {
+            const isEnabled = tempPreferences && tempPreferences.showSpeedDial;
             layoutBtns.forEach(btn => {
                 const isActive = btn.dataset.value === tempPreferences.linkLayout;
-                btn.className = `layout-btn p-2 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium transition-all ${isActive
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white'
-                    : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-                    }`;
+                let classes = `layout-btn p-2 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium transition-all `;
+
+                if (!isEnabled) {
+                    classes += 'border-zinc-100 dark:border-zinc-800 text-zinc-300 dark:text-zinc-600 cursor-not-allowed opacity-50';
+                    btn.disabled = true;
+                } else {
+                    btn.disabled = false;
+                    classes += 'cursor-pointer ';
+                    if (isActive) {
+                        classes += 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white';
+                    } else {
+                        classes += 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400';
+                    }
+                }
+                btn.className = classes;
             });
         }
 
-        function closeSettings() {
+        function closeSettingsUI() {
             // Discard changes
             tempPreferences = null;
             originalPreferencesSnapshot = null;
@@ -1804,6 +1918,45 @@
             resetSettingsBtn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
             resetSettingsBtn.classList.add('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
             lucide.createIcons();
+        }
+
+        function closeSettings() {
+            if (history.state && history.state.modal === 'settings') {
+                history.back();
+            } else {
+                closeSettingsUI();
+            }
+        }
+
+        function handleCloseSettingsClick() {
+            // 1. If not dirty, just close
+            if (!checkDirtyState()) {
+                closeSettings();
+                return;
+            }
+
+            // 2. If dirty, check if warning is already active
+            if (closeWarningActive) {
+                // Second click -> Force Close (Discard changes)
+                closeSettings();
+                return;
+            }
+
+            // 3. First click with dirty state -> Activate Warning & Shake
+            closeWarningActive = true;
+
+            // Shake Animation
+            const content = settingsModal.querySelector('.modal-content');
+            content.classList.remove('animate-shake');
+            void content.offsetWidth; // Trigger reflow
+            content.classList.add('animate-shake');
+            setTimeout(() => content.classList.remove('animate-shake'), 400);
+
+            // Reset warning after 5 seconds
+            if (closeWarningTimeout) clearTimeout(closeWarningTimeout);
+            closeWarningTimeout = setTimeout(() => {
+                closeWarningActive = false;
+            }, 5000);
         }
 
         function saveSettings() {
@@ -1827,18 +1980,27 @@
             // 5. Close
             // We manually clear dirty state just to be safe so closeSettings doesn't think we are abandoning changes
             tempPreferences = null;
-            closeSettings();
+            closeSettings(); // Uses history.back() if applicable
         }
 
         // --- Help Modal Handling ---
         function openHelp() {
+            history.pushState({ modal: 'help' }, '', '');
             helpModal.classList.remove('hidden');
             setTimeout(() => helpModal.classList.add('modal-active'), 10);
         }
 
-        function closeHelp() {
+        function closeHelpUI() {
             helpModal.classList.remove('modal-active');
             setTimeout(() => helpModal.classList.add('hidden'), 200);
+        }
+
+        function closeHelp() {
+            if (history.state && history.state.modal === 'help') {
+                history.back();
+            } else {
+                closeHelpUI();
+            }
         }
 
         // --- Event Listeners ---
@@ -1851,8 +2013,8 @@
         renderLinks();
 
         // Auto-focus Logic
-        if (preferences.autofocusSearch) {
-            searchInput.focus();
+        if (preferences.autofocusInput) {
+            mainInput.focus();
         }
 
         lucide.createIcons();
@@ -1874,23 +2036,23 @@
             e.preventDefault();
             e.stopPropagation();
 
-            if (!searchInput.value.trim()) {
-                searchInput.focus();
+            if (!mainInput.value.trim()) {
+                mainInput.focus();
                 return;
             }
 
-            searchForm.dispatchEvent(new Event('submit'));
+            mainForm.dispatchEvent(new Event('submit'));
         });
 
-        searchForm.addEventListener('submit', (e) => {
+        mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            let query = searchInput.value.trim();
+            let query = mainInput.value.trim();
             if (query) {
                 // 1. Check for Speed Dial Links (using prioritized match)
                 const speedDialLink = findMatchingLink(query);
                 let numericLink = null;
 
-                if (!speedDialLink && preferences.enableHotkeys) {
+                if (!speedDialLink && preferences.hotkeyMode === 'numeric') {
                     const index = getLinkIndexFromNumericKey(query);
                     if (index >= 0 && index < preferences.links.length) {
                         numericLink = preferences.links[index];
@@ -1917,7 +2079,7 @@
                     return;
                 }
 
-                // 2. Check for Search & Ask Engine logic
+                // 2. Check for Search & Ask logic
                 let engineIndex;
 
                 // Priority: Active Action Engine (from Tab or validated Space)
@@ -1929,7 +2091,7 @@
                         query = parts.slice(1).join(' '); // Remove shortcut
                         let url = engine.url;
                         if (url.includes('%s')) {
-                            url = url.replace('%s', encodeURIComponent(query));
+                            url = url.replaceAll('%s', encodeURIComponent(query));
                         } else {
                             url = url + encodeURIComponent(query);
                         }
@@ -1973,7 +2135,7 @@
 
                 let url = engine.url;
                 if (url.includes('%s')) {
-                    url = url.replace('%s', encodeURIComponent(query));
+                    url = url.replaceAll('%s', encodeURIComponent(query));
                 } else {
                     // Fallback for legacy URLs without %s
                     url = url + encodeURIComponent(query);
@@ -1989,7 +2151,7 @@
         });
 
         // Input listener for Enter vs Space vs Action Detection
-        searchInput.addEventListener('input', (e) => {
+        mainInput.addEventListener('input', (e) => {
             const val = e.target.value;
             const parts = val.trim().split(/\s+/); // Better whitespace split
             const potentialTrigger = parts[0];
@@ -2032,13 +2194,13 @@
                 actionEnter.classList.add('flex');
 
                 // Base classes
-                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex', 'group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)]', 'dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]'];
+                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex', '[@media(hover:hover)]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)]', '[@media(hover:hover)]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]'];
 
                 // Colors
-                const searchClasses = ['text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20', 'border-blue-100', 'dark:border-blue-900/30'];
-                const askClasses = ['text-purple-600', 'dark:text-purple-400', 'bg-purple-50', 'dark:bg-purple-900/20', 'border-purple-100', 'dark:border-purple-900/30'];
-                const engineMatchClasses = ['text-emerald-600', 'dark:text-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-100', 'dark:border-emerald-900/30'];
-                const linkClasses = ['text-orange-600', 'dark:text-orange-400', 'bg-orange-50', 'dark:bg-orange-900/20', 'border-orange-100', 'dark:border-orange-900/30'];
+                const searchClasses = ['text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10', 'border-blue-100', 'dark:border-blue-500/20', 'group-hover/action:border-blue-200', 'dark:group-hover/action:border-blue-500/50'];
+                const askClasses = ['text-purple-600', 'dark:text-purple-400', 'bg-purple-50', 'dark:bg-purple-500/10', 'border-purple-100', 'dark:border-purple-500/20', 'group-hover/action:border-purple-200', 'dark:group-hover/action:border-purple-500/50'];
+                const engineMatchClasses = ['text-emerald-600', 'dark:text-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-500/10', 'border-emerald-100', 'dark:border-emerald-500/20', 'group-hover/action:border-emerald-200', 'dark:group-hover/action:border-emerald-500/50'];
+                const linkClasses = ['text-orange-600', 'dark:text-orange-400', 'bg-orange-50', 'dark:bg-orange-500/10', 'border-orange-100', 'dark:border-orange-500/20', 'group-hover/action:border-orange-200', 'dark:group-hover/action:border-orange-500/50'];
 
                 // Determine what to show in the UI
                 let engineToShow = null;
@@ -2050,7 +2212,7 @@
                     linkToShow = findMatchingLink(parts[0]);
 
                     // 2. Numeric match (if hotkeys enabled)
-                    if (!linkToShow && preferences.enableHotkeys) {
+                    if (!linkToShow && preferences.hotkeyMode === 'numeric') {
                         const index = getLinkIndexFromNumericKey(parts[0]);
                         if (index >= 0 && index < preferences.links.length) {
                             linkToShow = preferences.links[index];
@@ -2067,7 +2229,8 @@
                             } else {
                                 window.location.href = targetUrl;
                             }
-                        } else if (preferences.autoOpenLinks === 'delay') {
+                        } else if (preferences.autoOpenLinks.startsWith('delay_')) {
+                            const delay = preferences.autoOpenLinks === 'delay_2s' ? 2000 : 1000;
                             autoOpenTimeout = setTimeout(() => {
                                 if (preferences.openLinkNewTab) {
                                     window.open(targetUrl, '_blank', 'noopener,noreferrer');
@@ -2075,7 +2238,7 @@
                                 } else {
                                     window.location.href = targetUrl;
                                 }
-                            }, 1000);
+                            }, delay);
                         }
                     }
                 }
@@ -2093,11 +2256,11 @@
                 if (linkToShow) {
                     // Link Match takes visual priority if exact match
                     actionEnter.className = [...baseClasses, ...linkClasses].join(' ');
-                    actionEnter.innerHTML = `Open ${linkToShow.name} <i data-lucide="external-link" class="w-3 h-3"></i>`;
+                    actionEnter.innerHTML = `<i data-lucide="mouse-pointer-click" class="w-3 h-3"></i> ${linkToShow.name}`;
                 } else if (engineToShow) {
                     // Engine Match
                     actionEnter.className = [...baseClasses, ...engineMatchClasses].join(' ');
-                    actionEnter.innerHTML = `<i data-lucide="search-code" class="w-3 h-3"></i> Search ${engineToShow.name}`;
+                    actionEnter.innerHTML = `<i data-lucide="search-code" class="w-3 h-3"></i> ${engineToShow.name}`;
                 } else {
                     // Standard Logic
                     const isAsk = val.trim().endsWith('?');
@@ -2114,7 +2277,7 @@
 
             } else {
                 activeActionEngine = null;
-                actionSpace.classList.remove('hidden');
+                actionSpace.classList.add('hidden');
                 actionSpace.classList.add('sm:inline-flex');
 
                 actionEnter.classList.add('hidden');
@@ -2125,7 +2288,7 @@
         themeToggle.addEventListener('click', cycleTheme);
         settingsToggle.addEventListener('click', () => openSettings());
         helpToggle.addEventListener('click', openHelp);
-        closeSettingsBtn.addEventListener('click', closeSettings);
+        closeSettingsBtn.addEventListener('click', handleCloseSettingsClick);
         saveSettingsBtn.addEventListener('click', saveSettings);
         saveLinkBtn.addEventListener('click', saveLink);
         saveEngineBtn.addEventListener('click', saveEngine);
@@ -2145,13 +2308,19 @@
                 if (!tempPreferences) return; // Should not happen if modal hidden
                 const val = isCheckbox ? e.target.checked : e.target.value;
                 tempPreferences[key] = val;
+
+                // Special handling for date options to update dropdown text
+                if (key === 'showWeekday' || key === 'showYear' || key === 'showLeadingZero') {
+                    updateDateFormatOptions();
+                }
+
                 checkDirtyState();
             });
         };
 
         attachInputListener(settingUsername, 'username');
         attachInputListener(settingEnableGreetings, 'enableGreetings', true);
-        attachInputListener(settingAutofocusSearch, 'autofocusSearch', true);
+        attachInputListener(settingAutofocusInput, 'autofocusInput', true);
         attachInputListener(settingOpenQueryNewTab, 'openQueryNewTab', true);
         attachInputListener(settingOpenLinkNewTab, 'openLinkNewTab', true);
         attachInputListener(settingDateFormat, 'dateFormat');
@@ -2161,20 +2330,16 @@
         attachInputListener(settingShowAmPm, 'showAmPm', true);
         attachInputListener(settingShowSeconds, 'showSeconds', true);
         attachInputListener(settingFlashSeparators, 'flashSeparators', true);
-        attachInputListener(settingEngineMatchMode, 'engineMatchMode');
         attachInputListener(settingTriggerKey, 'triggerKey');
-        attachInputListener(settingAutoOpen, 'autoOpenLinks');
-        attachInputListener(settingHotkeyModifier, 'hotkeyModifier');
+        attachInputListener(settingEngineMatchMode, 'engineMatchMode');
         attachInputListener(settingLinkMatchMode, 'linkMatchMode');
+        attachInputListener(settingHotkeyMode, 'hotkeyMode');
+        attachInputListener(settingAutoOpen, 'autoOpenLinks');
 
-        // Modified Toggles - Now just update temp state
-        settingEnableHotkeys.addEventListener('change', (e) => {
+        // Manually add listener for hotkey mode to update link previews
+        settingHotkeyMode.addEventListener('change', (e) => {
             if (!tempPreferences) return;
-            tempPreferences.enableHotkeys = e.target.checked;
-
-            // Toggle modifier visual state
-            settingHotkeyModifier.disabled = !e.target.checked;
-
+            tempPreferences.hotkeyMode = e.target.value;
             renderSettingsLinks(); // Updates the PREVIEW list in settings (show/hide badges)
             checkDirtyState();
         });
@@ -2182,13 +2347,14 @@
         settingShowSpeedDial.addEventListener('change', (e) => {
             if (!tempPreferences) return;
             tempPreferences.showSpeedDial = e.target.checked;
+            updateLayoutButtonsUI(); // Re-render to update disabled state
             checkDirtyState();
         });
 
         // Layout Buttons
         layoutBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                if (!tempPreferences) return;
+                if (!tempPreferences || !tempPreferences.showSpeedDial) return; // Prevent click if disabled
                 tempPreferences.linkLayout = e.currentTarget.dataset.value;
                 updateLayoutButtonsUI();
                 checkDirtyState();
@@ -2218,10 +2384,12 @@
             if (e.target === settingsModal && modalMouseDownTarget === settingsModal) {
                 // CRITICAL REQUIREMENT: Do not allow close if changes are made
                 if (checkDirtyState()) {
-                    // Visual feedback (shake) could go here
+                    // Visual feedback (shake)
                     const content = settingsModal.querySelector('.modal-content');
-                    content.classList.add('animate-pulse'); // Simple feedback using tailwind
-                    setTimeout(() => content.classList.remove('animate-pulse'), 200);
+                    content.classList.remove('animate-shake'); // Reset if spamming
+                    void content.offsetWidth; // Trigger reflow
+                    content.classList.add('animate-shake');
+                    setTimeout(() => content.classList.remove('animate-shake'), 400);
                     return;
                 }
                 closeSettings();
@@ -2241,13 +2409,25 @@
             helpModalMouseDownTarget = null;
         });
 
+        // Handle Back Button / Gesture
+        window.addEventListener('popstate', (e) => {
+            // If Settings UI is open but state is not settings, close it
+            if (settingsModal.classList.contains('modal-active') && (!e.state || e.state.modal !== 'settings')) {
+                closeSettingsUI();
+            }
+            // If Help UI is open but state is not help, close it
+            if (helpModal.classList.contains('modal-active') && (!e.state || e.state.modal !== 'help')) {
+                closeHelpUI();
+            }
+        });
+
         document.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement.tagName;
 
             // Search Focus
             if (e.code === 'Space' && activeTag !== 'INPUT') {
                 e.preventDefault();
-                searchInput.focus();
+                mainInput.focus();
             }
 
             // Escape Actions
@@ -2256,10 +2436,11 @@
                 if (!settingsModal.classList.contains('hidden')) {
                     e.preventDefault();
                     if (checkDirtyState()) {
-                        // Provide visual feedback that action is blocked
                         const content = settingsModal.querySelector('.modal-content');
-                        content.classList.add('animate-pulse');
-                        setTimeout(() => content.classList.remove('animate-pulse'), 200);
+                        content.classList.remove('animate-shake');
+                        void content.offsetWidth;
+                        content.classList.add('animate-shake');
+                        setTimeout(() => content.classList.remove('animate-shake'), 400);
                         return;
                     }
                     closeSettings();
@@ -2274,17 +2455,17 @@
                 }
 
                 // 3. Unfocus Search Input
-                if (document.activeElement === searchInput) {
+                if (document.activeElement === mainInput) {
                     e.preventDefault();
-                    searchInput.blur();
+                    mainInput.blur();
                 }
             }
 
             // Tab Key Trigger for Search Actions
-            if (e.key === 'Tab' && activeTag === 'INPUT' && document.activeElement === searchInput) {
+            if (e.key === 'Tab' && activeTag === 'INPUT' && document.activeElement === mainInput) {
                 // Only handle if preference allows Tab
                 if (preferences.triggerKey === 'tab' || preferences.triggerKey === 'both') {
-                    const val = searchInput.value;
+                    const val = mainInput.value;
                     const parts = val.trim().split(' ');
 
                     if (parts.length === 1 && parts[0].length > 0) {
@@ -2294,23 +2475,20 @@
                         if (found) {
                             e.preventDefault(); // Stop focus move
                             activeActionEngine = found;
-                            searchInput.value = val + ' '; // Add space
-                            searchInput.dispatchEvent(new Event('input')); // Update UI
+                            mainInput.value = val + ' '; // Add space
+                            mainInput.dispatchEvent(new Event('input')); // Update UI
                         }
                     }
                 }
             }
 
             // Speed Dial Keys (0-9)
-            if (preferences.enableHotkeys && activeTag !== 'INPUT') {
-                const modifierRequired = preferences.hotkeyModifier === 'alt';
-
-                // Allow exact Modifier+Key or Just Key matching preference
-                // Note: e.altKey is true if Option/Alt is pressed
-
+            if (activeTag !== 'INPUT') {
+                const mode = preferences.hotkeyMode;
+                if (mode === 'disabled') return;
+                const modifierRequired = mode === 'alt';
                 const isModifierPressed = e.altKey;
                 const matchesModifierConstraint = modifierRequired ? isModifierPressed : !isModifierPressed && !e.metaKey && !e.ctrlKey;
-
                 if (matchesModifierConstraint) {
                     const index = getLinkIndexFromNumericKey(e.key);
                     if (index >= 0 && index < preferences.links.length) {
@@ -2326,6 +2504,11 @@
                 }
             }
         });
+
+        // --- History State Cleanup ---
+        if (history.state && (history.state.modal === 'settings' || history.state.modal === 'help')) {
+            history.replaceState(null, '', window.location.href);
+        }
     </script>
 </body>
 

@@ -1,1 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="#18181b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rainbow-icon lucide-rainbow"><path d="M22 17a10 10 0 0 0-20 0"/><path d="M6 17a6 6 0 0 1 12 0"/><path d="M10 17a2 2 0 0 1 4 0"/></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="default_x5F_light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #18181b;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 21.33px;
+      }
+    </style>
+  </defs>
+  <g id="rainbow">
+    <path class="cls-1" d="M234.67,181.33c0-58.91-47.76-106.67-106.67-106.67S21.33,122.42,21.33,181.33"/>
+    <path class="cls-1" d="M64,181.33c0-35.35,28.65-64,64-64s64,28.65,64,64"/>
+    <path class="cls-1" d="M106.67,181.33c0-11.78,9.55-21.33,21.33-21.33s21.33,9.55,21.33,21.33"/>
+  </g>
+</svg>
