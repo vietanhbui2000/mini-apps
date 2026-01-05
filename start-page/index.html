@@ -143,15 +143,16 @@
                 <input id="search-input" type="text" placeholder="Search / Ask anything..." autocomplete="off"
                     class="flex-1 w-0 bg-transparent border-none text-zinc-900 dark:text-white text-lg px-5 h-full focus:outline-none focus:ring-0 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" />
 
-                <!-- Right Side Indicator -->
-                <div class="shrink-0 pr-5 flex items-center h-full pointer-events-none">
-                    <!-- Slash Shortcut -->
-                    <kbd id="shortcut-slash"
-                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700/50 transition-colors">
+                <!-- Right Side Action -->
+                <div id="action-btn"
+                    class="group/action shrink-0 pr-5 flex items-center h-full cursor-pointer transition-all">
+                    <!-- Action Space -->
+                    <kbd id="action-space"
+                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700/50 transition-all group-hover/action:border-zinc-300 dark:group-hover/action:border-zinc-500 group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)] dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                         Space
                     </kbd>
-                    <!-- Enter Indicator -->
-                    <span id="shortcut-enter"
+                    <!-- Action Enter -->
+                    <span id="action-enter"
                         class="hidden items-center gap-1 px-2.5 py-1 text-xs font-medium rounded border transition-all">
                         <!-- Content injected via JS -->
                     </span>
@@ -207,7 +208,7 @@
 
             <div class="space-y-6 overflow-y-auto custom-scrollbar px-2 pb-4">
 
-                <!-- Search Shortcuts -->
+                <!-- Search & Ask Engines -->
                 <div class="space-y-3">
                     <h3
                         class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
@@ -477,7 +478,7 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">
-                            Speed Dial <span id="shortcut-count" class="ml-1 text-xs text-zinc-500 font-normal"></span>
+                            Speed Dial <span id="link-count" class="ml-1 text-xs text-zinc-500 font-normal"></span>
                         </h3>
                     </div>
 
@@ -500,7 +501,7 @@
                         </label>
                     </div>
 
-                    <!-- Advanced Shortcut Settings -->
+                    <!-- Advanced Link Settings -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open Links</label>
@@ -521,8 +522,8 @@
                         </div>
                     </div>
 
-                    <!-- Add New Shortcut Form -->
-                    <div id="add-shortcut-form"
+                    <!-- Add New Link Form -->
+                    <div id="add-link-form"
                         class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input type="text" id="new-link-name" placeholder="Name (e.g. YouTube)"
@@ -546,7 +547,7 @@
                         <p id="link-error" class="text-red-500 text-xs hidden pt-1"></p>
                     </div>
 
-                    <!-- List of shortcuts -->
+                    <!-- List of links -->
                     <div id="settings-links-list" class="space-y-2">
                         <!-- Items injected via JS -->
                     </div>
@@ -675,7 +676,7 @@
         let originalPreferencesSnapshot = null;
 
         // This tracks the engine that was explicitly triggered by a valid keystroke sequence
-        let activeShortcutEngine = null;
+        let activeActionEngine = null;
 
         // --- Elements ---
         const dateDisplay = document.getElementById('date-display');
@@ -687,8 +688,9 @@
         // Search Elements
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
-        const shortcutSlash = document.getElementById('shortcut-slash');
-        const shortcutEnter = document.getElementById('shortcut-enter');
+        const actionBtn = document.getElementById('action-btn');
+        const actionSpace = document.getElementById('action-space');
+        const actionEnter = document.getElementById('action-enter');
 
         const linksContainer = document.getElementById('links-container');
         const themeToggle = document.getElementById('theme-toggle');
@@ -726,7 +728,7 @@
         const settingTriggerKey = document.getElementById('setting-trigger-key');
         const formatBtns = document.querySelectorAll('.format-btn[data-type=\"time\"]');
 
-        // Settings - Search Engines
+        // Settings - Search & Ask Engines
         const engineNameInput = document.getElementById('engine-name');
         const engineShortcutInput = document.getElementById('engine-shortcut');
         const engineUrlInput = document.getElementById('engine-url');
@@ -735,16 +737,16 @@
         const settingsEnginesList = document.getElementById('settings-engines-list');
         const engineError = document.getElementById('engine-error');
 
-        // Shortcut Settings Elements
+        // Link Settings Elements
         const newLinkName = document.getElementById('new-link-name');
         const newLinkShortcut = document.getElementById('new-link-shortcut');
         const newLinkUrl = document.getElementById('new-link-url');
         const saveLinkBtn = document.getElementById('save-link-btn');
         const cancelLinkEditBtn = document.getElementById('cancel-link-edit');
         const settingsLinksList = document.getElementById('settings-links-list');
-        const shortcutCount = document.getElementById('shortcut-count');
+        const linkCount = document.getElementById('link-count');
         const linkError = document.getElementById('link-error');
-        const addShortcutForm = document.getElementById('add-shortcut-form');
+        const addLinkForm = document.getElementById('add-link-form');
 
         // Layout Settings
         const layoutBtns = document.querySelectorAll('.layout-btn');
@@ -1079,14 +1081,14 @@
             lucide.createIcons();
         }
 
-        // --- Settings: Shortcut Management ---
+        // --- Settings: Link Management ---
 
         function renderSettingsLinks() {
             // Use tempPreferences if modal is open/active, otherwise fall back to main preferences
             const sourceLinks = tempPreferences ? tempPreferences.links : preferences.links;
             const sourceEnableHotkeys = tempPreferences ? tempPreferences.enableHotkeys : preferences.enableHotkeys;
 
-            shortcutCount.textContent = `(${sourceLinks.length})`;
+            linkCount.textContent = `(${sourceLinks.length})`;
 
             saveLinkBtn.disabled = false;
             if (editingLinkIndex === null) {
@@ -1448,7 +1450,7 @@
 
             cancelLinkEditBtn.classList.remove('hidden');
             hideError(linkError);
-            document.getElementById('add-shortcut-form').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('add-link-form').scrollIntoView({ behavior: 'smooth' });
 
             renderSettingsLinks();
         }
@@ -1847,11 +1849,24 @@
             if (preferences.theme === 'auto') applyTheme();
         });
 
+        // Handle click on the action indicator
+        actionBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!searchInput.value.trim()) {
+                searchInput.focus();
+                return;
+            }
+
+            searchForm.dispatchEvent(new Event('submit'));
+        });
+
         searchForm.addEventListener('submit', (e) => {
             e.preventDefault();
             let query = searchInput.value.trim();
             if (query) {
-                // 1. Check for Speed Dial Shortcuts (using prioritized match)
+                // 1. Check for Speed Dial Links (using prioritized match)
                 const speedDialLink = findMatchingLink(query);
                 let numericLink = null;
 
@@ -1880,15 +1895,15 @@
                     return;
                 }
 
-                // 2. Check for Search Engine logic
+                // 2. Check for Search & Ask Engine logic
                 let engineIndex;
 
-                // Priority: Active Shortcut Engine (from Tab or validated Space)
-                if (activeShortcutEngine && query.startsWith(activeShortcutEngine.shortcut)) {
+                // Priority: Active Action Engine (from Tab or validated Space)
+                if (activeActionEngine && query.startsWith(activeActionEngine.shortcut)) {
                     // Re-validate that the query actually matches the pattern "shortcut + space"
                     const parts = query.split(' ');
-                    if (parts[0] === activeShortcutEngine.shortcut && parts.length > 1) {
-                        const engine = activeShortcutEngine;
+                    if (parts[0] === activeActionEngine.shortcut && parts.length > 1) {
+                        const engine = activeActionEngine;
                         query = parts.slice(1).join(' '); // Remove shortcut
                         let url = engine.url;
                         if (url.includes('%s')) {
@@ -1910,9 +1925,9 @@
                 if (parts.length > 1 && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
                     const firstWord = parts[0];
                     const matchedEngine = findMatchingEngine(firstWord);
-                    const shortcutEngineIndex = matchedEngine ? preferences.engines.indexOf(matchedEngine) : -1;
-                    if (shortcutEngineIndex !== -1) {
-                        engineIndex = shortcutEngineIndex;
+                    const triggeredEngineIndex = matchedEngine ? preferences.engines.indexOf(matchedEngine) : -1;
+                    if (triggeredEngineIndex !== -1) {
+                        engineIndex = triggeredEngineIndex;
                         query = parts.slice(1).join(' '); // Remove shortcut from query
                     }
                 }
@@ -1920,7 +1935,7 @@
                 // If no shortcut was used, determine engine by Ask vs Search mode
                 let engineName;
                 if (engineIndex !== undefined) {
-                    // Shortcut was used - get the name from the matched engine
+                    // Engine was triggered - get the name from the matched engine
                     engineName = preferences.engines[engineIndex]?.name;
                 } else if (query.endsWith('?')) {
                     // Ask Mode
@@ -1949,11 +1964,11 @@
             }
         });
 
-        // Input listener for Enter vs Slash vs Shortcut Detection
+        // Input listener for Enter vs Space vs Action Detection
         searchInput.addEventListener('input', (e) => {
             const val = e.target.value;
             const parts = val.trim().split(/\s+/); // Better whitespace split
-            const potentialShortcut = parts[0];
+            const potentialTrigger = parts[0];
             const hasTrailingSpace = val.endsWith(' ');
 
             // Clear any pending auto-open
@@ -1962,23 +1977,23 @@
                 autoOpenTimeout = null;
             }
 
-            // --- State Management for Shortcuts ---
+            // --- State Management for Triggers ---
 
             // 1. Invalidate active engine if text no longer matches
-            if (activeShortcutEngine) {
-                if (!val.startsWith(activeShortcutEngine.shortcut + ' ')) {
-                    activeShortcutEngine = null;
+            if (activeActionEngine) {
+                if (!val.startsWith(activeActionEngine.shortcut + ' ')) {
+                    activeActionEngine = null;
                 }
             }
 
             // 2. Detect Space Trigger
-            if (!activeShortcutEngine && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
+            if (!activeActionEngine && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
                 // Check if input is exactly "shortcut " (shortcut followed by space)
                 if (val.endsWith(' ') && parts.length === 1 && parts[0].length > 0) {
                     const candidate = parts[0];
                     const found = findMatchingEngine(candidate);
                     if (found) {
-                        activeShortcutEngine = found;
+                        activeActionEngine = found;
                     }
                 }
             }
@@ -1986,26 +2001,26 @@
             // --- UI Updates ---
 
             if (val.length > 0) {
-                shortcutSlash.classList.add('hidden');
-                shortcutSlash.classList.remove('sm:inline-flex');
+                actionSpace.classList.add('hidden');
+                actionSpace.classList.remove('sm:inline-flex');
 
-                shortcutEnter.classList.remove('hidden');
-                shortcutEnter.classList.add('flex');
+                actionEnter.classList.remove('hidden');
+                actionEnter.classList.add('flex');
 
                 // Base classes
-                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex'];
+                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex', 'group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)]', 'dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]'];
 
                 // Colors
                 const searchClasses = ['text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20', 'border-blue-100', 'dark:border-blue-900/30'];
                 const askClasses = ['text-purple-600', 'dark:text-purple-400', 'bg-purple-50', 'dark:bg-purple-900/20', 'border-purple-100', 'dark:border-purple-900/30'];
-                const shortcutClasses = ['text-emerald-600', 'dark:text-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-100', 'dark:border-emerald-900/30'];
+                const engineMatchClasses = ['text-emerald-600', 'dark:text-emerald-400', 'bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-100', 'dark:border-emerald-900/30'];
                 const linkClasses = ['text-orange-600', 'dark:text-orange-400', 'bg-orange-50', 'dark:bg-orange-900/20', 'border-orange-100', 'dark:border-orange-900/30'];
 
                 // Determine what to show in the UI
                 let engineToShow = null;
                 let linkToShow = null;
 
-                // Check for Speed Dial Link Shortcut (Exact match AND strict - no trailing space if trying to search)
+                // Check for Speed Dial Link Match (Exact match AND strict - no trailing space if trying to search)
                 if (parts.length === 1 && !hasTrailingSpace) {
                     // 1. Exact string match
                     linkToShow = findMatchingLink(parts[0]);
@@ -2040,44 +2055,44 @@
                 }
 
                 // A. Explicitly active engine (via Tab or Space trigger)
-                if (activeShortcutEngine) {
-                    engineToShow = activeShortcutEngine;
+                if (activeActionEngine) {
+                    engineToShow = activeActionEngine;
                 }
                 // B. Implicit detection (Preview)
                 else if (preferences.triggerKey === 'space' || preferences.triggerKey === 'both') {
-                    const found = findMatchingEngine(potentialShortcut);
+                    const found = findMatchingEngine(potentialTrigger);
                     if (found && parts.length > 1) engineToShow = found;
                 }
 
                 if (linkToShow) {
                     // Link Match takes visual priority if exact match
-                    shortcutEnter.className = [...baseClasses, ...linkClasses].join(' ');
-                    shortcutEnter.innerHTML = `Open ${linkToShow.name} <i data-lucide="external-link" class="w-3 h-3"></i>`;
+                    actionEnter.className = [...baseClasses, ...linkClasses].join(' ');
+                    actionEnter.innerHTML = `Open ${linkToShow.name} <i data-lucide="external-link" class="w-3 h-3"></i>`;
                 } else if (engineToShow) {
-                    // Shortcut Match
-                    shortcutEnter.className = [...baseClasses, ...shortcutClasses].join(' ');
-                    shortcutEnter.innerHTML = `<i data-lucide="search-code" class="w-3 h-3"></i> Search ${engineToShow.name}`;
+                    // Engine Match
+                    actionEnter.className = [...baseClasses, ...engineMatchClasses].join(' ');
+                    actionEnter.innerHTML = `<i data-lucide="search-code" class="w-3 h-3"></i> Search ${engineToShow.name}`;
                 } else {
                     // Standard Logic
                     const isAsk = val.trim().endsWith('?');
                     if (isAsk) {
-                        shortcutEnter.className = [...baseClasses, ...askClasses].join(' ');
-                        shortcutEnter.innerHTML = `<i data-lucide="search-slash" class="w-3 h-3"></i> Ask`;
+                        actionEnter.className = [...baseClasses, ...askClasses].join(' ');
+                        actionEnter.innerHTML = `<i data-lucide="search-slash" class="w-3 h-3"></i> Ask`;
                     } else {
-                        shortcutEnter.className = [...baseClasses, ...searchClasses].join(' ');
-                        shortcutEnter.innerHTML = `<i data-lucide="search" class="w-3 h-3"></i> Search`;
+                        actionEnter.className = [...baseClasses, ...searchClasses].join(' ');
+                        actionEnter.innerHTML = `<i data-lucide="search" class="w-3 h-3"></i> Search`;
                     }
                 }
 
                 lucide.createIcons();
 
             } else {
-                activeShortcutEngine = null;
-                shortcutSlash.classList.remove('hidden');
-                shortcutSlash.classList.add('sm:inline-flex');
+                activeActionEngine = null;
+                actionSpace.classList.remove('hidden');
+                actionSpace.classList.add('sm:inline-flex');
 
-                shortcutEnter.classList.add('hidden');
-                shortcutEnter.classList.remove('flex');
+                actionEnter.classList.add('hidden');
+                actionEnter.classList.remove('flex');
             }
         });
 
@@ -2239,7 +2254,7 @@
                 }
             }
 
-            // Tab Key Trigger for Search Shortcuts
+            // Tab Key Trigger for Search Actions
             if (e.key === 'Tab' && activeTag === 'INPUT' && document.activeElement === searchInput) {
                 // Only handle if preference allows Tab
                 if (preferences.triggerKey === 'tab' || preferences.triggerKey === 'both') {
@@ -2252,7 +2267,7 @@
 
                         if (found) {
                             e.preventDefault(); // Stop focus move
-                            activeShortcutEngine = found;
+                            activeActionEngine = found;
                             searchInput.value = val + ' '; // Add space
                             searchInput.dispatchEvent(new Event('input')); // Update UI
                         }
