@@ -142,7 +142,7 @@
 <body
     class="min-h-screen bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 selection:bg-zinc-200 dark:selection:bg-zinc-800 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
 
-    <div class="w-full max-w-3xl space-y-12 mb-12">
+    <div class="w-full max-w-3xl space-y-12 mb-32">
 
         <!-- Header Section -->
         <header class="space-y-2 animate-fade-in flex flex-col items-center" style="animation-delay: 100ms;">
@@ -2490,15 +2490,23 @@
                 const isModifierPressed = e.altKey;
                 const matchesModifierConstraint = modifierRequired ? isModifierPressed : !isModifierPressed && !e.metaKey && !e.ctrlKey;
                 if (matchesModifierConstraint) {
-                    const index = getLinkIndexFromNumericKey(e.key);
-                    if (index >= 0 && index < preferences.links.length) {
-                        e.preventDefault(); // Prevent standard browser Alt+ behaviors if any
-                        const url = preferences.links[index].url;
-                        if (preferences.openLinkNewTab) {
-                            window.open(url, '_blank', 'noopener,noreferrer');
-                            clearAndResetInput();
-                        } else {
-                            window.location.href = url;
+                    let key = null;
+                    if (e.code.startsWith('Digit')) {
+                        key = e.code.slice(5);
+                    } else if (e.code.startsWith('Numpad')) {
+                        key = e.code.slice(6);
+                    }
+                    if (key !== null) {
+                        const index = getLinkIndexFromNumericKey(key);
+                        if (index >= 0 && index < preferences.links.length) {
+                            e.preventDefault();
+                            const url = preferences.links[index].url;
+                            if (preferences.openLinkNewTab) {
+                                window.open(url, '_blank', 'noopener,noreferrer');
+                                clearAndResetInput();
+                            } else {
+                                window.location.href = url;
+                            }
                         }
                     }
                 }
