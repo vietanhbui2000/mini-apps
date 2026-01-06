@@ -5,10 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Your new day starts here.">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Startpage">
+    <meta property="og:description" content="Your new day starts here.">
+    <meta property="og:url" content="https://vietanhbui2000.github.io/web-apps/startpage/">
+    <meta property="og:image"
+        content="https://vietanhbui2000.github.io/web-apps/startpage/startpage_thumbnail_1200x630.png">
+
     <title>Startpage</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="app-icon_any_x192.png">
+    <link rel="apple-touch-icon" href="startpage_icon_any_x192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f5f5f5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
@@ -60,14 +69,21 @@
             opacity: 0;
         }
 
-        /* Modal Transitions */
+        /* Modal transitions */
         .modal-enter {
             opacity: 0;
             pointer-events: none;
         }
 
         .modal-enter .modal-content {
-            transform: scale(0.95);
+            transform: translateY(100%);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @media (min-width: 640px) {
+            .modal-enter .modal-content {
+                transform: translateY(20px);
+            }
         }
 
         .modal-active {
@@ -76,7 +92,7 @@
         }
 
         .modal-active .modal-content {
-            transform: scale(1);
+            transform: translateY(0);
         }
 
         /* Scrollbar for settings */
@@ -99,7 +115,7 @@
             border: 2px dashed rgba(113, 113, 122, 0.3);
         }
 
-        /* Blinking Animation */
+        /* Blinking animation */
         @keyframes blink {
 
             0%,
@@ -116,7 +132,7 @@
             animation: blink 1s step-end infinite;
         }
 
-        /* Shake Animation */
+        /* Shake animation */
         @keyframes shake {
 
             0%,
@@ -149,7 +165,7 @@
             <div class="flex items-center gap-3 text-zinc-500 font-medium text-sm tracking-wide uppercase">
                 <p id="date-display">Loading date...</p>
                 <span class="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
-                <p id="clock-display">00:00</p>
+                <p id="time-display">00:00</p>
             </div>
             <h1
                 class="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-white tracking-tight transition-colors text-center">
@@ -223,7 +239,7 @@
 
             <div class="flex justify-between items-center mb-6 shrink-0">
                 <h2 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                    <i data-lucide="info" class="w-5 h-5 text-blue-500"></i> Usage Guide
+                    <i data-lucide="help-circle" class="w-5 h-5 text-zinc-500 dark:text-zinc-400"></i> Usage Guide
                 </h2>
                 <button id="close-help"
                     class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
@@ -255,7 +271,7 @@
                                 class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">query
                                 ?</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                                <strong class="text-zinc-900 dark:text-zinc-200">Ask:</strong> End with a
+                                <strong class="text-zinc-900 dark:text-zinc-200">Ask:</strong> Begin/end with a
                                 <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">?</code> to "ask" the AI.
                             </div>
                         </div>
@@ -331,7 +347,7 @@
 
             <div class="flex justify-between items-center mb-6 shrink-0">
                 <h2 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                    <i data-lucide="sliders-horizontal" class="w-5 h-5 text-zinc-500 dark:text-zinc-400"></i> Settings
+                    <i data-lucide="settings" class="w-5 h-5 text-zinc-500 dark:text-zinc-400"></i> Settings
                 </h2>
                 <button id="close-settings"
                     class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
@@ -343,7 +359,9 @@
 
                 <!-- General Settings -->
                 <div class="space-y-4">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">General
+                    <h3
+                        class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> General
                     </h3>
 
                     <div class="space-y-2">
@@ -433,9 +451,11 @@
                 </div>
 
                 <!-- Search & Ask Settings -->
-                <div class="space-y-4" id="settings-engines-section">
-                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">Search &
-                        Ask</h3>
+                <div class="space-y-4" id="setting-engines-section">
+                    <h3
+                        class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4"></i> Search & Ask
+                    </h3>
 
                     <p class="text-xs text-zinc-500 dark:text-zinc-400">
                         The engines you choose here will be used for features like searching and asking from the input
@@ -457,12 +477,13 @@
                     </p>
 
                     <!-- Add/Edit Engine Form -->
-                    <div id="engine-form"
+                    <div id="setting-engine-form"
                         class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input type="text" id="new-engine-name" placeholder="Name (e.g. Google)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                             <input type="text" id="new-engine-shortcut" placeholder="Shortcut (e.g. g)"
+                                autocapitalize="off" autocorrect="off"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         </div>
                         <input type="url" id="new-engine-url" placeholder="Query URL (e.g. google.com/search?q=%s)"
@@ -479,11 +500,11 @@
                             </button>
                         </div>
                         <!-- Error message for Engine Form -->
-                        <p id="engine-error" class="text-red-500 text-xs hidden pt-1"></p>
+                        <p id="setting-engine-form-error" class="text-red-500 text-xs hidden pt-1"></p>
                     </div>
 
                     <!-- Engine List -->
-                    <div id="settings-engines-list" class="space-y-2">
+                    <div id="setting-engines-list" class="space-y-2">
                         <!-- Engines injected via JS -->
                     </div>
 
@@ -491,7 +512,7 @@
                     <div class="space-y-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                         <div class="space-y-2">
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Trigger Key</label>
-                            <select id="setting-trigger-key"
+                            <select id="setting-engine-trigger-key"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
                                 <option value="both">Space or Tab</option>
                                 <option value="space">Space</option>
@@ -523,8 +544,10 @@
                 <!-- Speed Dial Settings -->
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider">
-                            Speed Dial <span id="link-count" class="ml-1 text-xs text-zinc-500 font-normal"></span>
+                        <h3
+                            class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4"></i> Speed Dial <span id="link-count"
+                                class="ml-1 text-xs text-zinc-500 font-normal"></span>
                         </h3>
                     </div>
 
@@ -532,7 +555,7 @@
                         Quickly go to a site or open a page using hotkey and/or trigger (Shortcut/Name/URL).
                     </p>
 
-                    <!-- New Toggles -->
+                    <!-- Show/Hide Toggle -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" id="setting-show-speed-dial"
@@ -541,13 +564,14 @@
                         </label>
                     </div>
 
-                    <!-- Add New Link Form -->
-                    <div id="add-link-form"
+                    <!-- Add/Edit Link Form -->
+                    <div id="setting-link-form"
                         class="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input type="text" id="new-link-name" placeholder="Name (e.g. YouTube)"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                             <input type="text" id="new-link-shortcut" placeholder="Shortcut (e.g. yt)"
+                                autocapitalize="off" autocorrect="off"
                                 class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         </div>
                         <input type="url" id="new-link-url" placeholder="URL (e.g. youtube.com)"
@@ -563,11 +587,11 @@
                             </button>
                         </div>
                         <!-- Error message for Link Form -->
-                        <p id="link-error" class="text-red-500 text-xs hidden pt-1"></p>
+                        <p id="setting-link-form-error" class="text-red-500 text-xs hidden pt-1"></p>
                     </div>
 
                     <!-- List of links -->
-                    <div id="settings-links-list" class="space-y-2">
+                    <div id="setting-links-list" class="space-y-2">
                         <!-- Items injected via JS -->
                     </div>
 
@@ -579,13 +603,13 @@
                             <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Layout View</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <button
-                                    class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                    class="setting-link-layout-view p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                                     data-value="list">
                                     <i data-lucide="layout-list" class="w-4 h-4"></i>
                                     <span>List</span>
                                 </button>
                                 <button
-                                    class="layout-btn p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                                    class="setting-link-layout-view p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center gap-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                                     data-value="grid">
                                     <i data-lucide="layout-grid" class="w-4 h-4"></i>
                                     <span>Grid</span>
@@ -613,7 +637,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hotkey Mode</label>
-                                <select id="setting-hotkey-mode"
+                                <select id="setting-link-hotkey-mode"
                                     class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
                                     <option value="alt">Alt/Option + 0-9</option>
                                     <option value="numeric">Number Keys only (0-9)</option>
@@ -626,7 +650,7 @@
                             <div class="space-y-2">
                                 <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Auto-open
                                     Links</label>
-                                <select id="setting-auto-open"
+                                <select id="setting-link-auto-open"
                                     class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
                                     <option value="disabled">Disabled (Wait for Enter)</option>
                                     <option value="immediate">Immediately</option>
@@ -707,17 +731,17 @@
             flashSeparators: localStorage.getItem('flashSeparators') === 'true',
             // Engines
             engines: safeJsonParse(localStorage.getItem('engines'), defaultEngines),
-            defaultSearchEngine: localStorage.getItem('defaultSearchEngine') || 'Google',
-            defaultAskEngine: localStorage.getItem('defaultAskEngine') || 'Google',
-            triggerKey: localStorage.getItem('triggerKey') || 'both',
+            engineDefaultSearch: localStorage.getItem('engineDefaultSearch') || 'Google',
+            engineDefaultAsk: localStorage.getItem('engineDefaultAsk') || 'Google',
+            engineTriggerKey: localStorage.getItem('engineTriggerKey') || 'both',
             engineMatchMode: localStorage.getItem('engineMatchMode') || 'shortcut',
             // Speed Dial
             showSpeedDial: localStorage.getItem('showSpeedDial') !== 'false',
             links: safeJsonParse(localStorage.getItem('links'), []),
             linkLayout: localStorage.getItem('linkLayout') || 'list',
             linkMatchMode: localStorage.getItem('linkMatchMode') || 'shortcut',
-            hotkeyMode: localStorage.getItem('hotkeyMode') || 'alt',
-            autoOpenLinks: localStorage.getItem('autoOpenLinks') || 'disabled',
+            linkHotkeyMode: localStorage.getItem('linkHotkeyMode') || 'alt',
+            linkAutoOpen: localStorage.getItem('linkAutoOpen') || 'disabled',
         };
 
         // Runtime State
@@ -737,24 +761,30 @@
         // This tracks the engine that was explicitly triggered by a valid keystroke sequence
         let activeActionEngine = null;
 
-        // --- Elements ---
+        // Header Elements
         const dateDisplay = document.getElementById('date-display');
+        const timeDisplay = document.getElementById('time-display');
         const greetingDisplay = document.getElementById('greeting-display');
         const usernameContainer = document.getElementById('username-container');
         const usernameDisplay = document.getElementById('username-display');
-        const clockDisplay = document.getElementById('clock-display');
 
-        // Search Elements
+        // Main Elements
         const mainForm = document.getElementById('main-form');
         const mainInput = document.getElementById('main-input');
         const actionBtn = document.getElementById('action-btn');
         const actionSpace = document.getElementById('action-space');
         const actionEnter = document.getElementById('action-enter');
-
         const linksContainer = document.getElementById('links-container');
+
+        // Help Modal Elements
+        const helpToggle = document.getElementById('help-toggle');
+        const helpModal = document.getElementById('help-modal');
+        const closeHelpBtn = document.getElementById('close-help');
+
+        // Theme Modal Elements
         const themeToggle = document.getElementById('theme-toggle');
 
-        // Modal Elements
+        // Settings Modal Elements
         const settingsToggle = document.getElementById('settings-toggle');
         const settingsModal = document.getElementById('settings-modal');
         const closeSettingsBtn = document.getElementById('close-settings');
@@ -766,11 +796,7 @@
         const exportSettingsBtn = document.getElementById('export-settings-btn');
         const importFileInput = document.getElementById('import-file-input');
 
-        // Help Modal Elements
-        const helpToggle = document.getElementById('help-toggle');
-        const helpModal = document.getElementById('help-modal');
-        const closeHelpBtn = document.getElementById('close-help');
-
+        // Settings - General
         const settingUsername = document.getElementById('setting-username');
         const settingEnableGreetings = document.getElementById('setting-enable-greetings');
         const settingAutofocusInput = document.getElementById('setting-autofocus-input');
@@ -780,39 +806,38 @@
         const settingShowWeekday = document.getElementById('setting-show-weekday');
         const settingShowYear = document.getElementById('setting-show-year');
         const settingShowLeadingZero = document.getElementById('setting-show-leading-zero');
+        const settingTimeFormat = document.querySelectorAll('.format-btn[data-type=\"time\"]');
         const settingShowAmPm = document.getElementById('setting-show-ampm');
         const settingShowSeconds = document.getElementById('setting-show-seconds');
         const settingFlashSeparators = document.getElementById('setting-flash-separators');
-        const settingEngineMatchMode = document.getElementById('setting-engine-match-mode');
-        const settingTriggerKey = document.getElementById('setting-trigger-key');
-        const formatBtns = document.querySelectorAll('.format-btn[data-type=\"time\"]');
 
         // Settings - Search & Ask
+        const settingEngineForm = document.getElementById('setting-engine-form');
+        const settingEngineFormError = document.getElementById('setting-engine-form-error');
         const newEngineName = document.getElementById('new-engine-name');
         const newEngineShortcut = document.getElementById('new-engine-shortcut');
         const newEngineUrl = document.getElementById('new-engine-url');
         const saveEngineBtn = document.getElementById('save-engine-btn');
         const cancelEngineEditBtn = document.getElementById('cancel-engine-edit');
-        const settingsEnginesList = document.getElementById('settings-engines-list');
-        const engineError = document.getElementById('engine-error');
+        const settingEnginesList = document.getElementById('setting-engines-list');
+        const settingEngineTriggerKey = document.getElementById('setting-engine-trigger-key');
+        const settingEngineMatchMode = document.getElementById('setting-engine-match-mode');
 
-        // Link Settings Elements
+        // Settings - Speed Dial
+        const linkCount = document.getElementById('link-count');
+        const settingShowSpeedDial = document.getElementById('setting-show-speed-dial');
+        const settingLinkForm = document.getElementById('setting-link-form');
+        const settingLinkFormError = document.getElementById('setting-link-form-error');
         const newLinkName = document.getElementById('new-link-name');
         const newLinkShortcut = document.getElementById('new-link-shortcut');
         const newLinkUrl = document.getElementById('new-link-url');
         const saveLinkBtn = document.getElementById('save-link-btn');
         const cancelLinkEditBtn = document.getElementById('cancel-link-edit');
-        const settingsLinksList = document.getElementById('settings-links-list');
-        const linkCount = document.getElementById('link-count');
-        const linkError = document.getElementById('link-error');
-        const addLinkForm = document.getElementById('add-link-form');
-
-        // Layout Settings
-        const layoutBtns = document.querySelectorAll('.layout-btn');
-        const settingShowSpeedDial = document.getElementById('setting-show-speed-dial');
+        const settingLinksList = document.getElementById('setting-links-list');
+        const settingLinkLayoutView = document.querySelectorAll('.setting-link-layout-view');
         const settingLinkMatchMode = document.getElementById('setting-link-match-mode');
-        const settingHotkeyMode = document.getElementById('setting-hotkey-mode');
-        const settingAutoOpen = document.getElementById('setting-auto-open');
+        const settingLinkHotkeyMode = document.getElementById('setting-link-hotkey-mode');
+        const settingLinkAutoOpen = document.getElementById('setting-link-auto-open');
 
         // --- Helper Functions ---
 
@@ -832,13 +857,17 @@
             if (!/^https?:\/\//i.test(formatted)) {
                 formatted = 'https://' + formatted;
             }
-            // Validate URL structure
             try {
                 new URL(formatted);
                 return formatted;
             } catch (e) {
                 return formatted;
             }
+        }
+
+        function getModifierKeyName() {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+            return isMac ? 'Option' : 'Alt';
         }
 
         function safeJsonParse(jsonString, fallback) {
@@ -868,11 +897,9 @@
 
         /**
          * Finds the best matching engine for the input string based on priority:
-         * 1. Exact Shortcut
-         * 2. Exact Name (if mode allows)
-         * 3. Partial URL/Match (if mode allows)
          */
         function findMatchingEngine(input) {
+            if (!input || !input.trim()) return null;
             const mode = preferences.engineMatchMode; // shortcut, shortcut_name, shortcut_name_url
             const lowerInput = input.toLowerCase();
 
@@ -888,10 +915,11 @@
                 }
             }
 
-            // 3. URL (Low Priority)
+            // 3. URL (Low Priority - Strict Domain Match)
             if (mode === 'shortcut_name_url') {
                 for (const engine of preferences.engines) {
-                    if (engine.url.toLowerCase().includes(lowerInput)) return engine;
+                    const cleanUrl = engine.url.replace(/^(https?:\/\/)?(www\.)?/, '').toLowerCase();
+                    if (cleanUrl.startsWith(lowerInput)) return engine;
                 }
             }
 
@@ -902,6 +930,7 @@
          * Finds the best matching link for the input string based on priority.
          */
         function findMatchingLink(input) {
+            if (!input || !input.trim()) return null;
             const mode = preferences.linkMatchMode; // shortcut, shortcut_name, shortcut_name_url
             const lowerInput = input.toLowerCase();
 
@@ -917,10 +946,11 @@
                 }
             }
 
-            // 3. URL
+            // 3. URL (Low Priority - Strict Domain Match)
             if (mode === 'shortcut_name_url') {
                 for (const link of preferences.links) {
-                    if (link.url.toLowerCase().includes(lowerInput)) return link;
+                    const cleanUrl = link.url.replace(/^(https?:\/\/)?(www\.)?/, '').toLowerCase();
+                    if (cleanUrl.startsWith(lowerInput)) return link;
                 }
             }
 
@@ -953,47 +983,22 @@
             localStorage.setItem('showSeconds', preferences.showSeconds);
             localStorage.setItem('flashSeparators', preferences.flashSeparators);
             localStorage.setItem('engines', JSON.stringify(preferences.engines));
-            localStorage.setItem('defaultSearchEngine', preferences.defaultSearchEngine);
-            localStorage.setItem('defaultAskEngine', preferences.defaultAskEngine);
-            localStorage.setItem('triggerKey', preferences.triggerKey);
+            localStorage.setItem('engineDefaultSearch', preferences.engineDefaultSearch);
+            localStorage.setItem('engineDefaultAsk', preferences.engineDefaultAsk);
+            localStorage.setItem('engineTriggerKey', preferences.engineTriggerKey);
             localStorage.setItem('engineMatchMode', preferences.engineMatchMode);
             localStorage.setItem('showSpeedDial', preferences.showSpeedDial);
             localStorage.setItem('links', JSON.stringify(preferences.links));
             localStorage.setItem('linkLayout', preferences.linkLayout);
             localStorage.setItem('linkMatchMode', preferences.linkMatchMode);
-            localStorage.setItem('hotkeyMode', preferences.hotkeyMode);
-            localStorage.setItem('autoOpenLinks', preferences.autoOpenLinks);
+            localStorage.setItem('linkHotkeyMode', preferences.linkHotkeyMode);
+            localStorage.setItem('linkAutoOpen', preferences.linkAutoOpen);
         }
 
         // --- Core Functions ---
 
-        function updateTime() {
+        function updateDateTime() {
             const now = new Date();
-
-            // Time Format
-            const h = now.getHours();
-            const m = now.getMinutes();
-            const s = now.getSeconds();
-            const is12 = preferences.timeFormat === '12';
-
-            let hours = h;
-            let ampm = '';
-            if (is12) {
-                hours = h % 12 || 12;
-                ampm = h >= 12 ? ' PM' : ' AM';
-            }
-
-            const pad = (n) => n.toString().padStart(2, '0');
-            const sepClass = preferences.flashSeparators ? 'blinking' : '';
-            const sep = `<span class="${sepClass}">:</span>`;
-
-            let timeHtml = `${hours}${sep}${pad(m)}`;
-            if (preferences.showSeconds) {
-                timeHtml += `${sep}${pad(s)}`;
-            }
-            if (ampm && preferences.showAmPm && is12) timeHtml += `<span class="text-sm ml-1">${ampm}</span>`;
-
-            clockDisplay.innerHTML = timeHtml;
 
             // Date Format
             const d = now;
@@ -1038,6 +1043,32 @@
             }
 
             dateDisplay.textContent = dateText;
+
+            // Time Format
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const s = now.getSeconds();
+            const is12 = preferences.timeFormat === '12';
+
+            let hours = h;
+            let ampm = '';
+            if (is12) {
+                hours = h % 12 || 12;
+                ampm = h >= 12 ? ' PM' : ' AM';
+            }
+
+            const pad = (n) => n.toString().padStart(2, '0');
+            const sepClass = preferences.flashSeparators ? 'blinking' : '';
+            const sep = `<span class="${sepClass}">:</span>`;
+
+            let timeHtml = `${hours}${sep}${pad(m)}`;
+            if (preferences.showSeconds) {
+                timeHtml += `${sep}${pad(s)}`;
+            }
+            if (ampm && preferences.showAmPm && is12) timeHtml += `<span class="text-sm ml-1">${ampm}</span>`;
+
+            timeDisplay.innerHTML = timeHtml;
+
             updateGreetingUI();
         }
 
@@ -1064,7 +1095,7 @@
             }
         }
 
-        // --- Links/Speed Dial Rendering ---
+        // --- Speed Dial/Links Rendering ---
 
         function renderLinks() {
             if (!preferences.showSpeedDial) {
@@ -1075,8 +1106,8 @@
 
             const linksToShow = preferences.links.slice(0, DISPLAY_LIMIT);
             const isIconMode = preferences.linkLayout === 'grid';
-            const hotkeyMode = preferences.hotkeyMode;
-            const showHotkeys = hotkeyMode !== 'disabled';
+            const linkHotkeyMode = preferences.linkHotkeyMode;
+            const showHotkeys = linkHotkeyMode !== 'disabled';
 
             if (linksToShow.length === 0) {
                 linksContainer.innerHTML = '';
@@ -1084,17 +1115,20 @@
                 return;
             }
 
+
             if (isIconMode) {
                 linksContainer.className = "animate-fade-in grid grid-cols-4 gap-4 [&>*:nth-child(9)]:col-start-2 md:grid md:grid-cols-10 md:gap-4 md:[&>*:nth-child(9)]:col-start-auto";
             } else {
                 linksContainer.className = "animate-fade-in grid grid-cols-2 sm:grid-cols-3 gap-3 [&>*:nth-child(10)]:sm:col-start-2";
             }
 
+            const modifierName = getModifierKeyName();
+
             let html = linksToShow.map((link, index) => {
                 let displayIndex = index + 1;
                 if (displayIndex === 10) displayIndex = 0;
 
-                const hotkeyDisplay = hotkeyMode === 'numeric' ? `${displayIndex}` : `Alt/Opt + ${displayIndex}`;
+                const hotkeyDisplay = linkHotkeyMode === 'numeric' ? `${displayIndex}` : `${modifierName} + ${displayIndex}`;
 
                 if (isIconMode) {
                     return `
@@ -1111,7 +1145,7 @@
                         <!-- Tooltip (hover only, not on focus) -->
                         <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-focus:opacity-0 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 group-hover:translate-y-0 flex flex-col items-center gap-0.5">
                             <span>${link.name}</span>
-                            ${showHotkeys ? `<span class="text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
+                            ${showHotkeys ? `<span class="hidden sm:inline text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
                         </div>
                     </a>
                     `;
@@ -1126,7 +1160,7 @@
                               transition-all duration-200 shadow-sm dark:shadow-none relative
                               focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                         ${showHotkeys ? `
-                        <div class="absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="hidden sm:block absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 group-hover:opacity-100 transition-opacity">
                             ${hotkeyDisplay}
                         </div>` : ''}
                         <div class="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow-sm shrink-0">
@@ -1144,85 +1178,14 @@
             lucide.createIcons();
         }
 
-        // --- Settings: Link Management ---
-
-        function renderSettingsLinks() {
-            // Use tempPreferences if modal is open/active, otherwise fall back to main preferences
-            const sourceLinks = tempPreferences ? tempPreferences.links : preferences.links;
-            const sourceHotkeyMode = tempPreferences ? tempPreferences.hotkeyMode : preferences.hotkeyMode;
-            const sourceEnableHotkeys = sourceHotkeyMode !== 'disabled';
-
-            linkCount.textContent = `(${sourceLinks.length})`;
-
-            saveLinkBtn.disabled = false;
-            if (editingLinkIndex === null) {
-                saveLinkBtn.textContent = "Add Link";
-            }
-            newLinkName.disabled = false;
-            newLinkUrl.disabled = false;
-
-            if (sourceLinks.length === 0) {
-                settingsLinksList.innerHTML = `<p class="text-center text-sm text-zinc-400 py-4 italic">No speed dial links added.</p>`;
-                return;
-            }
-
-            settingsLinksList.innerHTML = sourceLinks.map((link, index) => {
-                const isEditing = index === editingLinkIndex;
-                let displayIndex = index + 1;
-                if (index === 9) displayIndex = 0; // Show 0 for 10th item
-
-                let containerClass = "flex items-center justify-between p-3 rounded-lg border group transition-all duration-200 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800";
-
-                let editBtnClass = "p-2 rounded-md transition-colors";
-                if (isEditing) {
-                    editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
-                } else {
-                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-500 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 dark:hover:text-yellow-400";
-                }
-
-                return `
-                <div class="${containerClass}"
-                     draggable="true"
-                     data-index="${index}">
-                    
-                    <div class="flex items-center gap-3 overflow-hidden pointer-events-none">
-                        <img src="${getFavicon(link.url)}" class="w-5 h-5 rounded-sm shrink-0">
-                        <div class="flex flex-col overflow-hidden">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-zinc-900 dark:text-zinc-200 truncate">${link.name}</span>
-                                ${(index < 10 && sourceEnableHotkeys) ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${displayIndex}</span>` : ''}
-                                ${link.shortcut ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${link.shortcut}</span>` : ''}
-                            </div>
-                            <span class="text-xs text-zinc-400 truncate">${link.url}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-1">
-                        <div class="drag-handle p-2 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing transition-colors">
-                            <i data-lucide="grip-vertical" class="w-4 h-4"></i>
-                        </div>
-                        <button onclick="editLink(${index})" class="${editBtnClass}" title="Edit Link">
-                            <i data-lucide="pencil" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="deleteLink(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-500 hover:bg-red-100 dark:hover:bg-red-500/20 dark:hover:text-red-400 rounded-md transition-colors" title="Delete Link">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            `}).join('');
-
-            lucide.createIcons();
-            attachDragListeners();
-        }
-
         // --- Settings: Engine Management ---
 
         function renderSettingsEngines() {
             const sourceEngines = tempPreferences ? tempPreferences.engines : preferences.engines;
-            const sourceDefaultSearch = tempPreferences ? tempPreferences.defaultSearchEngine : preferences.defaultSearchEngine;
-            const sourceDefaultAsk = tempPreferences ? tempPreferences.defaultAskEngine : preferences.defaultAskEngine;
+            const sourceDefaultSearch = tempPreferences ? tempPreferences.engineDefaultSearch : preferences.engineDefaultSearch;
+            const sourceDefaultAsk = tempPreferences ? tempPreferences.engineDefaultAsk : preferences.engineDefaultAsk;
 
-            settingsEnginesList.innerHTML = sourceEngines.map((eng, index) => {
+            settingEnginesList.innerHTML = sourceEngines.map((eng, index) => {
                 const isSearch = eng.name === sourceDefaultSearch;
                 const isAsk = eng.name === sourceDefaultAsk;
                 const isEditing = index === editingEngineIndex;
@@ -1241,9 +1204,9 @@
 
                 let editBtnClass = "p-2 rounded-md transition-colors";
                 if (isEditing) {
-                    editBtnClass += " text-yellow-600 bg-yellow-50 dark:text-yellow-500 dark:bg-yellow-900/20";
+                    editBtnClass += " bg-yellow-100 text-yellow-700 dark:bg-yellow-500/30 dark:text-yellow-200";
                 } else {
-                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-500 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 dark:hover:text-yellow-400";
+                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-500 hover:bg-yellow-50 dark:hover:bg-yellow-500/10 dark:hover:text-yellow-300";
                 }
 
                 return `
@@ -1253,7 +1216,7 @@
                         <div class="flex flex-col overflow-hidden">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium text-zinc-900 dark:text-zinc-200 truncate">${eng.name}</span>
-                                ${eng.shortcut ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${eng.shortcut}</span>` : ''}
+                                ${eng.shortcut ? `<span class="whitespace-nowrap text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${eng.shortcut}</span>` : ''}
                             </div>
                             <span class="text-xs text-zinc-400 truncate">${eng.url}</span>
                         </div>
@@ -1261,12 +1224,12 @@
                     
                     <div class="flex items-center gap-1">
                          <!-- Search Default Toggle -->
-                        <button onclick="setDefaultSearch(${index})" class="p-2 rounded-md transition-colors ${isSearch ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-zinc-300 hover:text-blue-600 dark:text-zinc-500 hover:bg-blue-100 dark:hover:bg-blue-500/20 dark:hover:text-blue-400'}" title="Set as default Search Engine">
+                        <button onclick="setDefaultSearch(${index})" class="p-2 rounded-md transition-colors ${isSearch ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/30 dark:text-blue-200' : 'text-zinc-300 hover:text-blue-600 dark:text-zinc-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 dark:hover:text-blue-300'}" title="Set as default Search Engine">
                             <i data-lucide="search" class="w-4 h-4"></i>
                         </button>
                         
                         <!-- Ask Default Toggle -->
-                        <button onclick="setDefaultAsk(${index})" class="p-2 rounded-md transition-colors ${isAsk ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' : 'text-zinc-300 hover:text-purple-600 dark:text-zinc-500 hover:bg-purple-100 dark:hover:bg-purple-500/20 dark:hover:text-purple-400'}" title="Set as default Ask Engine">
+                        <button onclick="setDefaultAsk(${index})" class="p-2 rounded-md transition-colors ${isAsk ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/30 dark:text-purple-200' : 'text-zinc-300 hover:text-purple-600 dark:text-zinc-500 hover:bg-purple-50 dark:hover:bg-purple-500/10 dark:hover:text-purple-300'}" title="Set as default Ask Engine">
                             <i data-lucide="search-slash" class="w-4 h-4"></i>
                         </button>
 
@@ -1279,7 +1242,7 @@
 
                         <!-- Delete Button -->
                         ${sourceEngines.length > 1 ? `
-                        <button onclick="deleteEngine(${index}, this)" class="p-2 text-zinc-300 hover:text-red-500 dark:text-zinc-500 hover:bg-red-100 dark:hover:bg-red-500/20 dark:hover:text-red-400 rounded-md transition-colors" title="Delete Engine">
+                        <button onclick="deleteEngine(${index}, this)" class="p-2 text-zinc-300 hover:text-red-600 dark:text-zinc-500 hover:bg-red-50 dark:hover:bg-red-500/10 dark:hover:text-red-300 rounded-md transition-colors" title="Delete Engine">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                         ` : ''}
@@ -1290,13 +1253,13 @@
         }
 
         window.setDefaultSearch = function (index) {
-            tempPreferences.defaultSearchEngine = tempPreferences.engines[index].name;
+            tempPreferences.engineDefaultSearch = tempPreferences.engines[index].name;
             renderSettingsEngines();
             checkDirtyState();
         };
 
         window.setDefaultAsk = function (index) {
-            tempPreferences.defaultAskEngine = tempPreferences.engines[index].name;
+            tempPreferences.engineDefaultAsk = tempPreferences.engines[index].name;
             renderSettingsEngines();
             checkDirtyState();
         };
@@ -1307,7 +1270,7 @@
             // If we're editing this engine, cancel edit first and find the new button after re-render.
             if (editingEngineIndex === index) {
                 cancelEngineEdit();
-                const engineItems = settingsEnginesList.querySelectorAll(':scope > div');
+                const engineItems = settingEnginesList.querySelectorAll(':scope > div');
                 if (engineItems[index]) {
                     btn = engineItems[index].querySelector('button[title="Delete Engine"]');
                     if (!btn) return;
@@ -1316,19 +1279,19 @@
                 }
             }
 
-            // Confirmation Logic
+            // Delete Confirmation Logic
             if (!btn.dataset.confirm || btn.dataset.confirm === 'false') {
                 btn.dataset.confirm = 'true';
                 btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-                btn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
+                btn.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
+                btn.classList.remove('text-zinc-300', 'hover:text-red-600', 'dark:text-zinc-500', 'hover:bg-red-50', 'dark:hover:bg-red-500/10', 'dark:hover:text-red-300');
                 lucide.createIcons();
                 setTimeout(() => {
                     if (document.body.contains(btn)) {
                         btn.dataset.confirm = 'false';
                         btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
-                        btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                        btn.classList.add('text-zinc-300', 'dark:text-zinc-500', 'hover:text-red-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
+                        btn.classList.remove('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
+                        btn.classList.add('text-zinc-300', 'dark:text-zinc-500', 'hover:text-red-600', 'hover:bg-red-50', 'dark:hover:bg-red-500/10', 'dark:hover:text-red-300');
                         lucide.createIcons();
                     }
                 }, 2000);
@@ -1344,12 +1307,12 @@
 
             currentEngines.splice(index, 1);
 
-            // If the deleted engine was a default, fallback to first remaining engine
-            if (tempPreferences.defaultSearchEngine === deletedEngineName) {
-                tempPreferences.defaultSearchEngine = currentEngines[0].name;
+            // If the deleted engine was a default, fallback to first remaining engine.
+            if (tempPreferences.engineDefaultSearch === deletedEngineName) {
+                tempPreferences.engineDefaultSearch = currentEngines[0].name;
             }
-            if (tempPreferences.defaultAskEngine === deletedEngineName) {
-                tempPreferences.defaultAskEngine = currentEngines[0].name;
+            if (tempPreferences.engineDefaultAsk === deletedEngineName) {
+                tempPreferences.engineDefaultAsk = currentEngines[0].name;
             }
 
             renderSettingsEngines();
@@ -1361,13 +1324,11 @@
             newEngineName.value = engine.name;
             newEngineShortcut.value = engine.shortcut || '';
             newEngineUrl.value = engine.url;
-
             editingEngineIndex = index;
             saveEngineBtn.textContent = 'Update Engine';
             cancelEngineEditBtn.classList.remove('hidden');
-            hideError(engineError);
-
-            document.getElementById('engine-form').scrollIntoView({ behavior: 'smooth' });
+            hideError(settingEngineFormError);
+            settingEngineForm.scrollIntoView({ behavior: 'smooth' });
             renderSettingsEngines();
         };
 
@@ -1378,7 +1339,7 @@
             editingEngineIndex = null;
             saveEngineBtn.textContent = 'Add Engine';
             cancelEngineEditBtn.classList.add('hidden');
-            hideError(engineError);
+            hideError(settingEngineFormError);
             renderSettingsEngines();
         };
 
@@ -1387,19 +1348,25 @@
             const shortcut = newEngineShortcut.value.trim();
             let url = newEngineUrl.value.trim();
 
-            if (!name || !url) return;
+            if (!name || !url) {
+                showError(settingEngineFormError, 'Please enter a valid Name and URL.');
+                return;
+            }
 
             if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
-            hideError(engineError);
+            hideError(settingEngineFormError);
 
-            // Use tempPreferences for validation and saving
             const currentEngines = tempPreferences.engines;
 
             if (shortcut) {
+                if (shortcut === '?') {
+                    showError(settingEngineFormError, "The shortcut '?' is reserved for Ask Engine.");
+                    return;
+                }
                 const duplicateShortcut = currentEngines.find((e, i) => (editingEngineIndex === null || i !== editingEngineIndex) && e.shortcut === shortcut);
                 if (duplicateShortcut) {
-                    showError(engineError, `Shortcut '${shortcut}' already taken by the engine '${duplicateShortcut.name}'.`);
+                    showError(settingEngineFormError, `Shortcut '${shortcut}' already taken by the engine '${duplicateShortcut.name}'.`);
                     return;
                 }
             }
@@ -1418,21 +1385,200 @@
             checkDirtyState();
         }
 
-        // --- Drag & Drop Logic (Speed Dial) ---
+        // --- Settings: Speed Dial/Link Management ---
 
-        // Mousedown listener for drag detection - attached once (not in attachDragListeners to avoid memory leak)
+        function renderSettingsLinks() {
+            const sourceLinks = tempPreferences ? tempPreferences.links : preferences.links;
+            const sourceHotkeyMode = tempPreferences ? tempPreferences.linkHotkeyMode : preferences.linkHotkeyMode;
+            const sourceEnableHotkeys = sourceHotkeyMode !== 'disabled';
+
+            linkCount.textContent = `(${sourceLinks.length})`;
+
+            saveLinkBtn.disabled = false;
+            if (editingLinkIndex === null) {
+                saveLinkBtn.textContent = "Add Link";
+            }
+            newLinkName.disabled = false;
+            newLinkUrl.disabled = false;
+
+            if (sourceLinks.length === 0) {
+                settingLinksList.innerHTML = `<p class="text-center text-sm text-zinc-400 py-4 italic">No speed dial links added.</p>`;
+                return;
+            }
+
+            settingLinksList.innerHTML = sourceLinks.map((link, index) => {
+                const isEditing = index === editingLinkIndex;
+                let displayIndex = index + 1;
+                if (index === 9) displayIndex = 0; // Show 0 for 10th item
+
+                let containerClass = "flex items-center justify-between p-3 rounded-lg border group transition-all duration-200 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800";
+
+                let editBtnClass = "p-2 rounded-md transition-colors";
+                if (isEditing) {
+                    editBtnClass += " bg-yellow-100 text-yellow-700 dark:bg-yellow-500/30 dark:text-yellow-200";
+                } else {
+                    editBtnClass += " text-zinc-300 hover:text-yellow-600 dark:text-zinc-500 hover:bg-yellow-50 dark:hover:bg-yellow-500/10 dark:hover:text-yellow-300";
+                }
+
+                return `
+                <div class="${containerClass}"
+                     draggable="true"
+                     data-index="${index}">
+                    
+                    <div class="flex items-center gap-3 overflow-hidden pointer-events-none">
+                        <img src="${getFavicon(link.url)}" class="w-5 h-5 rounded-sm shrink-0">
+                        <div class="flex flex-col overflow-hidden">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-zinc-900 dark:text-zinc-200 truncate">${link.name}</span>
+                                ${(index < 10 && sourceEnableHotkeys) ? `<span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${displayIndex}</span>` : ''}
+                                ${link.shortcut ? `<span class="whitespace-nowrap text-[10px] text-zinc-500 dark:text-zinc-400 font-mono bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 rounded">${link.shortcut}</span>` : ''}
+                            </div>
+                            <span class="text-xs text-zinc-400 truncate">${link.url}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-1">
+                        <div class="drag-handle p-2 text-zinc-300 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing transition-colors">
+                            <i data-lucide="grip-vertical" class="w-4 h-4"></i>
+                        </div>
+                        <button onclick="editLink(${index})" class="${editBtnClass}" title="Edit Link">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteLink(${index}, this)" class="p-2 text-zinc-300 hover:text-red-600 dark:text-zinc-500 hover:bg-red-50 dark:hover:bg-red-500/10 dark:hover:text-red-300 rounded-md transition-colors" title="Delete Link">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+
+            lucide.createIcons();
+            attachDragListeners();
+        }
+
+        window.editLink = function (index) {
+            const link = tempPreferences.links[index];
+            newLinkName.value = link.name;
+            newLinkShortcut.value = link.shortcut || '';
+            newLinkUrl.value = link.url;
+            editingLinkIndex = index;
+            saveLinkBtn.textContent = "Update Link";
+            saveLinkBtn.disabled = false;
+            newLinkName.disabled = false;
+            newLinkUrl.disabled = false;
+            cancelLinkEditBtn.classList.remove('hidden');
+            hideError(settingLinkFormError);
+            settingLinkForm.scrollIntoView({ behavior: 'smooth' });
+            renderSettingsLinks();
+        }
+
+        window.cancelLinkEdit = function () {
+            newLinkName.value = '';
+            newLinkShortcut.value = '';
+            newLinkUrl.value = '';
+            editingLinkIndex = null;
+            saveLinkBtn.textContent = "Add Link";
+            cancelLinkEditBtn.classList.add('hidden');
+            hideError(settingLinkFormError);
+            renderSettingsLinks();
+        }
+
+        function saveLink() {
+            const name = newLinkName.value.trim();
+            const shortcut = newLinkShortcut.value.trim();
+            let url = newLinkUrl.value.trim();
+
+            if (!name || !url) {
+                showError(settingLinkFormError, 'Please enter a valid Name and URL.');
+                return;
+            }
+
+            url = formatUrl(url);
+
+            hideError(settingLinkFormError);
+
+            const currentLinks = tempPreferences.links;
+
+            if (shortcut) {
+                if (shortcut === '?') {
+                    showError(settingLinkFormError, "The shortcut '?' is reserved for Ask Engine.");
+                    return;
+                }
+                const duplicateShortcut = currentLinks.find((l, i) => (editingLinkIndex === null || i !== editingLinkIndex) && l.shortcut === shortcut);
+                if (duplicateShortcut) {
+                    showError(settingLinkFormError, `Shortcut '${shortcut}' already taken by the link '${duplicateShortcut.name}'.`);
+                    return;
+                }
+            }
+
+            if (editingLinkIndex !== null) {
+                currentLinks[editingLinkIndex] = { name, shortcut, url };
+                cancelLinkEdit();
+            } else {
+                currentLinks.push({ name, shortcut, url });
+                newLinkName.value = '';
+                newLinkShortcut.value = '';
+                newLinkUrl.value = '';
+            }
+
+            renderSettingsLinks();
+            checkDirtyState();
+        }
+
+        window.deleteLink = function (index, btn) {
+            // If we're editing this link, cancel edit first and find the new button after re-render.
+            if (editingLinkIndex === index) {
+                cancelLinkEdit();
+                const linkItems = settingLinksList.querySelectorAll(':scope > div[draggable="true"]');
+                if (linkItems[index]) {
+                    btn = linkItems[index].querySelector('button[title="Delete Link"]');
+                    if (!btn) return;
+                } else {
+                    return;
+                }
+            }
+
+            // Delete Confirmation Logic
+            if (!btn.dataset.confirm || btn.dataset.confirm === 'false') {
+                btn.dataset.confirm = 'true';
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+                btn.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
+                btn.classList.remove('text-zinc-300', 'hover:text-red-600', 'dark:text-zinc-500', 'hover:bg-red-50', 'dark:hover:bg-red-500/10', 'dark:hover:text-red-300');
+                lucide.createIcons();
+                setTimeout(() => {
+                    if (document.body.contains(btn)) {
+                        btn.dataset.confirm = 'false';
+                        btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
+                        btn.classList.remove('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
+                        btn.classList.add('text-zinc-300', 'dark:text-zinc-500', 'hover:text-red-600', 'hover:bg-red-50', 'dark:hover:bg-red-500/10', 'dark:hover:text-red-300');
+                        lucide.createIcons();
+                    }
+                }, 2000);
+                return;
+            }
+
+            // Actual Delete Logic
+            if (editingLinkIndex > index) editingLinkIndex--;
+
+            tempPreferences.links.splice(index, 1);
+
+            renderSettingsLinks();
+            checkDirtyState();
+        };
+
+        // --- Speed Dial: Drag & Drop Logic ---
+
         let dragListenerInitialized = false;
         function initDragListener() {
             if (dragListenerInitialized) return;
             dragListenerInitialized = true;
-            settingsLinksList.addEventListener('mousedown', (e) => {
+            settingLinksList.addEventListener('mousedown', (e) => {
                 lastMouseDownTarget = e.target;
             });
         }
 
         function attachDragListeners() {
-            initDragListener(); // Ensure mousedown is attached only once
-            const items = settingsLinksList.querySelectorAll('div[draggable="true"]');
+            initDragListener();
+            const items = settingLinksList.querySelectorAll('div[draggable="true"]');
             items.forEach(item => {
                 item.addEventListener('dragstart', handleDragStart);
                 item.addEventListener('dragover', handleDragOver);
@@ -1482,7 +1628,6 @@
                 const fromIndex = parseInt(draggedItem.getAttribute('data-index'));
                 const toIndex = parseInt(targetItem.getAttribute('data-index'));
 
-                // Use tempPreferences
                 const currentLinks = tempPreferences.links;
                 const itemToMove = currentLinks[fromIndex];
                 currentLinks.splice(fromIndex, 1);
@@ -1493,116 +1638,9 @@
                 renderSettingsLinks();
                 checkDirtyState();
             }
+
             return false;
         }
-
-        window.editLink = function (index) {
-            const link = tempPreferences.links[index];
-            newLinkName.value = link.name;
-            newLinkShortcut.value = link.shortcut || '';
-            newLinkUrl.value = link.url;
-
-            editingLinkIndex = index;
-            saveLinkBtn.textContent = "Update Link";
-            saveLinkBtn.disabled = false;
-            newLinkName.disabled = false;
-            newLinkUrl.disabled = false;
-
-            cancelLinkEditBtn.classList.remove('hidden');
-            hideError(linkError);
-            document.getElementById('add-link-form').scrollIntoView({ behavior: 'smooth' });
-
-            renderSettingsLinks();
-        }
-
-        window.cancelLinkEdit = function () {
-            newLinkName.value = '';
-            newLinkShortcut.value = '';
-            newLinkUrl.value = '';
-            editingLinkIndex = null;
-            saveLinkBtn.textContent = "Add Link";
-            cancelLinkEditBtn.classList.add('hidden');
-            hideError(linkError);
-            renderSettingsLinks();
-        }
-
-        function saveLink() {
-            const name = newLinkName.value.trim();
-            const shortcut = newLinkShortcut.value.trim();
-            let url = newLinkUrl.value.trim();
-
-            if (!name || !url) {
-                showError(linkError, 'Please enter a valid Name and URL.');
-                return;
-            }
-
-            url = formatUrl(url);
-
-            hideError(linkError);
-
-            const currentLinks = tempPreferences.links;
-
-            if (shortcut) {
-                const duplicateShortcut = currentLinks.find((l, i) => (editingLinkIndex === null || i !== editingLinkIndex) && l.shortcut === shortcut);
-                if (duplicateShortcut) {
-                    showError(linkError, `Shortcut '${shortcut}' already taken by the link '${duplicateShortcut.name}'.`);
-                    return;
-                }
-            }
-
-            if (editingLinkIndex !== null) {
-                currentLinks[editingLinkIndex] = { name, shortcut, url };
-                cancelLinkEdit();
-            } else {
-                currentLinks.push({ name, shortcut, url });
-                newLinkName.value = '';
-                newLinkShortcut.value = '';
-                newLinkUrl.value = '';
-            }
-
-            renderSettingsLinks();
-            checkDirtyState();
-        }
-
-        window.deleteLink = function (index, btn) {
-            // If we're editing this link, cancel edit first and find the new button after re-render.
-            if (editingLinkIndex === index) {
-                cancelLinkEdit();
-                const linkItems = settingsLinksList.querySelectorAll(':scope > div[draggable="true"]');
-                if (linkItems[index]) {
-                    btn = linkItems[index].querySelector('button[title="Delete Link"]');
-                    if (!btn) return;
-                } else {
-                    return;
-                }
-            }
-
-            // Confirmation Logic
-            if (!btn.dataset.confirm || btn.dataset.confirm === 'false') {
-                btn.dataset.confirm = 'true';
-                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-                btn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                btn.classList.remove('text-zinc-300', 'hover:text-red-500', 'dark:text-zinc-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
-                lucide.createIcons();
-                setTimeout(() => {
-                    if (document.body.contains(btn)) {
-                        btn.dataset.confirm = 'false';
-                        btn.innerHTML = `<i data-lucide="trash-2" class="w-4 h-4"></i>`;
-                        btn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
-                        btn.classList.add('text-zinc-300', 'dark:text-zinc-500', 'hover:text-red-500', 'hover:bg-red-100', 'dark:hover:bg-red-500/20', 'dark:hover:text-red-400');
-                        lucide.createIcons();
-                    }
-                }, 2000);
-                return;
-            }
-
-            if (editingLinkIndex > index) editingLinkIndex--;
-
-            tempPreferences.links.splice(index, 1);
-
-            renderSettingsLinks();
-            checkDirtyState();
-        };
 
         // --- Theme Handling ---
 
@@ -1613,7 +1651,6 @@
             if (isDark) document.documentElement.classList.add('dark');
             else document.documentElement.classList.remove('dark');
 
-            // Update Status Bar Color
             const themeColor = isDark ? '#09090b' : '#f5f5f5';
             document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
                 meta.setAttribute('content', themeColor);
@@ -1648,13 +1685,13 @@
             } else {
                 resetSettingsBtn.dataset.confirm = 'true';
                 resetSettingsBtn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-                resetSettingsBtn.classList.add('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+                resetSettingsBtn.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
                 resetSettingsBtn.classList.remove('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
                 lucide.createIcons();
                 resetConfirmTimeout = setTimeout(() => {
                     resetSettingsBtn.dataset.confirm = 'false';
                     resetSettingsBtn.innerHTML = `<i data-lucide="rotate-ccw" class="w-4 h-4"></i>`;
-                    resetSettingsBtn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+                    resetSettingsBtn.classList.remove('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
                     resetSettingsBtn.classList.add('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
                     lucide.createIcons();
                 }, 2000);
@@ -1678,16 +1715,16 @@
                 showSeconds: preferences.showSeconds,
                 flashSeparators: preferences.flashSeparators,
                 engines: preferences.engines.map(e => ({ name: e.name, shortcut: e.shortcut, url: e.url })),
-                defaultSearchEngine: preferences.defaultSearchEngine,
-                defaultAskEngine: preferences.defaultAskEngine,
-                triggerKey: preferences.triggerKey,
+                engineDefaultSearch: preferences.engineDefaultSearch,
+                engineDefaultAsk: preferences.engineDefaultAsk,
+                engineTriggerKey: preferences.engineTriggerKey,
                 engineMatchMode: preferences.engineMatchMode,
                 showSpeedDial: preferences.showSpeedDial,
                 links: preferences.links.map(l => ({ name: l.name, shortcut: l.shortcut, url: l.url })),
                 linkLayout: preferences.linkLayout,
                 linkMatchMode: preferences.linkMatchMode,
-                hotkeyMode: preferences.hotkeyMode,
-                autoOpenLinks: preferences.autoOpenLinks
+                linkHotkeyMode: preferences.linkHotkeyMode,
+                linkAutoOpen: preferences.linkAutoOpen
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orderedPreferences, null, 2));
             const downloadAnchorNode = document.createElement('a');
@@ -1711,9 +1748,7 @@
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (imported && typeof imported === 'object') {
-                        // Merge imported settings
                         preferences = { ...preferences, ...imported };
-                        // Save and Reload
                         persistPreferences();
                         window.location.reload();
                     } else {
@@ -1728,6 +1763,27 @@
             importFileInput.value = '';
         });
 
+        // --- Help Modal Handling ---
+        function openHelp() {
+            history.pushState({ modal: 'help' }, '', '');
+            helpModal.classList.remove('hidden');
+            setTimeout(() => helpModal.classList.add('modal-active'), 10);
+        }
+
+        function closeHelpUI() {
+            helpModal.classList.remove('modal-active');
+            setTimeout(() => helpModal.classList.add('hidden'), 600);
+            helpToggle.blur();
+        }
+
+        function closeHelp() {
+            if (history.state && history.state.modal === 'help') {
+                history.back();
+            } else {
+                closeHelpUI();
+            }
+        }
+
         // --- Settings Modal Handling ---
 
         function checkDirtyState() {
@@ -1740,7 +1796,7 @@
                 saveSettingsBtn.classList.remove('bg-zinc-200', 'dark:bg-zinc-700', 'text-zinc-400', 'dark:text-zinc-500', 'cursor-not-allowed');
                 saveSettingsBtn.classList.add('bg-zinc-900', 'dark:bg-white', 'text-white', 'dark:text-zinc-900', 'hover:opacity-90', 'cursor-pointer');
             } else {
-                // Gray/Inactive State (but still clickable to close)
+                // Inactive/Gray State (but still clickable to close)
                 saveSettingsBtn.classList.remove('bg-zinc-900', 'dark:bg-white', 'text-white', 'dark:text-zinc-900', 'hover:opacity-90');
                 saveSettingsBtn.classList.add('bg-zinc-200', 'dark:bg-zinc-700', 'text-zinc-400', 'dark:text-zinc-500');
             }
@@ -1769,22 +1825,21 @@
             settingShowAmPm.checked = tempPreferences.showAmPm;
             settingShowSeconds.checked = tempPreferences.showSeconds;
             settingFlashSeparators.checked = tempPreferences.flashSeparators;
-            settingTriggerKey.value = tempPreferences.triggerKey || 'both';
+            settingEngineTriggerKey.value = tempPreferences.engineTriggerKey || 'both';
             settingEngineMatchMode.value = tempPreferences.engineMatchMode || 'shortcut';
             settingShowSpeedDial.checked = tempPreferences.showSpeedDial;
-            // Link layout is handled by updateLayoutButtonsUI
             settingLinkMatchMode.value = tempPreferences.linkMatchMode || 'shortcut';
-            settingHotkeyMode.value = tempPreferences.hotkeyMode || 'alt';
-            settingAutoOpen.value = tempPreferences.autoOpenLinks || 'disabled';
+            settingLinkHotkeyMode.value = tempPreferences.linkHotkeyMode || 'alt';
+            settingLinkAutoOpen.value = tempPreferences.linkAutoOpen || 'disabled';
 
             // 3. Update Visuals for Buttons
-            updateFormatButtonsUI();
-            updateLayoutButtonsUI();
-            updateDateFormatOptions(); // Update Date Format Options Dynamic Text
+            updateDateFormatOptions();
+            updateTimeFormatOptions();
+            updateLayoutViewUI();
 
             // 4. Render Lists (using tempPreferences)
-            renderSettingsLinks();
             renderSettingsEngines();
+            renderSettingsLinks();
 
             // 5. Reset internal states
             cancelEngineEdit();
@@ -1797,54 +1852,28 @@
             if (closeWarningTimeout) clearTimeout(closeWarningTimeout);
 
             if (section === 'engines') {
-                document.getElementById('settings-engines-section').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('setting-engines-section').scrollIntoView({ behavior: 'smooth' });
             }
 
             checkDirtyState();
         }
 
-        function updateFormatButtonsUI() {
-            formatBtns.forEach(btn => {
-                const isActive = btn.dataset.value === tempPreferences.timeFormat;
-                btn.className = `format-btn p-2 rounded-lg border text-sm font-medium transition-all ${isActive
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white'
-                    : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-                    }`;
-            });
-
-            // Update Show AM/PM Disable State
-            if (settingShowAmPm) {
-                const is24 = tempPreferences.timeFormat === '24';
-                settingShowAmPm.disabled = is24;
-                if (is24) {
-                    settingShowAmPm.parentElement.classList.add('opacity-50');
-                } else {
-                    settingShowAmPm.parentElement.classList.remove('opacity-50');
-                }
-            }
-        }
-
         function updateDateFormatOptions() {
             if (!tempPreferences) return;
-
             const now = new Date();
             const year = now.getFullYear();
             const day = now.getDate();
             const monthIndex = now.getMonth();
             const shortMonth = now.toLocaleDateString('en-US', { month: 'short' });
             const longMonth = now.toLocaleDateString('en-US', { month: 'long' });
-
-            // Determine weekday format based on rules (short for short date, long for others)
             const shortWeekday = now.toLocaleDateString('en-US', { weekday: 'short' });
             const longWeekday = now.toLocaleDateString('en-US', { weekday: 'long' });
-
             const formatNum = (num) => {
                 if (tempPreferences.showLeadingZero) {
                     return num.toString().padStart(2, '0');
                 }
                 return num.toString();
             };
-
             const getFormatString = (type) => {
                 let text = '';
                 switch (type) {
@@ -1861,7 +1890,6 @@
                         if (tempPreferences.showYear) text += `/${year}`;
                         break;
                 }
-
                 if (tempPreferences.showWeekday) {
                     const weekday = type === 'short' ? shortWeekday : longWeekday;
                     text = `${weekday}, ${text}`;
@@ -1869,7 +1897,6 @@
                 return text;
             };
 
-            // Update Options
             const options = settingDateFormat.options;
             for (let i = 0; i < options.length; i++) {
                 const opt = options[i];
@@ -1877,17 +1904,34 @@
                 if (opt.value === 'short') label = 'Short';
                 else if (opt.value === 'long') label = 'Long';
                 else if (opt.value === 'numeric') label = 'Numeric';
-
                 opt.textContent = `${label} (${getFormatString(opt.value)})`;
             }
         }
 
-        function updateLayoutButtonsUI() {
-            const isEnabled = tempPreferences && tempPreferences.showSpeedDial;
-            layoutBtns.forEach(btn => {
-                const isActive = btn.dataset.value === tempPreferences.linkLayout;
-                let classes = `layout-btn p-2 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium transition-all `;
+        function updateTimeFormatOptions() {
+            settingTimeFormat.forEach(btn => {
+                const isActive = btn.dataset.value === tempPreferences.timeFormat;
+                btn.className = `format-btn p-2 rounded-lg border text-sm font-medium transition-all ${isActive
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white'
+                    : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    }`;
+            });
+            if (settingShowAmPm) {
+                const is24 = tempPreferences.timeFormat === '24';
+                settingShowAmPm.disabled = is24;
+                if (is24) {
+                    settingShowAmPm.parentElement.classList.add('opacity-50');
+                } else {
+                    settingShowAmPm.parentElement.classList.remove('opacity-50');
+                }
+            }
+        }
 
+        function updateLayoutViewUI() {
+            const isEnabled = tempPreferences && tempPreferences.showSpeedDial;
+            settingLinkLayoutView.forEach(btn => {
+                const isActive = btn.dataset.value === tempPreferences.linkLayout;
+                let classes = `setting-link-layout-view p-2 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium transition-all `;
                 if (!isEnabled) {
                     classes += 'border-zinc-100 dark:border-zinc-800 text-zinc-300 dark:text-zinc-600 cursor-not-allowed opacity-50';
                     btn.disabled = true;
@@ -1905,17 +1949,15 @@
         }
 
         function closeSettingsUI() {
-            // Discard changes
             tempPreferences = null;
             originalPreferencesSnapshot = null;
-
             settingsModal.classList.remove('modal-active');
-            setTimeout(() => settingsModal.classList.add('hidden'), 200);
-
+            setTimeout(() => settingsModal.classList.add('hidden'), 600);
+            settingsToggle.blur();
             if (resetConfirmTimeout) clearTimeout(resetConfirmTimeout);
             resetSettingsBtn.dataset.confirm = 'false';
             resetSettingsBtn.innerHTML = `<i data-lucide="rotate-ccw" class="w-4 h-4"></i>`;
-            resetSettingsBtn.classList.remove('bg-red-50', 'text-red-600', 'dark:bg-red-900/20', 'dark:text-red-400');
+            resetSettingsBtn.classList.remove('bg-red-100', 'text-red-700', 'dark:bg-red-500/30', 'dark:text-red-200');
             resetSettingsBtn.classList.add('text-zinc-400', 'hover:text-red-500', 'hover:bg-red-50', 'dark:hover:bg-red-900/20');
             lucide.createIcons();
         }
@@ -1935,20 +1977,19 @@
                 return;
             }
 
-            // 2. If dirty, check if warning is already active
+            // 2. If dirty, check if warning is already active; second click -> force close = discard changes
             if (closeWarningActive) {
-                // Second click -> Force Close (Discard changes)
                 closeSettings();
                 return;
             }
 
-            // 3. First click with dirty state -> Activate Warning & Shake
+            // 3. First click with dirty state -> warn
             closeWarningActive = true;
 
-            // Shake Animation
+            // Warning
             const content = settingsModal.querySelector('.modal-content');
             content.classList.remove('animate-shake');
-            void content.offsetWidth; // Trigger reflow
+            void content.offsetWidth;
             content.classList.add('animate-shake');
             setTimeout(() => content.classList.remove('animate-shake'), 400);
 
@@ -1973,42 +2014,20 @@
             persistPreferences();
 
             // 4. Update Main UI
+            updateDateTime();
             updateGreetingUI();
-            updateTime();
             renderLinks();
 
             // 5. Close
-            // We manually clear dirty state just to be safe so closeSettings doesn't think we are abandoning changes
             tempPreferences = null;
-            closeSettings(); // Uses history.back() if applicable
-        }
-
-        // --- Help Modal Handling ---
-        function openHelp() {
-            history.pushState({ modal: 'help' }, '', '');
-            helpModal.classList.remove('hidden');
-            setTimeout(() => helpModal.classList.add('modal-active'), 10);
-        }
-
-        function closeHelpUI() {
-            helpModal.classList.remove('modal-active');
-            setTimeout(() => helpModal.classList.add('hidden'), 200);
-        }
-
-        function closeHelp() {
-            if (history.state && history.state.modal === 'help') {
-                history.back();
-            } else {
-                closeHelpUI();
-            }
+            closeSettings();
         }
 
         // --- Event Listeners ---
 
         applyTheme();
-        // Initialize
-        updateTime();
-        setInterval(updateTime, 1000);
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
         updateGreetingUI();
         renderLinks();
 
@@ -2021,14 +2040,6 @@
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (preferences.theme === 'auto') applyTheme();
-        });
-
-        // Handle clicks on Speed Dial links (delegation)
-        linksContainer.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (link && preferences.openLinkNewTab) {
-                clearAndResetInput();
-            }
         });
 
         // Handle click on the action indicator
@@ -2044,15 +2055,23 @@
             mainForm.dispatchEvent(new Event('submit'));
         });
 
+        // Handle clicks on Speed Dial Links
+        linksContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && preferences.openLinkNewTab) {
+                clearAndResetInput();
+            }
+        });
+
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
             let query = mainInput.value.trim();
             if (query) {
-                // 1. Check for Speed Dial Links (using prioritized match)
+                // 1. Check for Speed Dial Links
                 const speedDialLink = findMatchingLink(query);
                 let numericLink = null;
 
-                if (!speedDialLink && preferences.hotkeyMode === 'numeric') {
+                if (!speedDialLink && preferences.linkHotkeyMode === 'numeric') {
                     const index = getLinkIndexFromNumericKey(query);
                     if (index >= 0 && index < preferences.links.length) {
                         numericLink = preferences.links[index];
@@ -2079,16 +2098,15 @@
                     return;
                 }
 
-                // 2. Check for Search & Ask logic
+                // 2. Check for Search & Ask Engines
                 let engineIndex;
 
-                // Priority: Active Action Engine (from Tab or validated Space)
+                // Priority: Active an engine (from Tab or validated Space)
                 if (activeActionEngine && query.startsWith(activeActionEngine.shortcut)) {
-                    // Re-validate that the query actually matches the pattern "shortcut + space"
                     const parts = query.split(' ');
                     if (parts[0] === activeActionEngine.shortcut && parts.length > 1) {
                         const engine = activeActionEngine;
-                        query = parts.slice(1).join(' '); // Remove shortcut
+                        query = parts.slice(1).join(' ');
                         let url = engine.url;
                         if (url.includes('%s')) {
                             url = url.replaceAll('%s', encodeURIComponent(query));
@@ -2107,27 +2125,32 @@
 
                 // Standard Parsing Logic (Fallback or Default Behavior)
                 const parts = query.split(' ');
-                if (parts.length > 1 && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
+                if (parts.length > 1 && (preferences.engineTriggerKey === 'space' || preferences.engineTriggerKey === 'both')) {
                     const firstWord = parts[0];
                     const matchedEngine = findMatchingEngine(firstWord);
                     const triggeredEngineIndex = matchedEngine ? preferences.engines.indexOf(matchedEngine) : -1;
                     if (triggeredEngineIndex !== -1) {
                         engineIndex = triggeredEngineIndex;
-                        query = parts.slice(1).join(' '); // Remove shortcut from query
+                        query = parts.slice(1).join(' ');
                     }
                 }
 
-                // If no shortcut was used, determine engine by Ask vs Search mode
+                // If no match is detected, determine engine by input triggers
                 let engineName;
                 if (engineIndex !== undefined) {
-                    // Engine was triggered - get the name from the matched engine
+                    // An input triggers an engine - get the engine name
                     engineName = preferences.engines[engineIndex]?.name;
-                } else if (query.endsWith('?')) {
-                    // Ask Mode
-                    engineName = preferences.defaultAskEngine;
+                } else if (query.startsWith('?') || query.endsWith('?')) {
+                    // Ask Engine ('? query' OR 'query ?')
+                    engineName = preferences.engineDefaultAsk;
+                    if (query.startsWith('?')) {
+                        query = query.substring(1).trim();
+                    } else {
+                        query = query.substring(0, query.length - 1).trim();
+                    }
                 } else {
-                    // Search Mode
-                    engineName = preferences.defaultSearchEngine;
+                    // Search Engine
+                    engineName = preferences.engineDefaultSearch;
                 }
 
                 // Find engine by name, fallback to first engine
@@ -2137,7 +2160,6 @@
                 if (url.includes('%s')) {
                     url = url.replaceAll('%s', encodeURIComponent(query));
                 } else {
-                    // Fallback for legacy URLs without %s
                     url = url + encodeURIComponent(query);
                 }
 
@@ -2153,7 +2175,7 @@
         // Input listener for Enter vs Space vs Action Detection
         mainInput.addEventListener('input', (e) => {
             const val = e.target.value;
-            const parts = val.trim().split(/\s+/); // Better whitespace split
+            const parts = val.trim().split(/\s+/);
             const potentialTrigger = parts[0];
             const hasTrailingSpace = val.endsWith(' ');
 
@@ -2173,8 +2195,7 @@
             }
 
             // 2. Detect Space Trigger
-            if (!activeActionEngine && (preferences.triggerKey === 'space' || preferences.triggerKey === 'both')) {
-                // Check if input is exactly "shortcut " (shortcut followed by space)
+            if (!activeActionEngine && (preferences.engineTriggerKey === 'space' || preferences.engineTriggerKey === 'both')) {
                 if (val.endsWith(' ') && parts.length === 1 && parts[0].length > 0) {
                     const candidate = parts[0];
                     const found = findMatchingEngine(candidate);
@@ -2189,9 +2210,8 @@
             if (val.length > 0) {
                 actionSpace.classList.add('hidden');
                 actionSpace.classList.remove('sm:inline-flex');
-
-                actionEnter.classList.remove('hidden');
                 actionEnter.classList.add('flex');
+                actionEnter.classList.remove('hidden');
 
                 // Base classes
                 const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex', '[@media(hover:hover)]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)]', '[@media(hover:hover)]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]'];
@@ -2212,7 +2232,7 @@
                     linkToShow = findMatchingLink(parts[0]);
 
                     // 2. Numeric match (if hotkeys enabled)
-                    if (!linkToShow && preferences.hotkeyMode === 'numeric') {
+                    if (!linkToShow && preferences.linkHotkeyMode === 'numeric') {
                         const index = getLinkIndexFromNumericKey(parts[0]);
                         if (index >= 0 && index < preferences.links.length) {
                             linkToShow = preferences.links[index];
@@ -2220,17 +2240,17 @@
                     }
 
                     // Handle Auto-Open
-                    if (linkToShow && preferences.autoOpenLinks !== 'disabled') {
-                        const targetUrl = linkToShow.url; // Capture URL to avoid stale reference
-                        if (preferences.autoOpenLinks === 'immediate') {
+                    if (linkToShow && preferences.linkAutoOpen !== 'disabled') {
+                        const targetUrl = linkToShow.url;
+                        if (preferences.linkAutoOpen === 'immediate') {
                             if (preferences.openLinkNewTab) {
                                 window.open(targetUrl, '_blank', 'noopener,noreferrer');
                                 clearAndResetInput();
                             } else {
                                 window.location.href = targetUrl;
                             }
-                        } else if (preferences.autoOpenLinks.startsWith('delay_')) {
-                            const delay = preferences.autoOpenLinks === 'delay_2s' ? 2000 : 1000;
+                        } else if (preferences.linkAutoOpen.startsWith('delay_')) {
+                            const delay = preferences.linkAutoOpen === 'delay_2s' ? 2000 : 1000;
                             autoOpenTimeout = setTimeout(() => {
                                 if (preferences.openLinkNewTab) {
                                     window.open(targetUrl, '_blank', 'noopener,noreferrer');
@@ -2248,7 +2268,7 @@
                     engineToShow = activeActionEngine;
                 }
                 // B. Implicit detection (Preview)
-                else if (preferences.triggerKey === 'space' || preferences.triggerKey === 'both') {
+                else if (preferences.engineTriggerKey === 'space' || preferences.engineTriggerKey === 'both') {
                     const found = findMatchingEngine(potentialTrigger);
                     if (found && parts.length > 1) engineToShow = found;
                 }
@@ -2263,7 +2283,7 @@
                     actionEnter.innerHTML = `<i data-lucide="search-code" class="w-3 h-3"></i> ${engineToShow.name}`;
                 } else {
                     // Standard Logic
-                    const isAsk = val.trim().endsWith('?');
+                    const isAsk = val.trim().startsWith('?') || val.trim().endsWith('?');
                     if (isAsk) {
                         actionEnter.className = [...baseClasses, ...askClasses].join(' ');
                         actionEnter.innerHTML = `<i data-lucide="search-slash" class="w-3 h-3"></i> Ask`;
@@ -2277,22 +2297,21 @@
 
             } else {
                 activeActionEngine = null;
-                actionSpace.classList.add('hidden');
                 actionSpace.classList.add('sm:inline-flex');
-
+                actionSpace.classList.remove('hidden');
                 actionEnter.classList.add('hidden');
                 actionEnter.classList.remove('flex');
             }
         });
 
+        helpToggle.addEventListener('click', openHelp);
         themeToggle.addEventListener('click', cycleTheme);
         settingsToggle.addEventListener('click', () => openSettings());
-        helpToggle.addEventListener('click', openHelp);
         closeSettingsBtn.addEventListener('click', handleCloseSettingsClick);
         saveSettingsBtn.addEventListener('click', saveSettings);
-        saveLinkBtn.addEventListener('click', saveLink);
         saveEngineBtn.addEventListener('click', saveEngine);
         cancelEngineEditBtn.addEventListener('click', cancelEngineEdit);
+        saveLinkBtn.addEventListener('click', saveLink);
         cancelLinkEditBtn.addEventListener('click', cancelLinkEdit);
 
         // Data listeners
@@ -2305,15 +2324,12 @@
         const attachInputListener = (elem, key, isCheckbox = false) => {
             const evt = isCheckbox ? 'change' : 'input';
             elem.addEventListener(evt, (e) => {
-                if (!tempPreferences) return; // Should not happen if modal hidden
+                if (!tempPreferences) return;
                 const val = isCheckbox ? e.target.checked : e.target.value;
                 tempPreferences[key] = val;
-
-                // Special handling for date options to update dropdown text
                 if (key === 'showWeekday' || key === 'showYear' || key === 'showLeadingZero') {
                     updateDateFormatOptions();
                 }
-
                 checkDirtyState();
             });
         };
@@ -2330,48 +2346,45 @@
         attachInputListener(settingShowAmPm, 'showAmPm', true);
         attachInputListener(settingShowSeconds, 'showSeconds', true);
         attachInputListener(settingFlashSeparators, 'flashSeparators', true);
-        attachInputListener(settingTriggerKey, 'triggerKey');
+        attachInputListener(settingEngineTriggerKey, 'engineTriggerKey');
         attachInputListener(settingEngineMatchMode, 'engineMatchMode');
         attachInputListener(settingLinkMatchMode, 'linkMatchMode');
-        attachInputListener(settingHotkeyMode, 'hotkeyMode');
-        attachInputListener(settingAutoOpen, 'autoOpenLinks');
+        attachInputListener(settingLinkHotkeyMode, 'linkHotkeyMode');
+        attachInputListener(settingLinkAutoOpen, 'linkAutoOpen');
 
-        // Manually add listener for hotkey mode to update link previews
-        settingHotkeyMode.addEventListener('change', (e) => {
-            if (!tempPreferences) return;
-            tempPreferences.hotkeyMode = e.target.value;
-            renderSettingsLinks(); // Updates the PREVIEW list in settings (show/hide badges)
-            checkDirtyState();
+        closeHelpBtn.addEventListener('click', closeHelp);
+
+        settingTimeFormat.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!tempPreferences) return;
+                tempPreferences.timeFormat = e.currentTarget.dataset.value;
+                updateTimeFormatOptions();
+                checkDirtyState();
+            });
         });
 
         settingShowSpeedDial.addEventListener('change', (e) => {
             if (!tempPreferences) return;
             tempPreferences.showSpeedDial = e.target.checked;
-            updateLayoutButtonsUI(); // Re-render to update disabled state
+            updateLayoutViewUI();
             checkDirtyState();
         });
 
-        // Layout Buttons
-        layoutBtns.forEach(btn => {
+        settingLinkLayoutView.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 if (!tempPreferences || !tempPreferences.showSpeedDial) return; // Prevent click if disabled
                 tempPreferences.linkLayout = e.currentTarget.dataset.value;
-                updateLayoutButtonsUI();
+                updateLayoutViewUI();
                 checkDirtyState();
             });
         });
 
-        // Time Format Buttons
-        formatBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (!tempPreferences) return;
-                tempPreferences.timeFormat = e.currentTarget.dataset.value;
-                updateFormatButtonsUI();
-                checkDirtyState();
-            });
+        settingLinkHotkeyMode.addEventListener('change', (e) => {
+            if (!tempPreferences) return;
+            tempPreferences.linkHotkeyMode = e.target.value;
+            renderSettingsLinks();
+            checkDirtyState();
         });
-
-        closeHelpBtn.addEventListener('click', closeHelp);
 
         // Modal Backdrop Click Handling
         let modalMouseDownTarget = null;
@@ -2380,14 +2393,11 @@
         });
 
         settingsModal.addEventListener('click', (e) => {
-            // Only consider closing if clicked strictly on the backdrop
             if (e.target === settingsModal && modalMouseDownTarget === settingsModal) {
-                // CRITICAL REQUIREMENT: Do not allow close if changes are made
                 if (checkDirtyState()) {
-                    // Visual feedback (shake)
                     const content = settingsModal.querySelector('.modal-content');
-                    content.classList.remove('animate-shake'); // Reset if spamming
-                    void content.offsetWidth; // Trigger reflow
+                    content.classList.remove('animate-shake');
+                    void content.offsetWidth;
                     content.classList.add('animate-shake');
                     setTimeout(() => content.classList.remove('animate-shake'), 400);
                     return;
@@ -2424,7 +2434,7 @@
         document.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement.tagName;
 
-            // Search Focus
+            // Focus Main Input
             if (e.code === 'Space' && activeTag !== 'INPUT') {
                 e.preventDefault();
                 mainInput.focus();
@@ -2463,20 +2473,17 @@
 
             // Tab Key Trigger for Search Actions
             if (e.key === 'Tab' && activeTag === 'INPUT' && document.activeElement === mainInput) {
-                // Only handle if preference allows Tab
-                if (preferences.triggerKey === 'tab' || preferences.triggerKey === 'both') {
+                if (preferences.engineTriggerKey === 'tab' || preferences.engineTriggerKey === 'both') {
                     const val = mainInput.value;
                     const parts = val.trim().split(' ');
-
                     if (parts.length === 1 && parts[0].length > 0) {
                         const candidate = parts[0];
                         const found = findMatchingEngine(candidate);
-
                         if (found) {
-                            e.preventDefault(); // Stop focus move
+                            e.preventDefault();
                             activeActionEngine = found;
-                            mainInput.value = val + ' '; // Add space
-                            mainInput.dispatchEvent(new Event('input')); // Update UI
+                            mainInput.value = val + ' ';
+                            mainInput.dispatchEvent(new Event('input'));
                         }
                     }
                 }
@@ -2484,7 +2491,7 @@
 
             // Speed Dial Keys (0-9)
             if (activeTag !== 'INPUT') {
-                const mode = preferences.hotkeyMode;
+                const mode = preferences.linkHotkeyMode;
                 if (mode === 'disabled') return;
                 const modifierRequired = mode === 'alt';
                 const isModifierPressed = e.altKey;
