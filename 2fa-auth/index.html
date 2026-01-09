@@ -7,12 +7,16 @@
     <meta name="description" content="Secure 2FA authenticator that works locally in the browser.">
     <title>2FA Authenticator</title>
 
-    <!-- External Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <!-- CryptoJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 
-    <!-- Google Fonts -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts: Inter, JetBrains Mono -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
         rel="stylesheet">
@@ -85,10 +89,10 @@
     </style>
 </head>
 
-<body class="bg-slate-100 text-slate-800 h-screen flex justify-center overflow-hidden">
+<body class="bg-slate-100 text-slate-800 h-[100dvh] flex justify-center overflow-hidden">
 
     <!-- Main App Container -->
-    <div
+    <div id="app-wrapper"
         class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-slate-200 sm:border">
 
         <!-- Header -->
@@ -97,7 +101,7 @@
             <div class="flex items-center gap-3">
                 <div
                     class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
-                    <i class="fas fa-shield-alt text-sm"></i>
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
                 </div>
                 <h1 class="font-bold text-lg tracking-tight text-slate-900">2FA Authenticator</h1>
             </div>
@@ -151,19 +155,19 @@
                         <button id="searchToggle"
                             class="absolute inset-0 z-10 w-full h-full flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors bg-transparent border-none outline-none transition-opacity duration-200 opacity-100"
                             aria-label="Open Search">
-                            <i class="fas fa-search text-lg"></i>
+                            <i data-lucide="search" class="w-5 h-5"></i>
                         </button>
 
                         <!-- Search Input Field -->
                         <div id="searchInputWrapper"
                             class="absolute inset-0 flex items-center opacity-0 pointer-events-none transition-all duration-300 pl-4 pr-10">
-                            <i class="fas fa-search text-slate-400 mr-3 flex-shrink-0"></i>
+                            <i data-lucide="search" class="text-slate-400 mr-3 flex-shrink-0 w-4 h-4"></i>
                             <input id="searchInput" type="text"
                                 class="w-full h-full bg-transparent border-none outline-none text-sm font-medium placeholder-slate-400"
                                 placeholder="Search accounts...">
                             <button id="closeSearch"
                                 class="absolute right-0 top-0 h-full w-12 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-                                <i class="fas fa-times"></i>
+                                <i data-lucide="x" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
@@ -182,7 +186,7 @@
             class="bg-white border-t border-slate-200 p-3 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
             <button id="toggleAddAccount"
                 class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
-                <i class="fas fa-plus transition-transform group-hover:rotate-90"></i>
+                <i data-lucide="plus" class="transition-transform group-hover:rotate-90 w-4 h-4"></i>
                 <span>Add Account</span>
             </button>
 
@@ -190,12 +194,12 @@
                 <button id="importButton"
                     class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
                     title="Import">
-                    <i class="fas fa-file-import"></i>
+                    <i data-lucide="file-up" class="w-5 h-5"></i>
                 </button>
                 <button id="exportButton"
                     class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
                     title="Export">
-                    <i class="fas fa-file-export"></i>
+                    <i data-lucide="file-down" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
@@ -213,11 +217,11 @@
             <div id="accountModal"
                 class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
                 role="dialog">
-                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+
                 <div class="flex justify-between items-center mb-6">
                     <h2 id="modalTitle" class="text-xl font-bold text-slate-900">Add Account</h2>
                     <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
-                        <i class="fas fa-times text-lg"></i>
+                        <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
                 <div class="space-y-4">
@@ -249,11 +253,11 @@
             <div id="dataModal"
                 class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
                 role="dialog">
-                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+
                 <div class="flex justify-between items-center mb-4">
                     <h2 id="dataModalTitle" class="text-xl font-bold text-slate-900">Import Accounts</h2>
                     <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
-                        <i class="fas fa-times text-lg"></i>
+                        <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
                 <p class="text-sm text-slate-500 mb-3">Format: <code
@@ -273,11 +277,11 @@
             <div id="deleteModal"
                 class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden"
                 role="dialog">
-                <div class="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+
                 <div class="text-center">
                     <div
                         class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                        <i data-lucide="triangle-alert" class="w-6 h-6"></i>
                     </div>
                     <h3 class="text-lg font-bold text-slate-900 mb-2">Delete Account?</h3>
                     <p id="deleteMessage" class="text-slate-500 text-sm mb-6">This action cannot be undone.</p>
@@ -344,9 +348,11 @@
             loadAccounts();
             initializeTiming();
             setupEventListeners();
+            setupMobileHeight();
             setupVisibilityHandling();
             // Enable animation on initial load
             updateAccountsDisplay(true);
+            lucide.createIcons();
         });
 
         // --- Event Listeners ---
@@ -389,6 +395,31 @@
                 }
             });
         }
+
+        // --- Mobile Layout Fix ---
+        function setupMobileHeight() {
+            const app = document.getElementById('app-wrapper');
+            if (!app) return;
+
+            function setHeight() {
+                if (window.innerWidth >= 640) {
+                    app.style.height = '';
+                    return;
+                }
+
+                if (document.activeElement &&
+                    (document.activeElement.tagName === 'INPUT' ||
+                        document.activeElement.tagName === 'TEXTAREA')) {
+                    return;
+                }
+
+                app.style.height = `${window.innerHeight}px`;
+            }
+
+            window.addEventListener('resize', setHeight);
+            setHeight();
+        }
+
 
         // --- Core Logic: Timing & TOTP ---
         function initializeTiming() {
@@ -527,7 +558,7 @@
                 els.codesContainer.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-20 text-slate-400">
                         <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
-                            <i class="fas fa-lock text-2xl"></i>
+                            <i data-lucide="lock" class="w-8 h-8"></i>
                         </div>
                         <p class="text-sm">No accounts yet</p>
                         <button onclick="openAccountModal()" class="mt-4 text-brand-600 font-medium text-sm hover:underline">Add your first account</button>
@@ -568,13 +599,13 @@
                                     ${formatAccountName(acc.name, filter)}
                                 </h3>
                             </div>
-                            <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                            <div class="opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-2">
                                 <!-- Stop propagation on buttons to prevent copying when clicking edit/delete -->
                                 <button onclick="event.stopPropagation(); editAccount(${idx})" class="text-slate-400 hover:text-yellow-500 p-1 transition-colors relative z-10" title="Edit">
-                                    <i class="fas fa-pen text-xs"></i>
+                                    <i data-lucide="pencil" class="w-3 h-3"></i>
                                 </button>
                                 <button onclick="event.stopPropagation(); initDelete(${idx})" class="text-slate-400 hover:text-red-500 p-1 transition-colors relative z-10" title="Delete">
-                                    <i class="fas fa-trash text-xs"></i>
+                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
                                 </button>
                             </div>
                         </div>
@@ -596,7 +627,7 @@
                     <div class="absolute inset-0 z-20 bg-emerald-50/90 backdrop-blur-[1px] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-200" id="copy-overlay-${idx}">
                         <div class="transform scale-50 transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)" id="copy-icon-${idx}">
                             <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-sm mb-1">
-                                <i class="fas fa-check text-lg"></i>
+                                <i data-lucide="check" class="w-5 h-5"></i>
                             </div>
                         </div>
                         <span class="text-emerald-600 font-bold text-xs tracking-wide uppercase translate-y-2 opacity-0 transition-all duration-300 delay-75" id="copy-text-${idx}">Copied!</span>
@@ -607,6 +638,9 @@
                 `;
                 els.codesContainer.appendChild(el);
             });
+
+            // Re-initialize icons for newly added elements
+            lucide.createIcons({ root: els.codesContainer });
 
             if (visibleCount === 0 && filter) {
                 els.codesContainer.innerHTML = `
@@ -640,20 +674,11 @@
             const hex = base32ToHex(secret);
             if (!hex) return showToast('Invalid Base32 Secret Key', 'error');
             const newAcc = { name, secret };
-            if (editingIndex >= 0) {
-                accounts[editingIndex] = newAcc;
-                showToast('Account updated');
-            } else {
-                if (accounts.some(a => a.name === name)) {
-                    return showToast('Account name already exists', 'error');
-                }
-                accounts.push(newAcc);
-                showToast('Account added');
-            }
             saveToStorage();
             closeAllModals();
             updateAccountsDisplay(true);
             updateCodes();
+            setTimeout(() => showToast(editingIndex >= 0 ? 'Account updated' : 'Account added'), 300);
         }
 
         function initDelete(index) {
@@ -666,10 +691,10 @@
             if (deletingIndex >= 0) {
                 accounts.splice(deletingIndex, 1);
                 saveToStorage();
-                showToast('Account removed');
                 updateAccountsDisplay(true);
             }
             closeAllModals();
+            setTimeout(() => showToast('Account removed'), 300);
         }
 
         function handleCardCopy(cardElement, index) {
@@ -760,36 +785,63 @@
                 els.dataTextarea.select();
                 try {
                     document.execCommand('copy');
-                    showToast('Export data copied!');
+                    closeAllModals();
+                    setTimeout(() => showToast('Export data copied!'), 300);
                 } catch (e) {
                     showToast('Failed to copy', 'error');
                 }
                 return;
             }
+
             const raw = els.dataTextarea.value.trim();
-            if (!raw) return;
+            if (!raw) return showToast('Please enter data to import', 'warning');
+
             const lines = raw.split('\n');
             let added = 0;
+            let duplicates = 0;
             let errors = 0;
+
             lines.forEach(line => {
-                const [name, secret] = line.split('|').map(s => s.trim());
+                if (!line.trim()) return;
+                const parts = line.split('|');
+                if (parts.length < 2) {
+                    errors++;
+                    return;
+                }
+                const name = parts[0].trim();
+                const secret = parts[1].trim();
+
                 if (name && secret && base32ToHex(secret)) {
                     if (!accounts.some(a => a.name === name)) {
                         accounts.push({ name, secret });
                         added++;
+                    } else {
+                        duplicates++;
                     }
                 } else {
                     errors++;
                 }
             });
+
             if (added > 0) {
                 saveToStorage();
                 updateAccountsDisplay(true);
                 updateCodes();
+
+                // Re-initialize icons (handled in updateAccountsDisplay) and close
                 closeAllModals();
-                showToast(`Imported ${added} accounts`);
+
+                let msg = `Imported ${added} accounts`;
+                if (duplicates > 0) msg += ` (${duplicates} skipped)`;
+                showToast(msg);
+            } else if (duplicates > 0) {
+                closeAllModals();
+                showToast(`All ${duplicates} accounts already exist`, 'warning');
             }
-            if (errors > 0) showToast(`${errors} lines were invalid`, 'warning');
+
+            if (errors > 0) {
+                showToast(`${errors} lines were invalid`, 'warning');
+            }
         }
 
         // --- Data Persistence ---
@@ -912,10 +964,11 @@
         function showToast(message, type = 'success') {
             const el = document.createElement('div');
             const colorClass = type === 'error' ? 'bg-red-500' : (type === 'warning' ? 'bg-amber-500' : 'bg-slate-800');
-            const icon = type === 'error' ? 'fa-exclamation-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle');
+            const icon = type === 'error' ? 'circle-alert' : (type === 'warning' ? 'triangle-alert' : 'circle-check');
             el.className = `${colorClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto min-w-[200px] justify-center`;
-            el.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+            el.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${message}</span>`;
             document.getElementById('toastContainer').appendChild(el);
+            lucide.createIcons({ root: el });
             requestAnimationFrame(() => {
                 el.classList.remove('translate-y-4', 'opacity-0');
             });
