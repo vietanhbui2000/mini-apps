@@ -674,6 +674,11 @@
             const hex = base32ToHex(secret);
             if (!hex) return showToast('Invalid Base32 Secret Key', 'error');
             const newAcc = { name, secret };
+            if (editingIndex >= 0) {
+                accounts[editingIndex] = newAcc;
+            } else {
+                accounts.push(newAcc);
+            }
             saveToStorage();
             closeAllModals();
             updateAccountsDisplay(true);
