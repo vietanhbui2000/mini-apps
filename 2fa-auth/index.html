@@ -176,7 +176,7 @@
             </div>
 
             <!-- Codes List -->
-            <div id="codesContainer" class="px-4 pb-24 space-y-3 pt-2">
+            <div id="codesContainer" class="px-4 pt-3 pb-24 space-y-3">
                 <!-- Content populated by JS -->
             </div>
         </main>
@@ -309,8 +309,7 @@
         let editingIndex = -1;
         let deletingIndex = -1;
         let internalTimer = null;
-        let startupTime = Math.floor(Date.now() / 1000);
-        let startupTimeLeft = TOTP_INTERVAL - (startupTime % TOTP_INTERVAL);
+        let lastTimeStep = -1;
         let isPageVisible = true;
         let currentModal = null;
         let isSearchActive = false;
@@ -423,9 +422,7 @@
 
         // --- Core Logic: Timing & TOTP ---
         function initializeTiming() {
-            const now = Math.floor(Date.now() / 1000);
-            startupTime = now;
-            startupTimeLeft = TOTP_INTERVAL - (now % TOTP_INTERVAL);
+            lastTimeStep = Math.floor(Date.now() / 1000 / TOTP_INTERVAL);
             updateTimers();
             updateCodes();
             startTimer();
@@ -439,10 +436,8 @@
         }
 
         function getCycleProgress() {
-            const elapsed = (Date.now() / 1000) - startupTime;
-            const currentPos = (startupTimeLeft - elapsed) % TOTP_INTERVAL;
-            const timeVal = currentPos <= 0 ? TOTP_INTERVAL + currentPos : currentPos;
-            return timeVal;
+            const now = Date.now() / 1000;
+            return TOTP_INTERVAL - (now % TOTP_INTERVAL);
         }
 
         let lastTimeInt = -1;
@@ -451,13 +446,17 @@
             const timeLeft = getCycleProgress();
             const timeInt = Math.ceil(timeLeft);
 
+            // Check if we've entered a new TOTP time step
+            const currentTimeStep = Math.floor(Date.now() / 1000 / TOTP_INTERVAL);
+            if (currentTimeStep !== lastTimeStep) {
+                lastTimeStep = currentTimeStep;
+                updateCodes();
+            }
+
             if (timeInt !== lastTimeInt) {
                 els.countdownTimer.textContent = `${timeInt}s`;
                 els.miniCountdownTimer.textContent = timeInt;
                 lastTimeInt = timeInt;
-                if (timeInt === 30) {
-                    updateCodes();
-                }
             }
 
             const percentage = (timeLeft / TOTP_INTERVAL) * 100;
@@ -521,7 +520,13 @@
                 if (val === -1) return '';
                 bits += val.toString(2).padStart(5, '0');
             }
-            return parseInt(bits.slice(0, Math.floor(bits.length / 8) * 8), 2).toString(16);
+            // Process 4 bits at a time to avoid precision loss with parseInt on long binary strings
+            let hex = '';
+            const usable = bits.slice(0, Math.floor(bits.length / 8) * 8);
+            for (let i = 0; i < usable.length; i += 4) {
+                hex += parseInt(usable.substr(i, 4), 2).toString(16);
+            }
+            return hex;
         }
 
         function formatCodeDisplay(code) {
