@@ -4,10 +4,11 @@ A small collection of *mini apps* built with *web technologies*. Vibe-coded with
 
 ## App list
 
+- <a href="https://vietanhbui2000.github.io/mini-apps/startpage/" target="_blank" rel="noopener noreferrer">Startpage</a>: Your new day starts here.
 - <a href="https://vietanhbui2000.github.io/mini-apps/2fa-auth/" target="_blank" rel="noopener noreferrer">2FA Authenticator</a>: Secure 2FA authenticator that works locally in the browser.
+- <a href="https://vietanhbui2000.github.io/mini-apps/dns-profile-gen/" target="_blank" rel="noopener noreferrer">Apple DNS Profile Generator</a>: Secure DNS configuration profile generator for Apple devices.
 - <a href="https://vietanhbui2000.github.io/mini-apps/blank-page/" target="_blank" rel="noopener noreferrer">Blank Page</a>: An infinite blank page to write down what's on your mind.
 - <a href="https://vietanhbui2000.github.io/mini-apps/clock-widget-builder/" target="_blank" rel="noopener noreferrer">Clock Widget Builder</a>: Create a clock widget for Obsidian/Notion with many customizations.
-- <a href="https://vietanhbui2000.github.io/mini-apps/startpage/" target="_blank" rel="noopener noreferrer">Startpage</a>: Your new day starts here.
 
 ---
 

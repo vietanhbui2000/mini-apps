@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Secure DNS configuration profile generator for Apple devices.">
+    <title>Apple DNS Profile Generator</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts: Inter, JetBrains Mono -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    },
+                    transitionProperty: {
+                        'width': 'width',
+                        'spacing': 'margin, padding',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom scrollbar for better visual integration on non-mobile */
+        @media (min-width: 640px) {
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #e2e8f0;
+                border-radius: 10px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #cbd5e1;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 h-[100dvh] flex justify-center overflow-hidden">
+
+    <!-- Main App Container -->
+    <div id="app-wrapper"
+        class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-slate-200 sm:border animate-slide-up">
+
+        <!-- Header -->
+        <header
+            class="bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 px-5 py-4 flex justify-between items-center flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
+                    <i data-lucide="shield" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-slate-900 leading-tight">Apple DNS Profile
+                        Generator</h1>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto relative bg-slate-50/50 scroll-smooth p-4 sm:p-6 no-scrollbar"
+            id="mainScroll">
+
+            <form id="profile-form" class="space-y-6">
+
+                <!-- ═══════════════════════════════ -->
+                <!--         PROFILE SECTION         -->
+                <!-- ═══════════════════════════════ -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-900 tracking-tight">Profile</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="profileName"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Profile Name</span>
+                                <span class="flex items-center gap-2">
+                                    <span
+                                        class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                                    <div class="relative group cursor-help">
+                                        <i data-lucide="info"
+                                            class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                        <div
+                                            class="absolute top-full right-[-4px] mt-2 w-48 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal">
+                                            The name of this configuration profile - displayed in iOS/iPadOS/macOS
+                                            Settings →
+                                            VPN & Device Management.
+                                            <div class="absolute -top-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </label>
+                            <input type="text" id="profileName"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-medium"
+                                placeholder="My Secure DNS" required>
+                        </div>
+
+                        <div>
+                            <label for="profileDescription"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Profile Description</span>
+                                <div class="relative group cursor-help">
+                                    <i data-lucide="info"
+                                        class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                    <div
+                                        class="absolute top-full right-[-4px] mt-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                        This description appears when installing or viewing the configuration profile in
+                                        Settings.
+                                        <div class="absolute -top-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <textarea id="profileDescription"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-medium text-sm resize-y min-h-[60px]"
+                                placeholder="Configures device to use Encrypted DNS." rows="2"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="profileIdentifier"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Profile Identifier</span>
+                                <div class="relative group cursor-help">
+                                    <i data-lucide="info"
+                                        class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                    <div
+                                        class="absolute top-full right-[-4px] mt-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                        A unique reverse-DNS-style identifier. Leave blank to auto-generate.
+                                        <div class="absolute -top-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <input type="text" id="profileIdentifier"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-mono text-sm"
+                                placeholder="com.example.dns">
+                        </div>
+
+                        <!-- Profile Advanced Settings Accordion -->
+                        <div>
+                            <button type="button" id="profileAdvancedBtn"
+                                onclick="toggleAccordion('profileAdvanced', 'profileAdvancedIcon')"
+                                class="w-full flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider py-1 hover:text-slate-700 transition-colors">
+                                <span>Advanced Settings</span>
+                                <i data-lucide="chevron-down" id="profileAdvancedIcon"
+                                    class="w-3.5 h-3.5 transition-transform duration-200"></i>
+                            </button>
+                            <div id="profileAdvanced" class="hidden space-y-4 mt-3">
+                                <div>
+                                    <label for="organizationName"
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                                        Organization Name
+                                    </label>
+                                    <input type="text" id="organizationName"
+                                        class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-medium"
+                                        placeholder="My Organization">
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                                        Payload Scope
+                                    </label>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <label
+                                            class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                            <input type="radio" name="payloadScope" value="System" class="peer sr-only"
+                                                checked>
+                                            <div class="flex items-start w-full gap-3">
+                                                <i data-lucide="users"
+                                                    class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors mt-0.5"></i>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-slate-900">System</span>
+                                                    <span
+                                                        class="block text-xs text-slate-500 mt-0.5 leading-snug">Applies
+                                                        to all users</span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label
+                                            class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                            <input type="radio" name="payloadScope" value="User" class="peer sr-only">
+                                            <div class="flex items-start w-full gap-3">
+                                                <i data-lucide="user"
+                                                    class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors mt-0.5"></i>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-slate-900">User</span>
+                                                    <span
+                                                        class="block text-xs text-slate-500 mt-0.5 leading-snug">Applies
+                                                        to current user</span>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span>Payload Removal</span>
+                                        <div class="relative group cursor-help">
+                                            <i data-lucide="info"
+                                                class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                            <div
+                                                class="absolute bottom-full right-[-4px] mb-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                                When enabled, the profile cannot be removed by the user from Settings
+                                                without an MDM command.
+                                                <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label
+                                        class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                        <input type="checkbox" id="payloadRemovalDisallowed" class="peer sr-only">
+                                        <div class="flex items-center justify-between w-full h-full">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="trash-2"
+                                                    class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-slate-900">Disallow
+                                                        Removal</span>
+                                                    <span
+                                                        class="block text-xs text-slate-500 mt-0.5 leading-snug">Prevents
+                                                        users from deleting this profile</span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 transition-colors group-has-[:checked]:bg-brand-600">
+                                                <span
+                                                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-6"></span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+
+                <!-- ══════════════════════════════════════ -->
+                <!--         DNS CONFIGURATION SECTION      -->
+                <!-- ══════════════════════════════════════ -->
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                            <i data-lucide="server" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-900 tracking-tight">DNS Configuration</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="dnsName"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>DNS Name</span>
+                                <div class="relative group cursor-help">
+                                    <i data-lucide="info"
+                                        class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                    <div
+                                        class="absolute top-full right-[-4px] mt-2 w-52 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                        The display name of the DNS payload shown in Settings. Leave blank to use
+                                        "[Profile Name] DNS".
+                                        <div class="absolute -top-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <input type="text" id="dnsName"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-medium"
+                                placeholder="[Profile Name] DNS">
+                        </div>
+
+                        <div>
+                            <label for="dnsDescription"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>DNS Description</span>
+                                <div class="relative group cursor-help">
+                                    <i data-lucide="info"
+                                        class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                    <div
+                                        class="absolute top-full right-[-4px] mt-2 w-52 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                        A short description for the DNS payload. Leave blank to use the default.
+                                        <div class="absolute -top-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <textarea id="dnsDescription"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-medium text-sm resize-y min-h-[60px]"
+                                placeholder="Configures device to use Encrypted DNS." rows="2"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="dnsIdentifier"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>DNS Identifier</span>
+                                <div class="relative group cursor-help">
+                                    <i data-lucide="info"
+                                        class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                    <div
+                                        class="absolute top-full right-[-4px] mt-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                        The identifier for the inner DNS payload. Leave blank to auto-generate.
+                                        <div class="absolute -top-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <input type="text" id="dnsIdentifier"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-mono text-sm"
+                                placeholder="com.apple.dnsSettings.managed">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                                DNS Protocol
+                            </label>
+                            <div class="grid grid-cols-1 gap-3">
+                                <label
+                                    class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group"
+                                    id="card-HTTPS">
+                                    <input type="radio" name="dnsProtocol" value="HTTPS" class="peer sr-only" checked>
+                                    <div class="flex items-start w-full gap-3">
+                                        <i data-lucide="lock"
+                                            class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors mt-0.5"></i>
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-semibold text-slate-900">DNS-over-HTTPS <span
+                                                    class="text-slate-500 font-bold whitespace-nowrap ml-1">(DoH)</span></span>
+                                            <span class="block text-xs text-slate-500 mt-0.5 leading-snug">Uses HTTPS on
+                                                port 443, harder to block</span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label
+                                    class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group"
+                                    id="card-TLS">
+                                    <input type="radio" name="dnsProtocol" value="TLS" class="peer sr-only">
+                                    <div class="flex items-start w-full gap-3">
+                                        <i data-lucide="shield-check"
+                                            class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors mt-0.5"></i>
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-semibold text-slate-900">DNS-over-TLS <span
+                                                    class="text-slate-500 font-bold whitespace-nowrap ml-1">(DoT)</span></span>
+                                            <span class="block text-xs text-slate-500 mt-0.5 leading-snug">Uses TLS on
+                                                port 853, dedicated protocol</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="serverURL"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span id="urlLabel">Server URL (DoH)</span>
+                                <span class="flex items-center gap-2">
+                                    <span
+                                        class="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                                    <div class="relative group cursor-help">
+                                        <i data-lucide="info"
+                                            class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                        <div
+                                            class="absolute bottom-full right-[-4px] mb-2 w-48 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                            <span id="urlHelpText"></span>
+                                            <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </label>
+                            <input type="text" id="serverURL"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-mono text-sm"
+                                placeholder="https://cloudflare-dns.com/dns-query" required>
+                        </div>
+
+                        <div>
+                            <label for="serverAddresses"
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Server Addresses</span>
+                                <div class="relative group cursor-help">
+                                    <i data-lucide="info"
+                                        class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                    <div
+                                        class="absolute bottom-full right-[-4px] mb-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                        Can help with the initial connection before DNS resolution. One IPv4/IPv6
+                                        address per line.
+                                        <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <textarea id="serverAddresses"
+                                class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-mono text-sm resize-y min-h-[60px]"
+                                placeholder="1.1.1.1&#10;1.0.0.1" rows="2"></textarea>
+                        </div>
+
+                        <!-- DNS Additional Options Accordion -->
+                        <div>
+                            <button type="button" id="dnsAdditionalBtn"
+                                onclick="toggleAccordion('dnsAdditional', 'dnsAdditionalIcon')"
+                                class="w-full flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider py-1 hover:text-slate-700 transition-colors">
+                                <span>Additional Options</span>
+                                <i data-lucide="chevron-down" id="dnsAdditionalIcon"
+                                    class="w-3.5 h-3.5 transition-transform duration-200"></i>
+                            </button>
+                            <div id="dnsAdditional" class="hidden space-y-4 mt-3">
+
+                                <div>
+                                    <label
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span>DNS Failover</span>
+                                        <div class="relative group cursor-help">
+                                            <i data-lucide="info"
+                                                class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                            <div
+                                                class="absolute bottom-full right-[-4px] mb-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                                Fallback to unencrypted DNS provided by the network when the configured
+                                                server is unreachable.
+                                                <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label
+                                        class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                        <input type="checkbox" id="allowFailover" class="peer sr-only">
+                                        <div class="flex items-center justify-between w-full h-full">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="shield-alert"
+                                                    class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-slate-900">Allow
+                                                        Failover</span>
+                                                    <span
+                                                        class="block text-xs text-slate-500 mt-0.5 leading-snug">Avoids
+                                                        internet loss on encrypted DNS failures</span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 transition-colors group-has-[:checked]:bg-brand-600">
+                                                <span
+                                                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-6"></span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span>DNS Disablement</span>
+                                        <div class="relative group cursor-help">
+                                            <i data-lucide="info"
+                                                class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                            <div
+                                                class="absolute bottom-full right-[-4px] mb-2 w-64 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                                When enabled, users cannot disable the encrypted DNS settings. Use with
+                                                caution on managed devices.
+                                                <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <label
+                                        class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                        <input type="checkbox" id="prohibitDisablement" class="peer sr-only">
+                                        <div class="flex items-center justify-between w-full h-full">
+                                            <div class="flex items-center gap-3">
+                                                <i data-lucide="lock"
+                                                    class="w-5 h-5 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                                                <div class="flex flex-col">
+                                                    <span class="text-sm font-semibold text-slate-900">Prohibit
+                                                        Disablement</span>
+                                                    <span
+                                                        class="block text-xs text-slate-500 mt-0.5 leading-snug">Prohibits
+                                                        disabling encrypted DNS</span>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 transition-colors group-has-[:checked]:bg-brand-600">
+                                                <span
+                                                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-6"></span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span>Network Interfaces</span>
+                                        <div class="relative group cursor-help">
+                                            <i data-lucide="info"
+                                                class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                            <div
+                                                class="absolute bottom-full right-[-4px] mb-2 w-64 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                                Use encrypted DNS with selected network interfaces. When Wi-Fi is
+                                                disabled, Excluded Wi-Fi Networks is also unavailable.
+                                                <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <label
+                                            class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                            <input type="checkbox" id="ifaceWifi" class="peer sr-only" checked
+                                                onchange="document.getElementById('excludedWifi').disabled = !this.checked; if(!this.checked) document.getElementById('excludedWifi').value = '';">
+                                            <div class="flex items-center gap-2 w-full">
+                                                <i data-lucide="wifi"
+                                                    class="w-4 h-4 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                                                <span class="text-sm font-semibold text-slate-900">Wi-Fi</span>
+                                            </div>
+                                        </label>
+                                        <label
+                                            class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                            <input type="checkbox" id="ifaceCellular" class="peer sr-only" checked>
+                                            <div class="flex items-center gap-2 w-full">
+                                                <i data-lucide="signal"
+                                                    class="w-4 h-4 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                                                <span class="text-sm font-semibold text-slate-900">Cellular</span>
+                                            </div>
+                                        </label>
+                                        <label
+                                            class="relative flex cursor-pointer rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                                            <input type="checkbox" id="ifaceEthernet" class="peer sr-only" checked>
+                                            <div class="flex items-center gap-2 w-full">
+                                                <i data-lucide="network"
+                                                    class="w-4 h-4 text-slate-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                                                <span class="text-sm font-semibold text-slate-900">Ethernet</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="excludedDomains"
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span>Excluded Domains</span>
+                                        <div class="relative group cursor-help">
+                                            <i data-lucide="info"
+                                                class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                            <div
+                                                class="absolute bottom-full right-[-4px] mb-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                                Disable encrypted DNS for these specified domains. One domain per line.
+                                                <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <textarea id="excludedDomains"
+                                        class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-mono text-sm resize-y min-h-[80px]"
+                                        placeholder="google.com&#10;dns.senkl.eu" rows="2"></textarea>
+                                </div>
+
+                                <div>
+                                    <label for="excludedWifi"
+                                        class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span>Excluded Wi-Fi Networks</span>
+                                        <div class="relative group cursor-help">
+                                            <i data-lucide="info"
+                                                class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors"></i>
+                                            <div
+                                                class="absolute bottom-full right-[-4px] mb-2 w-56 p-2 bg-slate-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                                                Disable encrypted DNS on these specific Wi-Fi networks. One SSID per
+                                                line.
+                                                <div class="absolute -bottom-1 right-2 w-2 h-2 bg-slate-800 rotate-45">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <textarea id="excludedWifi"
+                                        class="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-slate-400 font-mono text-sm resize-y min-h-[80px] disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                                        placeholder="MyHomeNetwork&#10;Silence of the LANs" rows="2"></textarea>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </main>
+
+        <!-- Bottom Action Bar -->
+        <div
+            class="bg-white border-t border-slate-200 p-3 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+
+            <button type="submit" form="profile-form" id="generateBtn"
+                class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
+                <span id="btnContent" class="flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4" id="btnIcon"></i>
+                    <span id="btnText">Generate .mobileconfig</span>
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            setupMobileHeight();
+        });
+
+        function setupMobileHeight() {
+            const app = document.getElementById('app-wrapper');
+            if (!app) return;
+
+            function setHeight() {
+                if (window.innerWidth >= 640) {
+                    app.style.height = '';
+                    return;
+                }
+                if (document.activeElement &&
+                    (document.activeElement.tagName === 'INPUT' ||
+                        document.activeElement.tagName === 'TEXTAREA')) {
+                    return;
+                }
+                app.style.height = `${window.innerHeight}px`;
+            }
+
+            window.addEventListener('resize', setHeight);
+            setHeight();
+        }
+
+        function toggleAccordion(contentId, iconId) {
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById(iconId);
+            const isHidden = content.classList.contains('hidden');
+            content.classList.toggle('hidden', !isHidden);
+            icon.style.transform = isHidden ? 'rotate(180deg)' : '';
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16).toUpperCase();
+            });
+        }
+
+        function escapeXml(unsafe) {
+            return unsafe.replace(/[<>&'"]/g, function (c) {
+                switch (c) {
+                    case '<': return '&lt;';
+                    case '>': return '&gt;';
+                    case '&': return '&amp;';
+                    case "'": return '&apos;';
+                    case '"': return '&quot;';
+                }
+            });
+        }
+
+        function generateMobileConfig(data) {
+            const payloadUUID = generateUUID();
+            const profileUUID = generateUUID();
+
+            const profileIdentifier = data.profileIdentifier || `com.apple.dns.${payloadUUID}`;
+
+            const ips = data.serverAddresses.split('\n').map(ip => ip.trim()).filter(ip => ip !== '');
+            let ipsXml = '';
+            if (ips.length > 0) {
+                const ipLines = ips.map(ip => '                    <string>' + escapeXml(ip) + '</string>').join('\n');
+                ipsXml = '                <key>ServerAddresses</key>\n                <array>\n' + ipLines + '\n                </array>';
+            }
+
+            const config = [
+                '<?xml version="1.0" encoding="UTF-8"?>',
+                '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+                '<plist version="1.0">',
+                '<dict>',
+                '    <key>PayloadDisplayName</key>',
+                '    <string>' + escapeXml(data.profileName) + '</string>',
+                '    <key>PayloadDescription</key>',
+                '    <string>' + escapeXml(data.profileDescription || 'Adds ' + data.profileName + ' HTTPS/TLS DNS configuration.') + '</string>',
+                '    <key>PayloadIdentifier</key>',
+                '    <string>' + escapeXml(profileIdentifier) + '</string>',
+                data.organizationName ? ('    <key>PayloadOrganization</key>\n    <string>' + escapeXml(data.organizationName) + '</string>') : null,
+                '    <key>PayloadRemovalDisallowed</key>',
+                data.payloadRemovalDisallowed ? '    <true/>' : '    <false/>',
+                data.payloadScope === 'User' ? '    <key>PayloadScope</key>\n    <string>User</string>' : null,
+                '    <key>PayloadType</key>',
+                '    <string>Configuration</string>',
+                '    <key>PayloadUUID</key>',
+                '    <string>' + profileUUID + '</string>',
+                '    <key>PayloadVersion</key>',
+                '    <integer>1</integer>',
+                '    <key>PayloadContent</key>',
+                '    <array>',
+                '        <dict>',
+                '            <key>DNSSettings</key>',
+                '            <dict>',
+                '                <key>DNSProtocol</key>',
+                '                <string>' + escapeXml(data.dnsProtocol) + '</string>',
+                data.dnsProtocol === 'HTTPS' ? '                <key>ServerURL</key>' : '                <key>ServerName</key>',
+                '                <string>' + escapeXml(data.serverURL) + '</string>'];
+
+            if (data.allowFailover) {
+                config.push(
+                    '                <key>AllowFailover</key>',
+                    '                <true/>'
+                );
+            }
+
+            if (ipsXml) {
+                config.push(ipsXml);
+            }
+
+            const excludedWifi = data.excludedWifi.split('\n').map(s => s.trim()).filter(s => s !== '');
+            const excludedDomains = data.excludedDomains.split('\n').map(s => s.trim()).filter(s => s !== '');
+            const interfaces = [];
+            if (data.ifaceWifi) interfaces.push('WiFi');
+            if (data.ifaceCellular) interfaces.push('Cellular');
+            if (data.ifaceEthernet) interfaces.push('Ethernet');
+
+            const hasRules = excludedWifi.length > 0 || excludedDomains.length > 0 || interfaces.length < 3;
+
+            if (hasRules) {
+                config.push('                <key>OnDemandRules</key>');
+                config.push('                <array>');
+
+                if (excludedWifi.length > 0) {
+                    config.push('                    <dict>');
+                    config.push('                        <key>Action</key>');
+                    config.push('                        <string>Disconnect</string>');
+                    config.push('                        <key>InterfaceTypeMatch</key>');
+                    config.push('                        <string>WiFi</string>');
+                    config.push('                        <key>SSIDMatch</key>');
+                    config.push('                        <array>');
+                    excludedWifi.forEach(ssid => {
+                        config.push('                            <string>' + escapeXml(ssid) + '</string>');
+                    });
+                    config.push('                        </array>');
+                    config.push('                    </dict>');
+                }
+
+                interfaces.forEach(iface => {
+                    config.push('                    <dict>');
+                    if (excludedDomains.length > 0) {
+                        config.push('                        <key>Action</key>');
+                        config.push('                        <string>EvaluateConnection</string>');
+                        config.push('                        <key>ActionParameters</key>');
+                        config.push('                        <array>');
+                        config.push('                            <dict>');
+                        config.push('                                <key>DomainAction</key>');
+                        config.push('                                <string>NeverConnect</string>');
+                        config.push('                                <key>DomainMatch</key>');
+                        config.push('                                <array>');
+                        excludedDomains.forEach(domain => {
+                            config.push('                                    <string>' + escapeXml(domain) + '</string>');
+                        });
+                        config.push('                                </array>');
+                        config.push('                            </dict>');
+                        config.push('                        </array>');
+                    } else {
+                        config.push('                        <key>Action</key>');
+                        config.push('                        <string>Connect</string>');
+                    }
+                    config.push('                        <key>InterfaceTypeMatch</key>');
+                    config.push('                        <string>' + iface + '</string>');
+                    config.push('                    </dict>');
+                });
+
+                config.push('                    <dict>');
+                config.push('                        <key>Action</key>');
+                config.push('                        <string>Disconnect</string>');
+                config.push('                    </dict>');
+
+                config.push('                </array>');
+            }
+
+            config.push(
+                '            </dict>',
+                '            <key>PayloadDisplayName</key>',
+                '            <string>' + escapeXml(data.dnsName || data.profileName + ' DNS') + '</string>',
+                '            <key>PayloadDescription</key>',
+                '            <string>' + escapeXml(data.dnsDescription || 'Configures device to use Encrypted DNS.') + '</string>',
+                '            <key>PayloadIdentifier</key>',
+                '            <string>' + escapeXml(data.dnsIdentifier || 'com.apple.dnsSettings.managed.' + payloadUUID) + '</string>',
+                '            <key>PayloadType</key>',
+                '            <string>com.apple.dnsSettings.managed</string>',
+                '            <key>PayloadUUID</key>',
+                '            <string>' + payloadUUID + '</string>',
+                '            <key>PayloadVersion</key>',
+                '            <integer>1</integer>',
+                '            <key>ProhibitDisablement</key>',
+                data.prohibitDisablement ? '            <true/>' : '            <false/>',
+                '        </dict>',
+                '    </array>',
+                '</dict>',
+                '</plist>'
+            );
+
+            return config.filter(line => line !== null).join('\n');
+        }
+
+        function downloadConfig(filename, content) {
+            const blob = new Blob([content], { type: 'application/x-apple-aspen-config' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        const protocolRadios = document.querySelectorAll('input[name="dnsProtocol"]');
+        const urlLabel = document.getElementById('urlLabel');
+        const serverURL = document.getElementById('serverURL');
+        const urlHelpText = document.getElementById('urlHelpText');
+
+        function updateProtocolUI(protocol) {
+            if (protocol === 'HTTPS') {
+                urlLabel.textContent = 'Server URL (DoH)';
+                serverURL.placeholder = 'https://cloudflare-dns.com/dns-query';
+                urlHelpText.textContent = 'The HTTPS endpoint of your DNS provider.';
+            } else {
+                urlLabel.textContent = 'Server Name (DoT)';
+                serverURL.placeholder = '1dot1dot1dot1.cloudflare-dns.com';
+                urlHelpText.textContent = 'The TLS hostname of your DNS provider.';
+            }
+        }
+
+        protocolRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                updateProtocolUI(e.target.value);
+            });
+        });
+
+        updateProtocolUI(document.querySelector('input[name="dnsProtocol"]:checked').value);
+
+        document.getElementById('profile-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const profileName = document.getElementById('profileName').value.trim();
+            const profileDescription = document.getElementById('profileDescription').value.trim();
+            const profileIdentifier = document.getElementById('profileIdentifier').value.trim();
+            const organizationName = document.getElementById('organizationName').value.trim();
+            const payloadScope = document.querySelector('input[name="payloadScope"]:checked').value;
+            const payloadRemovalDisallowed = document.getElementById('payloadRemovalDisallowed').checked;
+            const dnsName = document.getElementById('dnsName').value.trim();
+            const dnsDescription = document.getElementById('dnsDescription').value.trim();
+            const dnsIdentifier = document.getElementById('dnsIdentifier').value.trim();
+            const dnsProtocol = document.querySelector('input[name="dnsProtocol"]:checked').value;
+            const serverURL = document.getElementById('serverURL').value.trim();
+            const serverAddresses = document.getElementById('serverAddresses').value;
+            const allowFailover = document.getElementById('allowFailover').checked;
+            const prohibitDisablement = document.getElementById('prohibitDisablement').checked;
+            const ifaceWifi = document.getElementById('ifaceWifi').checked;
+            const ifaceCellular = document.getElementById('ifaceCellular').checked;
+            const ifaceEthernet = document.getElementById('ifaceEthernet').checked;
+            const excludedDomains = document.getElementById('excludedDomains').value;
+            const excludedWifi = document.getElementById('excludedWifi').value;
+
+            const configXml = generateMobileConfig({
+                profileName, profileDescription, profileIdentifier, organizationName,
+                payloadScope, payloadRemovalDisallowed,
+                dnsName, dnsDescription, dnsIdentifier,
+                dnsProtocol, serverURL, serverAddresses,
+                allowFailover, prohibitDisablement,
+                ifaceWifi, ifaceCellular, ifaceEthernet,
+                excludedDomains, excludedWifi
+            });
+
+            const filename = profileName.replace(/\s+/g, '_').toLowerCase() + '.mobileconfig';
+            downloadConfig(filename, configXml);
+
+            const btn = document.getElementById('generateBtn');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnText = document.getElementById('btnText');
+
+            const originalIconName = btnIcon.getAttribute('data-lucide');
+            const originalText = btnText.textContent;
+
+            btn.classList.remove('bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20');
+            btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20');
+
+            btnIcon.setAttribute('data-lucide', 'check');
+            btnText.textContent = 'Downloaded!';
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20');
+                btn.classList.add('bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20');
+                btnIcon.setAttribute('data-lucide', originalIconName);
+                btnText.textContent = originalText;
+                lucide.createIcons();
+            }, 2500);
+        });
+    </script>
+</body>
+
+</html>
