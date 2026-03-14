@@ -2078,6 +2078,10 @@
 
         // Handle clicks on Speed Dial Links
         linksContainer.addEventListener('click', (e) => {
+            if (document.activeElement === mainInput) {
+                e.preventDefault();
+                return;
+            }
             const link = e.target.closest('a');
             if (link && preferences.openLinkNewTab) {
                 clearAndResetInput();
