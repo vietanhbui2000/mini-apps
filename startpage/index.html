@@ -2077,26 +2077,24 @@
         });
 
         // Handle clicks on Speed Dial Links
-        const handleSpeedDialInteraction = (e) => {
+        // 1. Touch Interception: On mobile, if input is focused, the first tap ONLY blurs the input.
+        linksContainer.addEventListener('touchstart', (e) => {
             if (document.activeElement === mainInput) {
                 e.preventDefault();
                 e.stopPropagation();
                 mainInput.blur();
-                return;
             }
+        }, { passive: false, capture: true });
 
-            if (e.type === 'click') {
-                const link = e.target.closest('a');
-                if (link && preferences.openLinkNewTab) {
+        // 2. Click Handling: Desktop clicks, or Mobile taps when input is NOT focused.
+        linksContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link) {
+                if (preferences.openLinkNewTab) {
                     clearAndResetInput();
                 }
             }
-        };
-
-        // Capture phase listeners
-        linksContainer.addEventListener('touchstart', handleSpeedDialInteraction, { passive: false, capture: true });
-        linksContainer.addEventListener('mousedown', handleSpeedDialInteraction, { capture: true });
-        linksContainer.addEventListener('click', handleSpeedDialInteraction, { capture: true });
+        });
 
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -2555,10 +2553,18 @@
             }
         });
 
-        // --- History State Cleanup ---
+        // --- History State & Cache Cleanup ---
         if (history.state && (history.state.modal === 'settings' || history.state.modal === 'help')) {
             history.replaceState(null, '', window.location.href);
         }
+
+        window.addEventListener('pageshow', (e) => {
+            if (e.persisted) {
+                if (document.activeElement) document.activeElement.blur();
+                mainInput.blur();
+                renderLinks();
+            }
+        });
     </script>
 </body>
 
