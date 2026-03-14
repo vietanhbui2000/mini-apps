@@ -2089,10 +2089,14 @@
         linksContainer.addEventListener('touchstart', blockTouches, { passive: false, capture: true });
 
         linksContainer.addEventListener('click', (e) => {
-            if (document.activeElement === mainInput) return;
             const link = e.target.closest('a');
-            if (link && preferences.openLinkNewTab) {
-                clearAndResetInput();
+            if (document.activeElement === mainInput) return;
+
+            if (link) {
+                setTimeout(() => link.blur(), 50);
+                if (preferences.openLinkNewTab) {
+                    clearAndResetInput();
+                }
             }
         });
 
