@@ -2077,28 +2077,26 @@
         });
 
         // Handle clicks on Speed Dial Links
-        const blockTouches = (e) => {
+        const handleSpeedDialInteraction = (e) => {
             if (document.activeElement === mainInput) {
                 e.preventDefault();
                 e.stopPropagation();
                 mainInput.blur();
                 return;
             }
-        };
-        linksContainer.addEventListener('click', blockTouches, true);
-        linksContainer.addEventListener('touchstart', blockTouches, { passive: false, capture: true });
 
-        linksContainer.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (document.activeElement === mainInput) return;
-
-            if (link) {
-                setTimeout(() => link.blur(), 50);
-                if (preferences.openLinkNewTab) {
+            if (e.type === 'click') {
+                const link = e.target.closest('a');
+                if (link && preferences.openLinkNewTab) {
                     clearAndResetInput();
                 }
             }
-        });
+        };
+
+        // Capture phase listeners
+        linksContainer.addEventListener('touchstart', handleSpeedDialInteraction, { passive: false, capture: true });
+        linksContainer.addEventListener('mousedown', handleSpeedDialInteraction, { capture: true });
+        linksContainer.addEventListener('click', handleSpeedDialInteraction, { capture: true });
 
         mainForm.addEventListener('submit', (e) => {
             e.preventDefault();
