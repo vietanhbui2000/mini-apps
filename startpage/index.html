@@ -152,6 +152,28 @@
         .animate-shake {
             animation: shake 0.2s ease-in-out 2;
         }
+
+        /* Speed Dial Focus State */
+        body:has(#main-input:focus) #links-container > * {
+            opacity: 0.4;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+
+        /* On mobile (touch devices), disable interaction when focused to prevent mistouch */
+        @media (hover: none) and (pointer: coarse) {
+            body:has(#main-input:focus) #links-container {
+                pointer-events: none;
+            }
+        }
+
+        /* On desktop, restore normal state when hovered */
+        @media (hover: hover) and (pointer: fine) {
+            body:has(#main-input:focus) #links-container > *:hover {
+                opacity: 1;
+                filter: grayscale(0%);
+            }
+        }
     </style>
 </head>
 
@@ -1136,14 +1158,13 @@
                        class="group relative flex items-center justify-center p-3 rounded-xl 
                               bg-white dark:bg-zinc-800 
                               border border-zinc-200 dark:border-zinc-700 
-                              hover:border-zinc-300 dark:hover:border-zinc-600
-                              hover:scale-110 transition-all duration-300 shadow-sm
-                              aspect-square w-full focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                        <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 group-hover:opacity-100" aria-hidden="true">
+                               [@media(hover:hover)]:hover:border-zinc-300 [@media(hover:hover)]:dark:hover:border-zinc-600
+                               [@media(hover:hover)]:hover:scale-110 transition-all duration-300 shadow-sm
+                              aspect-square w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50">
+                        <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 [@media(hover:hover)]:group-hover:opacity-100" aria-hidden="true">
                          
                         <span class="sr-only">${link.name}</span>
-                        <!-- Tooltip (hover only, not on focus) -->
-                        <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-focus:opacity-0 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 group-hover:translate-y-0 flex flex-col items-center gap-0.5">
+                        <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus:opacity-0 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 [@media(hover:hover)]:group-hover:translate-y-0 flex flex-col items-center gap-0.5">
                             <span>${link.name}</span>
                             ${showHotkeys ? `<span class="hidden sm:inline text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
                         </div>
@@ -1155,18 +1176,18 @@
                        class="group flex items-center gap-3 p-3 rounded-xl 
                               bg-white/50 dark:bg-zinc-900/30 
                               border border-zinc-200/50 dark:border-zinc-800/50 
-                              hover:bg-white/80 dark:hover:bg-zinc-800/50 
-                              hover:border-zinc-300 dark:hover:border-zinc-700 
+                              [@media(hover:hover)]:hover:bg-white/80 [@media(hover:hover)]:dark:hover:bg-zinc-800/50 
+                              [@media(hover:hover)]:hover:border-zinc-300 [@media(hover:hover)]:dark:hover:border-zinc-700 
                               transition-all duration-200 shadow-sm dark:shadow-none relative
-                              focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                              focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50">
                         ${showHotkeys ? `
-                        <div class="hidden sm:block absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="hidden sm:block absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity">
                             ${hotkeyDisplay}
                         </div>` : ''}
                         <div class="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow-sm shrink-0">
-                            <img src="${getFavicon(link.url)}" alt="${link.name}" class="w-4 h-4 rounded-sm opacity-90 group-hover:opacity-100">
+                            <img src="${getFavicon(link.url)}" alt="${link.name}" class="w-4 h-4 rounded-sm opacity-90 [@media(hover:hover)]:group-hover:opacity-100">
                         </div>
-                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 truncate pr-4">
+                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400 [@media(hover:hover)]:group-hover:text-zinc-900 [@media(hover:hover)]:dark:group-hover:text-zinc-200 truncate pr-4">
                             ${link.name}
                         </span>
                     </a>
@@ -2297,8 +2318,8 @@
 
             } else {
                 activeActionEngine = null;
-                actionSpace.classList.add('sm:inline-flex');
-                actionSpace.classList.remove('hidden');
+                actionSpace.classList.add('hidden', 'sm:inline-flex');
+                actionSpace.classList.remove('flex');
                 actionEnter.classList.add('hidden');
                 actionEnter.classList.remove('flex');
             }
