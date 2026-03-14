@@ -154,7 +154,7 @@
         }
 
         /* Speed Dial Focus State */
-        body:has(#main-input:focus) #links-container > * {
+        body:has(#main-input:focus) #links-container>* {
             opacity: 0.4;
             filter: grayscale(100%);
             transition: all 0.3s ease;
@@ -162,14 +162,14 @@
 
         /* On mobile (touch devices), disable interaction when focused to prevent mistouch */
         @media (hover: none) and (pointer: coarse) {
-            body:has(#main-input:focus) #links-container {
+            body:has(#main-input:focus) #links-container>* {
                 pointer-events: none;
             }
         }
 
         /* On desktop, restore normal state when hovered */
         @media (hover: hover) and (pointer: fine) {
-            body:has(#main-input:focus) #links-container > *:hover {
+            body:has(#main-input:focus) #links-container>*:hover {
                 opacity: 1;
                 filter: grayscale(0%);
             }
@@ -320,10 +320,10 @@
                         class="bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4 border border-zinc-100 dark:border-zinc-800 space-y-3">
                         <div class="flex items-start gap-3">
                             <span
-                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">0-9</span>
+                                class="shrink-0 bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded text-xs font-mono mt-0.5">0–9</span>
                             <div class="text-sm text-zinc-600 dark:text-zinc-400">
                                 <strong class="text-zinc-900 dark:text-zinc-200">Hotkeys:</strong> Press Alt/Option +
-                                Number Keys (1-9, and 0 for the 10th item) to instantly open links.
+                                Number Keys (1–9, and 0 for the 10th item) to instantly open links.
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -661,8 +661,8 @@
                                 <label class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Hotkey Mode</label>
                                 <select id="setting-link-hotkey-mode"
                                     class="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
-                                    <option value="alt">Alt/Option + 0-9</option>
-                                    <option value="numeric">Number Keys only (0-9)</option>
+                                    <option value="alt">Alt/Option + 0–9</option>
+                                    <option value="numeric">Number Keys only (0–9)</option>
                                     <option value="disabled">Disabled</option>
                                 </select>
                                 <p class="text-[10px] text-zinc-400 dark:text-zinc-500">
@@ -980,8 +980,8 @@
         }
 
         /**
-         * Converts a numeric key (0-9) to a speed dial link index.
-         * Keys 1-9 map to indices 0-8, key 0 maps to index 9.
+         * Converts a numeric key (0–9) to a speed dial link index.
+         * Keys 1–9 map to indices 0–8, key 0 maps to index 9.
          * Returns -1 if the key is not a valid number or out of range.
          */
         function getLinkIndexFromNumericKey(key) {
@@ -2510,7 +2510,7 @@
                 }
             }
 
-            // Speed Dial Keys (0-9)
+            // Speed Dial Keys (0–9)
             if (activeTag !== 'INPUT') {
                 const mode = preferences.linkHotkeyMode;
                 if (mode === 'disabled') return;
