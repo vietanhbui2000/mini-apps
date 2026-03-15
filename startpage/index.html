@@ -17,7 +17,6 @@
     <title>Startpage</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="startpage_icon_any_x192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f5f5f5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
@@ -175,10 +174,29 @@
             }
         }
 
-        /* Prevent hover visual effects (scale, bg, border, opacity changes) when touch is active */
+        /* Prevent stuck hover visual effects when hover is inactive (touch or window blur) */
         body:not(.can-hover) #links-container a:hover {
             transform: none !important;
             border-color: inherit !important;
+        }
+
+        body:not(.can-hover) #links-container a:hover * {
+            opacity: revert !important;
+            color: inherit !important;
+            translate: revert !important;
+        }
+
+        body:not(.can-hover) #action-btn:hover #action-space,
+        body:not(.can-hover) #action-btn:hover #action-enter {
+            box-shadow: none !important;
+            border-color: inherit !important;
+        }
+
+        body:not(.can-hover) #help-toggle:hover,
+        body:not(.can-hover) #theme-toggle:hover,
+        body:not(.can-hover) #settings-toggle:hover {
+            background-color: transparent !important;
+            color: inherit !important;
         }
     </style>
 </head>
@@ -1169,7 +1187,7 @@
                         <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 [@media(hover:hover)]:group-hover:opacity-100" aria-hidden="true">
                          
                         <span class="sr-only">${link.name}</span>
-                        <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 [@media(hover:hover)]:group-hover:translate-y-0 flex flex-col items-center gap-0.5">
+                        <div class="absolute top-full mt-3 left-1/2 -translate-x-1/2 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 flex flex-col items-center gap-0.5">
                             <span>${link.name}</span>
                             ${showHotkeys ? `<span class="hidden sm:inline text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
                         </div>
@@ -2509,6 +2527,12 @@
                 }
             }
 
+            // Backspace on empty input: unfocus like Escape
+            if (e.key === 'Backspace' && document.activeElement === mainInput && mainInput.value === '') {
+                e.preventDefault();
+                mainInput.blur();
+            }
+
             // Tab Key Trigger for Search Actions
             if (e.key === 'Tab' && activeTag === 'INPUT' && document.activeElement === mainInput) {
                 if (preferences.engineTriggerKey === 'tab' || preferences.engineTriggerKey === 'both') {
@@ -2566,8 +2590,7 @@
         window.addEventListener('pageshow', (e) => {
             if (e.persisted) {
                 document.body.classList.remove('can-hover');
-                if (document.activeElement) document.activeElement.blur();
-                mainInput.blur();
+                clearAndResetInput();
                 renderLinks();
             }
         });
@@ -2577,6 +2600,22 @@
         document.addEventListener('touchstart', () => {
             document.body.classList.remove('can-hover');
         }, { passive: true });
+
+        // Remove can-hover and blur input when page becomes hidden (e.g. tab switch)
+        // Temporarily disable transition so shadow disappears instantly (no flash on return)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                document.body.classList.remove('can-hover');
+                mainInput.blur();
+                const inputWrapper = mainInput.parentElement;
+                inputWrapper.style.transition = 'none';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        inputWrapper.style.transition = '';
+                    });
+                });
+            }
+        });
 
         // Re-enable hover effects when a real mouse is detected
         document.addEventListener('mousemove', (e) => {
