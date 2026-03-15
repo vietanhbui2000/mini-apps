@@ -174,30 +174,7 @@
             }
         }
 
-        /* Prevent stuck hover visual effects when hover is inactive (touch or window blur) */
-        body:not(.can-hover) #links-container a:hover {
-            transform: none !important;
-            border-color: inherit !important;
-        }
 
-        body:not(.can-hover) #links-container a:hover * {
-            opacity: revert !important;
-            color: inherit !important;
-            translate: revert !important;
-        }
-
-        body:not(.can-hover) #action-btn:hover #action-space,
-        body:not(.can-hover) #action-btn:hover #action-enter {
-            box-shadow: none !important;
-            border-color: inherit !important;
-        }
-
-        body:not(.can-hover) #help-toggle:hover,
-        body:not(.can-hover) #theme-toggle:hover,
-        body:not(.can-hover) #settings-toggle:hover {
-            background-color: transparent !important;
-            color: inherit !important;
-        }
     </style>
 </head>
 
@@ -235,7 +212,7 @@
                     class="group/action shrink-0 pr-5 flex items-center h-full cursor-pointer transition-all">
                     <!-- Action Space -->
                     <kbd id="action-space"
-                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-500/10 rounded border border-zinc-200 dark:border-zinc-500/20 transition-all [@media(hover:hover)]:group-hover/action:border-zinc-300 [@media(hover:hover)]:dark:group-hover/action:border-zinc-500/50 [@media(hover:hover)]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)] [@media(hover:hover)]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                        class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-500/10 rounded border border-zinc-200 dark:border-zinc-500/20 transition-all [.can-hover_&]:group-hover/action:border-zinc-300 [.can-hover_&]:dark:group-hover/action:border-zinc-500/50 [.can-hover_&]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)] [.can-hover_&]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                         Space
                     </kbd>
                     <!-- Action Enter -->
@@ -257,7 +234,7 @@
     <!-- Help Button -->
     <div class="fixed bottom-6 left-6 z-30">
         <button id="help-toggle"
-            class="p-2 rounded-lg text-zinc-400 [@media(hover:hover)]:hover:bg-zinc-200 [@media(hover:hover)]:dark:hover:bg-zinc-800 [@media(hover:hover)]:hover:text-zinc-800 [@media(hover:hover)]:dark:hover:text-zinc-300 transition-all"
+            class="p-2 rounded-lg text-zinc-400 [.can-hover_&]:hover:bg-zinc-200 [.can-hover_&]:dark:hover:bg-zinc-800 [.can-hover_&]:hover:text-zinc-800 [.can-hover_&]:dark:hover:text-zinc-300 transition-all"
             aria-label="Help">
             <i data-lucide="help-circle" class="w-4 h-4"></i>
         </button>
@@ -266,12 +243,12 @@
     <!-- Theme & Settings Buttons -->
     <div class="fixed bottom-6 right-6 z-30 flex gap-2">
         <button id="theme-toggle"
-            class="p-2 rounded-lg text-zinc-400 [@media(hover:hover)]:hover:bg-zinc-200 [@media(hover:hover)]:dark:hover:bg-zinc-800 [@media(hover:hover)]:hover:text-zinc-800 [@media(hover:hover)]:dark:hover:text-zinc-300 transition-all"
+            class="p-2 rounded-lg text-zinc-400 [.can-hover_&]:hover:bg-zinc-200 [.can-hover_&]:dark:hover:bg-zinc-800 [.can-hover_&]:hover:text-zinc-800 [.can-hover_&]:dark:hover:text-zinc-300 transition-all"
             aria-label="Toggle Theme">
             <!-- Icon injected via JS -->
         </button>
         <button id="settings-toggle"
-            class="p-2 rounded-lg text-zinc-400 [@media(hover:hover)]:hover:bg-zinc-200 [@media(hover:hover)]:dark:hover:bg-zinc-800 [@media(hover:hover)]:hover:text-zinc-800 [@media(hover:hover)]:dark:hover:text-zinc-300 transition-all"
+            class="p-2 rounded-lg text-zinc-400 [.can-hover_&]:hover:bg-zinc-200 [.can-hover_&]:dark:hover:bg-zinc-800 [.can-hover_&]:hover:text-zinc-800 [.can-hover_&]:dark:hover:text-zinc-300 transition-all"
             aria-label="Settings">
             <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
@@ -1181,13 +1158,13 @@
                        class="group relative flex items-center justify-center p-3 rounded-xl 
                               bg-white dark:bg-zinc-800 
                               border border-zinc-200 dark:border-zinc-700 
-                               [@media(hover:hover)]:hover:border-zinc-300 [@media(hover:hover)]:dark:hover:border-zinc-600
-                               [@media(hover:hover)]:hover:scale-110 transition-all duration-300 shadow-sm
+                               [.can-hover_&]:hover:border-zinc-300 [.can-hover_&]:dark:hover:border-zinc-600
+                               [.can-hover_&]:hover:scale-110 transition-all duration-300 shadow-sm
                               aspect-square w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50">
-                        <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 [@media(hover:hover)]:group-hover:opacity-100" aria-hidden="true">
+                        <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 [.can-hover_&]:group-hover:opacity-100" aria-hidden="true">
                          
                         <span class="sr-only">${link.name}</span>
-                        <div class="absolute top-full mt-3 left-1/2 -translate-x-1/2 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 flex flex-col items-center gap-0.5">
+                        <div class="absolute top-full mt-3 left-1/2 -translate-x-1/2 opacity-0 [.can-hover_&]:group-hover:opacity-100 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 flex flex-col items-center gap-0.5">
                             <span>${link.name}</span>
                             ${showHotkeys ? `<span class="hidden sm:inline text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
                         </div>
@@ -1199,18 +1176,18 @@
                        class="group flex items-center gap-3 p-3 rounded-xl 
                               bg-white/50 dark:bg-zinc-900/30 
                               border border-zinc-200/50 dark:border-zinc-800/50 
-                              [@media(hover:hover)]:hover:bg-white/80 [@media(hover:hover)]:dark:hover:bg-zinc-800/50 
-                              [@media(hover:hover)]:hover:border-zinc-300 [@media(hover:hover)]:dark:hover:border-zinc-700 
+                              [.can-hover_&]:hover:bg-white/80 [.can-hover_&]:dark:hover:bg-zinc-800/50 
+                              [.can-hover_&]:hover:border-zinc-300 [.can-hover_&]:dark:hover:border-zinc-700 
                               transition-all duration-200 shadow-sm dark:shadow-none relative
                               focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50">
                         ${showHotkeys ? `
-                        <div class="hidden sm:block absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity">
+                        <div class="hidden sm:block absolute top-2 right-2 text-[10px] text-zinc-300 dark:text-zinc-700 font-mono font-normal opacity-0 [.can-hover_&]:group-hover:opacity-100 transition-opacity">
                             ${hotkeyDisplay}
                         </div>` : ''}
                         <div class="p-2 rounded-lg bg-white dark:bg-zinc-800 shadow-sm shrink-0">
-                            <img src="${getFavicon(link.url)}" alt="${link.name}" class="w-4 h-4 rounded-sm opacity-90 [@media(hover:hover)]:group-hover:opacity-100">
+                            <img src="${getFavicon(link.url)}" alt="${link.name}" class="w-4 h-4 rounded-sm opacity-90 [.can-hover_&]:group-hover:opacity-100">
                         </div>
-                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400 [@media(hover:hover)]:group-hover:text-zinc-900 [@media(hover:hover)]:dark:group-hover:text-zinc-200 truncate pr-4">
+                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400 [.can-hover_&]:group-hover:text-zinc-900 [.can-hover_&]:dark:group-hover:text-zinc-200 truncate pr-4">
                             ${link.name}
                         </span>
                     </a>
@@ -2270,7 +2247,7 @@
                 actionEnter.classList.remove('hidden');
 
                 // Base classes
-                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex', '[@media(hover:hover)]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)]', '[@media(hover:hover)]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]'];
+                const baseClasses = ['items-center', 'gap-1.5', 'px-2.5', 'py-1', 'text-xs', 'font-medium', 'rounded', 'border', 'transition-all', 'flex', '[.can-hover_&]:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.1)]', '[.can-hover_&]:dark:group-hover/action:shadow-[0_0_15px_rgba(0,0,0,0.5)]'];
 
                 // Colors
                 const searchClasses = ['text-blue-600', 'dark:text-blue-400', 'bg-blue-50', 'dark:bg-blue-500/10', 'border-blue-100', 'dark:border-blue-500/20', 'group-hover/action:border-blue-200', 'dark:group-hover/action:border-blue-500/50'];
