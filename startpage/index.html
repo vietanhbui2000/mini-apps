@@ -174,11 +174,17 @@
                 filter: grayscale(0%);
             }
         }
+
+        /* Prevent hover visual effects (scale, bg, border, opacity changes) when touch is active */
+        body:not(.can-hover) #links-container a:hover {
+            transform: none !important;
+            border-color: inherit !important;
+        }
     </style>
 </head>
 
 <body
-    class="min-h-screen bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 selection:bg-zinc-200 dark:selection:bg-zinc-800 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
+    class="can-hover min-h-screen bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 selection:bg-zinc-200 dark:selection:bg-zinc-800 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-300">
 
     <div class="w-full max-w-3xl space-y-12 mb-16">
 
@@ -1137,7 +1143,6 @@
                 return;
             }
 
-
             if (isIconMode) {
                 linksContainer.className = "animate-fade-in grid grid-cols-4 gap-4 [&>*:nth-child(9)]:col-start-2 md:grid md:grid-cols-10 md:gap-4 md:[&>*:nth-child(9)]:col-start-auto";
             } else {
@@ -1164,7 +1169,7 @@
                         <img src="${getFavicon(link.url)}" alt="" class="w-8 h-8 rounded-sm object-contain opacity-90 [@media(hover:hover)]:group-hover:opacity-100" aria-hidden="true">
                          
                         <span class="sr-only">${link.name}</span>
-                        <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus:opacity-0 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 [@media(hover:hover)]:group-hover:translate-y-0 flex flex-col items-center gap-0.5">
+                        <div class="absolute -bottom-14 left-1/2 -translate-x-1/2 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity duration-200 bg-zinc-800 text-white text-[10px] font-medium px-2 py-1.5 rounded shadow-lg whitespace-nowrap pointer-events-none z-10 translate-y-1 [@media(hover:hover)]:group-hover:translate-y-0 flex flex-col items-center gap-0.5">
                             <span>${link.name}</span>
                             ${showHotkeys ? `<span class="hidden sm:inline text-zinc-400 font-mono font-normal text-[9px]">${hotkeyDisplay}</span>` : ''}
                         </div>
@@ -2560,11 +2565,25 @@
 
         window.addEventListener('pageshow', (e) => {
             if (e.persisted) {
+                document.body.classList.remove('can-hover');
                 if (document.activeElement) document.activeElement.blur();
                 mainInput.blur();
                 renderLinks();
             }
         });
+
+        // --- Input Type Detection (Touch vs Mouse) ---
+        // Remove can-hover on touch to prevent sticky :hover states on mobile
+        document.addEventListener('touchstart', () => {
+            document.body.classList.remove('can-hover');
+        }, { passive: true });
+
+        // Re-enable hover effects when a real mouse is detected
+        document.addEventListener('mousemove', (e) => {
+            if (e.movementX !== 0 || e.movementY !== 0) {
+                document.body.classList.add('can-hover');
+            }
+        }, { passive: true });
     </script>
 </body>
 
