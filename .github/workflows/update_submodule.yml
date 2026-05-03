@@ -1,0 +1,30 @@
+name: Update `mini-apps` submodule in `vietanhbui2000`
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_submodule:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout `vietanhbui2000`
+        uses: actions/checkout@v6
+        with:
+          repository: vietanhbui2000/vietanhbui2000
+          token: ${{ secrets.VIETANHBUI2000_PAT }}
+          submodules: true
+
+      - name: Update `mini-apps` submodule to latest
+        run: |
+          git submodule update --remote mini-apps
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mini-apps
+          git diff --staged --quiet || git commit -m "update" -m "- updated \`mini-apps\` submodule"
+          git push
