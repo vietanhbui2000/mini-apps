@@ -3,88 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="An infinite blank page to write everything in your browser. Built with Claude & Cursor.">
+    <meta name="description" content="A clean, infinite blank page to write everything in your browser.">
     <title>Blank Page</title>
-    <meta name="theme-color" content="#f5f5f5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Blank Page">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" href="icons/icon-512x512.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts: Geist -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Prevent Theme Flicker (Anti-FOUC) -->
+    <script>
+        try {
+            const state = JSON.parse(localStorage.getItem('blank-page-single-v1') || '{}');
+            const isDark = state.theme === 'dark' || 
+                          (!state.theme && window.matchMedia('(prefers-color-scheme: dark)').matches) || 
+                          (state.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+    </script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    transitionTimingFunction: {
+                        'spring': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        
+        html.dark ::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+
+        /* Typing Dots Animation */
+        .typing-dots {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 12px;
+            padding: 0 4px;
+        }
+        .typing-dots span {
+            width: 5px;
+            height: 5px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: typing-bounce 1s infinite ease-in-out;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes typing-bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+            30% { transform: translateY(-3px); opacity: 1; }
+        }
+
+        @media (min-width: 640px) {
+            .wrapper-windowed {
+                border-radius: 1rem;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            }
+            html.dark .wrapper-windowed {
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+        }
+        
+        .wrapper-fullscreen {
+            height: 100vh;
+            border-radius: 0;
+            border: none !important;
+            box-shadow: none !important;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="title-area">
-                <h1>Blank Page</h1>
+
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 h-[100dvh] w-full flex justify-center overflow-hidden transition-colors duration-300">
+
+    <!-- Main App Container -->
+    <div id="app-wrapper" class="w-full bg-white dark:bg-slate-900 h-full flex flex-col relative overflow-hidden border-slate-200 dark:border-slate-800 transition-all duration-500 ease-spring mx-auto">
+
+        <!-- Header -->
+        <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20 border-b border-slate-100 dark:border-slate-800/80 p-4 sm:p-6 flex justify-between items-center flex-shrink-0 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
+                    <i data-lucide="pen-line" class="w-4 h-4"></i>
+                </div>
+                <h1 class="font-bold text-2xl tracking-tight text-slate-900 dark:text-white">Blank Page</h1>
             </div>
-            <div class="controls">
-                <button id="displayModeToggle" class="header-button" title="Display mode" aria-label="Toggle display mode">
-                    <i class="icon active fa-regular fa-face-smile-wink" id="autoModeIcon" aria-hidden="true"></i>
-                    <i class="icon fa-regular fa-sun" id="lightModeIcon" aria-hidden="true"></i>
-                    <i class="icon fa-regular fa-moon" id="darkModeIcon" aria-hidden="true"></i>
+            
+            <div class="flex items-center gap-1 sm:gap-2">
+                <!-- Size Toggle -->
+                <button id="toggleSize" class="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl transition-all" title="Change window size">
+                    <i data-lucide="sticky-note" id="icon-size-sticky-note" class="w-5 h-5 hidden"></i>
+                    <i data-lucide="file" id="icon-size-page" class="w-5 h-5 hidden"></i>
+                    <i data-lucide="maximize" id="icon-size-full-window" class="w-5 h-5 hidden"></i>
                 </button>
-                
-                <button id="screenModeToggle" class="header-button" title="Screen mode" aria-label="Toggle screen mode">
-                    <i class="icon active fa-regular fa-square-minus" id="centeredIcon" aria-hidden="true"></i>
-                    <i class="icon fa-regular fa-square-plus" id="fullscreenIcon" aria-hidden="true"></i>
+
+                <!-- Theme Toggle -->
+                <button id="toggleTheme" class="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl transition-all" title="Toggle theme">
+                    <i data-lucide="moon" id="icon-moon" class="w-5 h-5 hidden"></i>
+                    <i data-lucide="sun" id="icon-sun" class="w-5 h-5 hidden"></i>
+                    <i data-lucide="sun-moon" id="icon-sun-moon" class="w-5 h-5 hidden"></i>
                 </button>
             </div>
         </header>
-        
-        <!-- Tab Bar -->
-        <section class="tab-bar" id="tabBar" role="tablist" aria-label="Document tabs">
-            <div class="tabs-container" id="tabsContainer">
-                <!-- Tabs will be dynamically added here -->
-            </div>
-            <button class="add-tab-button" id="addTabButton" title="Add new tab" aria-label="Add new tab">
-                <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            </button>
-            <div class="more-menu-container">
-                <button class="more-button" id="moreButton" title="More options" aria-label="More options" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-                </button>
-                <div class="dropdown-menu" id="moreDropdown" aria-labelledby="moreButton" role="menu">
-                    <button class="dropdown-item" id="clearAllButton" role="menuitem">
-                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i> Clear All
-                    </button>
-                    <button class="dropdown-item" id="importButton" role="menuitem">
-                        <i class="fa-solid fa-file-import" aria-hidden="true"></i> Import File
-                    </button>
-                    <button class="dropdown-item" id="exportButton" role="menuitem">
-                        <i class="fa-solid fa-file-export" aria-hidden="true"></i> Export File
-                    </button>
-                </div>
-            </div>
-        </section>
-        
-        <main>
-            <textarea id="page" autofocus placeholder="Start typing..." spellcheck="true" aria-label="Text editor"></textarea>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 relative flex flex-col bg-slate-50/30 dark:bg-slate-900/50">
+            <textarea id="editor" autofocus class="flex-1 w-full h-full py-6 px-4 sm:px-6 bg-transparent border-none outline-none resize-none text-base leading-relaxed text-slate-800 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-600 transition-colors" placeholder="Start typing your thoughts..."></textarea>
         </main>
-        
-        <footer class="footer">
-            <div class="footer-left">
-                <button id="spellcheckToggle" class="footer-button" title="Check spelling?" aria-label="Toggle spell checking">
-                    <i class="icon active fa-regular fa-circle-check" id="spellcheckOnIcon" aria-hidden="true"></i>
-                    <i class="icon fa-regular fa-circle-dot" id="spellcheckOffIcon" aria-hidden="true"></i>
-                </button>
-                <div class="status" id="status" aria-live="polite">Saved</div>
-            </div>
+
+        <!-- Footer -->
+        <footer class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md z-20 border-t border-slate-100 dark:border-slate-800/80 px-4 sm:px-6 py-4 sm:py-3 flex justify-between items-center flex-shrink-0 transition-colors">
             
-            <div id="countDisplay" class="count-display" title="Click to toggle between characters/words count" role="button" tabindex="0" aria-label="Text count">0 characters</div>
+            <button id="toggleSpellcheck" class="p-2 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all flex items-center justify-center group" title="Toggle spell-check">
+                <i data-lucide="spell-check-2" id="spellcheckIcon" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+            </button>
+            
+            <!-- Count Display Button -->
+            <button id="toggleCountMode" class="flex items-center justify-center h-8 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 rounded-lg select-none w-auto min-w-0" title="Toggle words/characters count">
+                <span id="countDisplay" class="leading-none mt-[1px] whitespace-nowrap transition-colors">0 WORDS</span>
+            </button>
+            
         </footer>
     </div>
-    
-    <!-- PWA Install Prompt -->
-    <div id="installPrompt" role="dialog" aria-labelledby="installPromptTitle" aria-hidden="true">
-        <p id="installPromptTitle">Install Blank Page for offline use</p>
-        <button id="installButton">Install</button>
-        <button class="close" id="closePrompt" aria-label="Close install prompt">&times;</button>
-    </div>
 
-    <script src="app.js"></script>
+    <!-- Application Logic -->
+    <script>
+        // --- Constants & State ---
+        const STORAGE_KEY = 'blank-page-single-v1';
+        const SIZES = ['sticky-note', 'page', 'full-window'];
+        
+        let state = {
+            content: '',
+            countMode: 'words', // 'words' | 'characters'
+            sizeMode: 'page',     // 'sticky-note' | 'page' | 'full-window'
+            theme: 'system',    // 'light' | 'dark' | 'system'
+            spellcheck: true
+        };
+
+        let typingTimer = null;
+        let periodicSaveTimer = null;
+        let statusState = 'idle'; // 'idle' | 'typing' | 'saved' | 'error'
+
+        // --- DOM Elements ---
+        const els = {
+            wrapper: document.getElementById('app-wrapper'),
+            editor: document.getElementById('editor'),
+            countDisplay: document.getElementById('countDisplay'),
+            toggleSize: document.getElementById('toggleSize'),
+            toggleTheme: document.getElementById('toggleTheme'),
+            toggleSpellcheck: document.getElementById('toggleSpellcheck'),
+            toggleCountMode: document.getElementById('toggleCountMode')
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            applyTheme();
+            applySize();
+            
+            // Set value BEFORE applying spellcheck attribute to trick browser into evaluating it
+            els.editor.value = state.content;
+            applySpellcheck();
+            
+            setStatus('idle');
+            setupEventListeners();
+            setupMobileHeight();
+            lucide.createIcons();
+
+            // Small hack to wake up the browser's spellchecker engine on initial load
+            setTimeout(() => {
+                if (state.spellcheck && els.editor.value.length > 0) {
+                    const currentVal = els.editor.value;
+                    els.editor.value = currentVal + ' ';
+                    els.editor.value = currentVal;
+                }
+            }, 100);
+        });
+
+        // --- Event Listeners ---
+        function setupEventListeners() {
+            // Editor input with debounce and periodic saves
+            els.editor.addEventListener('input', () => {
+                if (statusState !== 'typing') setStatus('typing');
+                
+                // Reset the "stop typing" timer
+                if (typingTimer) clearTimeout(typingTimer);
+                
+                typingTimer = setTimeout(() => {
+                    saveContent();
+                    stopPeriodicSave();
+                }, 1000); // Save 1 second after typing stops
+
+                startPeriodicSave();
+            });
+
+            // Selection changes - using the highly accurate selectionchange API
+            const handleSelection = () => {
+                // Only update selection count if we aren't currently showing a saving animation
+                if (statusState === 'idle') {
+                    updateCountDisplay();
+                }
+            };
+            document.addEventListener('selectionchange', handleSelection);
+
+            // Toggles
+            els.toggleCountMode.addEventListener('click', () => {
+                state.countMode = state.countMode === 'words' ? 'characters' : 'words';
+                if (statusState === 'idle') {
+                    updateCountDisplay();
+                }
+                saveState();
+            });
+
+            els.toggleSize.addEventListener('click', () => {
+                const currentIndex = SIZES.indexOf(state.sizeMode);
+                state.sizeMode = SIZES[(currentIndex + 1) % SIZES.length];
+                applySize();
+                saveState();
+            });
+
+            els.toggleTheme.addEventListener('click', () => {
+                if (state.theme === 'system') state.theme = 'light';
+                else if (state.theme === 'light') state.theme = 'dark';
+                else state.theme = 'system';
+                
+                applyTheme();
+                saveState();
+            });
+
+            els.toggleSpellcheck.addEventListener('click', () => {
+                state.spellcheck = !state.spellcheck;
+                applySpellcheck();
+                saveState();
+            });
+
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    if (typingTimer) clearTimeout(typingTimer);
+                    saveContent();
+                    stopPeriodicSave();
+                }
+            });
+        }
+
+        // --- Core Logic ---
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } 
+            } catch (e) {
+                console.error("Failed to load state", e);
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error("Failed to save state", e);
+            }
+        }
+
+        function startPeriodicSave() {
+            if (!periodicSaveTimer) {
+                periodicSaveTimer = setInterval(() => {
+                    saveContent(true); // true = isPeriodic
+                }, 5000);
+            }
+        }
+
+        function stopPeriodicSave() {
+            if (periodicSaveTimer) {
+                clearInterval(periodicSaveTimer);
+                periodicSaveTimer = null;
+            }
+        }
+
+        function setStatus(newStatus) {
+            statusState = newStatus;
+            
+            // Clean up old classes (including the selection highlight classes)
+            els.countDisplay.classList.remove('text-brand-600', 'dark:text-brand-400', 'text-slate-400', 'dark:text-slate-500', 'text-emerald-500', 'text-red-500');
+
+            if (newStatus === 'typing') {
+                els.countDisplay.innerHTML = `<span class="typing-dots"><span></span><span></span><span></span></span>`;
+                els.countDisplay.classList.add('text-slate-400', 'dark:text-slate-500');
+                els.toggleCountMode.title = 'Saving...';
+            } else if (newStatus === 'saved') {
+                els.countDisplay.textContent = 'SAVED';
+                els.countDisplay.classList.add('text-slate-500', 'dark:text-slate-400');
+                els.toggleCountMode.title = 'Content saved safely';
+                
+                setTimeout(() => {
+                    if (statusState === 'saved') setStatus('idle');
+                }, 2000);
+            } else if (newStatus === 'error') {
+                els.countDisplay.textContent = 'ERROR SAVING';
+                els.countDisplay.classList.add('text-red-500');
+                els.toggleCountMode.title = "Can't save content";
+            } else {
+                // Idle
+                els.toggleCountMode.title = 'Toggle words/characters count';
+                updateCountDisplay();
+            }
+        }
+
+        function saveContent(isPeriodic = false) {
+            try {
+                state.content = els.editor.value;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                
+                // If it is a final save (not a background periodic save), update UI to Saved
+                if (!isPeriodic) {
+                    setStatus('saved'); 
+                }
+            } catch(e) {
+                setStatus('error');
+            }
+        }
+
+        function updateCountDisplay() {
+            const text = els.editor.value;
+            const selectionStart = els.editor.selectionStart;
+            const selectionEnd = els.editor.selectionEnd;
+            const hasSelection = selectionStart !== selectionEnd;
+            
+            const textToCount = hasSelection ? text.substring(selectionStart, selectionEnd) : text;
+            
+            let countText;
+            if (state.countMode === 'characters') {
+                countText = `${textToCount.length} CHARACTERS`;
+            } else {
+                const wordCount = textToCount.trim() === '' ? 0 : textToCount.trim().split(/\s+/).length;
+                countText = `${wordCount} WORDS`;
+            }
+
+            if (hasSelection) {
+                els.countDisplay.textContent = countText;
+                els.countDisplay.classList.add('text-brand-600', 'dark:text-brand-400');
+            } else {
+                els.countDisplay.classList.remove('text-brand-600', 'dark:text-brand-400');
+                els.countDisplay.textContent = countText;
+            }
+        }
+
+        // --- UI Updaters ---
+        function applyTheme() {
+            const root = document.documentElement;
+            let isDark = false;
+
+            if (state.theme === 'dark' || (state.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                isDark = true;
+                root.classList.add('dark');
+                root.classList.remove('light');
+            } else {
+                root.classList.remove('dark');
+                root.classList.add('light');
+            }
+
+            const iconMoon = document.getElementById('icon-moon');
+            const iconSun = document.getElementById('icon-sun');
+            const iconSystem = document.getElementById('icon-sun-moon');
+            
+            iconMoon?.classList.add('hidden');
+            iconSun?.classList.add('hidden');
+            iconSystem?.classList.add('hidden');
+            
+            if (state.theme === 'dark') {
+                iconMoon?.classList.remove('hidden');
+            } else if (state.theme === 'light') {
+                iconSun?.classList.remove('hidden');
+            } else {
+                iconSystem?.classList.remove('hidden');
+            }
+        }
+
+        function applySize() {
+            els.wrapper.classList.remove('max-w-[500px]', 'sm:h-[500px]', 'max-w-[800px]', 'sm:h-[95vh]', 'max-w-full', 'sm:my-auto', 'sm:rounded-2xl', 'sm:border', 'sm:shadow-2xl', 'wrapper-windowed', 'wrapper-fullscreen');
+            
+            document.getElementById('icon-size-sticky-note')?.classList.add('hidden');
+            document.getElementById('icon-size-page')?.classList.add('hidden');
+            document.getElementById('icon-size-full-window')?.classList.add('hidden');
+
+            if (state.sizeMode === 'sticky-note') {
+                els.wrapper.classList.add('max-w-[500px]', 'sm:h-[500px]', 'sm:my-auto', 'sm:rounded-2xl', 'sm:border', 'sm:shadow-2xl', 'wrapper-windowed');
+                document.getElementById('icon-size-sticky-note')?.classList.remove('hidden');
+            } else if (state.sizeMode === 'page') {
+                els.wrapper.classList.add('max-w-[800px]', 'sm:h-[95vh]', 'sm:my-auto', 'sm:rounded-2xl', 'sm:border', 'sm:shadow-2xl', 'wrapper-windowed');
+                document.getElementById('icon-size-page')?.classList.remove('hidden');
+            } else {
+                els.wrapper.classList.add('max-w-full', 'wrapper-fullscreen');
+                document.getElementById('icon-size-full-window')?.classList.remove('hidden');
+            }
+        }
+
+        function applySpellcheck() {
+            // Using setAttribute is more reliable for dynamic changes on textareas
+            els.editor.setAttribute('spellcheck', state.spellcheck ? 'true' : 'false');
+            
+            const icon = document.getElementById('spellcheckIcon');
+            
+            if (state.spellcheck) {
+                icon?.classList.remove('text-slate-400');
+                icon?.classList.add('text-brand-600', 'dark:text-brand-400');
+            } else {
+                icon?.classList.add('text-slate-400');
+                icon?.classList.remove('text-brand-600', 'dark:text-brand-400');
+            }
+        }
+
+        // --- Mobile Layout Fix ---
+        function setupMobileHeight() {
+            function setHeight() {
+                if (window.innerWidth >= 640 || state.sizeMode === 'full') {
+                    document.body.style.height = '100dvh';
+                    return;
+                }
+                if (document.activeElement === els.editor) return;
+                document.body.style.height = `${window.innerHeight}px`;
+            }
+
+            window.addEventListener('resize', setHeight);
+            setHeight();
+        }
+
+        // System theme listener
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (state.theme === 'system') {
+                applyTheme();
+            }
+        });
+
+    </script>
 </body>
 </html>
