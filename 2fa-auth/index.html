@@ -1,10 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Secure 2FA authenticator that works locally in the browser.">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="Secure 2FA authenticator that works locally in the browser."
+    />
     <title>2FA Authenticator</title>
 
     <!-- CryptoJS -->
@@ -17,568 +22,660 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Fonts: Geist, Geist Mono -->
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Tailwind Config -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Geist', 'sans-serif'],
-                        mono: ['Geist Mono', 'monospace'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        }
-                    },
-                    animation: {
-                        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    },
-                    keyframes: {
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        }
-                    },
-                    transitionProperty: {
-                        'width': 'width',
-                        'spacing': 'margin, padding',
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Geist', 'sans-serif'],
+              mono: ['Geist Mono', 'monospace'],
+            },
+            colors: {
+              brand: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+              },
+            },
+            animation: {
+              'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            },
+            keyframes: {
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+            },
+            transitionProperty: {
+              width: 'width',
+              spacing: 'margin, padding',
+            },
+          },
+        },
+      };
     </script>
 
     <style>
-        body {
-            -webkit-tap-highlight-color: transparent;
-        }
+      body {
+        -webkit-tap-highlight-color: transparent;
+      }
 
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
 
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
 
-        ::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 20px;
-        }
+      ::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
+      }
 
-        .timer-svg {
-            transform: rotate(-90deg);
-        }
+      .timer-svg {
+        transform: rotate(-90deg);
+      }
 
-        .card-tap-highlight {
-            transition: background-color 0.2s, border-color 0.2s;
-        }
+      .card-tap-highlight {
+        transition:
+          background-color 0.2s,
+          border-color 0.2s;
+      }
 
-        .card-tap-highlight:active {
-            background-color: #f8fafc;
-        }
+      .card-tap-highlight:active {
+        background-color: #f8fafc;
+      }
     </style>
-</head>
+  </head>
 
-<body class="bg-slate-100 text-slate-800 h-[100dvh] flex justify-center overflow-hidden">
-
+  <body class="bg-slate-100 text-slate-800 h-[100dvh] flex justify-center overflow-hidden">
     <!-- Main App Container -->
-    <div id="app-wrapper"
-        class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-slate-200 sm:border">
+    <div
+      id="app-wrapper"
+      class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-slate-200 sm:border"
+    >
+      <!-- Header -->
+      <header
+        class="bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg"
+          >
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <h1 class="font-bold text-2xl tracking-tight text-slate-900">2FA Authenticator</h1>
+        </div>
+      </header>
 
-        <!-- Header -->
-        <header
-            class="bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i>
-                </div>
-                <h1 class="font-bold text-2xl tracking-tight text-slate-900">2FA Authenticator</h1>
-            </div>
-        </header>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 overflow-y-auto relative bg-slate-50/50 scroll-smooth" id="mainScroll">
-
-            <!-- Dynamic Sticky Header (Timer & Search) -->
-            <div class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-[2px] shadow-sm transition-shadow px-4 sm:px-6 py-3 sm:py-4"
-                id="stickyHeader">
-
-                <div class="flex items-center gap-3 h-12">
-
-                    <!-- Timer Container -->
-                    <div id="headerTimerBox"
-                        class="relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex-1 h-full bg-white border border-slate-200 rounded-full shadow-sm overflow-hidden group">
-
-                        <!-- Pill Mode Elements -->
-                        <div id="timerPillContent" class="absolute inset-0 transition-opacity duration-200 opacity-100">
-                            <div id="timerProgressBar"
-                                class="absolute left-0 top-0 bottom-0 bg-brand-50 transition-all duration-1000 ease-linear w-full origin-left">
-                            </div>
-                            <div class="relative z-10 flex justify-between items-center w-full h-full px-4">
-                                <span
-                                    class="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Refreshing
-                                    in</span>
-                                <span id="countdownTimer" class="font-mono font-bold text-brand-600 text-lg">30s</span>
-                            </div>
-                        </div>
-
-                        <!-- Circle Mode Elements -->
-                        <div id="timerCircleContent"
-                            class="absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 scale-50">
-                            <svg class="w-10 h-10 timer-svg" viewBox="0 0 40 40">
-                                <circle cx="20" cy="20" r="18" fill="none" stroke-width="3" class="stroke-slate-100" />
-                                <circle id="timerCircleSvg" cx="20" cy="20" r="18" fill="none" stroke-width="3"
-                                    class="stroke-brand-600 transition-all duration-1000 ease-linear"
-                                    stroke-dasharray="113.1" stroke-dashoffset="0" stroke-linecap="round" />
-                            </svg>
-                            <span id="miniCountdownTimer"
-                                class="absolute font-mono font-bold text-brand-600 text-[10px]">30</span>
-                        </div>
-                    </div>
-
-                    <!-- Search Container -->
-                    <div id="headerSearchBox"
-                        class="relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] w-12 h-full bg-white border border-slate-200 rounded-full shadow-sm flex items-center justify-center overflow-hidden">
-
-                        <!-- Search Icon Trigger -->
-                        <button id="searchToggle"
-                            class="absolute inset-0 z-10 w-full h-full flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors bg-transparent border-none outline-none transition-opacity duration-200 opacity-100"
-                            aria-label="Open Search">
-                            <i data-lucide="search" class="w-5 h-5"></i>
-                        </button>
-
-                        <!-- Search Input Field -->
-                        <div id="searchInputWrapper"
-                            class="absolute inset-0 flex items-center opacity-0 pointer-events-none transition-all duration-300 pl-4 pr-10">
-                            <i data-lucide="search" class="text-slate-400 mr-3 flex-shrink-0 w-4 h-4"></i>
-                            <input id="searchInput" type="text"
-                                class="w-full h-full bg-transparent border-none outline-none text-sm font-medium placeholder-slate-400"
-                                placeholder="Search accounts...">
-                            <button id="closeSearch"
-                                class="absolute right-0 top-0 h-full w-12 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-                                <i data-lucide="x" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Codes List -->
-            <div id="codesContainer" class="px-4 sm:px-6 pt-4 sm:pt-6 pb-24 space-y-4">
-                <!-- Content populated by JS -->
-            </div>
-        </main>
-
-        <!-- Bottom Section Wrapper -->
-        <div class="relative flex-shrink-0">
-            <!-- Toast Notification Container -->
-            <div id="toastContainer"
-                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 sm:mb-6 z-[60] flex flex-col items-center gap-2 w-max max-w-[90%] pointer-events-none">
-            </div>
-
-            <!-- Bottom Action Bar -->
+      <!-- Main Content Area -->
+      <main class="flex-1 overflow-y-auto relative bg-slate-50/50 scroll-smooth" id="mainScroll">
+        <!-- Dynamic Sticky Header (Timer & Search) -->
+        <div
+          class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-[2px] shadow-sm transition-shadow px-4 sm:px-6 py-3 sm:py-4"
+          id="stickyHeader"
+        >
+          <div class="flex items-center gap-3 h-12">
+            <!-- Timer Container -->
             <div
-                class="bg-white border-t border-slate-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
-            <button id="toggleAddAccount"
-                class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
-                <i data-lucide="plus" class="transition-transform group-hover:rotate-90 w-4 h-4"></i>
-                <span>Add Account</span>
+              id="headerTimerBox"
+              class="relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex-1 h-full bg-white border border-slate-200 rounded-full shadow-sm overflow-hidden group"
+            >
+              <!-- Pill Mode Elements -->
+              <div
+                id="timerPillContent"
+                class="absolute inset-0 transition-opacity duration-200 opacity-100"
+              >
+                <div
+                  id="timerProgressBar"
+                  class="absolute left-0 top-0 bottom-0 bg-brand-50 transition-all duration-1000 ease-linear w-full origin-left"
+                ></div>
+                <div class="relative z-10 flex justify-between items-center w-full h-full px-4">
+                  <span
+                    class="text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap"
+                    >Refreshing in</span
+                  >
+                  <span id="countdownTimer" class="font-mono font-bold text-brand-600 text-lg"
+                    >30s</span
+                  >
+                </div>
+              </div>
+
+              <!-- Circle Mode Elements -->
+              <div
+                id="timerCircleContent"
+                class="absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 scale-50"
+              >
+                <svg class="w-10 h-10 timer-svg" viewBox="0 0 40 40">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="none"
+                    stroke-width="3"
+                    class="stroke-slate-100"
+                  />
+                  <circle
+                    id="timerCircleSvg"
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="none"
+                    stroke-width="3"
+                    class="stroke-brand-600 transition-all duration-1000 ease-linear"
+                    stroke-dasharray="113.1"
+                    stroke-dashoffset="0"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                <span
+                  id="miniCountdownTimer"
+                  class="absolute font-mono font-bold text-brand-600 text-[10px]"
+                  >30</span
+                >
+              </div>
+            </div>
+
+            <!-- Search Container -->
+            <div
+              id="headerSearchBox"
+              class="relative transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] w-12 h-full bg-white border border-slate-200 rounded-full shadow-sm flex items-center justify-center overflow-hidden"
+            >
+              <!-- Search Icon Trigger -->
+              <button
+                id="searchToggle"
+                class="absolute inset-0 z-10 w-full h-full flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors bg-transparent border-none outline-none transition-opacity duration-200 opacity-100"
+                aria-label="Open Search"
+              >
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </button>
+
+              <!-- Search Input Field -->
+              <div
+                id="searchInputWrapper"
+                class="absolute inset-0 flex items-center opacity-0 pointer-events-none transition-all duration-300 pl-4 pr-10"
+              >
+                <i data-lucide="search" class="text-slate-400 mr-3 flex-shrink-0 w-4 h-4"></i>
+                <input
+                  id="searchInput"
+                  type="text"
+                  class="w-full h-full bg-transparent border-none outline-none text-sm font-medium placeholder-slate-400"
+                  placeholder="Search accounts..."
+                />
+                <button
+                  id="closeSearch"
+                  class="absolute right-0 top-0 h-full w-12 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Codes List -->
+        <div id="codesContainer" class="px-4 sm:px-6 pt-4 sm:pt-6 pb-24 space-y-4">
+          <!-- Content populated by JS -->
+        </div>
+      </main>
+
+      <!-- Bottom Section Wrapper -->
+      <div class="relative flex-shrink-0">
+        <!-- Toast Notification Container -->
+        <div
+          id="toastContainer"
+          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 sm:mb-6 z-[60] flex flex-col items-center gap-2 w-max max-w-[90%] pointer-events-none"
+        ></div>
+
+        <!-- Bottom Action Bar -->
+        <div
+          class="bg-white border-t border-slate-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0"
+        >
+          <button
+            id="toggleAddAccount"
+            class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group"
+          >
+            <i data-lucide="plus" class="transition-transform group-hover:rotate-90 w-4 h-4"></i>
+            <span>Add Account</span>
+          </button>
+
+          <div class="flex gap-2">
+            <button
+              id="importButton"
+              class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+              title="Import"
+            >
+              <i data-lucide="file-up" class="w-5 h-5"></i>
             </button>
-
-            <div class="flex gap-2">
-                <button id="importButton"
-                    class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
-                    title="Import">
-                    <i data-lucide="file-up" class="w-5 h-5"></i>
-                </button>
-                <button id="exportButton"
-                    class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
-                    title="Export">
-                    <i data-lucide="file-down" class="w-5 h-5"></i>
-                </button>
-            </div>
+            <button
+              id="exportButton"
+              class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+              title="Export"
+            >
+              <i data-lucide="file-down" class="w-5 h-5"></i>
+            </button>
+          </div>
         </div>
-        </div>
+      </div>
 
-        <!-- Modals Overlay -->
-        <div id="modalOverlay"
-            class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end justify-center p-0 sm:pb-6">
-
-            <!-- Add/Edit Account Modal -->
-            <div id="accountModal"
-                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
-                role="dialog">
-
-                <div class="flex justify-between items-center mb-6">
-                    <h2 id="modalTitle" class="text-xl font-bold text-slate-900">Add Account</h2>
-                    <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Account
-                            Name</label>
-                        <input type="text" id="accountName"
-                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
-                            placeholder="e.g. Google (john@example.com)">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Secret
-                            Key / URI</label>
-                        <input type="text" id="secretKey"
-                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-mono text-sm"
-                            placeholder="BASE32 Key or otpauth:// URI">
-                    </div>
-                </div>
-                <div class="flex gap-3 mt-8">
-                    <button
-                        class="close-modal flex-1 py-3 px-4 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
-                    <button id="saveAccountBtn"
-                        class="flex-1 py-3 px-4 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all">Save</button>
-                </div>
+      <!-- Modals Overlay -->
+      <div
+        id="modalOverlay"
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end justify-center p-0 sm:pb-6"
+      >
+        <!-- Add/Edit Account Modal -->
+        <div
+          id="accountModal"
+          class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
+          role="dialog"
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h2 id="modalTitle" class="text-xl font-bold text-slate-900">Add Account</h2>
+            <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label
+                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
+                >Account Name</label
+              >
+              <input
+                type="text"
+                id="accountName"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+                placeholder="e.g. Google (john@example.com)"
+              />
             </div>
-
-            <!-- Import/Export Modal -->
-            <div id="dataModal"
-                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
-                role="dialog">
-
-                <div class="flex justify-between items-center mb-4">
-                    <h2 id="dataModalTitle" class="text-xl font-bold text-slate-900">Import Accounts</h2>
-                    <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <p class="text-sm text-slate-500 mb-3">Format: <code
-                        class="bg-slate-100 px-1 py-0.5 rounded text-xs">account name|secret key</code></p>
-                <textarea id="dataTextarea"
-                    class="w-full h-32 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all font-mono text-xs resize-none mb-4"
-                    spellcheck="false"></textarea>
-                <div class="flex gap-3">
-                    <button
-                        class="close-modal flex-1 py-3 px-4 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition-colors">Close</button>
-                    <button id="processDataBtn"
-                        class="flex-1 py-3 px-4 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all">Action</button>
-                </div>
+            <div>
+              <label
+                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
+                >Secret Key / URI</label
+              >
+              <input
+                type="text"
+                id="secretKey"
+                class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-mono text-sm"
+                placeholder="BASE32 Key or otpauth:// URI"
+              />
             </div>
-
-            <!-- Delete Confirmation -->
-            <div id="deleteModal"
-                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden"
-                role="dialog">
-
-                <div class="text-center">
-                    <div
-                        class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="triangle-alert" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-2">Delete Account?</h3>
-                    <p id="deleteMessage" class="text-slate-500 text-sm mb-6">This action cannot be undone.</p>
-                    <div class="flex gap-3">
-                        <button
-                            class="close-modal flex-1 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
-                        <button id="confirmDeleteBtn"
-                            class="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 shadow-lg shadow-red-500/30">Delete</button>
-                    </div>
-                </div>
-            </div>
-
+          </div>
+          <div class="flex gap-3 mt-8">
+            <button
+              class="close-modal flex-1 py-3 px-4 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              id="saveAccountBtn"
+              class="flex-1 py-3 px-4 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all"
+            >
+              Save
+            </button>
+          </div>
         </div>
 
+        <!-- Import/Export Modal -->
+        <div
+          id="dataModal"
+          class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
+          role="dialog"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h2 id="dataModalTitle" class="text-xl font-bold text-slate-900">Import Accounts</h2>
+            <button class="close-modal text-slate-400 hover:text-slate-600 p-2 -mr-2">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <p class="text-sm text-slate-500 mb-3">
+            Format:
+            <code class="bg-slate-100 px-1 py-0.5 rounded text-xs">account name|secret key</code>
+          </p>
+          <textarea
+            id="dataTextarea"
+            class="w-full h-32 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all font-mono text-xs resize-none mb-4"
+            spellcheck="false"
+          ></textarea>
+          <div class="flex gap-3">
+            <button
+              class="close-modal flex-1 py-3 px-4 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Close
+            </button>
+            <button
+              id="processDataBtn"
+              class="flex-1 py-3 px-4 rounded-xl bg-brand-600 text-white font-medium hover:bg-brand-700 shadow-lg shadow-brand-500/30 transition-all"
+            >
+              Action
+            </button>
+          </div>
+        </div>
+
+        <!-- Delete Confirmation -->
+        <div
+          id="deleteModal"
+          class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden"
+          role="dialog"
+        >
+          <div class="text-center">
+            <div
+              class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <i data-lucide="triangle-alert" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Delete Account?</h3>
+            <p id="deleteMessage" class="text-slate-500 text-sm mb-6">
+              This action cannot be undone.
+            </p>
+            <div class="flex gap-3">
+              <button
+                class="close-modal flex-1 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                id="confirmDeleteBtn"
+                class="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 shadow-lg shadow-red-500/30"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Application Logic -->
     <script>
-        // --- Constants & Config ---
-        const TOTP_INTERVAL = 30;
-        const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+      // --- Constants & Config ---
+      const TOTP_INTERVAL = 30;
+      const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
-        // --- State Management ---
-        let accounts = [];
-        let editingIndex = -1;
-        let deletingIndex = -1;
-        let internalTimer = null;
-        let lastTimeStep = -1;
-        let isPageVisible = true;
-        let currentModal = null;
-        let isSearchActive = false;
+      // --- State Management ---
+      let accounts = [];
+      let editingIndex = -1;
+      let deletingIndex = -1;
+      let internalTimer = null;
+      let lastTimeStep = -1;
+      let isPageVisible = true;
+      let currentModal = null;
+      let isSearchActive = false;
 
-        // --- DOM Elements Cache ---
-        const els = {
-            codesContainer: document.getElementById('codesContainer'),
-            headerTimerBox: document.getElementById('headerTimerBox'),
-            headerSearchBox: document.getElementById('headerSearchBox'),
-            timerPillContent: document.getElementById('timerPillContent'),
-            timerCircleContent: document.getElementById('timerCircleContent'),
-            searchToggle: document.getElementById('searchToggle'),
-            searchInputWrapper: document.getElementById('searchInputWrapper'),
-            countdownTimer: document.getElementById('countdownTimer'),
-            miniCountdownTimer: document.getElementById('miniCountdownTimer'),
-            timerProgressBar: document.getElementById('timerProgressBar'),
-            timerCircleSvg: document.getElementById('timerCircleSvg'),
-            searchInput: document.getElementById('searchInput'),
-            closeSearch: document.getElementById('closeSearch'),
-            modalOverlay: document.getElementById('modalOverlay'),
-            accountModal: document.getElementById('accountModal'),
-            dataModal: document.getElementById('dataModal'),
-            deleteModal: document.getElementById('deleteModal'),
-            accountName: document.getElementById('accountName'),
-            secretKey: document.getElementById('secretKey'),
-            dataTextarea: document.getElementById('dataTextarea'),
-            modalTitle: document.getElementById('modalTitle'),
-            saveAccountBtn: document.getElementById('saveAccountBtn'),
-            mainScroll: document.getElementById('mainScroll'),
-            stickyHeader: document.getElementById('stickyHeader')
+      // --- DOM Elements Cache ---
+      const els = {
+        codesContainer: document.getElementById('codesContainer'),
+        headerTimerBox: document.getElementById('headerTimerBox'),
+        headerSearchBox: document.getElementById('headerSearchBox'),
+        timerPillContent: document.getElementById('timerPillContent'),
+        timerCircleContent: document.getElementById('timerCircleContent'),
+        searchToggle: document.getElementById('searchToggle'),
+        searchInputWrapper: document.getElementById('searchInputWrapper'),
+        countdownTimer: document.getElementById('countdownTimer'),
+        miniCountdownTimer: document.getElementById('miniCountdownTimer'),
+        timerProgressBar: document.getElementById('timerProgressBar'),
+        timerCircleSvg: document.getElementById('timerCircleSvg'),
+        searchInput: document.getElementById('searchInput'),
+        closeSearch: document.getElementById('closeSearch'),
+        modalOverlay: document.getElementById('modalOverlay'),
+        accountModal: document.getElementById('accountModal'),
+        dataModal: document.getElementById('dataModal'),
+        deleteModal: document.getElementById('deleteModal'),
+        accountName: document.getElementById('accountName'),
+        secretKey: document.getElementById('secretKey'),
+        dataTextarea: document.getElementById('dataTextarea'),
+        modalTitle: document.getElementById('modalTitle'),
+        saveAccountBtn: document.getElementById('saveAccountBtn'),
+        mainScroll: document.getElementById('mainScroll'),
+        stickyHeader: document.getElementById('stickyHeader'),
+      };
+
+      // --- Initialization ---
+      document.addEventListener('DOMContentLoaded', () => {
+        loadAccounts();
+        initializeTiming();
+        setupEventListeners();
+        setupMobileHeight();
+        setupVisibilityHandling();
+        // Enable animation on initial load
+        updateAccountsDisplay(true);
+        lucide.createIcons();
+      });
+
+      // --- Event Listeners ---
+      function setupEventListeners() {
+        document.getElementById('toggleAddAccount').onclick = () => openAccountModal();
+        document.getElementById('importButton').onclick = () => openDataModal('import');
+        document.getElementById('exportButton').onclick = () => openDataModal('export');
+
+        els.searchToggle.onclick = toggleSearch;
+        els.closeSearch.onclick = toggleSearch;
+        els.searchInput.addEventListener('input', filterAccounts);
+        els.saveAccountBtn.onclick = saveAccount;
+        document.getElementById('processDataBtn').onclick = processDataAction;
+        document.getElementById('confirmDeleteBtn').onclick = confirmDelete;
+
+        document.querySelectorAll('.close-modal').forEach((btn) => {
+          btn.onclick = closeAllModals;
+        });
+        els.modalOverlay.onclick = (e) => {
+          if (e.target === els.modalOverlay) closeAllModals();
         };
 
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAccounts();
-            initializeTiming();
-            setupEventListeners();
-            setupMobileHeight();
-            setupVisibilityHandling();
-            // Enable animation on initial load
-            updateAccountsDisplay(true);
-            lucide.createIcons();
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            if (isSearchActive) toggleSearch();
+            closeAllModals();
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            if (!isSearchActive) toggleSearch();
+            els.searchInput.focus();
+          }
         });
 
-        // --- Event Listeners ---
-        function setupEventListeners() {
-            document.getElementById('toggleAddAccount').onclick = () => openAccountModal();
-            document.getElementById('importButton').onclick = () => openDataModal('import');
-            document.getElementById('exportButton').onclick = () => openDataModal('export');
+        els.mainScroll.addEventListener('scroll', () => {
+          if (els.mainScroll.scrollTop > 10) {
+            els.stickyHeader.classList.add('shadow-md');
+          } else {
+            els.stickyHeader.classList.remove('shadow-md');
+          }
+        });
+      }
 
-            els.searchToggle.onclick = toggleSearch;
-            els.closeSearch.onclick = toggleSearch;
-            els.searchInput.addEventListener('input', filterAccounts);
-            els.saveAccountBtn.onclick = saveAccount;
-            document.getElementById('processDataBtn').onclick = processDataAction;
-            document.getElementById('confirmDeleteBtn').onclick = confirmDelete;
+      // --- Mobile Layout Fix ---
+      function setupMobileHeight() {
+        const app = document.getElementById('app-wrapper');
+        if (!app) return;
 
-            document.querySelectorAll('.close-modal').forEach(btn => {
-                btn.onclick = closeAllModals;
-            });
-            els.modalOverlay.onclick = (e) => {
-                if (e.target === els.modalOverlay) closeAllModals();
-            };
+        function setHeight() {
+          if (window.innerWidth >= 640) {
+            app.style.height = '';
+            return;
+          }
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    if (isSearchActive) toggleSearch();
-                    closeAllModals();
-                }
-                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                    e.preventDefault();
-                    if (!isSearchActive) toggleSearch();
-                    els.searchInput.focus();
-                }
-            });
+          if (
+            document.activeElement &&
+            (document.activeElement.tagName === 'INPUT' ||
+              document.activeElement.tagName === 'TEXTAREA')
+          ) {
+            return;
+          }
 
-            els.mainScroll.addEventListener('scroll', () => {
-                if (els.mainScroll.scrollTop > 10) {
-                    els.stickyHeader.classList.add('shadow-md');
-                } else {
-                    els.stickyHeader.classList.remove('shadow-md');
-                }
-            });
+          app.style.height = `${window.innerHeight}px`;
         }
 
-        // --- Mobile Layout Fix ---
-        function setupMobileHeight() {
-            const app = document.getElementById('app-wrapper');
-            if (!app) return;
+        window.addEventListener('resize', setHeight);
+        setHeight();
+      }
 
-            function setHeight() {
-                if (window.innerWidth >= 640) {
-                    app.style.height = '';
-                    return;
-                }
+      // --- Core Logic: Timing & TOTP ---
+      function initializeTiming() {
+        // Force precise initial timestamp calculation
+        const now = Date.now() / 1000;
+        lastTimeStep = Math.floor(now / TOTP_INTERVAL);
+        updateCodes(Math.floor(now)); // Pass specific epoch to avoid race condition
+        updateTimers();
+        startTimer();
+      }
 
-                if (document.activeElement &&
-                    (document.activeElement.tagName === 'INPUT' ||
-                        document.activeElement.tagName === 'TEXTAREA')) {
-                    return;
-                }
+      function startTimer() {
+        if (internalTimer) clearInterval(internalTimer);
+        internalTimer = setInterval(() => {
+          if (isPageVisible) updateTimers();
+        }, 100);
+      }
 
-                app.style.height = `${window.innerHeight}px`;
-            }
+      function getCycleProgress(nowSec) {
+        return TOTP_INTERVAL - (nowSec % TOTP_INTERVAL);
+      }
 
-            window.addEventListener('resize', setHeight);
-            setHeight();
+      let lastTimeInt = -1;
+
+      function updateTimers() {
+        const nowSec = Date.now() / 1000;
+        const timeLeft = getCycleProgress(nowSec);
+        const timeInt = Math.ceil(timeLeft);
+
+        // Check if we've entered a new TOTP time step
+        const currentTimeStep = Math.floor(nowSec / TOTP_INTERVAL);
+        if (currentTimeStep !== lastTimeStep) {
+          lastTimeStep = currentTimeStep;
+          // FIX: Pass the exact deterministic timestamp we calculated to prevent double Date.now() race condition
+          updateCodes(Math.floor(nowSec));
         }
 
-
-        // --- Core Logic: Timing & TOTP ---
-        function initializeTiming() {
-            // Force precise initial timestamp calculation
-            const now = Date.now() / 1000;
-            lastTimeStep = Math.floor(now / TOTP_INTERVAL);
-            updateCodes(Math.floor(now)); // Pass specific epoch to avoid race condition
-            updateTimers();
-            startTimer();
+        if (timeInt !== lastTimeInt) {
+          els.countdownTimer.textContent = `${timeInt}s`;
+          els.miniCountdownTimer.textContent = timeInt;
+          lastTimeInt = timeInt;
         }
 
-        function startTimer() {
-            if (internalTimer) clearInterval(internalTimer);
-            internalTimer = setInterval(() => {
-                if (isPageVisible) updateTimers();
-            }, 100);
+        const percentage = (timeLeft / TOTP_INTERVAL) * 100;
+        els.timerProgressBar.style.width = `${percentage}%`;
+
+        const circumference = 113.1;
+        const offset = circumference - (percentage / 100) * circumference;
+        els.timerCircleSvg.style.strokeDashoffset = offset;
+
+        const isWarning = timeInt <= 5;
+        const colorClassAdd = isWarning ? 'text-red-500' : 'text-brand-600';
+        const colorClassRemove = isWarning ? 'text-brand-600' : 'text-red-500';
+
+        els.countdownTimer.classList.add(colorClassAdd);
+        els.countdownTimer.classList.remove(colorClassRemove);
+        els.miniCountdownTimer.classList.add(colorClassAdd);
+        els.miniCountdownTimer.classList.remove(colorClassRemove);
+
+        const barBgAdd = isWarning ? 'bg-red-100' : 'bg-brand-50';
+        const barBgRemove = isWarning ? 'bg-brand-50' : 'bg-red-100';
+        els.timerProgressBar.classList.add(barBgAdd);
+        els.timerProgressBar.classList.remove(barBgRemove);
+
+        const strokeAdd = isWarning ? 'stroke-red-500' : 'stroke-brand-600';
+        const strokeRemove = isWarning ? 'stroke-brand-600' : 'stroke-red-500';
+        els.timerCircleSvg.classList.add(strokeAdd);
+        els.timerCircleSvg.classList.remove(strokeRemove);
+      }
+
+      // --- TOTP Generation ---
+      function generateTOTP(secret, timestamp) {
+        try {
+          if (typeof CryptoJS === 'undefined') return 'Error';
+
+          // Using passed deterministic timestamp
+          const time = Math.floor(timestamp / TOTP_INTERVAL);
+
+          // Hex pad to 8 bytes (16 hex chars)
+          const timeHex = time.toString(16).padStart(16, '0');
+          const secretHex = base32ToHex(secret);
+
+          if (!secretHex) return '------';
+
+          const hmac = CryptoJS.HmacSHA1(
+            CryptoJS.enc.Hex.parse(timeHex),
+            CryptoJS.enc.Hex.parse(secretHex),
+          );
+
+          const hmacHex = hmac.toString(CryptoJS.enc.Hex);
+          const offset = parseInt(hmacHex.slice(-1), 16);
+          const codeHex = hmacHex.substring(offset * 2, offset * 2 + 8);
+
+          const code = parseInt(codeHex, 16) & 0x7fffffff;
+          return (code % 1000000).toString().padStart(6, '0');
+        } catch (e) {
+          console.error(e);
+          return '------';
+        }
+      }
+
+      function base32ToHex(base32) {
+        // FIX: Removed dangerous 1->L and 8->B substitutions.
+        // Secrets should be normalized AT SAVE, not at generation time.
+        if (!base32) return '';
+
+        let bits = 0;
+        let value = 0;
+        let hex = '';
+
+        for (let i = 0; i < base32.length; i++) {
+          const index = BASE32_CHARS.indexOf(base32[i]);
+          if (index === -1) return null; // Abort cleanly if an invalid character somehow snuck in
+
+          value = (value << 5) | index;
+          bits += 5;
+
+          if (bits >= 8) {
+            const byte = (value >>> (bits - 8)) & 0xff;
+            hex += byte.toString(16).padStart(2, '0');
+            bits -= 8;
+          }
         }
 
-        function getCycleProgress(nowSec) {
-            return TOTP_INTERVAL - (nowSec % TOTP_INTERVAL);
-        }
+        return hex;
+      }
 
-        let lastTimeInt = -1;
+      function formatCodeDisplay(code) {
+        return code.length === 6 ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
+      }
 
-        function updateTimers() {
-            const nowSec = Date.now() / 1000;
-            const timeLeft = getCycleProgress(nowSec);
-            const timeInt = Math.ceil(timeLeft);
+      function updateCodes(deterministicNow = null) {
+        // FIX: Ensure we use the deterministic timestamp if provided, solving the double Date.now() race condition.
+        const epoch = deterministicNow !== null ? deterministicNow : Math.floor(Date.now() / 1000);
 
-            // Check if we've entered a new TOTP time step
-            const currentTimeStep = Math.floor(nowSec / TOTP_INTERVAL);
-            if (currentTimeStep !== lastTimeStep) {
-                lastTimeStep = currentTimeStep;
-                // FIX: Pass the exact deterministic timestamp we calculated to prevent double Date.now() race condition
-                updateCodes(Math.floor(nowSec)); 
-            }
+        accounts.forEach((acc, idx) => {
+          const codeEl = document.getElementById(`code-value-${idx}`);
+          if (codeEl) {
+            const code = generateTOTP(acc.secret, epoch);
+            codeEl.textContent = formatCodeDisplay(code);
+          }
 
-            if (timeInt !== lastTimeInt) {
-                els.countdownTimer.textContent = `${timeInt}s`;
-                els.miniCountdownTimer.textContent = timeInt;
-                lastTimeInt = timeInt;
-            }
+          const nextCodeEl = document.getElementById(`next-code-value-${idx}`);
+          if (nextCodeEl) {
+            const nextCode = generateTOTP(acc.secret, epoch + TOTP_INTERVAL);
+            nextCodeEl.textContent = formatCodeDisplay(nextCode);
+          }
+        });
+      }
 
-            const percentage = (timeLeft / TOTP_INTERVAL) * 100;
-            els.timerProgressBar.style.width = `${percentage}%`;
+      // --- UI Rendering ---
+      function updateAccountsDisplay(shouldAnimate = false) {
+        const filter = els.searchInput.value.toLowerCase();
+        els.codesContainer.innerHTML = '';
 
-            const circumference = 113.1;
-            const offset = circumference - (percentage / 100) * circumference;
-            els.timerCircleSvg.style.strokeDashoffset = offset;
+        const now = Math.floor(Date.now() / 1000);
 
-            const isWarning = timeInt <= 5;
-            const colorClassAdd = isWarning ? 'text-red-500' : 'text-brand-600';
-            const colorClassRemove = isWarning ? 'text-brand-600' : 'text-red-500';
-
-            els.countdownTimer.classList.add(colorClassAdd);
-            els.countdownTimer.classList.remove(colorClassRemove);
-            els.miniCountdownTimer.classList.add(colorClassAdd);
-            els.miniCountdownTimer.classList.remove(colorClassRemove);
-
-            const barBgAdd = isWarning ? 'bg-red-100' : 'bg-brand-50';
-            const barBgRemove = isWarning ? 'bg-brand-50' : 'bg-red-100';
-            els.timerProgressBar.classList.add(barBgAdd);
-            els.timerProgressBar.classList.remove(barBgRemove);
-
-            const strokeAdd = isWarning ? 'stroke-red-500' : 'stroke-brand-600';
-            const strokeRemove = isWarning ? 'stroke-brand-600' : 'stroke-red-500';
-            els.timerCircleSvg.classList.add(strokeAdd);
-            els.timerCircleSvg.classList.remove(strokeRemove);
-        }
-
-        // --- TOTP Generation ---
-        function generateTOTP(secret, timestamp) {
-            try {
-                if (typeof CryptoJS === 'undefined') return 'Error';
-                
-                // Using passed deterministic timestamp
-                const time = Math.floor(timestamp / TOTP_INTERVAL);
-                
-                // Hex pad to 8 bytes (16 hex chars)
-                const timeHex = time.toString(16).padStart(16, '0');
-                const secretHex = base32ToHex(secret);
-                
-                if (!secretHex) return '------';
-
-                const hmac = CryptoJS.HmacSHA1(
-                    CryptoJS.enc.Hex.parse(timeHex),
-                    CryptoJS.enc.Hex.parse(secretHex)
-                );
-                
-                const hmacHex = hmac.toString(CryptoJS.enc.Hex);
-                const offset = parseInt(hmacHex.slice(-1), 16);
-                const codeHex = hmacHex.substring(offset * 2, offset * 2 + 8);
-                
-                const code = parseInt(codeHex, 16) & 0x7fffffff;
-                return (code % 1000000).toString().padStart(6, '0');
-            } catch (e) {
-                console.error(e);
-                return '------';
-            }
-        }
-
-        function base32ToHex(base32) {
-            // FIX: Removed dangerous 1->L and 8->B substitutions.
-            // Secrets should be normalized AT SAVE, not at generation time.
-            if (!base32) return '';
-
-            let bits = 0;
-            let value = 0;
-            let hex = '';
-
-            for (let i = 0; i < base32.length; i++) {
-                const index = BASE32_CHARS.indexOf(base32[i]);
-                if (index === -1) return null; // Abort cleanly if an invalid character somehow snuck in
-
-                value = (value << 5) | index;
-                bits += 5;
-
-                if (bits >= 8) {
-                    const byte = (value >>> (bits - 8)) & 0xFF;
-                    hex += byte.toString(16).padStart(2, '0');
-                    bits -= 8;
-                }
-            }
-            
-            return hex;
-        }
-
-        function formatCodeDisplay(code) {
-            return code.length === 6 ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
-        }
-
-        function updateCodes(deterministicNow = null) {
-            // FIX: Ensure we use the deterministic timestamp if provided, solving the double Date.now() race condition.
-            const epoch = deterministicNow !== null ? deterministicNow : Math.floor(Date.now() / 1000);
-            
-            accounts.forEach((acc, idx) => {
-                const codeEl = document.getElementById(`code-value-${idx}`);
-                if (codeEl) {
-                    const code = generateTOTP(acc.secret, epoch);
-                    codeEl.textContent = formatCodeDisplay(code);
-                }
-
-                const nextCodeEl = document.getElementById(`next-code-value-${idx}`);
-                if (nextCodeEl) {
-                    const nextCode = generateTOTP(acc.secret, epoch + TOTP_INTERVAL);
-                    nextCodeEl.textContent = formatCodeDisplay(nextCode);
-                }
-            });
-        }
-
-        // --- UI Rendering ---
-        function updateAccountsDisplay(shouldAnimate = false) {
-            const filter = els.searchInput.value.toLowerCase();
-            els.codesContainer.innerHTML = '';
-
-            const now = Math.floor(Date.now() / 1000);
-
-            if (accounts.length === 0) {
-                els.codesContainer.innerHTML = `
+        if (accounts.length === 0) {
+          els.codesContainer.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-20 text-slate-400">
                         <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
                             <i data-lucide="lock" class="w-8 h-8"></i>
@@ -586,33 +683,33 @@
                         <p class="text-sm">No accounts yet</p>
                         <button onclick="openAccountModal()" class="mt-4 text-brand-600 font-medium text-sm hover:underline">Add your first account</button>
                     </div>`;
-                return;
-            }
+          return;
+        }
 
-            let visibleCount = 0;
-            accounts.forEach((acc, idx) => {
-                if (filter && !acc.name.toLowerCase().includes(filter)) return;
-                visibleCount++;
+        let visibleCount = 0;
+        accounts.forEach((acc, idx) => {
+          if (filter && !acc.name.toLowerCase().includes(filter)) return;
+          visibleCount++;
 
-                const code = generateTOTP(acc.secret, now);
-                const nextCode = generateTOTP(acc.secret, now + TOTP_INTERVAL);
+          const code = generateTOTP(acc.secret, now);
+          const nextCode = generateTOTP(acc.secret, now + TOTP_INTERVAL);
 
-                const formattedCode = formatCodeDisplay(code);
-                const formattedNextCode = formatCodeDisplay(nextCode);
+          const formattedCode = formatCodeDisplay(code);
+          const formattedNextCode = formatCodeDisplay(nextCode);
 
-                const el = document.createElement('div');
+          const el = document.createElement('div');
 
-                const animationClass = shouldAnimate ? 'animate-slide-up' : '';
+          const animationClass = shouldAnimate ? 'animate-slide-up' : '';
 
-                el.className = `group bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-200 relative overflow-hidden cursor-pointer select-none card-tap-highlight ${animationClass}`;
-                el.onclick = (e) => handleCardCopy(e.currentTarget, idx);
-                el.id = `account-card-${idx}`;
+          el.className = `group bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-200 relative overflow-hidden cursor-pointer select-none card-tap-highlight ${animationClass}`;
+          el.onclick = (e) => handleCardCopy(e.currentTarget, idx);
+          el.id = `account-card-${idx}`;
 
-                if (shouldAnimate) {
-                    el.style.animationDelay = `${idx * 0.05}s`;
-                }
+          if (shouldAnimate) {
+            el.style.animationDelay = `${idx * 0.05}s`;
+          }
 
-                el.innerHTML = `
+          el.innerHTML = `
                     <div class="relative z-10">
                         <div class="flex justify-between items-center mb-2">
                             <div class="flex-1 mr-4 min-w-0">
@@ -653,399 +750,416 @@
 
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-50/50 pointer-events-none"></div>
                 `;
-                els.codesContainer.appendChild(el);
-            });
+          els.codesContainer.appendChild(el);
+        });
 
-            lucide.createIcons({ root: els.codesContainer });
+        lucide.createIcons({ root: els.codesContainer });
 
-            if (visibleCount === 0 && filter) {
-                els.codesContainer.innerHTML = `
+        if (visibleCount === 0 && filter) {
+          els.codesContainer.innerHTML = `
                     <div class="text-center py-10 text-slate-400">
                         <p>No matches found</p>
                     </div>`;
+        }
+      }
+
+      // --- Actions ---
+      function openAccountModal(index = -1) {
+        editingIndex = index;
+        if (index >= 0) {
+          els.modalTitle.textContent = 'Edit Account';
+          els.accountName.value = accounts[index].name;
+          els.secretKey.value = accounts[index].secret;
+        } else {
+          els.modalTitle.textContent = 'Add Account';
+          els.accountName.value = '';
+          els.secretKey.value = '';
+        }
+        openModal('accountModal');
+        setTimeout(() => els.accountName.focus(), 100);
+      }
+
+      function saveAccount() {
+        let name = els.accountName.value.trim();
+        let rawSecret = els.secretKey.value.trim();
+
+        if (!name && !rawSecret.startsWith('otpauth://'))
+          return showToast('Account name is required', 'error');
+        if (!rawSecret) return showToast('Secret key or URI is required', 'error');
+
+        // FIX: Gracefully handle parsing full otpauth:// URIs
+        if (rawSecret.startsWith('otpauth://')) {
+          try {
+            const url = new URL(rawSecret);
+            rawSecret = url.searchParams.get('secret');
+            if (!rawSecret) throw new Error('No secret parameter found');
+
+            // Auto-fill name if it wasn't provided
+            if (!name) {
+              const pathName = decodeURIComponent(url.pathname.split('/').pop() || '');
+              const issuer = url.searchParams.get('issuer');
+              name = issuer ? `${issuer} (${pathName})` : pathName;
             }
+          } catch (e) {
+            return showToast('Invalid otpauth URI', 'error');
+          }
         }
 
-        // --- Actions ---
-        function openAccountModal(index = -1) {
-            editingIndex = index;
-            if (index >= 0) {
-                els.modalTitle.textContent = 'Edit Account';
-                els.accountName.value = accounts[index].name;
-                els.secretKey.value = accounts[index].secret;
-            } else {
-                els.modalTitle.textContent = 'Add Account';
-                els.accountName.value = '';
-                els.secretKey.value = '';
-            }
-            openModal('accountModal');
-            setTimeout(() => els.accountName.focus(), 100);
+        // FIX: Normalize the secret ONCE during save, not on every generation loop.
+        // Remove spaces, hyphens, and make uppercase
+        let secret = rawSecret.replace(/[\s\-]/g, '').toUpperCase();
+
+        // Safe substitution: 0 is never used in Base32 and is universally meant to be 'O'
+        secret = secret.replace(/0/g, 'O');
+
+        // FIX: explicitly catch dangerous/ambiguous characters instead of blindly guessing
+        if (/[189]/.test(secret)) {
+          return showToast(
+            'Secret contains invalid characters (1, 8, or 9). Please check for typos.',
+            'error',
+          );
         }
 
-        function saveAccount() {
-            let name = els.accountName.value.trim();
-            let rawSecret = els.secretKey.value.trim();
-            
-            if (!name && !rawSecret.startsWith('otpauth://')) return showToast('Account name is required', 'error');
-            if (!rawSecret) return showToast('Secret key or URI is required', 'error');
+        // Verify it completely strips down to a valid Base32 string
+        if (/[^A-Z2-7]/.test(secret)) {
+          return showToast('Contains invalid Base32 characters.', 'error');
+        }
 
-            // FIX: Gracefully handle parsing full otpauth:// URIs
-            if (rawSecret.startsWith('otpauth://')) {
-                try {
-                    const url = new URL(rawSecret);
-                    rawSecret = url.searchParams.get('secret');
-                    if (!rawSecret) throw new Error("No secret parameter found");
-                    
-                    // Auto-fill name if it wasn't provided
-                    if (!name) {
-                        const pathName = decodeURIComponent(url.pathname.split('/').pop() || '');
-                        const issuer = url.searchParams.get('issuer');
-                        name = issuer ? `${issuer} (${pathName})` : pathName;
-                    }
-                } catch (e) {
-                    return showToast('Invalid otpauth URI', 'error');
-                }
-            }
+        // Validate via conversion to ensure structural integrity
+        const hex = base32ToHex(secret);
+        if (!hex) return showToast('Invalid Base32 structure/length.', 'error');
 
-            // FIX: Normalize the secret ONCE during save, not on every generation loop.
-            // Remove spaces, hyphens, and make uppercase
-            let secret = rawSecret.replace(/[\s\-]/g, '').toUpperCase();
-            
-            // Safe substitution: 0 is never used in Base32 and is universally meant to be 'O'
-            secret = secret.replace(/0/g, 'O');
+        const newAcc = { name, secret };
+        if (editingIndex >= 0) {
+          accounts[editingIndex] = newAcc;
+        } else {
+          accounts.push(newAcc);
+        }
 
-            // FIX: explicitly catch dangerous/ambiguous characters instead of blindly guessing
-            if (/[189]/.test(secret)) {
-                return showToast('Secret contains invalid characters (1, 8, or 9). Please check for typos.', 'error');
-            }
+        saveToStorage();
+        closeAllModals();
+        updateAccountsDisplay(true);
+        updateCodes(); // Triggers generation with current time
+        setTimeout(() => showToast(editingIndex >= 0 ? 'Account updated' : 'Account added'), 300);
+      }
 
-            // Verify it completely strips down to a valid Base32 string
-            if (/[^A-Z2-7]/.test(secret)) {
-                return showToast('Contains invalid Base32 characters.', 'error');
-            }
+      function initDelete(index) {
+        deletingIndex = index;
+        document.getElementById('deleteMessage').textContent = `Remove "${accounts[index].name}"?`;
+        openModal('deleteModal');
+      }
 
-            // Validate via conversion to ensure structural integrity
-            const hex = base32ToHex(secret);
-            if (!hex) return showToast('Invalid Base32 structure/length.', 'error');
-            
-            const newAcc = { name, secret };
-            if (editingIndex >= 0) {
-                accounts[editingIndex] = newAcc;
-            } else {
-                accounts.push(newAcc);
-            }
-            
-            saveToStorage();
+      function confirmDelete() {
+        if (deletingIndex >= 0) {
+          accounts.splice(deletingIndex, 1);
+          saveToStorage();
+          updateAccountsDisplay(true);
+        }
+        closeAllModals();
+        setTimeout(() => showToast('Account removed'), 300);
+      }
+
+      function handleCardCopy(cardElement, index) {
+        const codeEl = document.getElementById(`code-value-${index}`);
+        if (!codeEl) return;
+
+        const text = codeEl.textContent.replace(/\s/g, '');
+
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            const overlay = document.getElementById(`copy-overlay-${index}`);
+            const icon = document.getElementById(`copy-icon-${index}`);
+            const label = document.getElementById(`copy-text-${index}`);
+
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            icon.classList.remove('scale-50');
+            icon.classList.add('scale-100');
+            label.classList.remove('translate-y-2', 'opacity-0');
+            cardElement.classList.add('!border-emerald-500', 'ring-1', 'ring-emerald-500');
+
+            setTimeout(() => {
+              overlay.classList.add('opacity-0', 'pointer-events-none');
+              icon.classList.add('scale-50');
+              icon.classList.remove('scale-100');
+              label.classList.add('translate-y-2', 'opacity-0');
+              cardElement.classList.remove('!border-emerald-500', 'ring-1', 'ring-emerald-500');
+            }, 1200);
+          } else {
+            showToast('Failed to copy', 'error');
+          }
+        } catch (err) {
+          showToast('Failed to copy', 'error');
+        }
+
+        document.body.removeChild(textArea);
+      }
+
+      function editAccount(index) {
+        openAccountModal(index);
+      }
+
+      // --- Import/Export ---
+      function openDataModal(type) {
+        const btn = document.getElementById('processDataBtn');
+        const title = document.getElementById('dataModalTitle');
+        if (type === 'import') {
+          title.textContent = 'Import Accounts';
+          btn.textContent = 'Import';
+          btn.dataset.action = 'import';
+          els.dataTextarea.value = '';
+          els.dataTextarea.readOnly = false;
+          els.dataTextarea.placeholder = 'Google|JBSWY3DPEHPK3PXP\nGitHub|KRPGS5ABN2...';
+        } else {
+          title.textContent = 'Export Accounts';
+          btn.textContent = 'Copy to Clipboard';
+          btn.dataset.action = 'export';
+          els.dataTextarea.value = accounts.map((a) => `${a.name}|${a.secret}`).join('\n');
+          els.dataTextarea.readOnly = true;
+        }
+        openModal('dataModal');
+      }
+
+      function processDataAction() {
+        const btn = document.getElementById('processDataBtn');
+        const action = btn.dataset.action;
+        if (action === 'export') {
+          els.dataTextarea.select();
+          try {
+            document.execCommand('copy');
             closeAllModals();
-            updateAccountsDisplay(true);
-            updateCodes(); // Triggers generation with current time
-            setTimeout(() => showToast(editingIndex >= 0 ? 'Account updated' : 'Account added'), 300);
+            setTimeout(() => showToast('Export data copied!'), 300);
+          } catch (e) {
+            showToast('Failed to copy', 'error');
+          }
+          return;
         }
 
-        function initDelete(index) {
-            deletingIndex = index;
-            document.getElementById('deleteMessage').textContent = `Remove "${accounts[index].name}"?`;
-            openModal('deleteModal');
-        }
+        const raw = els.dataTextarea.value.trim();
+        if (!raw) return showToast('Please enter data to import', 'warning');
 
-        function confirmDelete() {
-            if (deletingIndex >= 0) {
-                accounts.splice(deletingIndex, 1);
-                saveToStorage();
-                updateAccountsDisplay(true);
-            }
-            closeAllModals();
-            setTimeout(() => showToast('Account removed'), 300);
-        }
+        const lines = raw.split('\n');
+        let added = 0;
+        let duplicates = 0;
+        let errors = 0;
 
-        function handleCardCopy(cardElement, index) {
-            const codeEl = document.getElementById(`code-value-${index}`);
-            if (!codeEl) return;
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+          const parts = line.split('|');
+          if (parts.length < 2) {
+            errors++;
+            return;
+          }
+          const name = parts[0].trim();
+          let secret = parts[1]
+            .trim()
+            .replace(/[\s\-]/g, '')
+            .toUpperCase()
+            .replace(/0/g, 'O');
 
-            const text = codeEl.textContent.replace(/\s/g, '');
-
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            textArea.style.top = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    const overlay = document.getElementById(`copy-overlay-${index}`);
-                    const icon = document.getElementById(`copy-icon-${index}`);
-                    const label = document.getElementById(`copy-text-${index}`);
-
-                    overlay.classList.remove('opacity-0', 'pointer-events-none');
-                    icon.classList.remove('scale-50');
-                    icon.classList.add('scale-100');
-                    label.classList.remove('translate-y-2', 'opacity-0');
-                    cardElement.classList.add('!border-emerald-500', 'ring-1', 'ring-emerald-500');
-
-                    setTimeout(() => {
-                        overlay.classList.add('opacity-0', 'pointer-events-none');
-                        icon.classList.add('scale-50');
-                        icon.classList.remove('scale-100');
-                        label.classList.add('translate-y-2', 'opacity-0');
-                        cardElement.classList.remove('!border-emerald-500', 'ring-1', 'ring-emerald-500');
-                    }, 1200);
-
-                } else {
-                    showToast('Failed to copy', 'error');
-                }
-            } catch (err) {
-                showToast('Failed to copy', 'error');
-            }
-
-            document.body.removeChild(textArea);
-        }
-
-        function editAccount(index) {
-            openAccountModal(index);
-        }
-
-        // --- Import/Export ---
-        function openDataModal(type) {
-            const btn = document.getElementById('processDataBtn');
-            const title = document.getElementById('dataModalTitle');
-            if (type === 'import') {
-                title.textContent = 'Import Accounts';
-                btn.textContent = 'Import';
-                btn.dataset.action = 'import';
-                els.dataTextarea.value = '';
-                els.dataTextarea.readOnly = false;
-                els.dataTextarea.placeholder = "Google|JBSWY3DPEHPK3PXP\nGitHub|KRPGS5ABN2..."
+          if (name && secret && !/[^A-Z2-7]/.test(secret) && base32ToHex(secret)) {
+            if (!accounts.some((a) => a.name === name)) {
+              accounts.push({ name, secret });
+              added++;
             } else {
-                title.textContent = 'Export Accounts';
-                btn.textContent = 'Copy to Clipboard';
-                btn.dataset.action = 'export';
-                els.dataTextarea.value = accounts.map(a => `${a.name}|${a.secret}`).join('\n');
-                els.dataTextarea.readOnly = true;
+              duplicates++;
             }
-            openModal('dataModal');
+          } else {
+            errors++;
+          }
+        });
+
+        if (added > 0) {
+          saveToStorage();
+          updateAccountsDisplay(true);
+          updateCodes();
+          closeAllModals();
+
+          let msg = `Imported ${added} accounts`;
+          if (duplicates > 0) msg += ` (${duplicates} skipped)`;
+          showToast(msg);
+        } else if (duplicates > 0) {
+          closeAllModals();
+          showToast(`All ${duplicates} accounts already exist`, 'warning');
         }
 
-        function processDataAction() {
-            const btn = document.getElementById('processDataBtn');
-            const action = btn.dataset.action;
-            if (action === 'export') {
-                els.dataTextarea.select();
-                try {
-                    document.execCommand('copy');
-                    closeAllModals();
-                    setTimeout(() => showToast('Export data copied!'), 300);
-                } catch (e) {
-                    showToast('Failed to copy', 'error');
-                }
-                return;
-            }
+        if (errors > 0) {
+          showToast(`${errors} lines were invalid`, 'warning');
+        }
+      }
 
-            const raw = els.dataTextarea.value.trim();
-            if (!raw) return showToast('Please enter data to import', 'warning');
+      // --- Data Persistence ---
+      function loadAccounts() {
+        try {
+          const saved = localStorage.getItem('totpAccounts');
+          if (saved) accounts = JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to load accounts');
+          accounts = [];
+        }
+      }
 
-            const lines = raw.split('\n');
-            let added = 0;
-            let duplicates = 0;
-            let errors = 0;
+      function saveToStorage() {
+        localStorage.setItem('totpAccounts', JSON.stringify(accounts));
+      }
 
-            lines.forEach(line => {
-                if (!line.trim()) return;
-                const parts = line.split('|');
-                if (parts.length < 2) {
-                    errors++;
-                    return;
-                }
-                const name = parts[0].trim();
-                let secret = parts[1].trim().replace(/[\s\-]/g, '').toUpperCase().replace(/0/g, 'O');
+      // --- UI Utils ---
+      function toggleSearch() {
+        isSearchActive = !isSearchActive;
+        const timerBox = els.headerTimerBox;
+        const searchBox = els.headerSearchBox;
 
-                if (name && secret && !/[^A-Z2-7]/.test(secret) && base32ToHex(secret)) {
-                    if (!accounts.some(a => a.name === name)) {
-                        accounts.push({ name, secret });
-                        added++;
-                    } else {
-                        duplicates++;
-                    }
-                } else {
-                    errors++;
-                }
-            });
+        if (isSearchActive) {
+          timerBox.classList.remove('flex-1');
+          timerBox.classList.add('w-12');
+          els.timerPillContent.classList.remove('opacity-100');
+          els.timerPillContent.classList.add('opacity-0', 'pointer-events-none');
+          els.timerCircleContent.classList.remove('opacity-0', 'scale-50');
+          els.timerCircleContent.classList.add('opacity-100', 'scale-100');
 
-            if (added > 0) {
-                saveToStorage();
-                updateAccountsDisplay(true);
-                updateCodes();
-                closeAllModals();
+          searchBox.classList.remove('w-12');
+          searchBox.classList.add('flex-1');
+          els.searchToggle.classList.remove('opacity-100');
+          els.searchToggle.classList.add('opacity-0', 'pointer-events-none');
+          els.searchInputWrapper.classList.remove('opacity-0', 'pointer-events-none');
+          els.searchInputWrapper.classList.add('opacity-100');
+          setTimeout(() => els.searchInput.focus(), 300);
+        } else {
+          timerBox.classList.add('flex-1');
+          timerBox.classList.remove('w-12');
+          els.timerPillContent.classList.remove('opacity-0', 'pointer-events-none');
+          els.timerPillContent.classList.add('opacity-100');
+          els.timerCircleContent.classList.remove('opacity-100', 'scale-100');
+          els.timerCircleContent.classList.add('opacity-0', 'scale-50');
 
-                let msg = `Imported ${added} accounts`;
-                if (duplicates > 0) msg += ` (${duplicates} skipped)`;
-                showToast(msg);
-            } else if (duplicates > 0) {
-                closeAllModals();
-                showToast(`All ${duplicates} accounts already exist`, 'warning');
-            }
+          searchBox.classList.add('w-12');
+          searchBox.classList.remove('flex-1');
+          els.searchToggle.classList.remove('opacity-0', 'pointer-events-none');
+          els.searchToggle.classList.add('opacity-100');
+          els.searchInputWrapper.classList.remove('opacity-100');
+          els.searchInputWrapper.classList.add('opacity-0', 'pointer-events-none');
 
-            if (errors > 0) {
-                showToast(`${errors} lines were invalid`, 'warning');
-            }
+          els.searchInput.value = '';
+          updateAccountsDisplay(false);
+        }
+      }
+
+      function filterAccounts() {
+        updateAccountsDisplay(false);
+      }
+
+      function formatAccountName(name, filter) {
+        if (filter) return highlightText(name, filter);
+        const escaped = escapeHtml(name);
+        return escaped.replace(
+          /(\([^)]+\))/g,
+          '<span class="text-slate-400 font-normal text-xs ml-0.5">$1</span>',
+        );
+      }
+
+      function highlightText(text, filter) {
+        if (!filter) return escapeHtml(text);
+        const lowerText = text.toLowerCase();
+        const start = lowerText.indexOf(filter);
+        if (start === -1) return escapeHtml(text);
+        const end = start + filter.length;
+        return (
+          escapeHtml(text.substring(0, start)) +
+          `<span class="bg-yellow-200 text-yellow-800 rounded px-0.5">${escapeHtml(text.substring(start, end))}</span>` +
+          escapeHtml(text.substring(end))
+        );
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // --- Modal System ---
+      function openModal(modalId) {
+        els.modalOverlay.classList.remove('hidden');
+        setTimeout(() => {
+          els.modalOverlay.classList.remove('opacity-0');
+        }, 10);
+        document.querySelectorAll('.modal-content').forEach((el) => {
+          el.classList.add('hidden');
+          el.classList.remove('translate-y-0');
+          el.classList.add('translate-y-full');
+        });
+        const modal = document.getElementById(modalId);
+        currentModal = modal;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('translate-y-full');
+          modal.classList.add('translate-y-0');
+        }, 50);
+      }
+
+      function closeAllModals() {
+        els.modalOverlay.classList.add('opacity-0');
+        if (currentModal) {
+          currentModal.classList.add('translate-y-full');
+          currentModal.classList.remove('translate-y-0');
+        }
+        setTimeout(() => {
+          els.modalOverlay.classList.add('hidden');
+          document.querySelectorAll('.modal-content').forEach((el) => el.classList.add('hidden'));
+          currentModal = null;
+        }, 300);
+      }
+
+      // --- Toast System ---
+      function showToast(message, type = 'success') {
+        const el = document.createElement('div');
+        const colorClass =
+          type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-amber-500' : 'bg-slate-800';
+        const icon =
+          type === 'error'
+            ? 'circle-alert'
+            : type === 'warning'
+              ? 'triangle-alert'
+              : 'circle-check';
+        el.className = `${colorClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto min-w-[200px] justify-center`;
+        el.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${message}</span>`;
+
+        const container = document.getElementById('toastContainer');
+        // Limit to 3 notifications
+        while (container.children.length >= 3) {
+          container.firstChild.remove();
         }
 
-        // --- Data Persistence ---
-        function loadAccounts() {
-            try {
-                const saved = localStorage.getItem('totpAccounts');
-                if (saved) accounts = JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed to load accounts');
-                accounts = [];
-            }
-        }
+        container.appendChild(el);
+        lucide.createIcons({ root: el });
+        requestAnimationFrame(() => {
+          el.classList.remove('translate-y-4', 'opacity-0');
+        });
+        setTimeout(() => {
+          el.classList.add('translate-y-4', 'opacity-0');
+          setTimeout(() => {
+            if (el.parentNode) el.remove();
+          }, 300);
+        }, 3000);
+      }
 
-        function saveToStorage() {
-            localStorage.setItem('totpAccounts', JSON.stringify(accounts));
-        }
-
-        // --- UI Utils ---
-        function toggleSearch() {
-            isSearchActive = !isSearchActive;
-            const timerBox = els.headerTimerBox;
-            const searchBox = els.headerSearchBox;
-
-            if (isSearchActive) {
-                timerBox.classList.remove('flex-1');
-                timerBox.classList.add('w-12');
-                els.timerPillContent.classList.remove('opacity-100');
-                els.timerPillContent.classList.add('opacity-0', 'pointer-events-none');
-                els.timerCircleContent.classList.remove('opacity-0', 'scale-50');
-                els.timerCircleContent.classList.add('opacity-100', 'scale-100');
-
-                searchBox.classList.remove('w-12');
-                searchBox.classList.add('flex-1');
-                els.searchToggle.classList.remove('opacity-100');
-                els.searchToggle.classList.add('opacity-0', 'pointer-events-none');
-                els.searchInputWrapper.classList.remove('opacity-0', 'pointer-events-none');
-                els.searchInputWrapper.classList.add('opacity-100');
-                setTimeout(() => els.searchInput.focus(), 300);
-            } else {
-                timerBox.classList.add('flex-1');
-                timerBox.classList.remove('w-12');
-                els.timerPillContent.classList.remove('opacity-0', 'pointer-events-none');
-                els.timerPillContent.classList.add('opacity-100');
-                els.timerCircleContent.classList.remove('opacity-100', 'scale-100');
-                els.timerCircleContent.classList.add('opacity-0', 'scale-50');
-
-                searchBox.classList.add('w-12');
-                searchBox.classList.remove('flex-1');
-                els.searchToggle.classList.remove('opacity-0', 'pointer-events-none');
-                els.searchToggle.classList.add('opacity-100');
-                els.searchInputWrapper.classList.remove('opacity-100');
-                els.searchInputWrapper.classList.add('opacity-0', 'pointer-events-none');
-
-                els.searchInput.value = '';
-                updateAccountsDisplay(false);
-            }
-        }
-
-        function filterAccounts() {
-            updateAccountsDisplay(false);
-        }
-
-        function formatAccountName(name, filter) {
-            if (filter) return highlightText(name, filter);
-            const escaped = escapeHtml(name);
-            return escaped.replace(/(\([^)]+\))/g, '<span class="text-slate-400 font-normal text-xs ml-0.5">$1</span>');
-        }
-
-        function highlightText(text, filter) {
-            if (!filter) return escapeHtml(text);
-            const lowerText = text.toLowerCase();
-            const start = lowerText.indexOf(filter);
-            if (start === -1) return escapeHtml(text);
-            const end = start + filter.length;
-            return escapeHtml(text.substring(0, start)) +
-                `<span class="bg-yellow-200 text-yellow-800 rounded px-0.5">${escapeHtml(text.substring(start, end))}</span>` +
-                escapeHtml(text.substring(end));
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // --- Modal System ---
-        function openModal(modalId) {
-            els.modalOverlay.classList.remove('hidden');
-            setTimeout(() => {
-                els.modalOverlay.classList.remove('opacity-0');
-            }, 10);
-            document.querySelectorAll('.modal-content').forEach(el => {
-                el.classList.add('hidden');
-                el.classList.remove('translate-y-0');
-                el.classList.add('translate-y-full');
-            });
-            const modal = document.getElementById(modalId);
-            currentModal = modal;
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('translate-y-full');
-                modal.classList.add('translate-y-0');
-            }, 50);
-        }
-
-        function closeAllModals() {
-            els.modalOverlay.classList.add('opacity-0');
-            if (currentModal) {
-                currentModal.classList.add('translate-y-full');
-                currentModal.classList.remove('translate-y-0');
-            }
-            setTimeout(() => {
-                els.modalOverlay.classList.add('hidden');
-                document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-                currentModal = null;
-            }, 300);
-        }
-
-        // --- Toast System ---
-        function showToast(message, type = 'success') {
-            const el = document.createElement('div');
-            const colorClass = type === 'error' ? 'bg-red-500' : (type === 'warning' ? 'bg-amber-500' : 'bg-slate-800');
-            const icon = type === 'error' ? 'circle-alert' : (type === 'warning' ? 'triangle-alert' : 'circle-check');
-            el.className = `${colorClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto min-w-[200px] justify-center`;
-            el.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${message}</span>`;
-            
-            const container = document.getElementById('toastContainer');
-            // Limit to 3 notifications
-            while (container.children.length >= 3) {
-                container.firstChild.remove();
-            }
-            
-            container.appendChild(el);
-            lucide.createIcons({ root: el });
-            requestAnimationFrame(() => {
-                el.classList.remove('translate-y-4', 'opacity-0');
-            });
-            setTimeout(() => {
-                el.classList.add('translate-y-4', 'opacity-0');
-                setTimeout(() => {
-                    if (el.parentNode) el.remove();
-                }, 300);
-            }, 3000);
-        }
-
-        // --- Visibility Handling ---
-        function setupVisibilityHandling() {
-            document.addEventListener('visibilitychange', () => {
-                isPageVisible = !document.hidden;
-                if (isPageVisible) {
-                    initializeTiming();
-                }
-            });
-        }
+      // --- Visibility Handling ---
+      function setupVisibilityHandling() {
+        document.addEventListener('visibilitychange', () => {
+          isPageVisible = !document.hidden;
+          if (isPageVisible) {
+            initializeTiming();
+          }
+        });
+      }
     </script>
-</body>
-
+  </body>
 </html>
