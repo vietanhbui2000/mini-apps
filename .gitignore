@@ -2,3 +2,7 @@
 .vscode/
 .cursor/
 ~testing/
+package.json
+.prettierrc
+.prettierignore
+eslint.config.mjs
