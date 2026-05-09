@@ -648,7 +648,7 @@
         setupResizeLogic();
 
         const videoToPlay = checkUrlForVideo();
-        setHistoryState('replace', { view: 'index' }, '/');
+        setHistoryState('replace', { view: 'index' }, '');
 
         if (videoToPlay) {
           els.urlInput.value = videoToPlay;
