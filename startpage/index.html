@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -44,6 +44,18 @@
 
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Prevent Theme Flicker (Anti-FOUC) -->
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('theme') || 'auto';
+                const isDark = theme === 'dark' || 
+                              (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDark) document.documentElement.classList.add('dark');
+            } catch (e) {}
+        })();
+    </script>
 
     <style>
         body {
