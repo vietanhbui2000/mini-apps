@@ -1,7 +1,7 @@
 .DS_Store
-.vscode/
-.cursor/
-~testing/
+.vscode
+.cursor
+~testing
 package.json
 .prettierrc
 .prettierignore
