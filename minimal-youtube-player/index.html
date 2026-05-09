@@ -153,6 +153,25 @@
         transition-delay: 0.05s;
       }
 
+      /* On touch devices (no hover), keep the pill permanently expanded */
+      @media (hover: none) {
+        .zen-pill-morph {
+          width: 140px;
+          height: 48px;
+          background-color: rgba(0, 0, 0, 0.4);
+          border-color: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .zen-pill-inner {
+          opacity: 1;
+          transform: scale(1);
+          pointer-events: auto;
+        }
+      }
+
       /* View Transitions Architecture */
       .morph-active {
         view-transition-name: player-morph;
@@ -179,6 +198,12 @@
       }
       .zen-video-active .resize-handle {
         display: flex !important;
+      }
+      /* Small phones: no room to resize, hide handles */
+      @media (max-width: 639px) {
+        .zen-video-active .resize-handle {
+          display: none !important;
+        }
       }
     </style>
   </head>
@@ -608,8 +633,14 @@
         }
       }
 
+      // --- Base path: the directory containing this index.html ---
+      // e.g. '/mini-apps/minimal-youtube-player/' on subdirectory deployments
+      const APP_BASE = window.location.pathname.replace(/\/[^\/]*$/, '/').replace(/\/+$/, '/') || '/';
+
       // --- History API Wrapper for Sandbox Compatibility ---
-      function setHistoryState(action, state, url) {
+      function setHistoryState(action, state, relPath) {
+        // relPath is relative to APP_BASE, e.g. '' for index, 'watch?v=ID' for playing
+        const url = relPath ? APP_BASE + relPath : APP_BASE;
         try {
           if (action === 'push') {
             history.pushState(state, '', url);
@@ -648,7 +679,7 @@
         setupResizeLogic();
 
         const videoToPlay = checkUrlForVideo();
-        setHistoryState('replace', { view: 'index' }, '');
+        setHistoryState('replace', { view: 'index' }, '');  // '' → resolves to APP_BASE
 
         if (videoToPlay) {
           els.urlInput.value = videoToPlay;
@@ -661,9 +692,14 @@
         let potentialInput = params.get('v') || params.get('url');
 
         if (!potentialInput) {
-          // Ignore /watch and index.html so we don't treat them as video IDs
-          const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
-          if (path && path !== 'index.html' && path !== 'watch') potentialInput = path;
+          // Strip APP_BASE prefix so subdirectory deployments resolve correctly
+          const rawPath = window.location.pathname;
+          const relativePath = rawPath.startsWith(APP_BASE)
+            ? rawPath.slice(APP_BASE.length)
+            : rawPath.replace(/^\/+|\/+$/g, '');
+          const segment = relativePath.replace(/^\/+|\/+$/g, '');
+          // Ignore known non-video path segments
+          if (segment && segment !== 'index.html' && segment !== 'watch') potentialInput = segment;
         }
 
         if (potentialInput) {
@@ -675,6 +711,9 @@
 
       // --- Custom Resize Logic ---
       function setupResizeLogic() {
+        // Skip resize on small phones — no horizontal space
+        if (window.innerWidth < 640) return;
+
         let isResizing = false;
         let resizeStartX = 0;
         let resizeStartWidth = 0;
@@ -1102,12 +1141,12 @@
           };
 
           if (isChangingMedia) {
-            setHistoryState('replace', { view: 'playing' }, '/watch?v=' + videoId);
+            setHistoryState('replace', { view: 'playing' }, 'watch?v=' + videoId);
 
             showSkeletons();
             setTimeout(() => loadMedia(), 300);
           } else {
-            setHistoryState('push', { view: 'playing' }, '/watch?v=' + videoId);
+            setHistoryState('push', { view: 'playing' }, 'watch?v=' + videoId);
 
             els.emptyState.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
             els.emptyState.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
