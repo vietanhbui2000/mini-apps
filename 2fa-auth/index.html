@@ -16,10 +16,8 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Fonts: Inter, JetBrains Mono -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <!-- Fonts: Geist, Geist Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- Tailwind Config -->
     <script>
@@ -27,8 +25,8 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        sans: ['Geist', 'sans-serif'],
+                        mono: ['Geist Mono', 'monospace'],
                     },
                     colors: {
                         brand: {
@@ -97,13 +95,13 @@
 
         <!-- Header -->
         <header
-            class="bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 px-5 py-4 flex justify-between items-center flex-shrink-0">
+            class="bg-white/90 backdrop-blur-md z-20 border-b border-slate-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0">
             <div class="flex items-center gap-3">
                 <div
                     class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
                     <i data-lucide="shield-check" class="w-4 h-4"></i>
                 </div>
-                <h1 class="font-bold text-lg tracking-tight text-slate-900">2FA Authenticator</h1>
+                <h1 class="font-bold text-2xl tracking-tight text-slate-900">2FA Authenticator</h1>
             </div>
         </header>
 
@@ -111,7 +109,7 @@
         <main class="flex-1 overflow-y-auto relative bg-slate-50/50 scroll-smooth" id="mainScroll">
 
             <!-- Dynamic Sticky Header (Timer & Search) -->
-            <div class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-[2px] shadow-sm transition-shadow px-4 py-3"
+            <div class="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-[2px] shadow-sm transition-shadow px-4 sm:px-6 py-3 sm:py-4"
                 id="stickyHeader">
 
                 <div class="flex items-center gap-3 h-12">
@@ -176,14 +174,21 @@
             </div>
 
             <!-- Codes List -->
-            <div id="codesContainer" class="px-4 pt-3 pb-24 space-y-3">
+            <div id="codesContainer" class="px-4 sm:px-6 pt-4 sm:pt-6 pb-24 space-y-4">
                 <!-- Content populated by JS -->
             </div>
         </main>
 
-        <!-- Bottom Action Bar -->
-        <div
-            class="bg-white border-t border-slate-200 p-3 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+        <!-- Bottom Section Wrapper -->
+        <div class="relative flex-shrink-0">
+            <!-- Toast Notification Container -->
+            <div id="toastContainer"
+                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 sm:mb-6 z-[60] flex flex-col items-center gap-2 w-max max-w-[90%] pointer-events-none">
+            </div>
+
+            <!-- Bottom Action Bar -->
+            <div
+                class="bg-white border-t border-slate-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
             <button id="toggleAddAccount"
                 class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
                 <i data-lucide="plus" class="transition-transform group-hover:rotate-90 w-4 h-4"></i>
@@ -204,18 +209,13 @@
             </div>
         </div>
 
-        <!-- Toast Notification -->
-        <div id="toastContainer"
-            class="absolute bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-2 w-max max-w-[90%] pointer-events-none">
-        </div>
-
         <!-- Modals Overlay -->
         <div id="modalOverlay"
             class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end justify-center p-0 sm:pb-6">
 
             <!-- Add/Edit Account Modal -->
             <div id="accountModal"
-                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
+                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
                 role="dialog">
 
                 <div class="flex justify-between items-center mb-6">
@@ -235,10 +235,10 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Secret
-                            Key</label>
+                            Key / URI</label>
                         <input type="text" id="secretKey"
                             class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all font-mono text-sm"
-                            placeholder="BASE32 Key">
+                            placeholder="BASE32 Key or otpauth:// URI">
                     </div>
                 </div>
                 <div class="flex gap-3 mt-8">
@@ -251,7 +251,7 @@
 
             <!-- Import/Export Modal -->
             <div id="dataModal"
-                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
+                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
                 role="dialog">
 
                 <div class="flex justify-between items-center mb-4">
@@ -275,7 +275,7 @@
 
             <!-- Delete Confirmation -->
             <div id="deleteModal"
-                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden"
+                class="bg-white w-full sm:w-[90%] max-w-[480px] rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden"
                 role="dialog">
 
                 <div class="text-center">
@@ -422,9 +422,11 @@
 
         // --- Core Logic: Timing & TOTP ---
         function initializeTiming() {
-            lastTimeStep = Math.floor(Date.now() / 1000 / TOTP_INTERVAL);
+            // Force precise initial timestamp calculation
+            const now = Date.now() / 1000;
+            lastTimeStep = Math.floor(now / TOTP_INTERVAL);
+            updateCodes(Math.floor(now)); // Pass specific epoch to avoid race condition
             updateTimers();
-            updateCodes();
             startTimer();
         }
 
@@ -435,22 +437,23 @@
             }, 100);
         }
 
-        function getCycleProgress() {
-            const now = Date.now() / 1000;
-            return TOTP_INTERVAL - (now % TOTP_INTERVAL);
+        function getCycleProgress(nowSec) {
+            return TOTP_INTERVAL - (nowSec % TOTP_INTERVAL);
         }
 
         let lastTimeInt = -1;
 
         function updateTimers() {
-            const timeLeft = getCycleProgress();
+            const nowSec = Date.now() / 1000;
+            const timeLeft = getCycleProgress(nowSec);
             const timeInt = Math.ceil(timeLeft);
 
             // Check if we've entered a new TOTP time step
-            const currentTimeStep = Math.floor(Date.now() / 1000 / TOTP_INTERVAL);
+            const currentTimeStep = Math.floor(nowSec / TOTP_INTERVAL);
             if (currentTimeStep !== lastTimeStep) {
                 lastTimeStep = currentTimeStep;
-                updateCodes();
+                // FIX: Pass the exact deterministic timestamp we calculated to prevent double Date.now() race condition
+                updateCodes(Math.floor(nowSec)); 
             }
 
             if (timeInt !== lastTimeInt) {
@@ -487,22 +490,28 @@
         }
 
         // --- TOTP Generation ---
-        function generateTOTP(secret, timestamp = null) {
+        function generateTOTP(secret, timestamp) {
             try {
                 if (typeof CryptoJS === 'undefined') return 'Error';
-                const epoch = timestamp !== null ? timestamp : Math.floor(Date.now() / 1000);
-                const time = Math.floor(epoch / TOTP_INTERVAL);
+                
+                // Using passed deterministic timestamp
+                const time = Math.floor(timestamp / TOTP_INTERVAL);
+                
+                // Hex pad to 8 bytes (16 hex chars)
                 const timeHex = time.toString(16).padStart(16, '0');
                 const secretHex = base32ToHex(secret);
-                if (!secretHex) return 'Invalid';
+                
+                if (!secretHex) return '------';
 
                 const hmac = CryptoJS.HmacSHA1(
                     CryptoJS.enc.Hex.parse(timeHex),
                     CryptoJS.enc.Hex.parse(secretHex)
                 );
-                const hmacHex = hmac.toString();
+                
+                const hmacHex = hmac.toString(CryptoJS.enc.Hex);
                 const offset = parseInt(hmacHex.slice(-1), 16);
                 const codeHex = hmacHex.substring(offset * 2, offset * 2 + 8);
+                
                 const code = parseInt(codeHex, 16) & 0x7fffffff;
                 return (code % 1000000).toString().padStart(6, '0');
             } catch (e) {
@@ -512,20 +521,28 @@
         }
 
         function base32ToHex(base32) {
-            let bits = '';
-            base32 = base32.replace(/\s+/g, '').toUpperCase().replace(/[^A-Z2-7]/g, '');
-            if (base32.length < 8) return '';
-            for (let i = 0; i < base32.length; i++) {
-                const val = BASE32_CHARS.indexOf(base32[i]);
-                if (val === -1) return '';
-                bits += val.toString(2).padStart(5, '0');
-            }
-            // Process 4 bits at a time to avoid precision loss with parseInt on long binary strings
+            // FIX: Removed dangerous 1->L and 8->B substitutions.
+            // Secrets should be normalized AT SAVE, not at generation time.
+            if (!base32) return '';
+
+            let bits = 0;
+            let value = 0;
             let hex = '';
-            const usable = bits.slice(0, Math.floor(bits.length / 8) * 8);
-            for (let i = 0; i < usable.length; i += 4) {
-                hex += parseInt(usable.substr(i, 4), 2).toString(16);
+
+            for (let i = 0; i < base32.length; i++) {
+                const index = BASE32_CHARS.indexOf(base32[i]);
+                if (index === -1) return null; // Abort cleanly if an invalid character somehow snuck in
+
+                value = (value << 5) | index;
+                bits += 5;
+
+                if (bits >= 8) {
+                    const byte = (value >>> (bits - 8)) & 0xFF;
+                    hex += byte.toString(16).padStart(2, '0');
+                    bits -= 8;
+                }
             }
+            
             return hex;
         }
 
@@ -533,20 +550,20 @@
             return code.length === 6 ? `${code.slice(0, 3)} ${code.slice(3)}` : code;
         }
 
-        function updateCodes() {
-            const now = Math.floor(Date.now() / 1000);
+        function updateCodes(deterministicNow = null) {
+            // FIX: Ensure we use the deterministic timestamp if provided, solving the double Date.now() race condition.
+            const epoch = deterministicNow !== null ? deterministicNow : Math.floor(Date.now() / 1000);
+            
             accounts.forEach((acc, idx) => {
-                // Update Current Code
                 const codeEl = document.getElementById(`code-value-${idx}`);
                 if (codeEl) {
-                    const code = generateTOTP(acc.secret, now);
+                    const code = generateTOTP(acc.secret, epoch);
                     codeEl.textContent = formatCodeDisplay(code);
                 }
 
-                // Update Next Code
                 const nextCodeEl = document.getElementById(`next-code-value-${idx}`);
                 if (nextCodeEl) {
-                    const nextCode = generateTOTP(acc.secret, now + TOTP_INTERVAL);
+                    const nextCode = generateTOTP(acc.secret, epoch + TOTP_INTERVAL);
                     nextCodeEl.textContent = formatCodeDisplay(nextCode);
                 }
             });
@@ -576,7 +593,6 @@
                 if (filter && !acc.name.toLowerCase().includes(filter)) return;
                 visibleCount++;
 
-                // Codes
                 const code = generateTOTP(acc.secret, now);
                 const nextCode = generateTOTP(acc.secret, now + TOTP_INTERVAL);
 
@@ -587,7 +603,6 @@
 
                 const animationClass = shouldAnimate ? 'animate-slide-up' : '';
 
-                // Add click handler to entire card
                 el.className = `group bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-200 relative overflow-hidden cursor-pointer select-none card-tap-highlight ${animationClass}`;
                 el.onclick = (e) => handleCardCopy(e.currentTarget, idx);
                 el.id = `account-card-${idx}`;
@@ -605,7 +620,6 @@
                                 </h3>
                             </div>
                             <div class="opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex gap-2">
-                                <!-- Stop propagation on buttons to prevent copying when clicking edit/delete -->
                                 <button onclick="event.stopPropagation(); editAccount(${idx})" class="text-slate-400 hover:text-yellow-500 p-1 transition-colors relative z-10" title="Edit">
                                     <i data-lucide="pencil" class="w-3 h-3"></i>
                                 </button>
@@ -620,7 +634,6 @@
                                 ${formattedCode}
                             </div>
                             
-                            <!-- Next Code Display (Replaces Copy Button) -->
                             <div class="text-right flex flex-col items-end opacity-60 group-hover:opacity-100 transition-opacity">
                                 <span class="text-[10px] uppercase text-slate-400 font-bold tracking-wider mb-0.5">Next</span>
                                 <span id="next-code-value-${idx}" class="font-mono text-sm font-medium text-slate-400 tracking-wide">${formattedNextCode}</span>
@@ -628,7 +641,6 @@
                         </div>
                     </div>
 
-                    <!-- Success Overlay -->
                     <div class="absolute inset-0 z-20 bg-emerald-50/90 backdrop-blur-[1px] flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-200" id="copy-overlay-${idx}">
                         <div class="transform scale-50 transition-all duration-300 cubic-bezier(0.34, 1.56, 0.64, 1)" id="copy-icon-${idx}">
                             <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-sm mb-1">
@@ -638,13 +650,11 @@
                         <span class="text-emerald-600 font-bold text-xs tracking-wide uppercase translate-y-2 opacity-0 transition-all duration-300 delay-75" id="copy-text-${idx}">Copied!</span>
                     </div>
 
-                    <!-- Hover Effect Gradient -->
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-50/50 pointer-events-none"></div>
                 `;
                 els.codesContainer.appendChild(el);
             });
 
-            // Re-initialize icons for newly added elements
             lucide.createIcons({ root: els.codesContainer });
 
             if (visibleCount === 0 && filter) {
@@ -672,22 +682,62 @@
         }
 
         function saveAccount() {
-            const name = els.accountName.value.trim();
-            let secret = els.secretKey.value.trim().replace(/\s/g, '').toUpperCase();
-            if (!name) return showToast('Account name is required', 'error');
-            if (!secret) return showToast('Secret key is required', 'error');
+            let name = els.accountName.value.trim();
+            let rawSecret = els.secretKey.value.trim();
+            
+            if (!name && !rawSecret.startsWith('otpauth://')) return showToast('Account name is required', 'error');
+            if (!rawSecret) return showToast('Secret key or URI is required', 'error');
+
+            // FIX: Gracefully handle parsing full otpauth:// URIs
+            if (rawSecret.startsWith('otpauth://')) {
+                try {
+                    const url = new URL(rawSecret);
+                    rawSecret = url.searchParams.get('secret');
+                    if (!rawSecret) throw new Error("No secret parameter found");
+                    
+                    // Auto-fill name if it wasn't provided
+                    if (!name) {
+                        const pathName = decodeURIComponent(url.pathname.split('/').pop() || '');
+                        const issuer = url.searchParams.get('issuer');
+                        name = issuer ? `${issuer} (${pathName})` : pathName;
+                    }
+                } catch (e) {
+                    return showToast('Invalid otpauth URI', 'error');
+                }
+            }
+
+            // FIX: Normalize the secret ONCE during save, not on every generation loop.
+            // Remove spaces, hyphens, and make uppercase
+            let secret = rawSecret.replace(/[\s\-]/g, '').toUpperCase();
+            
+            // Safe substitution: 0 is never used in Base32 and is universally meant to be 'O'
+            secret = secret.replace(/0/g, 'O');
+
+            // FIX: explicitly catch dangerous/ambiguous characters instead of blindly guessing
+            if (/[189]/.test(secret)) {
+                return showToast('Secret contains invalid characters (1, 8, or 9). Please check for typos.', 'error');
+            }
+
+            // Verify it completely strips down to a valid Base32 string
+            if (/[^A-Z2-7]/.test(secret)) {
+                return showToast('Contains invalid Base32 characters.', 'error');
+            }
+
+            // Validate via conversion to ensure structural integrity
             const hex = base32ToHex(secret);
-            if (!hex) return showToast('Invalid Base32 Secret Key', 'error');
+            if (!hex) return showToast('Invalid Base32 structure/length.', 'error');
+            
             const newAcc = { name, secret };
             if (editingIndex >= 0) {
                 accounts[editingIndex] = newAcc;
             } else {
                 accounts.push(newAcc);
             }
+            
             saveToStorage();
             closeAllModals();
             updateAccountsDisplay(true);
-            updateCodes();
+            updateCodes(); // Triggers generation with current time
             setTimeout(() => showToast(editingIndex >= 0 ? 'Account updated' : 'Account added'), 300);
         }
 
@@ -713,7 +763,6 @@
 
             const text = codeEl.textContent.replace(/\s/g, '');
 
-            // 1. Perform Copy
             const textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.style.position = "fixed";
@@ -726,25 +775,16 @@
             try {
                 const successful = document.execCommand('copy');
                 if (successful) {
-                    // 2. Trigger Visual Animation (Overlay + Green Border)
                     const overlay = document.getElementById(`copy-overlay-${index}`);
                     const icon = document.getElementById(`copy-icon-${index}`);
                     const label = document.getElementById(`copy-text-${index}`);
 
-                    // Show Overlay
                     overlay.classList.remove('opacity-0', 'pointer-events-none');
-
-                    // Pop Icon
                     icon.classList.remove('scale-50');
                     icon.classList.add('scale-100');
-
-                    // Slide up Text
                     label.classList.remove('translate-y-2', 'opacity-0');
-
-                    // Glow Card Border
                     cardElement.classList.add('!border-emerald-500', 'ring-1', 'ring-emerald-500');
 
-                    // Reset after 1.2s
                     setTimeout(() => {
                         overlay.classList.add('opacity-0', 'pointer-events-none');
                         icon.classList.add('scale-50');
@@ -819,9 +859,9 @@
                     return;
                 }
                 const name = parts[0].trim();
-                const secret = parts[1].trim();
+                let secret = parts[1].trim().replace(/[\s\-]/g, '').toUpperCase().replace(/0/g, 'O');
 
-                if (name && secret && base32ToHex(secret)) {
+                if (name && secret && !/[^A-Z2-7]/.test(secret) && base32ToHex(secret)) {
                     if (!accounts.some(a => a.name === name)) {
                         accounts.push({ name, secret });
                         added++;
@@ -837,8 +877,6 @@
                 saveToStorage();
                 updateAccountsDisplay(true);
                 updateCodes();
-
-                // Re-initialize icons (handled in updateAccountsDisplay) and close
                 closeAllModals();
 
                 let msg = `Imported ${added} accounts`;
@@ -977,14 +1015,23 @@
             const icon = type === 'error' ? 'circle-alert' : (type === 'warning' ? 'triangle-alert' : 'circle-check');
             el.className = `${colorClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto min-w-[200px] justify-center`;
             el.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${message}</span>`;
-            document.getElementById('toastContainer').appendChild(el);
+            
+            const container = document.getElementById('toastContainer');
+            // Limit to 3 notifications
+            while (container.children.length >= 3) {
+                container.firstChild.remove();
+            }
+            
+            container.appendChild(el);
             lucide.createIcons({ root: el });
             requestAnimationFrame(() => {
                 el.classList.remove('translate-y-4', 'opacity-0');
             });
             setTimeout(() => {
                 el.classList.add('translate-y-4', 'opacity-0');
-                setTimeout(() => el.remove(), 300);
+                setTimeout(() => {
+                    if (el.parentNode) el.remove();
+                }, 300);
             }, 3000);
         }
 
