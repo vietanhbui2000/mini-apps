@@ -1,35 +1,35 @@
 {
-    "name": "Startpage",
-    "short_name": "Startpage",
-    "description": "Your new day starts here.",
-    "start_url": "./",
-    "display": "standalone",
-    "background_color": "#f5f5f5",
-    "theme_color": "#f5f5f5",
-    "icons": [
-        {
-            "src": "startpage_icon_any_x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "startpage_icon_maskable_x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "startpage_icon_any_x512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "startpage_icon_maskable_x512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
-    ]
+  "name": "Startpage",
+  "short_name": "Startpage",
+  "description": "Your new day starts here.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#f5f5f5",
+  "icons": [
+    {
+      "src": "startpage_icon_any_x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "startpage_icon_maskable_x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "startpage_icon_any_x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "startpage_icon_maskable_x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }
