@@ -10,6 +10,7 @@ A small collection of *mini apps* built with *web technologies*. Vibe-coded with
 - <a href="https://vietanhbui2000.pages.dev/mini-apps/clock-widget-builder/" target="_blank" rel="noopener noreferrer">Clock Widget Builder</a>: Create a clock widget for Obsidian/Notion with many customizations.
 - <a href="https://vietanhbui2000.pages.dev/mini-apps/dns-profile-gen/" target="_blank" rel="noopener noreferrer">Apple DNS Profile Generator</a>: Secure DNS configuration profile generator for Apple devices.
 - <a href="https://vietanhbui2000.pages.dev/mini-apps/year-left/" target="_blank" rel="noopener noreferrer">Year Left</a>: See the current year progress at a glance.
+- <a href="https://vietanhbui2000.pages.dev/mini-apps/minimal-youtube-player/" target="_blank" rel="noopener noreferrer">Minimal YouTube Player</a>: Play any YouTube video or livestream without distraction.
 
 ---
 
