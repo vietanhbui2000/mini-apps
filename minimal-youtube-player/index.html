@@ -501,10 +501,11 @@
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            
+
+            // Lucide replaces <i> with <svg>, so re-capture refs after icons are rendered
             els.audioPauseIcon = document.getElementById('audio-pause-icon');
             els.audioPlayIcon = document.getElementById('audio-play-icon');
-            
+
             const tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -513,36 +514,28 @@
             setupEventListeners();
             setupMobileHeight();
             setupResizeLogic();
-            
-            // 1. Check URL for existing video before we reset history
+
             const videoToPlay = checkUrlForVideo();
-            
-            // 2. Set the baseline history state to root so "Back" goes to a clean empty state
             setHistoryState('replace', { view: 'index' }, '/');
-            
-            // 3. Trigger playback if a video was found (this will push /play?v=... to URL)
+
             if (videoToPlay) {
                 els.urlInput.value = videoToPlay;
-                setTimeout(() => handlePlay(true), 150); 
+                setTimeout(() => handlePlay(true), 150);
             }
         });
         
         function checkUrlForVideo() {
             const params = new URLSearchParams(window.location.search);
-            // Check ?v=... or ?url=...
             let potentialInput = params.get('v') || params.get('url');
-            
+
             if (!potentialInput) {
-                // Check path like domain.com/VIDEO_ID (ignore the new /watch standard route so we don't treat 'watch' as an ID)
+                // Ignore /watch and index.html so we don't treat them as video IDs
                 const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
                 if (path && path !== 'index.html' && path !== 'watch') potentialInput = path;
             }
 
-            // Notice we completely removed the hash logic (#link) as requested
-            
             if (potentialInput) {
                 const decoded = decodeURIComponent(potentialInput);
-                // Return only if it's a valid extraction so we don't accidentally auto-play random path strings
                 if (extractVideoID(decoded)) return decoded;
             }
             return null;
@@ -556,6 +549,7 @@
             let resizeBaseWidth = 0;
             let resizeDir = 1;
 
+            const resizeOverlay = document.getElementById('resize-overlay');
             const getClientX = (e) => e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
 
             document.querySelectorAll('.resize-handle').forEach(handle => {
@@ -563,45 +557,39 @@
                     if (currentZenMode !== 'video') return;
                     isResizing = true;
                     resizeStartX = getClientX(e);
-                    
-                    // Clear custom width momentarily to measure the base CSS width for magnetic snapback
+
+                    // Measure the base CSS width (without inline style) for magnetic snap-back
                     const currentStyleWidth = els.videoWrapper.style.width;
                     els.videoWrapper.style.width = '';
                     resizeBaseWidth = els.videoWrapper.offsetWidth;
-                    
-                    // Put width back and start
                     els.videoWrapper.style.width = currentStyleWidth || `${resizeBaseWidth}px`;
                     resizeStartWidth = els.videoWrapper.offsetWidth;
-                    
+
                     resizeDir = parseInt(handle.getAttribute('data-x-dir'));
-                    
-                    // Show invisible overlay over iframe so it doesn't swallow mouse events during drag
-                    document.getElementById('resize-overlay').classList.remove('hidden');
-                    
+
+                    // Block iframe from swallowing pointer events during drag
+                    resizeOverlay.classList.remove('hidden');
+
                     window.addEventListener('mousemove', handleResizeMove);
                     window.addEventListener('mouseup', handleResizeUp);
                     window.addEventListener('touchmove', handleResizeMove, { passive: false });
                     window.addEventListener('touchend', handleResizeUp);
                 };
-                
+
                 handle.addEventListener('mousedown', startDrag);
                 handle.addEventListener('touchstart', startDrag, { passive: true });
             });
 
             function handleResizeMove(e) {
                 if (!isResizing) return;
-                if (e.cancelable) e.preventDefault(); // Prevent scrolling on touch devices during drag
-                
+                if (e.cancelable) e.preventDefault();
+
                 const deltaX = getClientX(e) - resizeStartX;
-                
-                // Because container is -translate-x-1/2, dragging 10px on an edge means the total width needs to increase by 20px
+                // Container is -translate-x-1/2, so 10px drag on one edge = 20px total width change
                 const widthChange = deltaX * resizeDir * 2;
-                let newWidth = resizeStartWidth + widthChange;
-                
-                // Clamp width between reasonable bounds (updated to 90% max width)
-                newWidth = Math.max(300, Math.min(newWidth, window.innerWidth * 0.90));
-                
-                // Magnetic Snapback safe zone (if within 50px of the CSS default size, snap and clear inline style)
+                let newWidth = Math.max(300, Math.min(resizeStartWidth + widthChange, window.innerWidth * 0.90));
+
+                // Magnetic snap-back: clear inline style if within 50px of the natural CSS width
                 if (Math.abs(newWidth - resizeBaseWidth) < 50) {
                     els.videoWrapper.style.width = '';
                 } else {
@@ -612,8 +600,8 @@
             function handleResizeUp() {
                 if (!isResizing) return;
                 isResizing = false;
-                document.getElementById('resize-overlay').classList.add('hidden');
-                
+                resizeOverlay.classList.add('hidden');
+
                 window.removeEventListener('mousemove', handleResizeMove);
                 window.removeEventListener('mouseup', handleResizeUp);
                 window.removeEventListener('touchmove', handleResizeMove);
@@ -706,23 +694,17 @@
 
         // --- Mobile Layout Fix ---
         function setupMobileHeight() {
-            const app = document.getElementById('app-wrapper');
-            if (!app) return;
-
             let resizeTimer;
             function setHeight() {
                 if (window.innerWidth >= 640) {
-                    app.style.height = '';
+                    els.appWrapper.style.height = '';
                 } else if (!(document.activeElement && document.activeElement.tagName === 'INPUT')) {
-                    app.style.height = `${window.innerHeight}px`;
+                    els.appWrapper.style.height = `${window.innerHeight}px`;
                 }
-                
-                // Recalculate scrolling distances on orientation/window size changes
+
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(() => {
-                    if (currentZenMode === 'audio' && typeof checkAudioTitleScroll === 'function') {
-                        checkAudioTitleScroll();
-                    }
+                    if (currentZenMode === 'audio') checkAudioTitleScroll();
                 }, 150);
             }
 
@@ -926,33 +908,24 @@
 
                 const loadMedia = async () => {
                     replaceIframe(`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`);
-                    
+
+                    let videoTitle = '';
+                    let authorName = '';
                     try {
                         const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
                         const data = await res.json();
-                        
-                        // Default to empty strings instead of generic placeholders
-                        const videoTitle = data.title || '';
-                        const authorName = data.author_name || '';
-
-                        // Update dynamic document tab title
-                        document.title = videoTitle ? `${videoTitle} | Minimal YouTube Player` : 'Minimal YouTube Player';
-
-                        els.metaTitle.textContent = videoTitle;
-                        els.metaAuthor.textContent = authorName;
-                        
-                        els.audioTitle.textContent = videoTitle;
-                        els.audioAuthor.textContent = authorName;
-                        els.audioThumbnail.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+                        videoTitle = data.title || '';
+                        authorName = data.author_name || '';
                     } catch (err) {
-                        // Secure fallback if request entirely fails
-                        document.title = 'Minimal YouTube Player';
-                        els.metaTitle.textContent = '';
-                        els.metaAuthor.textContent = '';
-                        els.audioTitle.textContent = '';
-                        els.audioAuthor.textContent = '';
-                        els.audioThumbnail.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+                        // Metadata unavailable — leave title/author empty
                     }
+
+                    document.title = videoTitle ? `${videoTitle} | Minimal YouTube Player` : 'Minimal YouTube Player';
+                    els.metaTitle.textContent = videoTitle;
+                    els.metaAuthor.textContent = authorName;
+                    els.audioTitle.textContent = videoTitle;
+                    els.audioAuthor.textContent = authorName;
+                    els.audioThumbnail.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 
                     setPlayingStateUI(false, true);
 
@@ -965,13 +938,11 @@
                 };
 
                 if (isChangingMedia) {
-                    // Instantly swap the URL for the new video without filling up browser history with junk
                     setHistoryState('replace', { view: 'playing' }, '/watch?v=' + videoId);
                     
                     showSkeletons();
                     setTimeout(() => loadMedia(), 300);
                 } else {
-                    // Set the standard URL format you requested
                     setHistoryState('push', { view: 'playing' }, '/watch?v=' + videoId);
                     
                     els.emptyState.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
@@ -1050,42 +1021,33 @@
             }, 300);
         }
 
-        /* Dynamically swap morph tag and layouts to seamlessly morph container bounds */
         function switchZenMode(mode) {
             currentZenMode = mode;
             if (mode === 'video') {
-                els.videoWrapper.style.width = ''; // Always clear inline resize width when swapping
-                els.videoWrapper.classList.add('morph-active');
+                els.videoWrapper.style.width = '';
                 els.audioThumbnailWrapper.classList.remove('morph-active');
-                
+
                 els.zenVideoBtn.className = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-white/20 text-white shadow-sm';
                 els.zenAudioBtn.className = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/60 hover:text-white hover:bg-white/10';
-                
+
                 els.audioCard.classList.add('hidden');
-                
-                // Using exactly 50vw per instruction as the core desktop Zen layout size
+
                 els.videoWrapper.className = 'zen-video-active morph-active absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[50vw] max-w-[90vw] aspect-video z-50 pointer-events-auto';
                 els.videoInner.className = 'w-full h-full relative overflow-hidden rounded-2xl bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-300';
             } else {
                 els.videoWrapper.style.width = '';
                 els.audioThumbnailWrapper.classList.add('morph-active');
-                els.videoWrapper.classList.remove('morph-active');
-                
-                // Ensure resize handles are stripped via `.zen-video-active` removal BEFORE transition takes snapshot
-                els.videoWrapper.classList.remove('zen-video-active');
-                
+
                 els.zenAudioBtn.className = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-white/20 text-white shadow-sm';
                 els.zenVideoBtn.className = 'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/60 hover:text-white hover:bg-white/10';
-                
+
                 els.audioCard.classList.remove('hidden');
-                
+
+                // className replacement implicitly removes zen-video-active and morph-active
                 els.videoWrapper.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[50vw] max-w-[90vw] aspect-video z-50 opacity-0 pointer-events-none';
                 els.videoInner.className = 'w-full h-full relative overflow-hidden rounded-2xl bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-300';
 
-                // Measure width for scrolling title once layout is visible
-                requestAnimationFrame(() => {
-                    checkAudioTitleScroll();
-                });
+                requestAnimationFrame(() => checkAudioTitleScroll());
             }
         }
 
@@ -1108,9 +1070,7 @@
         }
 
         function _syncExitZenMode() {
-            // Restore morph tags explicitly so Audio card maps smoothly back to Top player
-            els.videoWrapper.style.width = ''; // Prevent residual resizes keeping inline views broken
-            els.videoWrapper.classList.add('morph-active');
+            els.videoWrapper.style.width = '';
             els.audioThumbnailWrapper.classList.remove('morph-active');
 
             els.appHeader.classList.remove('hidden');
@@ -1128,6 +1088,7 @@
             els.mainContent.classList.add('bg-slate-50/50');
             els.mainContent.classList.remove('bg-transparent');
 
+            // className replacement also restores morph-active and clears zen-video-active
             els.videoWrapper.className = 'morph-active w-full aspect-video sticky top-0 z-10 flex-shrink-0 relative';
             els.videoInner.className = 'w-full h-full relative overflow-hidden bg-slate-100 shadow-sm transition-all duration-300';
         }
