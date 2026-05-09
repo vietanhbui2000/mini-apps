@@ -1,912 +1,1103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Year Left</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
     <!-- Prevent Theme Flicker (Anti-FOUC) -->
     <script>
-        (function() {
-            try {
-                const theme = localStorage.getItem('theme-pref') || 'auto';
-                if (theme !== 'auto') {
-                    document.documentElement.setAttribute('data-theme', theme);
-                    document.documentElement.style.colorScheme = theme;
-                }
-            } catch (e) {}
-        })();
+      (function () {
+        try {
+          const theme = localStorage.getItem('theme-pref') || 'auto';
+          if (theme !== 'auto') {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
+          }
+        } catch (e) {}
+      })();
     </script>
     <style>
-        /* ─── Variables matching your theme ─── */
+      /* ─── Variables matching your theme ─── */
+      :root {
+        --bg: #f5f5f5;
+        --text-primary: #0f0f0f;
+        --text-secondary: #5e5e5e;
+        --text-tertiary: #9e9e9e;
+        --border: #dedede;
+        --border-hover: #c8c8c8;
+        --surface: #ebebeb;
+        --surface-hover: #e2e2e2;
+        --sparkle-active: #fbbf24; /* yellow */
+        --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+      }
+
+      @media (prefers-color-scheme: dark) {
         :root {
-            --bg: #f5f5f5;
-            --text-primary: #0f0f0f;
-            --text-secondary: #5e5e5e;
-            --text-tertiary: #9e9e9e;
-            --border: #dedede;
-            --border-hover: #c8c8c8;
-            --surface: #ebebeb;
-            --surface-hover: #e2e2e2;
-            --sparkle-active: #fbbf24; /* yellow */
-            --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+          --bg: #09090b;
+          --text-primary: #f0f0f0;
+          --text-secondary: #828282;
+          --text-tertiary: #4c4c4c;
+          --border: #1e1e22;
+          --border-hover: #2e2e34;
+          --surface: #131316;
+          --surface-hover: #1c1c20;
+          --sparkle-active: #facc15;
         }
+      }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #09090b;
-                --text-primary: #f0f0f0;
-                --text-secondary: #828282;
-                --text-tertiary: #4c4c4c;
-                --border: #1e1e22;
-                --border-hover: #2e2e34;
-                --surface: #131316;
-                --surface-hover: #1c1c20;
-                --sparkle-active: #facc15;
-            }
-        }
+      /* Explicit theme overrides */
+      html[data-theme='light'] {
+        --bg: #f5f5f5;
+        --text-primary: #0f0f0f;
+        --text-secondary: #5e5e5e;
+        --text-tertiary: #9e9e9e;
+        --border: #dedede;
+        --border-hover: #c8c8c8;
+        --surface: #ebebeb;
+        --surface-hover: #e2e2e2;
+        --sparkle-active: #fbbf24;
+        color-scheme: light;
+      }
 
-        /* Explicit theme overrides */
-        html[data-theme="light"] {
-            --bg: #f5f5f5;
-            --text-primary: #0f0f0f;
-            --text-secondary: #5e5e5e;
-            --text-tertiary: #9e9e9e;
-            --border: #dedede;
-            --border-hover: #c8c8c8;
-            --surface: #ebebeb;
-            --surface-hover: #e2e2e2;
-            --sparkle-active: #fbbf24;
-            color-scheme: light;
-        }
+      html[data-theme='dark'] {
+        --bg: #09090b;
+        --text-primary: #f0f0f0;
+        --text-secondary: #828282;
+        --text-tertiary: #4c4c4c;
+        --border: #1e1e22;
+        --border-hover: #2e2e34;
+        --surface: #131316;
+        --surface-hover: #1c1c20;
+        --sparkle-active: #facc15;
+        color-scheme: dark;
+      }
 
-        html[data-theme="dark"] {
-            --bg: #09090b;
-            --text-primary: #f0f0f0;
-            --text-secondary: #828282;
-            --text-tertiary: #4c4c4c;
-            --border: #1e1e22;
-            --border-hover: #2e2e34;
-            --surface: #131316;
-            --surface-hover: #1c1c20;
-            --sparkle-active: #facc15;
-            color-scheme: dark;
-        }
+      /* ─── Base Styles ─── */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        /* ─── Base Styles ─── */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      body {
+        font-family: var(--font-body);
+        background-color: var(--bg);
+        color: var(--text-primary);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+        -webkit-font-smoothing: antialiased;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
 
-        body {
-            font-family: var(--font-body);
-            background-color: var(--bg);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 2rem 1.5rem;
-            -webkit-font-smoothing: antialiased;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+      /* ─── Page Container & Load Animations ─── */
+      .page-container {
+        width: 100%;
+        max-width: 800px;
+        margin: auto 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
 
-        /* ─── Page Container & Load Animations ─── */
-        .page-container {
-            width: 100%;
-            max-width: 800px;
-            margin: auto 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+      /* STEP 2: Header */
+      .header-title {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        font-style: italic;
+        font-weight: 400;
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.1;
+        text-align: center;
+        width: 100%;
 
-        /* STEP 2: Header */
+        opacity: 0;
+        transform: translateY(10px);
+        overflow: hidden;
+        max-height: 0;
+        /* Starts at -1.5rem to perfectly cancel the page-container gap */
+        margin-bottom: -1.5rem;
+        transition:
+          opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      html.load-step-header .header-title {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 100px;
+        margin-bottom: 0;
+      }
+
+      /* STEP 1: Widget Wrapper */
+      .widget-wrapper {
+        background-color: var(--surface);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+        user-select: none;
+        -webkit-user-select: none;
+        transition:
+          background-color 0.3s ease,
+          border-color 0.3s ease,
+          opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      html.load-step-widget .widget-wrapper {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* STEP 3: Widget Subtext/Footer */
+      .widget-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        overflow: hidden;
+
+        opacity: 0;
+        max-height: 0;
+        /* Starts at -1.5rem to perfectly cancel the widget-wrapper gap */
+        margin-top: -1.5rem;
+        transition:
+          opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .progress-text-left {
+        color: var(--text-secondary);
+        /* Monospace digits so width stays consistent if font has tabular nums */
+        font-variant-numeric: tabular-nums;
+      }
+
+      html.load-step-subtext .widget-footer {
+        opacity: 1;
+        max-height: 50px;
+        margin-top: 0;
+      }
+
+      /* STEP 4: Controls */
+      .controls-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        opacity: 0;
+        transform: translateY(10px);
+        transition:
+          opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      html.load-step-controls .controls-container {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Quick override for reduced motion on load */
+      @media (prefers-reduced-motion: reduce) {
+        .widget-wrapper,
+        .widget-footer,
+        .controls-container,
+        .sparkle-icon,
+        .dot-icon.past-dot,
         .header-title {
-            font-family: var(--font-display);
-            font-size: 2.5rem;
-            font-style: italic;
-            font-weight: 400;
-            color: var(--text-primary);
-            margin: 0;
-            line-height: 1.1;
-            text-align: center;
-            width: 100%;
-            
-            opacity: 0;
-            transform: translateY(10px);
-            overflow: hidden;
-            max-height: 0;
-            /* Starts at -1.5rem to perfectly cancel the page-container gap */
-            margin-bottom: -1.5rem; 
-            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), margin-bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: none !important;
         }
-        
-        html.load-step-header .header-title {
-            opacity: 1;
-            transform: translateY(0);
-            max-height: 100px; 
-            margin-bottom: 0;
+      }
+
+      /* ─── Controls & Buttons ─── */
+      .left-controls {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.4s ease; /* Smoothed transition for individual fades */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        outline: none;
+        flex-shrink: 0;
+        opacity: 1; /* Default to full opacity */
+      }
+
+      /* Fade buttons down individually when the 5s idle timer finishes */
+      html.idle-controls .action-btn {
+        opacity: 0.4;
+      }
+
+      .action-btn:hover,
+      .action-btn:focus-visible {
+        color: var(--text-primary);
+        border-color: var(--border-hover);
+        background: var(--surface-hover);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        opacity: 1 !important; /* Always fully visible on hover */
+      }
+
+      .theme-icon,
+      .motion-icon,
+      .text-icon {
+        display: none;
+        flex-shrink: 0;
+      }
+
+      html:not([data-theme]) .icon-auto,
+      html[data-theme='light'] .icon-light,
+      html[data-theme='dark'] .icon-dark {
+        display: block;
+      }
+
+      html:not([data-motion='reduced']) .icon-zap,
+      html[data-motion='reduced'] .icon-zap-off {
+        display: block;
+      }
+
+      html:not([data-text='hidden']) .icon-message,
+      html[data-text='hidden'] .icon-message-off {
+        display: block;
+      }
+
+      /* Hide text toggle logic */
+      html[data-text='hidden'] .header-title {
+        opacity: 0 !important;
+        max-height: 0 !important;
+        margin-bottom: -1.5rem !important; /* cancel out page-container gap */
+        pointer-events: none !important;
+      }
+
+      html[data-text='hidden'] .widget-footer {
+        opacity: 0 !important;
+        max-height: 0 !important;
+        margin-top: -1.5rem !important; /* cancel out widget-wrapper gap */
+        pointer-events: none !important;
+      }
+
+      /* ─── Grid & Cells ─── */
+      .year-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 4px;
+        margin: -4px;
+        cursor: default;
+      }
+
+      .day-cell {
+        width: 14px;
+        height: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .dot-icon {
+        width: 4px;
+        height: 4px;
+        background-color: var(--border-hover);
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+      }
+
+      /* The morphing past dot */
+      .dot-icon.past-dot {
+        position: absolute;
+        transition:
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .grid-ready .dot-icon.past-dot {
+        transform: scale(0);
+        opacity: 0;
+      }
+
+      /* ─── Sparkles ─── */
+      .sparkle-icon {
+        font-size: 11px;
+        line-height: 1;
+
+        --day-scale-boost: 1;
+        --day-color-boost: 0;
+        --active-color-ratio: clamp(0, var(--color-ratio, 0) + var(--day-color-boost), 1);
+
+        color: color-mix(
+          in srgb,
+          var(--sparkle-active) calc(var(--active-color-ratio) * 100%),
+          var(--text-secondary)
+        );
+        text-shadow: 0 0 calc((8px + var(--scale-ratio, 0) * 12px) * var(--active-color-ratio))
+          rgba(251, 191, 36, calc(var(--active-color-ratio) * 0.8));
+
+        display: block;
+        pointer-events: none;
+
+        /* Phase 1: Hidden during initial load */
+        animation: none;
+        opacity: 0;
+        scale: 0;
+        transform: rotate(0deg);
+        transition:
+          opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          scale 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .sparkle-icon.current-day {
+        --day-scale-boost: 1.8;
+        --day-color-boost: 1;
+        z-index: 5;
+      }
+
+      /* Phase 2: Blooming into existence (Still not rotating) */
+      .grid-ready .sparkle-icon {
+        opacity: clamp(0.5, calc(0.5 + var(--color-ratio, 0) * 0.5 + var(--day-color-boost)), 1);
+        scale: calc((0.9 + var(--scale-ratio, 0) * 0.7) * var(--day-scale-boost));
+      }
+
+      /* Phase 3: Morph sequence complete, hand off to keyframe animation */
+      .grid-animate .sparkle-icon {
+        transition: none;
+        animation: slow-twinkle 6s infinite linear both;
+      }
+
+      /* ─── Animations ─── */
+
+      @keyframes slow-twinkle {
+        0% {
+          transform: rotate(var(--start-rot, 0deg));
+          scale: calc((0.9 + var(--scale-ratio, 0) * 0.7) * var(--day-scale-boost));
+          opacity: clamp(0.5, calc(0.5 + var(--color-ratio, 0) * 0.5 + var(--day-color-boost)), 1);
         }
-
-        /* STEP 1: Widget Wrapper */
-        .widget-wrapper {
-            background-color: var(--surface);
-            padding: 2rem;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
-            user-select: none;
-            -webkit-user-select: none;
-            transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            
-            opacity: 0;
-            transform: translateY(10px);
+        50% {
+          transform: rotate(var(--mid-rot, 45deg));
+          scale: calc((1.2 + var(--scale-ratio, 0) * 0.5) * var(--day-scale-boost));
+          opacity: clamp(0.8, calc(0.8 + var(--color-ratio, 0) * 0.2 + var(--day-color-boost)), 1);
         }
-
-        html.load-step-widget .widget-wrapper {
-            opacity: 1;
-            transform: translateY(0);
+        100% {
+          transform: rotate(var(--end-rot, 180deg));
+          scale: calc((0.9 + var(--scale-ratio, 0) * 0.7) * var(--day-scale-boost));
+          opacity: clamp(0.5, calc(0.5 + var(--color-ratio, 0) * 0.5 + var(--day-color-boost)), 1);
         }
-
-        /* STEP 3: Widget Subtext/Footer */
-        .widget-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            overflow: hidden;
-
-            opacity: 0;
-            max-height: 0;
-            /* Starts at -1.5rem to perfectly cancel the widget-wrapper gap */
-            margin-top: -1.5rem;
-            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .progress-text-left {
-            color: var(--text-secondary);
-            /* Monospace digits so width stays consistent if font has tabular nums */
-            font-variant-numeric: tabular-nums; 
-        }
-
-        html.load-step-subtext .widget-footer {
-            opacity: 1;
-            max-height: 50px;
-            margin-top: 0;
-        }
-
-        /* STEP 4: Controls */
-        .controls-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        html.load-step-controls .controls-container {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Quick override for reduced motion on load */
-        @media (prefers-reduced-motion: reduce) {
-            .widget-wrapper, .widget-footer, .controls-container, .sparkle-icon, .dot-icon.past-dot, .header-title {
-                transition: none !important;
-            }
-        }
-
-        /* ─── Controls & Buttons ─── */
-        .left-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .action-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.4s ease; /* Smoothed transition for individual fades */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            outline: none;
-            flex-shrink: 0;
-            opacity: 1; /* Default to full opacity */
-        }
-
-        /* Fade buttons down individually when the 5s idle timer finishes */
-        html.idle-controls .action-btn {
-            opacity: 0.4;
-        }
-
-        .action-btn:hover, .action-btn:focus-visible {
-            color: var(--text-primary);
-            border-color: var(--border-hover);
-            background: var(--surface-hover);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-            opacity: 1 !important; /* Always fully visible on hover */
-        }
-
-        .theme-icon, .motion-icon, .text-icon {
-            display: none;
-            flex-shrink: 0;
-        }
-
-        html:not([data-theme]) .icon-auto,
-        html[data-theme="light"] .icon-light,
-        html[data-theme="dark"] .icon-dark { display: block; }
-
-        html:not([data-motion="reduced"]) .icon-zap,
-        html[data-motion="reduced"] .icon-zap-off { display: block; }
-
-        html:not([data-text="hidden"]) .icon-message,
-        html[data-text="hidden"] .icon-message-off { display: block; }
-
-        /* Hide text toggle logic */
-        html[data-text="hidden"] .header-title {
-            opacity: 0 !important;
-            max-height: 0 !important;
-            margin-bottom: -1.5rem !important; /* cancel out page-container gap */
-            pointer-events: none !important;
-        }
-
-        html[data-text="hidden"] .widget-footer {
-            opacity: 0 !important;
-            max-height: 0 !important;
-            margin-top: -1.5rem !important; /* cancel out widget-wrapper gap */
-            pointer-events: none !important;
-        }
-
-        /* ─── Grid & Cells ─── */
-        .year-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            padding: 4px; 
-            margin: -4px;
-            cursor: default;
-        }
-
-        .day-cell {
-            width: 14px;
-            height: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .dot-icon {
-            width: 4px;
-            height: 4px;
-            background-color: var(--border-hover);
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
-        }
-
-        /* The morphing past dot */
-        .dot-icon.past-dot {
-            position: absolute; 
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .grid-ready .dot-icon.past-dot {
-            transform: scale(0);
-            opacity: 0;
-        }
-
-        /* ─── Sparkles ─── */
-        .sparkle-icon {
-            font-size: 11px;
-            line-height: 1;
-
-            --day-scale-boost: 1;
-            --day-color-boost: 0;
-            --active-color-ratio: clamp(0, var(--color-ratio, 0) + var(--day-color-boost), 1);
-
-            color: color-mix(in srgb, var(--sparkle-active) calc(var(--active-color-ratio) * 100%), var(--text-secondary));
-            text-shadow: 0 0 calc((8px + var(--scale-ratio, 0) * 12px) * var(--active-color-ratio)) rgba(251, 191, 36, calc(var(--active-color-ratio) * 0.8));
-            
-            display: block;
-            pointer-events: none;
-            
-            /* Phase 1: Hidden during initial load */
-            animation: none;
-            opacity: 0;
-            scale: 0;
-            transform: rotate(0deg); 
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), scale 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .sparkle-icon.current-day {
-            --day-scale-boost: 1.8;
-            --day-color-boost: 1;
-            z-index: 5;
-        }
-
-        /* Phase 2: Blooming into existence (Still not rotating) */
-        .grid-ready .sparkle-icon {
-            opacity: clamp(0.5, calc(0.5 + var(--color-ratio, 0) * 0.5 + var(--day-color-boost)), 1);
-            scale: calc((0.9 + var(--scale-ratio, 0) * 0.7) * var(--day-scale-boost));
-        }
-
-        /* Phase 3: Morph sequence complete, hand off to keyframe animation */
-        .grid-animate .sparkle-icon {
-            transition: none; 
-            animation: slow-twinkle 6s infinite linear both;
-        }
-
-        /* ─── Animations ─── */
-        
-        @keyframes slow-twinkle {
-            0% {
-                transform: rotate(var(--start-rot, 0deg));
-                scale: calc((0.9 + var(--scale-ratio, 0) * 0.7) * var(--day-scale-boost));
-                opacity: clamp(0.5, calc(0.5 + var(--color-ratio, 0) * 0.5 + var(--day-color-boost)), 1);
-            }
-            50% {
-                transform: rotate(var(--mid-rot, 45deg));
-                scale: calc((1.2 + var(--scale-ratio, 0) * 0.5) * var(--day-scale-boost));
-                opacity: clamp(0.8, calc(0.8 + var(--color-ratio, 0) * 0.2 + var(--day-color-boost)), 1);
-            }
-            100% {
-                transform: rotate(var(--end-rot, 180deg));
-                scale: calc((0.9 + var(--scale-ratio, 0) * 0.7) * var(--day-scale-boost));
-                opacity: clamp(0.5, calc(0.5 + var(--color-ratio, 0) * 0.5 + var(--day-color-boost)), 1);
-            }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="page-container">
-        
-        <h1 class="header-title" id="main-header">Year 0000</h1>
+      <h1 class="header-title" id="main-header">Year 0000</h1>
 
-        <div class="widget-wrapper">
-            <div class="year-grid" id="year-grid">
-                <!-- Cells injected by JavaScript -->
-            </div>
-            <div class="widget-footer">
-                <span class="progress-text-left" id="progress-text-left">Day 000 / 00.00%</span>
-                <span class="progress-text-right" id="progress-text-right">000 days left</span>
-            </div>
+      <div class="widget-wrapper">
+        <div class="year-grid" id="year-grid">
+          <!-- Cells injected by JavaScript -->
+        </div>
+        <div class="widget-footer">
+          <span class="progress-text-left" id="progress-text-left">Day 000 / 00.00%</span>
+          <span class="progress-text-right" id="progress-text-right">000 days left</span>
+        </div>
+      </div>
+
+      <div class="controls-container">
+        <div class="left-controls">
+          <button
+            class="action-btn"
+            id="ignite-btn"
+            aria-label="Ignite Sparkles"
+            title="Ignite Sparkles"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-flame-icon lucide-flame"
+            >
+              <path
+                d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"
+              />
+            </svg>
+          </button>
+          <button
+            class="action-btn"
+            id="text-toggle"
+            aria-label="Toggle Text"
+            title="Toggle Text Visibility"
+          >
+            <svg
+              class="text-icon icon-message"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"
+              />
+            </svg>
+            <svg
+              class="text-icon icon-message-off"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m2 2 20 20" />
+              <path
+                d="M4.93 4.929a10 10 0 0 0-1.938 11.412 2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 0 0 11.302-1.989"
+              />
+              <path d="M8.35 2.69A10 10 0 0 1 21.3 15.65" />
+            </svg>
+          </button>
+          <button
+            class="action-btn"
+            id="motion-toggle"
+            aria-label="Toggle Motion"
+            title="Toggle Motion"
+          >
+            <svg
+              class="motion-icon icon-zap"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+              />
+            </svg>
+            <svg
+              class="motion-icon icon-zap-off"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M10.513 4.856 13.12 2.17a.5.5 0 0 1 .86.46l-1.377 4.317" />
+              <path d="M15.656 10H20a1 1 0 0 1 .78 1.63l-1.72 1.773" />
+              <path
+                d="M16.273 16.273 10.88 21.83a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14H4a1 1 0 0 1-.78-1.63l4.507-4.643"
+              />
+              <path d="m2 2 20 20" />
+            </svg>
+          </button>
         </div>
 
-        <div class="controls-container">
-            <div class="left-controls">
-                <button class="action-btn" id="ignite-btn" aria-label="Ignite Sparkles" title="Ignite Sparkles">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame-icon lucide-flame"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></svg>
-                </button>
-                <button class="action-btn" id="text-toggle" aria-label="Toggle Text" title="Toggle Text Visibility">
-                    <svg class="text-icon icon-message" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg>
-                    <svg class="text-icon icon-message-off" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20"/><path d="M4.93 4.929a10 10 0 0 0-1.938 11.412 2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 0 0 11.302-1.989"/><path d="M8.35 2.69A10 10 0 0 1 21.3 15.65"/></svg>
-                </button>
-                <button class="action-btn" id="motion-toggle" aria-label="Toggle Motion" title="Toggle Motion">
-                    <svg class="motion-icon icon-zap" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
-                    <svg class="motion-icon icon-zap-off" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.513 4.856 13.12 2.17a.5.5 0 0 1 .86.46l-1.377 4.317"/><path d="M15.656 10H20a1 1 0 0 1 .78 1.63l-1.72 1.773"/><path d="M16.273 16.273 10.88 21.83a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14H4a1 1 0 0 1-.78-1.63l4.507-4.643"/><path d="m2 2 20 20"/></svg>
-                </button>
-            </div>
-            
-            <button class="action-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
-                <svg class="theme-icon icon-auto" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2v2" />
-                    <path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715" />
-                    <path d="M16 12a4 4 0 0 0-4-4" />
-                    <path d="m19 5-1.256 1.256" />
-                    <path d="M20 12h2" />
-                </svg>
-                <svg class="theme-icon icon-light" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2" />
-                    <path d="M12 20v2" />
-                    <path d="m4.93 4.93 1.41 1.41" />
-                    <path d="m17.66 17.66 1.41 1.41" />
-                    <path d="M2 12h2" />
-                    <path d="M20 12h2" />
-                    <path d="m6.34 17.66-1.41 1.41" />
-                    <path d="m19.07 4.93-1.41 1.41" />
-                </svg>
-                <svg class="theme-icon icon-dark" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />
-                </svg>
-            </button>
-        </div>
+        <button class="action-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+          <svg
+            class="theme-icon icon-auto"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 2v2" />
+            <path
+              d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715"
+            />
+            <path d="M16 12a4 4 0 0 0-4-4" />
+            <path d="m19 5-1.256 1.256" />
+            <path d="M20 12h2" />
+          </svg>
+          <svg
+            class="theme-icon icon-light"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+          <svg
+            class="theme-icon icon-dark"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <script>
-        (function() {
-            'use strict';
+      (function () {
+        'use strict';
 
-            let sparkles = []; 
+        let sparkles = [];
 
-            // ─── Theme Toggle Logic ──────────────────────────────────────────
-            const THEMES = ['auto', 'light', 'dark'];
-            let currentTheme = localStorage.getItem('theme-pref') || 'auto';
+        // ─── Theme Toggle Logic ──────────────────────────────────────────
+        const THEMES = ['auto', 'light', 'dark'];
+        let currentTheme = localStorage.getItem('theme-pref') || 'auto';
 
-            function applyTheme(theme) {
-                currentTheme = theme;
-                localStorage.setItem('theme-pref', theme); // Save preference
-                const html = document.documentElement;
-                if (theme === 'auto') {
-                    html.removeAttribute('data-theme');
-                    html.style.colorScheme = '';
-                } else {
-                    html.setAttribute('data-theme', theme);
-                    html.style.colorScheme = theme;
-                }
-            }
+        function applyTheme(theme) {
+          currentTheme = theme;
+          localStorage.setItem('theme-pref', theme); // Save preference
+          const html = document.documentElement;
+          if (theme === 'auto') {
+            html.removeAttribute('data-theme');
+            html.style.colorScheme = '';
+          } else {
+            html.setAttribute('data-theme', theme);
+            html.style.colorScheme = theme;
+          }
+        }
 
-            function setupThemeToggle() {
-                const btn = document.getElementById('theme-toggle');
-                if (!btn) return;
+        function setupThemeToggle() {
+          const btn = document.getElementById('theme-toggle');
+          if (!btn) return;
 
-                applyTheme(currentTheme); // Apply initial from storage
+          applyTheme(currentTheme); // Apply initial from storage
 
-                btn.addEventListener('click', () => {
-                    const next = THEMES[(THEMES.indexOf(currentTheme) + 1) % THEMES.length];
-                    applyTheme(next);
-                });
+          btn.addEventListener('click', () => {
+            const next = THEMES[(THEMES.indexOf(currentTheme) + 1) % THEMES.length];
+            applyTheme(next);
+          });
 
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                    if (currentTheme === 'auto') applyTheme('auto');
-                });
-            }
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (currentTheme === 'auto') applyTheme('auto');
+          });
+        }
 
-            // ─── Motion Toggle Logic ─────────────────────────────────────────
-            function setupMotionToggle() {
-                const btn = document.getElementById('motion-toggle');
-                if (!btn) return;
-                
-                // Read from local storage (defaulting to system preference if null)
-                const savedMotion = localStorage.getItem('motion-pref');
-                if (savedMotion === 'reduced' || (!savedMotion && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-                    document.documentElement.setAttribute('data-motion', 'reduced');
-                }
+        // ─── Motion Toggle Logic ─────────────────────────────────────────
+        function setupMotionToggle() {
+          const btn = document.getElementById('motion-toggle');
+          if (!btn) return;
 
-                btn.addEventListener('click', () => {
-                    const isReduced = document.documentElement.hasAttribute('data-motion');
-                    
-                    if (isReduced) {
-                        document.documentElement.removeAttribute('data-motion');
-                        localStorage.setItem('motion-pref', 'normal'); // Save preference
-                        sparkles.forEach(item => {
-                            item.el.style.animationPlayState = 'running';
-                        });
-                    } else {
-                        document.documentElement.setAttribute('data-motion', 'reduced');
-                        localStorage.setItem('motion-pref', 'reduced'); // Save preference
-                    }
-                });
-            }
+          // Read from local storage (defaulting to system preference if null)
+          const savedMotion = localStorage.getItem('motion-pref');
+          if (
+            savedMotion === 'reduced' ||
+            (!savedMotion && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+          ) {
+            document.documentElement.setAttribute('data-motion', 'reduced');
+          }
 
-            // ─── Text Visibility Toggle Logic ────────────────────────────────
-            function setupTextToggle() {
-                const btn = document.getElementById('text-toggle');
-                if (!btn) return;
+          btn.addEventListener('click', () => {
+            const isReduced = document.documentElement.hasAttribute('data-motion');
 
-                let isHidden = localStorage.getItem('text-pref') === 'hidden';
-                if (isHidden) {
-                    document.documentElement.setAttribute('data-text', 'hidden');
-                }
-
-                btn.addEventListener('click', () => {
-                    isHidden = !isHidden;
-                    if (isHidden) {
-                        document.documentElement.setAttribute('data-text', 'hidden');
-                        localStorage.setItem('text-pref', 'hidden'); // Save preference
-                    } else {
-                        document.documentElement.removeAttribute('data-text');
-                        localStorage.setItem('text-pref', 'visible'); // Save preference
-                    }
-                });
-            }
-
-            setupThemeToggle();
-            setupMotionToggle();
-            setupTextToggle();
-
-            const grid = document.getElementById('year-grid');
-            const mainHeader = document.getElementById('main-header');
-            const progressTextLeft = document.getElementById('progress-text-left');
-            const progressTextRight = document.getElementById('progress-text-right');
-
-            // Pre-calculate load state based on local storage so animations sequence properly
-            const savedMotionPref = localStorage.getItem('motion-pref');
-            const isReducedLoad = savedMotionPref === 'reduced' || 
-                                (!savedMotionPref && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-            // ─── Time Calculations (1-Minute Interval) ───────────────────────
-            
-            let currentDayValue = 0;
-            let totalDaysForGrid = 365;
-            let documentDynamicTitle = "";
-
-            function updateTime() {
-                const now = new Date();
-                const currentYear = now.getFullYear();
-                
-                const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || currentYear % 400 === 0;
-                const totalDays = isLeapYear ? 366 : 365;
-                totalDaysForGrid = totalDays; // Export to grid generation
-
-                const startOfYear = Date.UTC(currentYear, 0, 1);
-                const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-                
-                const currentDay = Math.floor((todayUTC - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
-                currentDayValue = currentDay; // Export to grid generation
-                
-                const daysLeft = totalDays - currentDay;
-                const percentage = ((currentDay / totalDays) * 100).toFixed(2);
-
-                mainHeader.textContent = `Year ${currentYear}`;
-                
-                // Pad formatting for uniform aesthetic
-                const padDays = (d) => d.toString().padStart(3, '0');
-                const padPerc = (p) => {
-                    const parts = p.toString().split('.');
-                    const intPart = parts[0].padStart(2, '0');
-                    const decPart = parts[1];
-                    return `${intPart}.${decPart}`;
-                };
-                
-                progressTextLeft.textContent = `Day ${padDays(currentDay)} / ${padPerc(percentage)}%`;
-                progressTextRight.textContent = `${daysLeft} days left`;
-                
-                // Store the dynamic title string
-                documentDynamicTitle = `Year ${currentYear} — ${padPerc(percentage)}% | ${daysLeft} days left`;
-                
-                // Only update the live document title if the page has finished its intro animations
-                if (grid.classList.contains('grid-animate') || isReducedLoad) {
-                    document.title = documentDynamicTitle;
-                }
-            }
-
-            // Run once immediately, then start a 60-second loop
-            updateTime();
-            setInterval(updateTime, 60 * 1000); 
-
-            // ─── Grid Generation (Optimized with DocumentFragment) ───────────
-            
-            const fragment = document.createDocumentFragment();
-
-            for (let i = 1; i <= totalDaysForGrid; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'day-cell';
-                
-                const dot = document.createElement('span');
-                dot.className = 'dot-icon';
-                
-                if (i <= currentDayValue) {
-                    dot.classList.add('past-dot'); 
-                    cell.appendChild(dot);
-                    
-                    const icon = document.createElement('span');
-                    icon.className = 'sparkle-icon';
-                    icon.textContent = '✦';
-                    
-                    const delay = Math.random() * 4; 
-                    const duration = 5 + Math.random() * 5; 
-                    
-                    const spinDirection = Math.random() > 0.5 ? 1 : -1;
-                    const spinAmount = (Math.random() > 0.5 ? 180 : 360) * spinDirection;
-                    
-                    icon.style.animationDelay = `${delay}s`;
-                    icon.style.animationDuration = `${duration}s`;
-                    icon.style.setProperty('--start-rot', `0deg`);
-                    icon.style.setProperty('--mid-rot', `${spinAmount / 2}deg`);
-                    icon.style.setProperty('--end-rot', `${spinAmount}deg`);
-                    
-                    const isCurrentDay = (i === currentDayValue);
-                    if (isCurrentDay) {
-                        icon.classList.add('current-day');
-                    }
-                    
-                    icon.style.animationPlayState = 'paused';
-
-                    icon.addEventListener('animationiteration', () => {
-                        if (document.documentElement.hasAttribute('data-motion')) {
-                            icon.style.animationPlayState = 'paused';
-                        }
-                    });
-
-                    cell.appendChild(icon);
-                    
-                    sparkles.push({
-                        el: icon,
-                        x: 0,
-                        y: 0,
-                        currentHover: 0,
-                        targetHover: 0,
-                        currentGlow: 0,
-                        targetGlow: 0,
-                        currentScale: 0,
-                        lastHover: -1,
-                        lastGlow: -1,
-                        ignited: false
-                    });
-                } else {
-                    cell.appendChild(dot);
-                }
-                
-                fragment.appendChild(cell);
-            }
-
-            // Append entirely loaded DOM tree at once to avoid layout thrashing
-            grid.appendChild(fragment);
-
-            // ─── Load Orchestration ──────────────────────────────────────────
-            
-            if (isReducedLoad) {
-                document.documentElement.classList.add('load-step-widget', 'load-step-header', 'load-step-subtext', 'load-step-controls');
-                grid.classList.add('grid-ready', 'grid-animate');
-                sparkles.forEach(item => {
-                    item.el.style.transform = 'rotate(0deg)';
-                });
-                
-                document.title = documentDynamicTitle; // Update title immediately for reduced motion
-                
-                // Still set up the idle fade-out after load is technically done
-                setTimeout(() => {
-                    document.documentElement.classList.add('idle-controls');
-                }, 5000);
+            if (isReduced) {
+              document.documentElement.removeAttribute('data-motion');
+              localStorage.setItem('motion-pref', 'normal'); // Save preference
+              sparkles.forEach((item) => {
+                item.el.style.animationPlayState = 'running';
+              });
             } else {
-                
-                // Calculate dynamic delays based on text visibility preference
-                const isTextHidden = document.documentElement.hasAttribute('data-text');
-                
-                const t_widget = 50;
-                const t_subtext = t_widget + (isTextHidden ? 0 : 250); // Subtext expands first
-                const t_header = t_subtext + (isTextHidden ? 0 : 250); // Header appears second
-                const t_controls = t_header + 250; // Buttons fade in third
-                const t_morph = t_controls + 500;
-                const t_animate = t_morph + 600;
+              document.documentElement.setAttribute('data-motion', 'reduced');
+              localStorage.setItem('motion-pref', 'reduced'); // Save preference
+            }
+          });
+        }
 
-                // 1. Widget Wrapper appears
-                setTimeout(() => { document.documentElement.classList.add('load-step-widget'); }, t_widget);
+        // ─── Text Visibility Toggle Logic ────────────────────────────────
+        function setupTextToggle() {
+          const btn = document.getElementById('text-toggle');
+          if (!btn) return;
 
-                // 2. Subtext footer expands inside
-                setTimeout(() => { document.documentElement.classList.add('load-step-subtext'); }, t_subtext);
-                
-                // 3. Header appears above
-                setTimeout(() => { document.documentElement.classList.add('load-step-header'); }, t_header);
+          let isHidden = localStorage.getItem('text-pref') === 'hidden';
+          if (isHidden) {
+            document.documentElement.setAttribute('data-text', 'hidden');
+          }
 
-                // 4. Buttons fade in below
-                setTimeout(() => {
-                    document.documentElement.classList.add('load-step-controls');
-                    
-                    // After 5s of being fully visible, individual buttons fade to an idle state
-                    setTimeout(() => { document.documentElement.classList.add('idle-controls'); }, 5000);
-                }, t_controls);
+          btn.addEventListener('click', () => {
+            isHidden = !isHidden;
+            if (isHidden) {
+              document.documentElement.setAttribute('data-text', 'hidden');
+              localStorage.setItem('text-pref', 'hidden'); // Save preference
+            } else {
+              document.documentElement.removeAttribute('data-text');
+              localStorage.setItem('text-pref', 'visible'); // Save preference
+            }
+          });
+        }
 
-                // 5. Morph sequence
-                setTimeout(() => { grid.classList.add('grid-ready'); }, t_morph);
+        setupThemeToggle();
+        setupMotionToggle();
+        setupTextToggle();
 
-                // 6. Free animation loop (When the page visually finishes loading)
-                setTimeout(() => {
-                    grid.classList.add('grid-animate');
-                    sparkles.forEach(item => {
-                        item.el.style.animationPlayState = 'running';
-                    });
-                    
-                    // Apply dynamic title perfectly synced with the end of the intro animations
-                    document.title = documentDynamicTitle;
-                }, t_animate);
+        const grid = document.getElementById('year-grid');
+        const mainHeader = document.getElementById('main-header');
+        const progressTextLeft = document.getElementById('progress-text-left');
+        const progressTextRight = document.getElementById('progress-text-right');
+
+        // Pre-calculate load state based on local storage so animations sequence properly
+        const savedMotionPref = localStorage.getItem('motion-pref');
+        const isReducedLoad =
+          savedMotionPref === 'reduced' ||
+          (!savedMotionPref && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+        // ─── Time Calculations (1-Minute Interval) ───────────────────────
+
+        let currentDayValue = 0;
+        let totalDaysForGrid = 365;
+        let documentDynamicTitle = '';
+
+        function updateTime() {
+          const now = new Date();
+          const currentYear = now.getFullYear();
+
+          const isLeapYear =
+            (currentYear % 4 === 0 && currentYear % 100 !== 0) || currentYear % 400 === 0;
+          const totalDays = isLeapYear ? 366 : 365;
+          totalDaysForGrid = totalDays; // Export to grid generation
+
+          const startOfYear = Date.UTC(currentYear, 0, 1);
+          const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+
+          const currentDay = Math.floor((todayUTC - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
+          currentDayValue = currentDay; // Export to grid generation
+
+          const daysLeft = totalDays - currentDay;
+          const percentage = ((currentDay / totalDays) * 100).toFixed(2);
+
+          mainHeader.textContent = `Year ${currentYear}`;
+
+          // Pad formatting for uniform aesthetic
+          const padDays = (d) => d.toString().padStart(3, '0');
+          const padPerc = (p) => {
+            const parts = p.toString().split('.');
+            const intPart = parts[0].padStart(2, '0');
+            const decPart = parts[1];
+            return `${intPart}.${decPart}`;
+          };
+
+          progressTextLeft.textContent = `Day ${padDays(currentDay)} / ${padPerc(percentage)}%`;
+          progressTextRight.textContent = `${daysLeft} days left`;
+
+          // Store the dynamic title string
+          documentDynamicTitle = `Year ${currentYear} — ${padPerc(percentage)}% | ${daysLeft} days left`;
+
+          // Only update the live document title if the page has finished its intro animations
+          if (grid.classList.contains('grid-animate') || isReducedLoad) {
+            document.title = documentDynamicTitle;
+          }
+        }
+
+        // Run once immediately, then start a 60-second loop
+        updateTime();
+        setInterval(updateTime, 60 * 1000);
+
+        // ─── Grid Generation (Optimized with DocumentFragment) ───────────
+
+        const fragment = document.createDocumentFragment();
+
+        for (let i = 1; i <= totalDaysForGrid; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'day-cell';
+
+          const dot = document.createElement('span');
+          dot.className = 'dot-icon';
+
+          if (i <= currentDayValue) {
+            dot.classList.add('past-dot');
+            cell.appendChild(dot);
+
+            const icon = document.createElement('span');
+            icon.className = 'sparkle-icon';
+            icon.textContent = '✦';
+
+            const delay = Math.random() * 4;
+            const duration = 5 + Math.random() * 5;
+
+            const spinDirection = Math.random() > 0.5 ? 1 : -1;
+            const spinAmount = (Math.random() > 0.5 ? 180 : 360) * spinDirection;
+
+            icon.style.animationDelay = `${delay}s`;
+            icon.style.animationDuration = `${duration}s`;
+            icon.style.setProperty('--start-rot', `0deg`);
+            icon.style.setProperty('--mid-rot', `${spinAmount / 2}deg`);
+            icon.style.setProperty('--end-rot', `${spinAmount}deg`);
+
+            const isCurrentDay = i === currentDayValue;
+            if (isCurrentDay) {
+              icon.classList.add('current-day');
             }
 
-            // ─── Proximity Hover Effect & Layout Caching ─────────────────────
-            
-            function updateCache() {
-                const gridRect = grid.getBoundingClientRect();
-                sparkles.forEach(item => {
-                    const rect = item.el.getBoundingClientRect();
-                    item.x = (rect.left - gridRect.left) + rect.width / 2;
-                    item.y = (rect.top - gridRect.top) + rect.height / 2;
-                });
-            }
+            icon.style.animationPlayState = 'paused';
 
-            setTimeout(updateCache, 50);
-
-            // Debounced resize observer to avoid layout thrashing while dragging window
-            let resizeTimeout;
-            const resizeObserver = new ResizeObserver(() => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    requestAnimationFrame(updateCache);
-                }, 100);
+            icon.addEventListener('animationiteration', () => {
+              if (document.documentElement.hasAttribute('data-motion')) {
+                icon.style.animationPlayState = 'paused';
+              }
             });
-            resizeObserver.observe(grid);
 
-            const HOVER_RADIUS = 80; 
-            const HOVER_RADIUS_SQ = HOVER_RADIUS * HOVER_RADIUS;
-            
-            let cursorX = -1000;
-            let cursorY = -1000;
-            let isHovering = false;
-            
-            // Ignite state variables
-            let waveActive = false;
-            let waveStartTime = 0;
-            const delayPerSparkle = 8;
-            const waveSustain = 4000; // Hold the full glow for 4 seconds
-            let waveTotalDuration = 0;
-            
-            let animFrameId = null;
+            cell.appendChild(icon);
 
-            function renderLoop() {
-                // Using performance.now() directly inside the loop ensures 
-                // the time scale matches waveStartTime perfectly across all browsers.
-                const currentTime = performance.now();
-                
-                let isAnimating = false;
-                const isReduced = document.documentElement.hasAttribute('data-motion');
+            sparkles.push({
+              el: icon,
+              x: 0,
+              y: 0,
+              currentHover: 0,
+              targetHover: 0,
+              currentGlow: 0,
+              targetGlow: 0,
+              currentScale: 0,
+              lastHover: -1,
+              lastGlow: -1,
+              ignited: false,
+            });
+          } else {
+            cell.appendChild(dot);
+          }
 
-                if (waveActive) {
-                    const elapsed = currentTime - waveStartTime;
-                    
-                    if (elapsed > waveTotalDuration) {
-                        // When the wave ends, reset ALL states to 0 simultaneously
-                        waveActive = false;
-                        sparkles.forEach(item => item.ignited = false);
-                    }
-                    isAnimating = true; // Keep loop running while wave sequence is active
-                }
+          fragment.appendChild(cell);
+        }
 
-                sparkles.forEach((item, index) => {
-                    
-                    if (waveActive) {
-                        const elapsed = currentTime - waveStartTime;
-                        const turnOnTime = index * delayPerSparkle;
-                        
-                        // We only handle turning ON sequentially. 
-                        // Turning OFF is handled globally when waveActive ends, fading them all out smoothly.
-                        if (elapsed >= turnOnTime) {
-                            item.ignited = true;
-                        }
-                    }
+        // Append entirely loaded DOM tree at once to avoid layout thrashing
+        grid.appendChild(fragment);
 
-                    // Hover target calculation
-                    if (isHovering) {
-                        const dx = cursorX - item.x;
-                        const dy = cursorY - item.y;
-                        const distSq = dx * dx + dy * dy;
+        // ─── Load Orchestration ──────────────────────────────────────────
 
-                        if (distSq < HOVER_RADIUS_SQ) {
-                            const dist = Math.sqrt(distSq);
-                            item.targetHover = 1 - (dist / HOVER_RADIUS);
-                        } else {
-                            item.targetHover = 0;
-                        }
-                    } else {
-                        item.targetHover = 0;
-                    }
+        if (isReducedLoad) {
+          document.documentElement.classList.add(
+            'load-step-widget',
+            'load-step-header',
+            'load-step-subtext',
+            'load-step-controls',
+          );
+          grid.classList.add('grid-ready', 'grid-animate');
+          sparkles.forEach((item) => {
+            item.el.style.transform = 'rotate(0deg)';
+          });
 
-                    item.targetGlow = item.ignited ? 1 : 0;
+          document.title = documentDynamicTitle; // Update title immediately for reduced motion
 
-                    let changed = false;
-                    
-                    // Hover ease interpolation
-                    const diffHover = item.targetHover - item.currentHover;
-                    if (Math.abs(diffHover) > 0.005) {
-                        // Fast to respond (0.15), smooth to fade out (0.05)
-                        const easeSpeed = diffHover > 0 ? 0.15 : 0.05; 
-                        item.currentHover += diffHover * easeSpeed;
-                        changed = true;
-                    } else {
-                        item.currentHover = item.targetHover;
-                    }
+          // Still set up the idle fade-out after load is technically done
+          setTimeout(() => {
+            document.documentElement.classList.add('idle-controls');
+          }, 5000);
+        } else {
+          // Calculate dynamic delays based on text visibility preference
+          const isTextHidden = document.documentElement.hasAttribute('data-text');
 
-                    // Glow ease interpolation (The key to the smooth fade-out back to grey)
-                    const diffGlow = item.targetGlow - item.currentGlow;
-                    if (Math.abs(diffGlow) > 0.005) {
-                        // Fast turn on (0.15), VERY slow, consistent global fade out to grey (0.025)
-                        const easeSpeed = diffGlow > 0 ? 0.15 : 0.025; 
-                        item.currentGlow += diffGlow * easeSpeed;
-                        changed = true;
-                    } else {
-                        item.currentGlow = item.targetGlow;
-                    }
-                    
-                    // Scale ease interpolation
-                    let targetScale = isReduced ? 0 : item.currentHover;
-                    let diffScale = targetScale - item.currentScale;
-                    if (Math.abs(diffScale) > 0.005) {
-                        const easeSpeed = diffScale > 0 ? 0.15 : 0.05;
-                        item.currentScale += diffScale * easeSpeed;
-                        changed = true;
-                    } else {
-                        item.currentScale = targetScale;
-                    }
+          const t_widget = 50;
+          const t_subtext = t_widget + (isTextHidden ? 0 : 250); // Subtext expands first
+          const t_header = t_subtext + (isTextHidden ? 0 : 250); // Header appears second
+          const t_controls = t_header + 250; // Buttons fade in third
+          const t_morph = t_controls + 500;
+          const t_animate = t_morph + 600;
 
-                    // Only update DOM styles if actual calculations changed (huge JS/CSS bridge optimization)
-                    if (changed || item.lastHover === -1) {
-                        const colorIntensity = Math.max(item.currentHover, item.currentGlow);
-                        
-                        item.el.style.setProperty('--color-ratio', colorIntensity.toFixed(3));
-                        item.el.style.setProperty('--scale-ratio', item.currentScale.toFixed(3));
-                        
-                        item.lastHover = item.currentHover;
-                        item.lastGlow = item.currentGlow;
-                        isAnimating = true; 
-                    }
-                });
+          // 1. Widget Wrapper appears
+          setTimeout(() => {
+            document.documentElement.classList.add('load-step-widget');
+          }, t_widget);
 
-                if (isAnimating || isHovering || waveActive) {
-                    animFrameId = requestAnimationFrame(renderLoop);
-                } else {
-                    animFrameId = null;
-                }
+          // 2. Subtext footer expands inside
+          setTimeout(() => {
+            document.documentElement.classList.add('load-step-subtext');
+          }, t_subtext);
+
+          // 3. Header appears above
+          setTimeout(() => {
+            document.documentElement.classList.add('load-step-header');
+          }, t_header);
+
+          // 4. Buttons fade in below
+          setTimeout(() => {
+            document.documentElement.classList.add('load-step-controls');
+
+            // After 5s of being fully visible, individual buttons fade to an idle state
+            setTimeout(() => {
+              document.documentElement.classList.add('idle-controls');
+            }, 5000);
+          }, t_controls);
+
+          // 5. Morph sequence
+          setTimeout(() => {
+            grid.classList.add('grid-ready');
+          }, t_morph);
+
+          // 6. Free animation loop (When the page visually finishes loading)
+          setTimeout(() => {
+            grid.classList.add('grid-animate');
+            sparkles.forEach((item) => {
+              item.el.style.animationPlayState = 'running';
+            });
+
+            // Apply dynamic title perfectly synced with the end of the intro animations
+            document.title = documentDynamicTitle;
+          }, t_animate);
+        }
+
+        // ─── Proximity Hover Effect & Layout Caching ─────────────────────
+
+        function updateCache() {
+          const gridRect = grid.getBoundingClientRect();
+          sparkles.forEach((item) => {
+            const rect = item.el.getBoundingClientRect();
+            item.x = rect.left - gridRect.left + rect.width / 2;
+            item.y = rect.top - gridRect.top + rect.height / 2;
+          });
+        }
+
+        setTimeout(updateCache, 50);
+
+        // Debounced resize observer to avoid layout thrashing while dragging window
+        let resizeTimeout;
+        const resizeObserver = new ResizeObserver(() => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+            requestAnimationFrame(updateCache);
+          }, 100);
+        });
+        resizeObserver.observe(grid);
+
+        const HOVER_RADIUS = 80;
+        const HOVER_RADIUS_SQ = HOVER_RADIUS * HOVER_RADIUS;
+
+        let cursorX = -1000;
+        let cursorY = -1000;
+        let isHovering = false;
+
+        // Ignite state variables
+        let waveActive = false;
+        let waveStartTime = 0;
+        const delayPerSparkle = 8;
+        const waveSustain = 4000; // Hold the full glow for 4 seconds
+        let waveTotalDuration = 0;
+
+        let animFrameId = null;
+
+        function renderLoop() {
+          // Using performance.now() directly inside the loop ensures
+          // the time scale matches waveStartTime perfectly across all browsers.
+          const currentTime = performance.now();
+
+          let isAnimating = false;
+          const isReduced = document.documentElement.hasAttribute('data-motion');
+
+          if (waveActive) {
+            const elapsed = currentTime - waveStartTime;
+
+            if (elapsed > waveTotalDuration) {
+              // When the wave ends, reset ALL states to 0 simultaneously
+              waveActive = false;
+              sparkles.forEach((item) => (item.ignited = false));
+            }
+            isAnimating = true; // Keep loop running while wave sequence is active
+          }
+
+          sparkles.forEach((item, index) => {
+            if (waveActive) {
+              const elapsed = currentTime - waveStartTime;
+              const turnOnTime = index * delayPerSparkle;
+
+              // We only handle turning ON sequentially.
+              // Turning OFF is handled globally when waveActive ends, fading them all out smoothly.
+              if (elapsed >= turnOnTime) {
+                item.ignited = true;
+              }
             }
 
-            function startRenderLoop() {
-                if (!animFrameId) {
-                    animFrameId = requestAnimationFrame(renderLoop);
-                }
+            // Hover target calculation
+            if (isHovering) {
+              const dx = cursorX - item.x;
+              const dy = cursorY - item.y;
+              const distSq = dx * dx + dy * dy;
+
+              if (distSq < HOVER_RADIUS_SQ) {
+                const dist = Math.sqrt(distSq);
+                item.targetHover = 1 - dist / HOVER_RADIUS;
+              } else {
+                item.targetHover = 0;
+              }
+            } else {
+              item.targetHover = 0;
             }
 
-            function handleMove(e) {
-                const gridRect = grid.getBoundingClientRect();
-                cursorX = e.clientX - gridRect.left;
-                cursorY = e.clientY - gridRect.top;
-                isHovering = true;
-                startRenderLoop();
+            item.targetGlow = item.ignited ? 1 : 0;
+
+            let changed = false;
+
+            // Hover ease interpolation
+            const diffHover = item.targetHover - item.currentHover;
+            if (Math.abs(diffHover) > 0.005) {
+              // Fast to respond (0.15), smooth to fade out (0.05)
+              const easeSpeed = diffHover > 0 ? 0.15 : 0.05;
+              item.currentHover += diffHover * easeSpeed;
+              changed = true;
+            } else {
+              item.currentHover = item.targetHover;
             }
 
-            function handleLeave() {
-                isHovering = false;
-                startRenderLoop();
+            // Glow ease interpolation (The key to the smooth fade-out back to grey)
+            const diffGlow = item.targetGlow - item.currentGlow;
+            if (Math.abs(diffGlow) > 0.005) {
+              // Fast turn on (0.15), VERY slow, consistent global fade out to grey (0.025)
+              const easeSpeed = diffGlow > 0 ? 0.15 : 0.025;
+              item.currentGlow += diffGlow * easeSpeed;
+              changed = true;
+            } else {
+              item.currentGlow = item.targetGlow;
             }
 
-            grid.addEventListener('mousemove', handleMove);
-            grid.addEventListener('mouseleave', handleLeave);
-            grid.addEventListener('touchmove', (e) => handleMove(e.touches[0]), { passive: true });
-            grid.addEventListener('touchend', handleLeave);
-
-            // ─── Ignite Wave (Optimized to Timestamp Math) ───────────────────
-            function triggerGlobalGlow() {
-                waveActive = true;
-                waveStartTime = performance.now(); // Rock solid time origin
-                
-                // Total duration = Wave On sweeps + Sustain Period
-                waveTotalDuration = (sparkles.length * delayPerSparkle) + waveSustain;
-                
-                sparkles.forEach(item => item.ignited = false); // reset state if double-clicked
-                startRenderLoop();
+            // Scale ease interpolation
+            let targetScale = isReduced ? 0 : item.currentHover;
+            let diffScale = targetScale - item.currentScale;
+            if (Math.abs(diffScale) > 0.005) {
+              const easeSpeed = diffScale > 0 ? 0.15 : 0.05;
+              item.currentScale += diffScale * easeSpeed;
+              changed = true;
+            } else {
+              item.currentScale = targetScale;
             }
 
-            const igniteBtn = document.getElementById('ignite-btn');
-            if(igniteBtn) {
-                 igniteBtn.addEventListener('click', triggerGlobalGlow);
+            // Only update DOM styles if actual calculations changed (huge JS/CSS bridge optimization)
+            if (changed || item.lastHover === -1) {
+              const colorIntensity = Math.max(item.currentHover, item.currentGlow);
+
+              item.el.style.setProperty('--color-ratio', colorIntensity.toFixed(3));
+              item.el.style.setProperty('--scale-ratio', item.currentScale.toFixed(3));
+
+              item.lastHover = item.currentHover;
+              item.lastGlow = item.currentGlow;
+              isAnimating = true;
             }
+          });
 
-            startRenderLoop();
+          if (isAnimating || isHovering || waveActive) {
+            animFrameId = requestAnimationFrame(renderLoop);
+          } else {
+            animFrameId = null;
+          }
+        }
 
-        })();
+        function startRenderLoop() {
+          if (!animFrameId) {
+            animFrameId = requestAnimationFrame(renderLoop);
+          }
+        }
+
+        function handleMove(e) {
+          const gridRect = grid.getBoundingClientRect();
+          cursorX = e.clientX - gridRect.left;
+          cursorY = e.clientY - gridRect.top;
+          isHovering = true;
+          startRenderLoop();
+        }
+
+        function handleLeave() {
+          isHovering = false;
+          startRenderLoop();
+        }
+
+        grid.addEventListener('mousemove', handleMove);
+        grid.addEventListener('mouseleave', handleLeave);
+        grid.addEventListener('touchmove', (e) => handleMove(e.touches[0]), { passive: true });
+        grid.addEventListener('touchend', handleLeave);
+
+        // ─── Ignite Wave (Optimized to Timestamp Math) ───────────────────
+        function triggerGlobalGlow() {
+          waveActive = true;
+          waveStartTime = performance.now(); // Rock solid time origin
+
+          // Total duration = Wave On sweeps + Sustain Period
+          waveTotalDuration = sparkles.length * delayPerSparkle + waveSustain;
+
+          sparkles.forEach((item) => (item.ignited = false)); // reset state if double-clicked
+          startRenderLoop();
+        }
+
+        const igniteBtn = document.getElementById('ignite-btn');
+        if (igniteBtn) {
+          igniteBtn.addEventListener('click', triggerGlobalGlow);
+        }
+
+        startRenderLoop();
+      })();
     </script>
-</body>
+  </body>
 </html>
