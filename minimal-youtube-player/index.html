@@ -633,14 +633,8 @@
         }
       }
 
-      // --- Base path: the directory containing this index.html ---
-      // e.g. '/mini-apps/minimal-youtube-player/' on subdirectory deployments
-      const APP_BASE = window.location.pathname.replace(/\/[^\/]*$/, '/').replace(/\/+$/, '/') || '/';
-
       // --- History API Wrapper for Sandbox Compatibility ---
-      function setHistoryState(action, state, relPath) {
-        // relPath is relative to APP_BASE, e.g. '' for index, 'watch?v=ID' for playing
-        const url = relPath ? APP_BASE + relPath : APP_BASE;
+      function setHistoryState(action, state, url) {
         try {
           if (action === 'push') {
             history.pushState(state, '', url);
@@ -679,7 +673,7 @@
         setupResizeLogic();
 
         const videoToPlay = checkUrlForVideo();
-        setHistoryState('replace', { view: 'index' }, '');  // '' → resolves to APP_BASE
+        setHistoryState('replace', { view: 'index' }, window.location.pathname); // Clears any query parameters
 
         if (videoToPlay) {
           els.urlInput.value = videoToPlay;
@@ -689,18 +683,7 @@
 
       function checkUrlForVideo() {
         const params = new URLSearchParams(window.location.search);
-        let potentialInput = params.get('v') || params.get('url');
-
-        if (!potentialInput) {
-          // Strip APP_BASE prefix so subdirectory deployments resolve correctly
-          const rawPath = window.location.pathname;
-          const relativePath = rawPath.startsWith(APP_BASE)
-            ? rawPath.slice(APP_BASE.length)
-            : rawPath.replace(/^\/+|\/+$/g, '');
-          const segment = relativePath.replace(/^\/+|\/+$/g, '');
-          // Ignore known non-video path segments
-          if (segment && segment !== 'index.html' && segment !== 'watch') potentialInput = segment;
-        }
+        const potentialInput = params.get('p');
 
         if (potentialInput) {
           const decoded = decodeURIComponent(potentialInput);
@@ -819,12 +802,25 @@
         window.addEventListener('popstate', (e) => {
           const view = e.state && e.state.view;
           if (view === 'playing-zen') {
-            exitZenMode();
+            if (!currentVideoId) {
+              const videoToPlay = checkUrlForVideo();
+              if (videoToPlay) {
+                els.urlInput.value = videoToPlay;
+                handlePlay(false, true);
+              }
+            }
+            enterZenMode(currentZenMode, true);
           } else if (view === 'playing') {
-            if (currentVideoId && !els.zenControls.classList.contains('hidden')) {
-              exitZenMode(); // Fallback if states desync
-            } else if (currentVideoId) {
-              handleClose(true);
+            if (currentVideoId) {
+              if (!els.zenControls.classList.contains('hidden')) {
+                exitZenMode();
+              }
+            } else {
+              const videoToPlay = checkUrlForVideo();
+              if (videoToPlay) {
+                els.urlInput.value = videoToPlay;
+                handlePlay(false, true);
+              }
             }
           } else {
             if (currentVideoId) {
@@ -1010,29 +1006,28 @@
 
       function updatePlayButtonState(state) {
         const playText = els.playContentDefault.querySelector('span');
+
+        const baseBtnClasses =
+          'flex-1 rounded-xl font-medium transition-all duration-300 flex items-center justify-center group h-full overflow-hidden shrink-0 relative';
+        const baseDefaultContentClasses =
+          'absolute flex items-center gap-2 transition-all duration-300';
+        const basePlayingContentClasses =
+          'absolute flex items-center gap-[4px] text-brand-600 transition-all duration-300';
+
         if (state === 'default') {
           if (playText) playText.textContent = 'Play';
-          els.playBtn.className =
-            'flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl font-medium shadow-brand-500/30 shadow-lg transition-all duration-300 flex items-center justify-center group h-full overflow-hidden shrink-0 relative';
-          els.playContentDefault.className =
-            'absolute flex items-center gap-2 transition-all duration-300 opacity-100 blur-none';
-          els.playContentPlaying.className =
-            'absolute flex items-center gap-[4px] text-brand-600 transition-all duration-300 opacity-0 blur-[2px] pointer-events-none';
+          els.playBtn.className = `${baseBtnClasses} bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white shadow-brand-500/30 shadow-lg`;
+          els.playContentDefault.className = `${baseDefaultContentClasses} opacity-100 blur-none`;
+          els.playContentPlaying.className = `${basePlayingContentClasses} opacity-0 blur-[2px] pointer-events-none`;
         } else if (state === 'playing') {
-          els.playBtn.className =
-            'flex-1 bg-slate-100 hover:bg-slate-200 text-brand-600 rounded-xl font-medium transition-all duration-300 flex items-center justify-center group h-full overflow-hidden shrink-0 relative';
-          els.playContentDefault.className =
-            'absolute flex items-center gap-2 transition-all duration-300 opacity-0 blur-[2px] pointer-events-none';
-          els.playContentPlaying.className =
-            'absolute flex items-center gap-[4px] text-brand-600 transition-all duration-300 opacity-100 blur-none';
+          els.playBtn.className = `${baseBtnClasses} bg-slate-100 hover:bg-slate-200 text-brand-600`;
+          els.playContentDefault.className = `${baseDefaultContentClasses} opacity-0 blur-[2px] pointer-events-none`;
+          els.playContentPlaying.className = `${basePlayingContentClasses} opacity-100 blur-none`;
         } else if (state === 'paused') {
           if (playText) playText.textContent = 'Play';
-          els.playBtn.className =
-            'flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all duration-300 flex items-center justify-center group h-full overflow-hidden shrink-0 relative';
-          els.playContentDefault.className =
-            'absolute flex items-center gap-2 transition-all duration-300 opacity-100 blur-none';
-          els.playContentPlaying.className =
-            'absolute flex items-center gap-[4px] text-brand-600 transition-all duration-300 opacity-0 blur-[2px] pointer-events-none';
+          els.playBtn.className = `${baseBtnClasses} bg-slate-100 hover:bg-slate-200 text-slate-700`;
+          els.playContentDefault.className = `${baseDefaultContentClasses} opacity-100 blur-none`;
+          els.playContentPlaying.className = `${basePlayingContentClasses} opacity-0 blur-[2px] pointer-events-none`;
         }
       }
 
@@ -1083,7 +1078,7 @@
         }
       }
 
-      function handlePlay(fromInput = false) {
+      function handlePlay(fromInput = false, fromPopState = false) {
         const url = els.urlInput.value.trim();
         if (!url) {
           showToast('Please enter a YouTube link or ID', 'warning');
@@ -1140,14 +1135,18 @@
             }, 400);
           };
 
-          if (isChangingMedia) {
-            setHistoryState('replace', { view: 'playing' }, 'watch?v=' + videoId);
+          if (!fromPopState) {
+            if (isChangingMedia) {
+              setHistoryState('replace', { view: 'playing' }, '?p=' + videoId);
+            } else {
+              setHistoryState('push', { view: 'playing' }, '?p=' + videoId);
+            }
+          }
 
+          if (isChangingMedia) {
             showSkeletons();
             setTimeout(() => loadMedia(), 300);
           } else {
-            setHistoryState('push', { view: 'playing' }, 'watch?v=' + videoId);
-
             els.emptyState.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
             els.emptyState.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
 
@@ -1317,8 +1316,10 @@
           'w-full h-full relative overflow-hidden bg-slate-100 shadow-sm transition-all duration-300';
       }
 
-      function enterZenMode(mode = 'video') {
-        setHistoryState('push', { view: 'playing-zen' }, '');
+      function enterZenMode(mode = 'video', fromPopState = false) {
+        if (!fromPopState) {
+          setHistoryState('push', { view: 'playing-zen' }, '');
+        }
 
         if (document.startViewTransition) {
           document.startViewTransition(() => _syncEnterZenMode(mode));
