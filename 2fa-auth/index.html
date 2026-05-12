@@ -68,6 +68,14 @@
         -webkit-tap-highlight-color: transparent;
       }
 
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #d4d4d8 transparent;
+      }
+      html.dark {
+        scrollbar-color: #52525b transparent;
+      }
+
       ::-webkit-scrollbar {
         width: 6px;
       }
@@ -117,13 +125,11 @@
         </div>
       </header>
 
-      <!-- Main Content Area -->
-      <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth" id="mainScroll">
-        <!-- Dynamic Sticky Header (Timer & Search) -->
-        <div
-          class="sticky top-0 z-30 bg-zinc-50/95 backdrop-blur-[2px] shadow-sm transition-shadow px-4 sm:px-6 py-3 sm:py-4"
-          id="stickyHeader"
-        >
+      <!-- Dynamic Sticky Header (Timer & Search) -->
+      <div
+        class="z-30 bg-white border-b border-zinc-200 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0"
+        id="stickyHeader"
+      >
           <div class="flex items-center gap-3 h-12">
             <!-- Timer Container -->
             <div
@@ -222,6 +228,8 @@
           </div>
         </div>
 
+      <!-- Main Content Area -->
+      <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth" id="mainScroll">
         <!-- Codes List -->
         <div id="codesContainer" class="px-4 sm:px-6 pt-4 sm:pt-6 pb-24 space-y-4">
           <!-- Content populated by JS -->
