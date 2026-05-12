@@ -65,6 +65,14 @@
       }
 
       /* Custom Scrollbar */
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #d4d4d8 transparent;
+      }
+      html.dark {
+        scrollbar-color: #52525b transparent;
+      }
+
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -407,11 +415,11 @@
 
         if (newStatus === 'typing') {
           els.countDisplay.innerHTML = `<span class="typing-dots"><span></span><span></span><span></span></span>`;
-          els.countDisplay.classList.add('text-zinc-400', 'dark:text-zinc-500');
+          els.countDisplay.classList.add('text-brand-600', 'dark:text-brand-400');
           els.toggleCountMode.title = 'Saving...';
         } else if (newStatus === 'saved') {
           els.countDisplay.textContent = 'SAVED';
-          els.countDisplay.classList.add('text-zinc-500', 'dark:text-zinc-400');
+          els.countDisplay.classList.add('text-brand-600', 'dark:text-brand-400');
           els.toggleCountMode.title = 'Content saved safely';
 
           setTimeout(() => {
