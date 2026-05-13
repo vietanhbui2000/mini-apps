@@ -1,8 +1,8 @@
 .DS_Store
 .vscode
 .cursor
-~private
-~testing
+_private
+_testing
 package.json
 .prettierrc
 .prettierignore
