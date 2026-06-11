@@ -39,15 +39,6 @@
                 700: '#1d4ed8',
               },
             },
-            animation: {
-              'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            },
-            keyframes: {
-              slideUp: {
-                '0%': { transform: 'translateY(20px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              },
-            },
           },
         },
       };
@@ -397,7 +388,7 @@
       </main>
 
       <!-- Bottom Section Wrapper -->
-      <div class="relative flex-shrink-0">
+      <div class="relative flex-shrink-0 z-20">
         <!-- Toast Notification Container -->
         <div
           id="toastContainer"
@@ -407,7 +398,7 @@
         <!-- Bottom Action Bar -->
         <div
           id="action-bar"
-          class="bg-white border-t border-zinc-200 p-4 sm:px-6 sm:py-4 flex flex-col gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-30 flex-shrink-0"
+          class="bg-white border-t border-zinc-200 p-4 sm:px-6 sm:py-4 flex flex-col gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0"
         >
           <div>
             <input
@@ -515,8 +506,19 @@
     </div>
 
     <!-- Application Logic -->
-    <script>
-      // DOM Elements
+    <script>      // --- Constants & Config ---
+      // (None)
+
+      // --- State Management ---
+      let currentVideoId = null;
+      let currentVideoUrl = '';
+      let isPlaying = false;
+      let currentZenMode = 'video';
+
+      let isYTAPIReady = false;
+      let ytPlayer = null;
+
+      // --- DOM Elements ---
       const els = {
         mainContent: document.getElementById('main-content'),
         emptyState: document.getElementById('empty-state'),
@@ -561,87 +563,6 @@
         metaAuthor: document.getElementById('meta-author'),
       };
 
-      let currentVideoId = null;
-      let currentVideoUrl = '';
-      let isPlaying = false;
-      let currentZenMode = 'video';
-
-      let isYTAPIReady = false;
-      let ytPlayer = null;
-
-      // YouTube IFrame API Callback
-      window.onYouTubeIframeAPIReady = function () {
-        isYTAPIReady = true;
-        // Prevent race condition if user hits play before the API downloaded
-        if (currentVideoId && !ytPlayer && els.iframe) {
-          initYouTubePlayer();
-        }
-      };
-
-      function initYouTubePlayer() {
-        ytPlayer = new YT.Player('yt-iframe', {
-          events: {
-            onStateChange: onPlayerStateChange,
-            onError: onPlayerError,
-          },
-        });
-      }
-
-      function replaceIframe(url) {
-        if (ytPlayer) {
-          if (typeof ytPlayer.destroy === 'function') {
-            try {
-              ytPlayer.destroy();
-            } catch (e) {}
-          }
-          ytPlayer = null;
-        }
-
-        const newIframe = document.createElement('iframe');
-        newIframe.id = 'yt-iframe';
-        newIframe.className = 'w-full h-full border-0';
-        newIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-        newIframe.setAttribute(
-          'allow',
-          'autoplay; encrypted-media; fullscreen; picture-in-picture',
-        );
-        newIframe.setAttribute('allowfullscreen', '');
-        if (url) {
-          newIframe.src = url;
-        }
-
-        els.videoContainer.innerHTML = '';
-        els.videoContainer.appendChild(newIframe);
-
-        els.iframe = newIframe;
-
-        if (url && isYTAPIReady) {
-          initYouTubePlayer();
-        }
-      }
-
-      // --- History API Wrapper for Sandbox Compatibility ---
-      function setHistoryState(action, state, url) {
-        try {
-          if (action === 'push') {
-            history.pushState(state, '', url);
-          } else {
-            history.replaceState(state, '', url);
-          }
-        } catch (e) {
-          // Fallback for sandboxed environments (like preview iframes) where URL changing is restricted
-          try {
-            if (action === 'push') {
-              history.pushState(state, '');
-            } else {
-              history.replaceState(state, '');
-            }
-          } catch (err) {
-            console.warn('History API is blocked in this environment.');
-          }
-        }
-      }
-
       // --- Initialization ---
       document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
@@ -679,88 +600,13 @@
         return null;
       }
 
-      // --- Custom Resize Logic ---
-      function setupResizeLogic() {
-        // Skip resize on small phones — no horizontal space
-        if (window.innerWidth < 640) return;
-
-        let isResizing = false;
-        let resizeStartX = 0;
-        let resizeStartWidth = 0;
-        let resizeBaseWidth = 0;
-        let resizeDir = 1;
-
-        const resizeOverlay = document.getElementById('resize-overlay');
-        const getClientX = (e) =>
-          e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
-
-        document.querySelectorAll('.resize-handle').forEach((handle) => {
-          const startDrag = (e) => {
-            if (currentZenMode !== 'video') return;
-            isResizing = true;
-            resizeStartX = getClientX(e);
-
-            // Measure the base CSS width (without inline style) for magnetic snap-back
-            const currentStyleWidth = els.videoWrapper.style.width;
-            els.videoWrapper.style.width = '';
-            resizeBaseWidth = els.videoWrapper.offsetWidth;
-            els.videoWrapper.style.width = currentStyleWidth || `${resizeBaseWidth}px`;
-            resizeStartWidth = els.videoWrapper.offsetWidth;
-
-            resizeDir = parseInt(handle.getAttribute('data-x-dir'));
-
-            // Block iframe from swallowing pointer events during drag
-            resizeOverlay.classList.remove('hidden');
-
-            window.addEventListener('mousemove', handleResizeMove);
-            window.addEventListener('mouseup', handleResizeUp);
-            window.addEventListener('touchmove', handleResizeMove, { passive: false });
-            window.addEventListener('touchend', handleResizeUp);
-          };
-
-          handle.addEventListener('mousedown', startDrag);
-          handle.addEventListener('touchstart', startDrag, { passive: true });
-        });
-
-        function handleResizeMove(e) {
-          if (!isResizing) return;
-          if (e.cancelable) e.preventDefault();
-
-          const deltaX = getClientX(e) - resizeStartX;
-          // Container is -translate-x-1/2, so 10px drag on one edge = 20px total width change
-          const widthChange = deltaX * resizeDir * 2;
-          let newWidth = Math.max(
-            300,
-            Math.min(resizeStartWidth + widthChange, window.innerWidth * 0.9),
-          );
-
-          // Magnetic snap-back: clear inline style if within 50px of the natural CSS width
-          if (Math.abs(newWidth - resizeBaseWidth) < 50) {
-            els.videoWrapper.style.width = '';
-          } else {
-            els.videoWrapper.style.width = `${newWidth}px`;
-          }
-        }
-
-        function handleResizeUp() {
-          if (!isResizing) return;
-          isResizing = false;
-          resizeOverlay.classList.add('hidden');
-
-          window.removeEventListener('mousemove', handleResizeMove);
-          window.removeEventListener('mouseup', handleResizeUp);
-          window.removeEventListener('touchmove', handleResizeMove);
-          window.removeEventListener('touchend', handleResizeUp);
-        }
-      }
-
+      // --- Event Listeners ---
       function setupEventListeners() {
         els.playBtn.addEventListener('click', () => handlePlay(false));
         els.closeBtn.addEventListener('click', () => handleClose(false));
 
         els.zenBtn.addEventListener('click', () => enterZenMode('video'));
 
-        // Remove focus when mouse leaves to allow pill to collapse instantly
         els.zenControls.addEventListener('mouseleave', () => {
           if (document.activeElement && els.zenControls.contains(document.activeElement)) {
             document.activeElement.blur();
@@ -852,129 +698,58 @@
         });
       }
 
-      // --- Mobile Layout Fix ---
-      function setupMobileHeight() {
-        let resizeTimer;
-        function setHeight() {
-          if (window.innerWidth >= 640) {
-            els.appWrapper.style.height = '';
-          } else if (!(document.activeElement && document.activeElement.tagName === 'INPUT')) {
-            els.appWrapper.style.height = `${window.innerHeight}px`;
-          }
 
-          clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(() => {
-            if (currentZenMode === 'audio') checkAudioTitleScroll();
-          }, 150);
+      // --- Core Logic ---
+      window.onYouTubeIframeAPIReady = function () {
+        isYTAPIReady = true;
+        // Prevent race condition if user hits play before the API downloaded
+        if (currentVideoId && !ytPlayer && els.iframe) {
+          initYouTubePlayer();
         }
+      };
 
-        window.addEventListener('resize', setHeight);
-        setHeight();
-      }
-
-      function checkAudioTitleScroll() {
-        if (
-          els.audioCard.classList.contains('hidden') ||
-          els.audioCard.classList.contains('opacity-0')
-        )
-          return;
-
-        // Cancel any active Web Animations API loops
-        if (els.audioTitle.scrollAnim) {
-          els.audioTitle.scrollAnim.cancel();
-        }
-
-        els.audioTitle.style.transform = 'none';
-        els.audioTitleContainer.style.maskImage = 'none';
-        els.audioTitleContainer.style.webkitMaskImage = 'none';
-
-        // Clean up safely
-        const originalText =
-          els.audioTitle.getAttribute('data-original-text') ?? els.audioTitle.textContent;
-        els.audioTitle.textContent = originalText;
-        els.audioTitle.setAttribute('data-original-text', originalText);
-
-        requestAnimationFrame(() => {
-          const parent = els.audioTitleContainer;
-          const textWidth = els.audioTitle.scrollWidth;
-          const containerWidth = parent.clientWidth;
-
-          if (textWidth > containerWidth && containerWidth > 0) {
-            const gap = 48; // Space between loops
-
-            // Create a seamless loop securely via DOM generation (prevents any XSS injection)
-            els.audioTitle.textContent = ''; // clear initial contents
-
-            const span1 = document.createElement('span');
-            span1.textContent = originalText;
-
-            const span2 = document.createElement('span');
-            span2.style.paddingLeft = `${gap}px`;
-            span2.textContent = originalText;
-
-            els.audioTitle.appendChild(span1);
-            els.audioTitle.appendChild(span2);
-
-            const scrollDist = textWidth + gap;
-
-            // Web Animations API: Allows exact 3s pause natively without hacky CSS workarounds
-            const scrollDuration = scrollDist / 35; // purely the time it takes to scroll
-            const pauseDuration = 3;
-            const totalDuration = scrollDuration + pauseDuration;
-            const pausePercent = pauseDuration / totalDuration; // Dynamic percentage for holding at 0px
-
-            els.audioTitle.scrollAnim = els.audioTitle.animate(
-              [
-                { transform: 'translateX(0)', offset: 0 },
-                { transform: 'translateX(0)', offset: pausePercent },
-                { transform: `translateX(-${scrollDist}px)`, offset: 1 },
-              ],
-              {
-                duration: totalDuration * 1000,
-                iterations: Infinity,
-                easing: 'linear',
-              },
-            );
-
-            // Add fade mask to both edges so text blends in perfectly
-            parent.style.maskImage =
-              'linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%)';
-            parent.style.webkitMaskImage =
-              'linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%)';
-          }
+      function initYouTubePlayer() {
+        ytPlayer = new YT.Player('yt-iframe', {
+          events: {
+            onStateChange: onPlayerStateChange,
+            onError: onPlayerError,
+          },
         });
       }
 
-      // --- Unified Skeleton Handlers ---
-      function showSkeletons() {
-        els.videoSkeleton.classList.remove('opacity-0', 'pointer-events-none');
-        els.videoSkeleton.classList.add('opacity-100', 'pointer-events-auto');
+      function replaceIframe(url) {
+        if (ytPlayer) {
+          if (typeof ytPlayer.destroy === 'function') {
+            try {
+              ytPlayer.destroy();
+            } catch (e) {}
+          }
+          ytPlayer = null;
+        }
 
-        els.metaSkeleton.classList.remove('opacity-0', 'pointer-events-none');
-        els.metaSkeleton.classList.add('opacity-100', 'pointer-events-auto');
+        const newIframe = document.createElement('iframe');
+        newIframe.id = 'yt-iframe';
+        newIframe.className = 'w-full h-full border-0';
+        newIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        newIframe.setAttribute(
+          'allow',
+          'autoplay; encrypted-media; fullscreen; picture-in-picture',
+        );
+        newIframe.setAttribute('allowfullscreen', '');
+        if (url) {
+          newIframe.src = url;
+        }
 
-        els.videoContainer.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
-        els.videoContainer.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
+        els.videoContainer.innerHTML = '';
+        els.videoContainer.appendChild(newIframe);
 
-        els.metaContent.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
-        els.metaContent.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
+        els.iframe = newIframe;
+
+        if (url && isYTAPIReady) {
+          initYouTubePlayer();
+        }
       }
 
-      function hideSkeletons() {
-        els.videoSkeleton.classList.remove('opacity-100', 'pointer-events-auto');
-        els.videoSkeleton.classList.add('opacity-0', 'pointer-events-none');
-
-        els.metaSkeleton.classList.remove('opacity-100', 'pointer-events-auto');
-        els.metaSkeleton.classList.add('opacity-0', 'pointer-events-none');
-
-        els.videoContainer.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
-        els.videoContainer.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
-
-        els.metaContent.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
-        els.metaContent.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
-      }
-
-      // --- YouTube Logic ---
       function extractVideoID(input) {
         if (!input) return null;
         const cleanInput = input.trim();
@@ -1334,7 +1109,37 @@
         }
       }
 
-      // --- Toast Notification System ---
+
+      // --- UI Updates ---
+      function showSkeletons() {
+        els.videoSkeleton.classList.remove('opacity-0', 'pointer-events-none');
+        els.videoSkeleton.classList.add('opacity-100', 'pointer-events-auto');
+
+        els.metaSkeleton.classList.remove('opacity-0', 'pointer-events-none');
+        els.metaSkeleton.classList.add('opacity-100', 'pointer-events-auto');
+
+        els.videoContainer.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
+        els.videoContainer.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
+
+        els.metaContent.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
+        els.metaContent.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
+      }
+
+      function hideSkeletons() {
+        els.videoSkeleton.classList.remove('opacity-100', 'pointer-events-auto');
+        els.videoSkeleton.classList.add('opacity-0', 'pointer-events-none');
+
+        els.metaSkeleton.classList.remove('opacity-100', 'pointer-events-auto');
+        els.metaSkeleton.classList.add('opacity-0', 'pointer-events-none');
+
+        els.videoContainer.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
+        els.videoContainer.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
+
+        els.metaContent.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
+        els.metaContent.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
+      }
+
+
       function showToast(message, type = 'success') {
         const el = document.createElement('div');
         const colorClass =
@@ -1363,6 +1168,188 @@
           }, 300);
         }, 3000);
       }
+
+      // --- Utilities ---
+      function setHistoryState(action, state, url) {
+        try {
+          if (action === 'push') {
+            history.pushState(state, '', url);
+          } else {
+            history.replaceState(state, '', url);
+          }
+        } catch (e) {
+            try {
+            if (action === 'push') {
+              history.pushState(state, '');
+            } else {
+              history.replaceState(state, '');
+            }
+          } catch (err) {
+            console.warn('History API is blocked in this environment.');
+          }
+        }
+      }
+
+
+      function setupResizeLogic() {
+        if (window.innerWidth < 640) return;
+
+        let isResizing = false;
+        let resizeStartX = 0;
+        let resizeStartWidth = 0;
+        let resizeBaseWidth = 0;
+        let resizeDir = 1;
+
+        const resizeOverlay = document.getElementById('resize-overlay');
+        const getClientX = (e) =>
+          e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+
+        document.querySelectorAll('.resize-handle').forEach((handle) => {
+          const startDrag = (e) => {
+            if (currentZenMode !== 'video') return;
+            isResizing = true;
+            resizeStartX = getClientX(e);
+
+            const currentStyleWidth = els.videoWrapper.style.width;
+            els.videoWrapper.style.width = '';
+            resizeBaseWidth = els.videoWrapper.offsetWidth;
+            els.videoWrapper.style.width = currentStyleWidth || `${resizeBaseWidth}px`;
+            resizeStartWidth = els.videoWrapper.offsetWidth;
+
+            resizeDir = parseInt(handle.getAttribute('data-x-dir'));
+
+            resizeOverlay.classList.remove('hidden');
+
+            window.addEventListener('mousemove', handleResizeMove);
+            window.addEventListener('mouseup', handleResizeUp);
+            window.addEventListener('touchmove', handleResizeMove, { passive: false });
+            window.addEventListener('touchend', handleResizeUp);
+          };
+
+          handle.addEventListener('mousedown', startDrag);
+          handle.addEventListener('touchstart', startDrag, { passive: true });
+        });
+
+        function handleResizeMove(e) {
+          if (!isResizing) return;
+          if (e.cancelable) e.preventDefault();
+
+          const deltaX = getClientX(e) - resizeStartX;
+          const widthChange = deltaX * resizeDir * 2;
+          let newWidth = Math.max(
+            300,
+            Math.min(resizeStartWidth + widthChange, window.innerWidth * 0.9),
+          );
+
+          if (Math.abs(newWidth - resizeBaseWidth) < 50) {
+            els.videoWrapper.style.width = '';
+          } else {
+            els.videoWrapper.style.width = `${newWidth}px`;
+          }
+        }
+
+        function handleResizeUp() {
+          if (!isResizing) return;
+          isResizing = false;
+          resizeOverlay.classList.add('hidden');
+
+          window.removeEventListener('mousemove', handleResizeMove);
+          window.removeEventListener('mouseup', handleResizeUp);
+          window.removeEventListener('touchmove', handleResizeMove);
+          window.removeEventListener('touchend', handleResizeUp);
+        }
+      }
+
+
+      function setupMobileHeight() {
+        let resizeTimer;
+        function setHeight() {
+          if (window.innerWidth >= 640) {
+            els.appWrapper.style.height = '';
+          } else if (!(document.activeElement && document.activeElement.tagName === 'INPUT')) {
+            els.appWrapper.style.height = `${window.innerHeight}px`;
+          }
+
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            if (currentZenMode === 'audio') checkAudioTitleScroll();
+          }, 150);
+        }
+
+        window.addEventListener('resize', setHeight);
+        setHeight();
+      }
+
+      function checkAudioTitleScroll() {
+        if (
+          els.audioCard.classList.contains('hidden') ||
+          els.audioCard.classList.contains('opacity-0')
+        )
+          return;
+
+        if (els.audioTitle.scrollAnim) {
+          els.audioTitle.scrollAnim.cancel();
+        }
+
+        els.audioTitle.style.transform = 'none';
+        els.audioTitleContainer.style.maskImage = 'none';
+        els.audioTitleContainer.style.webkitMaskImage = 'none';
+
+        const originalText =
+          els.audioTitle.getAttribute('data-original-text') ?? els.audioTitle.textContent;
+        els.audioTitle.textContent = originalText;
+        els.audioTitle.setAttribute('data-original-text', originalText);
+
+        requestAnimationFrame(() => {
+          const parent = els.audioTitleContainer;
+          const textWidth = els.audioTitle.scrollWidth;
+          const containerWidth = parent.clientWidth;
+
+          if (textWidth > containerWidth && containerWidth > 0) {
+            const gap = 48; // Space between loops
+
+            els.audioTitle.textContent = ''; // clear initial contents
+
+            const span1 = document.createElement('span');
+            span1.textContent = originalText;
+
+            const span2 = document.createElement('span');
+            span2.style.paddingLeft = `${gap}px`;
+            span2.textContent = originalText;
+
+            els.audioTitle.appendChild(span1);
+            els.audioTitle.appendChild(span2);
+
+            const scrollDist = textWidth + gap;
+
+            // Web Animations API: Allows exact 3s pause natively without hacky CSS workarounds
+            const scrollDuration = scrollDist / 35; // purely the time it takes to scroll
+            const pauseDuration = 3;
+            const totalDuration = scrollDuration + pauseDuration;
+            const pausePercent = pauseDuration / totalDuration; // Dynamic percentage for holding at 0px
+
+            els.audioTitle.scrollAnim = els.audioTitle.animate(
+              [
+                { transform: 'translateX(0)', offset: 0 },
+                { transform: 'translateX(0)', offset: pausePercent },
+                { transform: `translateX(-${scrollDist}px)`, offset: 1 },
+              ],
+              {
+                duration: totalDuration * 1000,
+                iterations: Infinity,
+                easing: 'linear',
+              },
+            );
+
+            // Add fade mask to both edges so text blends in perfectly
+            parent.style.maskImage =
+              'linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%)';
+            parent.style.webkitMaskImage =
+              'linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%)';
+          }
+        });
+      }
+
     </script>
   </body>
 </html>
