@@ -65,36 +65,31 @@
       }
 
       /* Custom Scrollbar */
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: #d4d4d8 transparent;
-      }
-      html.dark {
-        scrollbar-color: #52525b transparent;
-      }
-
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background-color: #d4d4d8;
-        border-radius: 20px;
-        border: 2px solid transparent;
-        background-clip: padding-box;
-      }
-
-      html.dark ::-webkit-scrollbar-thumb {
-        background-color: #52525b;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background-color: #a1a1aa;
+      /* Custom Webkit Scrollbar */
+      @media (min-width: 640px) {
+        html {
+          scrollbar-width: thin;
+          scrollbar-color: #d4d4d8 transparent;
+        }
+        html.dark {
+          scrollbar-color: #52525b transparent;
+        }
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          background-color: #d4d4d8;
+          border-radius: 20px;
+        }
+        html.dark ::-webkit-scrollbar-thumb {
+          background-color: #52525b;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background-color: #a1a1aa;
+        }
       }
 
       /* Typing Dots Animation */
@@ -243,11 +238,11 @@
     </div>
 
     <!-- Application Logic -->
-    <script>
-      // --- Constants & State ---
+    <script>      // --- Constants & Config ---
       const STORAGE_KEY = 'blank-page-single-v1';
       const SIZES = ['sticky-note', 'page', 'full-window'];
 
+      // --- State Management ---
       let state = {
         content: '',
         countMode: 'words', // 'words' | 'characters'
@@ -277,7 +272,6 @@
         applyTheme();
         applySize();
 
-        // Set value BEFORE applying spellcheck attribute to trick browser into evaluating it
         els.editor.value = state.content;
         applySpellcheck();
 
@@ -286,7 +280,6 @@
         setupMobileHeight();
         lucide.createIcons();
 
-        // Small hack to wake up the browser's spellchecker engine on initial load
         setTimeout(() => {
           if (state.spellcheck && els.editor.value.length > 0) {
             const currentVal = els.editor.value;
@@ -298,24 +291,20 @@
 
       // --- Event Listeners ---
       function setupEventListeners() {
-        // Editor input with debounce and periodic saves
         els.editor.addEventListener('input', () => {
           if (statusState !== 'typing') setStatus('typing');
 
-          // Reset the "stop typing" timer
           if (typingTimer) clearTimeout(typingTimer);
 
           typingTimer = setTimeout(() => {
             saveContent();
             stopPeriodicSave();
-          }, 1000); // Save 1 second after typing stops
+          }, 1000);
 
           startPeriodicSave();
         });
 
-        // Selection changes - using the highly accurate selectionchange API
         const handleSelection = () => {
-          // Only update selection count if we aren't currently showing a saving animation
           if (statusState === 'idle') {
             updateCountDisplay();
           }
@@ -364,6 +353,12 @@
         });
       }
 
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (state.theme === 'system') {
+          applyTheme();
+        }
+      });
+
       // --- Core Logic ---
       function loadState() {
         try {
@@ -388,7 +383,7 @@
       function startPeriodicSave() {
         if (!periodicSaveTimer) {
           periodicSaveTimer = setInterval(() => {
-            saveContent(true); // true = isPeriodic
+            saveContent(true);
           }, 5000);
         }
       }
@@ -441,7 +436,6 @@
           state.content = els.editor.value;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-          // If it is a final save (not a background periodic save), update UI to Saved
           if (!isPeriodic) {
             setStatus('saved');
           }
@@ -475,7 +469,7 @@
         }
       }
 
-      // --- UI Updaters ---
+      // --- UI Updates ---
       function applyTheme() {
         const root = document.documentElement;
         let isDark = false;
@@ -571,7 +565,7 @@
         }
       }
 
-      // --- Mobile Layout Fix ---
+      // --- Utilities ---
       function setupMobileHeight() {
         function setHeight() {
           if (window.innerWidth >= 640 || state.sizeMode === 'full') {
@@ -586,12 +580,7 @@
         setHeight();
       }
 
-      // System theme listener
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (state.theme === 'system') {
-          applyTheme();
-        }
-      });
+
     </script>
   </body>
 </html>
