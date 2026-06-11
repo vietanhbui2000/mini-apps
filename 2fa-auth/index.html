@@ -68,25 +68,25 @@
         -webkit-tap-highlight-color: transparent;
       }
 
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: #d4d4d8 transparent;
-      }
-      html.dark {
-        scrollbar-color: #52525b transparent;
-      }
-
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background-color: #d4d4d8;
-        border-radius: 20px;
+      /* Custom Scrollbar */
+      @media (min-width: 640px) {
+        html {
+          scrollbar-width: thin;
+          scrollbar-color: #d4d4d8 transparent;
+        }
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+          background-color: #d4d4d8;
+          border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background-color: #a1a1aa;
+        }
       }
 
       .timer-svg {
@@ -231,13 +231,13 @@
       <!-- Main Content Area -->
       <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth" id="mainScroll">
         <!-- Codes List -->
-        <div id="codesContainer" class="px-4 sm:px-6 pt-4 sm:pt-6 pb-24 space-y-4">
+        <div id="codesContainer" class="px-4 sm:px-6 pt-4 sm:pt-6 pb-6 space-y-4">
           <!-- Content populated by JS -->
         </div>
       </main>
 
       <!-- Bottom Section Wrapper -->
-      <div class="relative flex-shrink-0">
+      <div class="relative flex-shrink-0 z-20">
         <!-- Toast Notification Container -->
         <div
           id="toastContainer"
@@ -246,7 +246,7 @@
 
         <!-- Bottom Action Bar -->
         <div
-          class="bg-white border-t border-zinc-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0"
+          class="bg-white border-t border-zinc-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0"
         >
           <button
             id="toggleAddAccount"
@@ -404,11 +404,9 @@
     </div>
 
     <!-- Application Logic -->
-    <script>
-      // --- Constants & Config ---
+    <script>      // --- Constants & Config ---
       const TOTP_INTERVAL = 30;
       const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-
       // --- State Management ---
       let accounts = [];
       let editingIndex = -1;
@@ -418,8 +416,7 @@
       let isPageVisible = true;
       let currentModal = null;
       let isSearchActive = false;
-
-      // --- DOM Elements Cache ---
+      // --- DOM Elements ---
       const els = {
         codesContainer: document.getElementById('codesContainer'),
         headerTimerBox: document.getElementById('headerTimerBox'),
@@ -446,7 +443,6 @@
         mainScroll: document.getElementById('mainScroll'),
         stickyHeader: document.getElementById('stickyHeader'),
       };
-
       // --- Initialization ---
       document.addEventListener('DOMContentLoaded', () => {
         loadAccounts();
@@ -458,7 +454,6 @@
         updateAccountsDisplay(true);
         lucide.createIcons();
       });
-
       // --- Event Listeners ---
       function setupEventListeners() {
         document.getElementById('toggleAddAccount').onclick = () => openAccountModal();
@@ -499,34 +494,7 @@
           }
         });
       }
-
-      // --- Mobile Layout Fix ---
-      function setupMobileHeight() {
-        const app = document.getElementById('app-wrapper');
-        if (!app) return;
-
-        function setHeight() {
-          if (window.innerWidth >= 640) {
-            app.style.height = '';
-            return;
-          }
-
-          if (
-            document.activeElement &&
-            (document.activeElement.tagName === 'INPUT' ||
-              document.activeElement.tagName === 'TEXTAREA')
-          ) {
-            return;
-          }
-
-          app.style.height = `${window.innerHeight}px`;
-        }
-
-        window.addEventListener('resize', setHeight);
-        setHeight();
-      }
-
-      // --- Core Logic: Timing & TOTP ---
+      // --- Core Logic ---
       function initializeTiming() {
         // Force precise initial timestamp calculation
         const now = Date.now() / 1000;
@@ -558,7 +526,6 @@
         const currentTimeStep = Math.floor(nowSec / TOTP_INTERVAL);
         if (currentTimeStep !== lastTimeStep) {
           lastTimeStep = currentTimeStep;
-          // FIX: Pass the exact deterministic timestamp we calculated to prevent double Date.now() race condition
           updateCodes(Math.floor(nowSec));
         }
 
@@ -594,8 +561,6 @@
         els.timerCircleSvg.classList.add(strokeAdd);
         els.timerCircleSvg.classList.remove(strokeRemove);
       }
-
-      // --- TOTP Generation ---
       function generateTOTP(secret, timestamp) {
         try {
           if (typeof CryptoJS === 'undefined') return 'Error';
@@ -627,8 +592,6 @@
       }
 
       function base32ToHex(base32) {
-        // FIX: Removed dangerous 1->L and 8->B substitutions.
-        // Secrets should be normalized AT SAVE, not at generation time.
         if (!base32) return '';
 
         let bits = 0;
@@ -657,7 +620,6 @@
       }
 
       function updateCodes(deterministicNow = null) {
-        // FIX: Ensure we use the deterministic timestamp if provided, solving the double Date.now() race condition.
         const epoch = deterministicNow !== null ? deterministicNow : Math.floor(Date.now() / 1000);
 
         accounts.forEach((acc, idx) => {
@@ -674,8 +636,230 @@
           }
         });
       }
+      function openAccountModal(index = -1) {
+        editingIndex = index;
+        if (index >= 0) {
+          els.modalTitle.textContent = 'Edit Account';
+          els.accountName.value = accounts[index].name;
+          els.secretKey.value = accounts[index].secret;
+        } else {
+          els.modalTitle.textContent = 'Add Account';
+          els.accountName.value = '';
+          els.secretKey.value = '';
+        }
+        openModal('accountModal');
+        setTimeout(() => els.accountName.focus(), 100);
+      }
 
-      // --- UI Rendering ---
+      function saveAccount() {
+        let name = els.accountName.value.trim();
+        let rawSecret = els.secretKey.value.trim();
+
+        if (!name && !rawSecret.startsWith('otpauth://'))
+          return showToast('Account name is required', 'error');
+        if (!rawSecret) return showToast('Secret key or URI is required', 'error');
+
+        if (rawSecret.startsWith('otpauth://')) {
+          try {
+            const url = new URL(rawSecret);
+            rawSecret = url.searchParams.get('secret');
+            if (!rawSecret) throw new Error('No secret parameter found');
+
+            // Auto-fill name if it wasn't provided
+            if (!name) {
+              const pathName = decodeURIComponent(url.pathname.split('/').pop() || '');
+              const issuer = url.searchParams.get('issuer');
+              name = issuer ? `${issuer} (${pathName})` : pathName;
+            }
+          } catch (e) {
+            return showToast('Invalid otpauth URI', 'error');
+          }
+        }
+
+        let secret = rawSecret.replace(/[\s\-]/g, '').toUpperCase();
+
+        secret = secret.replace(/0/g, 'O');
+
+        if (/[189]/.test(secret)) {
+          return showToast(
+            'Secret contains invalid characters (1, 8, or 9). Please check for typos.',
+            'error',
+          );
+        }
+
+        if (/[^A-Z2-7]/.test(secret)) {
+          return showToast('Contains invalid Base32 characters.', 'error');
+        }
+
+        const hex = base32ToHex(secret);
+        if (!hex) return showToast('Invalid Base32 structure/length.', 'error');
+
+        const newAcc = { name, secret };
+        if (editingIndex >= 0) {
+          accounts[editingIndex] = newAcc;
+        } else {
+          accounts.push(newAcc);
+        }
+
+        saveToStorage();
+        closeAllModals();
+        updateAccountsDisplay(true);
+        updateCodes(); // Triggers generation with current time
+        setTimeout(() => showToast(editingIndex >= 0 ? 'Account updated' : 'Account added'), 300);
+      }
+
+      function initDelete(index) {
+        deletingIndex = index;
+        document.getElementById('deleteMessage').textContent = `Remove "${accounts[index].name}"?`;
+        openModal('deleteModal');
+      }
+
+      function confirmDelete() {
+        if (deletingIndex >= 0) {
+          accounts.splice(deletingIndex, 1);
+          saveToStorage();
+          updateAccountsDisplay(true);
+        }
+        closeAllModals();
+        setTimeout(() => showToast('Account removed'), 300);
+      }
+
+      function handleCardCopy(cardElement, index) {
+        const codeEl = document.getElementById(`code-value-${index}`);
+        if (!codeEl) return;
+
+        const text = codeEl.textContent.replace(/\s/g, '');
+
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            const overlay = document.getElementById(`copy-overlay-${index}`);
+            const icon = document.getElementById(`copy-icon-${index}`);
+            const label = document.getElementById(`copy-text-${index}`);
+
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            icon.classList.remove('scale-50');
+            icon.classList.add('scale-100');
+            label.classList.remove('translate-y-2', 'opacity-0');
+            cardElement.classList.add('!border-emerald-500', 'ring-1', 'ring-emerald-500');
+
+            setTimeout(() => {
+              overlay.classList.add('opacity-0', 'pointer-events-none');
+              icon.classList.add('scale-50');
+              icon.classList.remove('scale-100');
+              label.classList.add('translate-y-2', 'opacity-0');
+              cardElement.classList.remove('!border-emerald-500', 'ring-1', 'ring-emerald-500');
+            }, 1200);
+          } else {
+            showToast('Failed to copy', 'error');
+          }
+        } catch (err) {
+          showToast('Failed to copy', 'error');
+        }
+
+        document.body.removeChild(textArea);
+      }
+
+      function editAccount(index) {
+        openAccountModal(index);
+      }
+      function openDataModal(type) {
+        const btn = document.getElementById('processDataBtn');
+        const title = document.getElementById('dataModalTitle');
+        if (type === 'import') {
+          title.textContent = 'Import Accounts';
+          btn.textContent = 'Import';
+          btn.dataset.action = 'import';
+          els.dataTextarea.value = '';
+          els.dataTextarea.readOnly = false;
+          els.dataTextarea.placeholder = 'Google|JBSWY3DPEHPK3PXP\nGitHub|KRPGS5ABN2...';
+        } else {
+          title.textContent = 'Export Accounts';
+          btn.textContent = 'Copy to Clipboard';
+          btn.dataset.action = 'export';
+          els.dataTextarea.value = accounts.map((a) => `${a.name}|${a.secret}`).join('\n');
+          els.dataTextarea.readOnly = true;
+        }
+        openModal('dataModal');
+      }
+
+      function processDataAction() {
+        const btn = document.getElementById('processDataBtn');
+        const action = btn.dataset.action;
+        if (action === 'export') {
+          els.dataTextarea.select();
+          try {
+            document.execCommand('copy');
+            closeAllModals();
+            setTimeout(() => showToast('Export data copied!'), 300);
+          } catch (e) {
+            showToast('Failed to copy', 'error');
+          }
+          return;
+        }
+
+        const raw = els.dataTextarea.value.trim();
+        if (!raw) return showToast('Please enter data to import', 'warning');
+
+        const lines = raw.split('\n');
+        let added = 0;
+        let duplicates = 0;
+        let errors = 0;
+
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+          const parts = line.split('|');
+          if (parts.length < 2) {
+            errors++;
+            return;
+          }
+          const name = parts[0].trim();
+          let secret = parts[1]
+            .trim()
+            .replace(/[\s\-]/g, '')
+            .toUpperCase()
+            .replace(/0/g, 'O');
+
+          if (name && secret && !/[^A-Z2-7]/.test(secret) && base32ToHex(secret)) {
+            if (!accounts.some((a) => a.name === name)) {
+              accounts.push({ name, secret });
+              added++;
+            } else {
+              duplicates++;
+            }
+          } else {
+            errors++;
+          }
+        });
+
+        if (added > 0) {
+          saveToStorage();
+          updateAccountsDisplay(true);
+          updateCodes();
+          closeAllModals();
+
+          let msg = `Imported ${added} accounts`;
+          if (duplicates > 0) msg += ` (${duplicates} skipped)`;
+          showToast(msg);
+        } else if (duplicates > 0) {
+          closeAllModals();
+          showToast(`All ${duplicates} accounts already exist`, 'warning');
+        }
+
+        if (errors > 0) {
+          showToast(`${errors} lines were invalid`, 'warning');
+        }
+      }
+      // --- UI Updates ---
       function updateAccountsDisplay(shouldAnimate = false) {
         const filter = els.searchInput.value.toLowerCase();
         els.codesContainer.innerHTML = '';
@@ -770,257 +954,6 @@
                     </div>`;
         }
       }
-
-      // --- Actions ---
-      function openAccountModal(index = -1) {
-        editingIndex = index;
-        if (index >= 0) {
-          els.modalTitle.textContent = 'Edit Account';
-          els.accountName.value = accounts[index].name;
-          els.secretKey.value = accounts[index].secret;
-        } else {
-          els.modalTitle.textContent = 'Add Account';
-          els.accountName.value = '';
-          els.secretKey.value = '';
-        }
-        openModal('accountModal');
-        setTimeout(() => els.accountName.focus(), 100);
-      }
-
-      function saveAccount() {
-        let name = els.accountName.value.trim();
-        let rawSecret = els.secretKey.value.trim();
-
-        if (!name && !rawSecret.startsWith('otpauth://'))
-          return showToast('Account name is required', 'error');
-        if (!rawSecret) return showToast('Secret key or URI is required', 'error');
-
-        // FIX: Gracefully handle parsing full otpauth:// URIs
-        if (rawSecret.startsWith('otpauth://')) {
-          try {
-            const url = new URL(rawSecret);
-            rawSecret = url.searchParams.get('secret');
-            if (!rawSecret) throw new Error('No secret parameter found');
-
-            // Auto-fill name if it wasn't provided
-            if (!name) {
-              const pathName = decodeURIComponent(url.pathname.split('/').pop() || '');
-              const issuer = url.searchParams.get('issuer');
-              name = issuer ? `${issuer} (${pathName})` : pathName;
-            }
-          } catch (e) {
-            return showToast('Invalid otpauth URI', 'error');
-          }
-        }
-
-        // FIX: Normalize the secret ONCE during save, not on every generation loop.
-        // Remove spaces, hyphens, and make uppercase
-        let secret = rawSecret.replace(/[\s\-]/g, '').toUpperCase();
-
-        // Safe substitution: 0 is never used in Base32 and is universally meant to be 'O'
-        secret = secret.replace(/0/g, 'O');
-
-        // FIX: explicitly catch dangerous/ambiguous characters instead of blindly guessing
-        if (/[189]/.test(secret)) {
-          return showToast(
-            'Secret contains invalid characters (1, 8, or 9). Please check for typos.',
-            'error',
-          );
-        }
-
-        // Verify it completely strips down to a valid Base32 string
-        if (/[^A-Z2-7]/.test(secret)) {
-          return showToast('Contains invalid Base32 characters.', 'error');
-        }
-
-        // Validate via conversion to ensure structural integrity
-        const hex = base32ToHex(secret);
-        if (!hex) return showToast('Invalid Base32 structure/length.', 'error');
-
-        const newAcc = { name, secret };
-        if (editingIndex >= 0) {
-          accounts[editingIndex] = newAcc;
-        } else {
-          accounts.push(newAcc);
-        }
-
-        saveToStorage();
-        closeAllModals();
-        updateAccountsDisplay(true);
-        updateCodes(); // Triggers generation with current time
-        setTimeout(() => showToast(editingIndex >= 0 ? 'Account updated' : 'Account added'), 300);
-      }
-
-      function initDelete(index) {
-        deletingIndex = index;
-        document.getElementById('deleteMessage').textContent = `Remove "${accounts[index].name}"?`;
-        openModal('deleteModal');
-      }
-
-      function confirmDelete() {
-        if (deletingIndex >= 0) {
-          accounts.splice(deletingIndex, 1);
-          saveToStorage();
-          updateAccountsDisplay(true);
-        }
-        closeAllModals();
-        setTimeout(() => showToast('Account removed'), 300);
-      }
-
-      function handleCardCopy(cardElement, index) {
-        const codeEl = document.getElementById(`code-value-${index}`);
-        if (!codeEl) return;
-
-        const text = codeEl.textContent.replace(/\s/g, '');
-
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        textArea.style.top = '0';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-          const successful = document.execCommand('copy');
-          if (successful) {
-            const overlay = document.getElementById(`copy-overlay-${index}`);
-            const icon = document.getElementById(`copy-icon-${index}`);
-            const label = document.getElementById(`copy-text-${index}`);
-
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-            icon.classList.remove('scale-50');
-            icon.classList.add('scale-100');
-            label.classList.remove('translate-y-2', 'opacity-0');
-            cardElement.classList.add('!border-emerald-500', 'ring-1', 'ring-emerald-500');
-
-            setTimeout(() => {
-              overlay.classList.add('opacity-0', 'pointer-events-none');
-              icon.classList.add('scale-50');
-              icon.classList.remove('scale-100');
-              label.classList.add('translate-y-2', 'opacity-0');
-              cardElement.classList.remove('!border-emerald-500', 'ring-1', 'ring-emerald-500');
-            }, 1200);
-          } else {
-            showToast('Failed to copy', 'error');
-          }
-        } catch (err) {
-          showToast('Failed to copy', 'error');
-        }
-
-        document.body.removeChild(textArea);
-      }
-
-      function editAccount(index) {
-        openAccountModal(index);
-      }
-
-      // --- Import/Export ---
-      function openDataModal(type) {
-        const btn = document.getElementById('processDataBtn');
-        const title = document.getElementById('dataModalTitle');
-        if (type === 'import') {
-          title.textContent = 'Import Accounts';
-          btn.textContent = 'Import';
-          btn.dataset.action = 'import';
-          els.dataTextarea.value = '';
-          els.dataTextarea.readOnly = false;
-          els.dataTextarea.placeholder = 'Google|JBSWY3DPEHPK3PXP\nGitHub|KRPGS5ABN2...';
-        } else {
-          title.textContent = 'Export Accounts';
-          btn.textContent = 'Copy to Clipboard';
-          btn.dataset.action = 'export';
-          els.dataTextarea.value = accounts.map((a) => `${a.name}|${a.secret}`).join('\n');
-          els.dataTextarea.readOnly = true;
-        }
-        openModal('dataModal');
-      }
-
-      function processDataAction() {
-        const btn = document.getElementById('processDataBtn');
-        const action = btn.dataset.action;
-        if (action === 'export') {
-          els.dataTextarea.select();
-          try {
-            document.execCommand('copy');
-            closeAllModals();
-            setTimeout(() => showToast('Export data copied!'), 300);
-          } catch (e) {
-            showToast('Failed to copy', 'error');
-          }
-          return;
-        }
-
-        const raw = els.dataTextarea.value.trim();
-        if (!raw) return showToast('Please enter data to import', 'warning');
-
-        const lines = raw.split('\n');
-        let added = 0;
-        let duplicates = 0;
-        let errors = 0;
-
-        lines.forEach((line) => {
-          if (!line.trim()) return;
-          const parts = line.split('|');
-          if (parts.length < 2) {
-            errors++;
-            return;
-          }
-          const name = parts[0].trim();
-          let secret = parts[1]
-            .trim()
-            .replace(/[\s\-]/g, '')
-            .toUpperCase()
-            .replace(/0/g, 'O');
-
-          if (name && secret && !/[^A-Z2-7]/.test(secret) && base32ToHex(secret)) {
-            if (!accounts.some((a) => a.name === name)) {
-              accounts.push({ name, secret });
-              added++;
-            } else {
-              duplicates++;
-            }
-          } else {
-            errors++;
-          }
-        });
-
-        if (added > 0) {
-          saveToStorage();
-          updateAccountsDisplay(true);
-          updateCodes();
-          closeAllModals();
-
-          let msg = `Imported ${added} accounts`;
-          if (duplicates > 0) msg += ` (${duplicates} skipped)`;
-          showToast(msg);
-        } else if (duplicates > 0) {
-          closeAllModals();
-          showToast(`All ${duplicates} accounts already exist`, 'warning');
-        }
-
-        if (errors > 0) {
-          showToast(`${errors} lines were invalid`, 'warning');
-        }
-      }
-
-      // --- Data Persistence ---
-      function loadAccounts() {
-        try {
-          const saved = localStorage.getItem('totpAccounts');
-          if (saved) accounts = JSON.parse(saved);
-        } catch (e) {
-          console.error('Failed to load accounts');
-          accounts = [];
-        }
-      }
-
-      function saveToStorage() {
-        localStorage.setItem('totpAccounts', JSON.stringify(accounts));
-      }
-
-      // --- UI Utils ---
       function toggleSearch() {
         isSearchActive = !isSearchActive;
         const timerBox = els.headerTimerBox;
@@ -1092,8 +1025,6 @@
         div.textContent = text;
         return div.innerHTML;
       }
-
-      // --- Modal System ---
       function openModal(modalId) {
         els.modalOverlay.classList.remove('hidden');
         setTimeout(() => {
@@ -1125,8 +1056,6 @@
           currentModal = null;
         }, 300);
       }
-
-      // --- Toast System ---
       function showToast(message, type = 'success') {
         const el = document.createElement('div');
         const colorClass =
@@ -1158,8 +1087,49 @@
           }, 300);
         }, 3000);
       }
+      // --- Utilities ---
+      function setupMobileHeight() {
+        const app = document.getElementById('app-wrapper');
+        if (!app) return;
 
-      // --- Visibility Handling ---
+        function setHeight() {
+          if (window.innerWidth >= 640) {
+            app.style.height = '';
+            return;
+          }
+
+          if (
+            document.activeElement &&
+            (document.activeElement.tagName === 'INPUT' ||
+              document.activeElement.tagName === 'TEXTAREA')
+          ) {
+            return;
+          }
+
+          app.style.height = `${window.innerHeight}px`;
+        }
+
+        window.addEventListener('resize', setHeight);
+        setHeight();
+      }
+      function loadAccounts() {
+        try {
+          const saved = localStorage.getItem('totpAccounts');
+          if (saved) accounts = JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to load accounts');
+          accounts = [];
+        }
+      }
+
+      function saveToStorage() {
+        try {
+          localStorage.setItem('totpAccounts', JSON.stringify(accounts));
+        } catch (e) {
+          console.error('Failed to save accounts', e);
+          showToast('Failed to save to local storage (Storage might be full or disabled)', 'error');
+        }
+      }
       function setupVisibilityHandling() {
         document.addEventListener('visibilitychange', () => {
           isPageVisible = !document.hidden;
