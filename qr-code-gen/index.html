@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Simple, customizable QR Code generator." />
+  <title>QR Code Generator</title>
+
+  <!-- qr-code-styling Library -->
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.min.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Fonts: Geist, Geist Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Geist', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            },
+          },
+          transitionProperty: {
+            width: 'width',
+            spacing: 'margin, padding',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Constrain canvas to prevent visual pop during high-res export */
+    #qr-canvas-holder canvas,
+    #qr-canvas-holder svg {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain;
+    }
+
+    /* Custom scrollbar for better visual integration on non-mobile */
+    @media (min-width: 640px) {
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #d4d4d8 transparent;
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #d4d4d8;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1aa;
+      }
+    }
+
+    .card-tap-highlight {
+      transition:
+        background-color 0.2s,
+        border-color 0.2s;
+    }
+
+    .card-tap-highlight:active {
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+
+<body class="bg-[#f5f5f5] text-zinc-800 h-[100dvh] flex justify-center overflow-hidden">
+  <!-- Main App Container -->
+  <div id="app-wrapper"
+    class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border">
+    <!-- Header -->
+    <header
+      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
+          <i data-lucide="qr-code" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-2xl tracking-tight text-zinc-900 leading-tight">
+            QR Code Generator
+          </h1>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sticky QR Preview Container -->
+    <div class="flex-shrink-0 bg-zinc-50/50 px-4 sm:px-6 pt-4 sm:pt-6 pb-6 z-10 relative">
+      <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col items-center relative">
+        <div id="qr-card" class="relative flex items-center justify-center w-[200px] h-[200px]">
+          <div id="qr-canvas-holder" class="w-full h-full flex items-center justify-center">
+            <!-- Rendered canvas / svg goes here -->
+          </div>
+          <!-- Loading Indicator -->
+          <div id="qr-loading"
+            class="absolute inset-0 bg-white/80 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+            <i data-lucide="loader-2" class="w-6 h-6 text-brand-500 animate-spin"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 sm:px-6 bg-zinc-50/50 z-10 relative flex-shrink-0">
+      <hr class="border-zinc-200" />
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth px-4 sm:px-6 py-6" id="mainScroll">
+      <div class="space-y-6">
+
+        <!-- ═══════════════════════════════ -->
+        <!--         DATA SECTION            -->
+        <!-- ═══════════════════════════════ -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                <i data-lucide="database" class="w-3.5 h-3.5"></i>
+              </div>
+              <h2 class="font-bold text-zinc-900 tracking-tight">Data Payload</h2>
+            </div>
+            <span id="char-counter"
+              class="text-[10px] font-mono text-zinc-500 font-bold bg-zinc-100 px-2 py-1 rounded uppercase tracking-wider">
+              0 chars
+            </span>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                Data Type
+              </label>
+              <select id="dataTypeSelector" onchange="switchDataType(this.value)"
+                class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm font-medium">
+                <option value="url" selected>Text / Link</option>
+                <option value="wifi">Wi-Fi Network</option>
+                <option value="vcard">Contact (vCard)</option>
+                <option value="email">Email</option>
+                <option value="sms">SMS</option>
+                <option value="whatsapp">WhatsApp</option>
+              </select>
+            </div>
+
+            <!-- DYNAMIC FORMS -->
+            <div id="forms-container">
+
+              <!-- URL Form -->
+              <div id="form-url" class="space-y-3">
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Content</span>
+                    <span
+                      class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                  </label>
+                  <textarea id="input-url" rows="3"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium resize-y min-h-[60px]"
+                    placeholder="Enter text or paste a link (e.g. https://example.com)"
+                    oninput="onFormChange()"></textarea>
+                </div>
+              </div>
+
+              <!-- WiFi Form -->
+              <div id="form-wifi" class="hidden space-y-4">
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Network Name (SSID)</span>
+                    <span
+                      class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                  </label>
+                  <input type="text" id="wifi-ssid"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium"
+                    placeholder="My Wi-Fi" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                    Network Password
+                  </label>
+                  <input type="password" id="wifi-pass"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium"
+                    placeholder="1234567890" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                    Security Type
+                  </label>
+                  <div class="grid grid-cols-3 gap-3">
+                    <label
+                      class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                      <input type="radio" name="wifi-sec" value="WPA" class="peer sr-only" checked
+                        onchange="onFormChange()" />
+                      <div class="flex items-center justify-center w-full">
+                        <span
+                          class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">WPA/WPA2</span>
+                      </div>
+                    </label>
+                    <label
+                      class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                      <input type="radio" name="wifi-sec" value="WEP" class="peer sr-only" onchange="onFormChange()" />
+                      <div class="flex items-center justify-center w-full">
+                        <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">WEP</span>
+                      </div>
+                    </label>
+                    <label
+                      class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                      <input type="radio" name="wifi-sec" value="nopass" class="peer sr-only"
+                        onchange="onFormChange()" />
+                      <div class="flex items-center justify-center w-full">
+                        <span
+                          class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">None</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact (vCard) Form -->
+              <div id="form-vcard" class="hidden space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">First
+                      Name</label>
+                    <input type="text" id="card-first"
+                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      placeholder="John" oninput="onFormChange()" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Last
+                      Name</label>
+                    <input type="text" id="card-last"
+                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      placeholder="Doe" oninput="onFormChange()" />
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Phone</label>
+                    <input type="tel" id="card-phone"
+                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      placeholder="+1234567890" oninput="onFormChange()" />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Email</label>
+                    <input type="email" id="card-email"
+                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      placeholder="john@example.com" oninput="onFormChange()" />
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Organization</label>
+                  <input type="text" id="card-org"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="Company Inc." oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Website</label>
+                  <input type="url" id="card-web"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="https://example.com" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Address</label>
+                  <input type="text" id="card-addr"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="Street, City, Country" oninput="onFormChange()" />
+                </div>
+              </div>
+
+              <!-- Email Form -->
+              <div id="form-email" class="hidden space-y-4">
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Recipient Email</span>
+                    <span
+                      class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                  </label>
+                  <input type="email" id="email-to"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="hello@example.com" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Subject</label>
+                  <input type="text" id="email-sub"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="Email Subject" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Message</label>
+                  <textarea id="email-body" rows="2"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
+                    placeholder="Message contents..." oninput="onFormChange()"></textarea>
+                </div>
+              </div>
+
+              <!-- SMS Form -->
+              <div id="form-sms" class="hidden space-y-4">
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Phone Number</span>
+                    <span
+                      class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                  </label>
+                  <input type="tel" id="sms-phone"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="+15551234567" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Message</label>
+                  <textarea id="sms-msg" rows="2"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
+                    placeholder="SMS text..." oninput="onFormChange()"></textarea>
+                </div>
+              </div>
+
+              <!-- WhatsApp Form -->
+              <div id="form-whatsapp" class="hidden space-y-4">
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Phone Number</span>
+                    <span
+                      class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
+                  </label>
+                  <input type="tel" id="wa-phone"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    placeholder="15551234567 (with country code)" oninput="onFormChange()" />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Message</label>
+                  <textarea id="wa-msg" rows="2"
+                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
+                    placeholder="Pre-filled message..." oninput="onFormChange()"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-zinc-200" />
+
+        <!-- ════════════════════════════════════════ -->
+        <!--         STYLING CONFIGURATION ACCORDION  -->
+        <!-- ════════════════════════════════════════ -->
+        <div>
+          <button type="button" onclick="toggleAccordion('stylingAdvanced', 'stylingAdvancedIcon')"
+            class="w-full flex items-center justify-between mb-4 group">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+              </div>
+              <h2 class="font-bold text-zinc-900 tracking-tight group-hover:text-brand-600 transition-colors">Appearance
+                Settings</h2>
+            </div>
+            <i data-lucide="chevron-down" id="stylingAdvancedIcon"
+              class="w-4 h-4 text-zinc-400 transition-transform duration-200"></i>
+          </button>
+          <div id="stylingAdvanced" class="hidden space-y-5">
+
+            <!-- Patterns & Colors -->
+            <div>
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Dot
+                Pattern</label>
+              <div class="grid grid-cols-3 gap-3 mb-3">
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                  <input type="radio" name="dot-style" value="square" class="peer sr-only" checked
+                    onchange="updateQRStyling()" />
+                  <span
+                    class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700 mx-auto">Square</span>
+                </label>
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                  <input type="radio" name="dot-style" value="rounded" class="peer sr-only"
+                    onchange="updateQRStyling()" />
+                  <span
+                    class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700 mx-auto">Rounded</span>
+                </label>
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                  <input type="radio" name="dot-style" value="dots" class="peer sr-only" onchange="updateQRStyling()" />
+                  <span
+                    class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700 mx-auto">Dots</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Padding & Transparent BG -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Margin Padding</span>
+                  <span id="padding-val" class="text-zinc-400 font-mono text-xs">0</span>
+                </label>
+                <div class="flex items-center w-full p-3 bg-white border border-zinc-200 rounded-xl h-[50px]">
+                  <input type="range" id="qr-padding" min="0" max="10" value="0" step="1" oninput="updateQRStyling()"
+                    class="w-full accent-brand-500 cursor-pointer" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                  Background
+                </label>
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 group h-[50px]">
+                  <input type="checkbox" id="bg-transparent" class="peer sr-only" onchange="updateQRStyling()" />
+                  <div class="flex items-center justify-between w-full h-full">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="square-dashed"
+                        class="w-4 h-4 text-zinc-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                      <span class="text-sm font-semibold text-zinc-900">Transparent</span>
+                    </div>
+                    <div
+                      class="relative inline-flex h-5 w-9 items-center rounded-full bg-zinc-200 transition-colors group-has-[:checked]:bg-brand-600 flex-shrink-0">
+                      <span
+                        class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-5"></span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Colors -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Foreground
+                  Color</label>
+                <div
+                  class="flex items-center gap-3 w-full p-3 bg-white border border-zinc-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500">
+                  <input type="color" id="dot-solid" value="#18181b"
+                    class="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent" oninput="updateQRStyling()" />
+                  <span class="text-sm font-medium text-zinc-700">QR Code</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Background
+                  Color</label>
+                <div
+                  class="flex items-center gap-3 w-full p-3 bg-white border border-zinc-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500">
+                  <input type="color" id="bg-solid" value="#ffffff"
+                    class="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent" oninput="updateQRStyling()" />
+                  <span class="text-sm font-medium text-zinc-700">Canvas</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Correction -->
+            <div>
+              <label
+                class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                <span>Error Correction Level</span>
+                <div class="relative group cursor-help">
+                  <i data-lucide="info" class="w-3.5 h-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"></i>
+                  <div
+                    class="absolute bottom-full right-[-4px] mb-2 w-56 p-2 bg-zinc-800 text-white text-[11px] rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 text-center pointer-events-none normal-case font-normal whitespace-normal">
+                    Higher levels improve scannability but make the QR code denser.
+                    <div class="absolute -bottom-1 right-2 w-2 h-2 bg-zinc-800 rotate-45"></div>
+                  </div>
+                </div>
+              </label>
+              <select id="qr-ecc" onchange="updateQRStyling()"
+                class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all text-sm font-medium">
+                <option value="L">Low (7%)</option>
+                <option value="M">Medium (15%)</option>
+                <option value="Q" selected>Quartile (25%)</option>
+                <option value="H">High (30%)</option>
+              </select>
+            </div>
+
+            <!-- Logo Options -->
+            <div>
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Upload
+                Logo</label>
+              <div class="flex items-center gap-3">
+                <label
+                  class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-300 bg-white rounded-xl py-4 hover:border-brand-500 hover:bg-zinc-50 cursor-pointer transition-colors px-4 text-center">
+                  <i data-lucide="image" class="w-5 h-5 text-zinc-400 mb-1"></i>
+                  <span class="text-xs font-bold text-zinc-700">Choose Image File</span>
+                  <input type="file" id="logo-uploader" class="hidden" accept="image/*"
+                    onchange="handleLogoUpload(event)" />
+                </label>
+                <div id="logo-preview-box" class="hidden flex-col items-center gap-1.5 w-16">
+                  <div
+                    class="w-12 h-12 rounded-xl border border-zinc-200 bg-white p-1 flex items-center justify-center overflow-hidden shadow-sm">
+                    <img id="logo-preview-img" class="max-w-full max-h-full object-contain" src="" alt="logo" />
+                  </div>
+                  <button type="button" onclick="removeLogo()"
+                    class="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-wider">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="logo-options-group" class="hidden">
+              <label
+                class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
+                <input type="checkbox" id="logo-clear-bg" class="peer sr-only" checked onchange="updateQRStyling()" />
+                <div class="flex items-center justify-between w-full h-full">
+                  <div class="flex items-center gap-3">
+                    <i data-lucide="layers"
+                      class="w-5 h-5 text-zinc-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
+                    <div class="flex flex-col">
+                      <span class="text-sm font-semibold text-zinc-900">Clear Background Behind Logo</span>
+                      <span class="block text-xs text-zinc-500 mt-0.5 leading-snug">Removes QR dots under the
+                        image</span>
+                    </div>
+                  </div>
+                  <div
+                    class="relative inline-flex h-6 w-11 items-center rounded-full bg-zinc-200 transition-colors group-has-[:checked]:bg-brand-600">
+                    <span
+                      class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-6"></span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <hr class="border-zinc-200" />
+
+        <!-- ════════════════════════════════════════ -->
+        <!--         EXPORT SETTINGS ACCORDION        -->
+        <!-- ════════════════════════════════════════ -->
+        <div>
+          <button type="button" onclick="toggleAccordion('exportSettings', 'exportSettingsIcon')"
+            class="w-full flex items-center justify-between mb-4 group">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              </div>
+              <h2 class="font-bold text-zinc-900 tracking-tight group-hover:text-brand-600 transition-colors">Download &
+                Copy Options</h2>
+            </div>
+            <i data-lucide="chevron-down" id="exportSettingsIcon"
+              class="w-4 h-4 text-zinc-400 transition-transform duration-200"></i>
+          </button>
+          <div id="exportSettings" class="hidden space-y-5">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                File Name
+              </label>
+              <input type="text" id="export-filename"
+                class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm font-medium"
+                placeholder="qrcode" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                Export Format
+              </label>
+              <div class="grid grid-cols-3 gap-3">
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
+                  <input type="radio" name="export-format" value="png" class="sr-only" checked
+                    onchange="handleFormatChange(this.value)" />
+                  <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">PNG</span>
+                </label>
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
+                  <input type="radio" name="export-format" value="jpeg" class="sr-only"
+                    onchange="handleFormatChange(this.value)" />
+                  <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">JPG</span>
+                </label>
+                <label
+                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
+                  <input type="radio" name="export-format" value="svg" class="sr-only"
+                    onchange="handleFormatChange(this.value)" />
+                  <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">SVG</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                Size
+              </label>
+              <div class="grid grid-cols-3 gap-3">
+                <label
+                  class="size-option-label relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
+                  <input type="radio" name="export-size" value="512" class="sr-only" />
+                  <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">512px</span>
+                </label>
+                <label
+                  class="size-option-label relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
+                  <input type="radio" name="export-size" value="1024" class="sr-only" checked />
+                  <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">1024px</span>
+                </label>
+                <label
+                  class="size-option-label relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
+                  <input type="radio" name="export-size" value="2048" class="sr-only" />
+                  <span class="text-sm font-semibold text-zinc-900 group-has-[:checked]:text-brand-700">2048px</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Sticky Action Bar -->
+    <div
+      class="bg-white border-t border-zinc-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+      <button onclick="triggerQRDownload(this)"
+        class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span>Download</span>
+      </button>
+
+      <div class="flex gap-2">
+        <button onclick="copyQRToClipboard(this)"
+          class="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 transition-colors"
+          title="Copy Image">
+          <i data-lucide="copy" class="w-5 h-5"></i>
+        </button>
+        <button onclick="resetInputs()"
+          class="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-red-500 transition-colors"
+          title="Clear Data">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+
+  </div>
+
+  <!-- Application Script logic -->
+  <script>      // --- Constants & Config ---
+    // (None)
+
+    // --- State Management ---
+    let currentDataType = 'url';
+    let qrCodeInstance = null;
+    let activeLogo = null;
+
+    const activeVisuals = {
+      dotStyle: 'square',
+      ecc: 'Q',
+      dotColor: '#18181b',
+      bgColor: '#ffffff',
+      bgTransparent: false,
+      padding: 0,
+      logoClearBg: true
+    };
+
+    // --- DOM Elements ---
+    const els = {
+      qrCanvasHolder: document.getElementById('qr-canvas-holder'),
+      qrLoading: document.getElementById('qr-loading'),
+      charCounter: document.getElementById('char-counter'),
+      logoPreviewBox: document.getElementById('logo-preview-box'),
+      logoPreviewImg: document.getElementById('logo-preview-img'),
+      logoOptionsGroup: document.getElementById('logo-options-group'),
+      exportFilename: document.getElementById('export-filename')
+    };
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+      setupMobileHeight();
+      initQRCode();
+      resetInputs();
+      lucide.createIcons();
+    });
+
+    // --- Event Listeners ---
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        activeLogo = e.target.result;
+        els.logoPreviewImg.src = activeLogo;
+        els.logoPreviewBox.classList.remove('hidden');
+        els.logoPreviewBox.classList.add('flex');
+        els.logoOptionsGroup.classList.remove('hidden');
+        updateQRStyling();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLogo() {
+      activeLogo = null;
+      els.logoPreviewBox.classList.add('hidden');
+      els.logoPreviewBox.classList.remove('flex');
+      els.logoOptionsGroup.classList.add('hidden');
+      document.getElementById('logo-uploader').value = '';
+      updateQRStyling();
+    }
+
+    async function triggerQRDownload(btn) {
+      let filename = els.exportFilename.value.trim() || els.exportFilename.placeholder || 'qrcode';
+      const ext = document.querySelector('input[name="export-format"]:checked').value;
+      const size = ext === 'svg' ? 200 : parseInt(document.querySelector('input[name="export-size"]:checked').value);
+
+      try {
+        const exportQR = new QRCodeStyling(getQROptions(size, generatePayload(true)));
+        await exportQR.download({ name: filename, extension: ext });
+        setButtonFeedback(btn, true, 'Downloaded!');
+      } catch (err) {
+        console.error(err);
+        setButtonFeedback(btn, false, 'Failed');
+      }
+    }
+
+    async function copyQRToClipboard(btn) {
+      if (!navigator.clipboard || !window.ClipboardItem) return setButtonFeedback(btn, false);
+
+      const format = document.querySelector('input[name="export-format"]:checked').value;
+      if (format === 'svg') {
+        return setButtonFeedback(btn, false);
+      }
+
+      const size = parseInt(document.querySelector('input[name="export-size"]:checked').value);
+
+      const makeBlob = async () => {
+        const exportQR = new QRCodeStyling(getQROptions(size, generatePayload(true)));
+        const blob = await exportQR.getRawData('png');
+        if (!blob) throw new Error('Failed to generate image');
+        return blob;
+      };
+
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': makeBlob() })
+        ]);
+        setButtonFeedback(btn, true);
+      } catch (e) {
+        try {
+          const blob = await makeBlob();
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          setButtonFeedback(btn, true);
+        } catch (err) {
+          console.error(err);
+          setButtonFeedback(btn, false);
+        }
+      }
+    }
+
+
+    // --- Core Logic ---
+    function getQROptions(size, data) {
+      const corners = getCornerStyles(activeVisuals.dotStyle);
+      return {
+        width: size,
+        height: size,
+        data: data,
+        margin: Math.floor(size * (activeVisuals.padding * 0.02)),
+        qrOptions: { errorCorrectionLevel: activeVisuals.ecc },
+        dotsOptions: { type: activeVisuals.dotStyle, color: activeVisuals.dotColor },
+        backgroundOptions: { color: activeVisuals.bgTransparent ? 'transparent' : activeVisuals.bgColor },
+        cornersSquareOptions: { type: corners.square, color: activeVisuals.dotColor },
+        cornersDotOptions: { type: corners.dot, color: activeVisuals.dotColor },
+        image: activeLogo,
+        imageOptions: {
+          crossOrigin: "anonymous",
+          hideBackgroundDots: activeVisuals.logoClearBg,
+          imageSize: 0.25,
+          margin: 6
+        }
+      };
+    }
+
+    function initQRCode() {
+      qrCodeInstance = new QRCodeStyling(getQROptions(200, "https://example.com"));
+      qrCodeInstance.append(els.qrCanvasHolder);
+    }
+
+    function switchDataType(type) {
+      currentDataType = type;
+      const forms = ['url', 'wifi', 'vcard', 'email', 'sms', 'whatsapp'];
+      forms.forEach(t => {
+        const form = document.getElementById(`form-${t}`);
+        if (form) {
+          if (t === type) form.classList.remove('hidden');
+          else form.classList.add('hidden');
+        }
+      });
+      generatePayload();
+    }
+
+    function generatePayload(isInitial = false) {
+      let payload = '';
+      let fileHint = 'qr-code';
+
+      switch (currentDataType) {
+        case 'url':
+          const urlVal = document.getElementById('input-url').value.trim();
+          payload = urlVal || 'https://example.com';
+          if (urlVal) fileHint = 'qr-link';
+          break;
+        case 'wifi':
+          const ssid = document.getElementById('wifi-ssid').value.trim();
+          const pass = document.getElementById('wifi-pass').value.trim();
+          const sec = document.querySelector('input[name="wifi-sec"]:checked').value;
+          payload = sec === 'nopass' ? `WIFI:S:${escapeWifiString(ssid)};T:nopass;;` : `WIFI:S:${escapeWifiString(ssid)};T:${sec};P:${escapeWifiString(pass)};;`;
+          fileHint = `qr-wifi-${ssid || 'network'}`;
+          break;
+        case 'vcard':
+          const first = document.getElementById('card-first').value.trim();
+          const last = document.getElementById('card-last').value.trim();
+          const phone = document.getElementById('card-phone').value.trim();
+          const email = document.getElementById('card-email').value.trim();
+          const org = document.getElementById('card-org').value.trim();
+          const web = document.getElementById('card-web').value.trim();
+          const addr = document.getElementById('card-addr').value.trim();
+          payload = `BEGIN:VCARD\nVERSION:3.0\nN:${last};${first};;;\nFN:${first} ${last}\nORG:${org}\nTEL;TYPE=CELL:${phone}\nEMAIL:${email}\nURL:${web}\nADR:;;${addr};;;;\nEND:VCARD`;
+          fileHint = `qr-contact-${first || 'info'}`;
+          break;
+        case 'email':
+          const to = document.getElementById('email-to').value.trim();
+          const sub = document.getElementById('email-sub').value.trim();
+          const body = document.getElementById('email-body').value.trim();
+          payload = `mailto:${to}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+          fileHint = `qr-email-${to || 'mail'}`;
+          break;
+        case 'sms':
+          const smsPhone = document.getElementById('sms-phone').value.trim();
+          const smsMsg = document.getElementById('sms-msg').value.trim();
+          payload = `SMSTO:${smsPhone}:${smsMsg}`;
+          fileHint = `qr-sms-${smsPhone || 'phone'}`;
+          break;
+        case 'whatsapp':
+          const waPhone = document.getElementById('wa-phone').value.trim();
+          const waMsg = document.getElementById('wa-msg').value.trim();
+          payload = `https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`;
+          fileHint = `qr-wa-${waPhone || 'chat'}`;
+          break;
+      }
+
+      els.charCounter.textContent = `${payload.length} chars`;
+      els.exportFilename.placeholder = fileHint;
+
+      if (!isInitial) triggerQRUpdate(payload);
+      return payload;
+    }
+
+    let debounceTimer = null;
+    function onFormChange() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => generatePayload(), 150);
+    }
+
+
+    // --- UI Updates ---
+    function toggleAccordion(contentId, iconId) {
+      const content = document.getElementById(contentId);
+      const icon = document.getElementById(iconId);
+      const isHidden = content.classList.contains('hidden');
+      content.classList.toggle('hidden', !isHidden);
+      icon.style.transform = isHidden ? 'rotate(180deg)' : '';
+    }
+
+    function triggerQRUpdate(data) {
+      if (!qrCodeInstance) return;
+      els.qrLoading.classList.remove('opacity-0', 'pointer-events-none');
+
+      try {
+        qrCodeInstance.update(getQROptions(200, data)).then(() => {
+          setTimeout(() => els.qrLoading.classList.add('opacity-0', 'pointer-events-none'), 100);
+        }).catch(err => {
+          console.error(err);
+          els.qrLoading.classList.add('opacity-0', 'pointer-events-none');
+        });
+      } catch (e) {
+        console.error(e);
+        els.qrLoading.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function updateQRStyling() {
+      activeVisuals.dotStyle = document.querySelector('input[name="dot-style"]:checked').value;
+      activeVisuals.dotColor = document.getElementById('dot-solid').value;
+      activeVisuals.bgColor = document.getElementById('bg-solid').value;
+      activeVisuals.ecc = document.getElementById('qr-ecc').value;
+      activeVisuals.logoClearBg = document.getElementById('logo-clear-bg').checked;
+      activeVisuals.bgTransparent = document.getElementById('bg-transparent').checked;
+      activeVisuals.padding = parseInt(document.getElementById('qr-padding').value);
+
+      document.getElementById('padding-val').textContent = activeVisuals.padding;
+
+      const bgPicker = document.getElementById('bg-solid').closest('div');
+      if (activeVisuals.bgTransparent) {
+        bgPicker.classList.add('opacity-50', 'pointer-events-none');
+      } else {
+        bgPicker.classList.remove('opacity-50', 'pointer-events-none');
+      }
+
+      triggerQRUpdate(generatePayload(true));
+    }
+
+    function resetInputs() {
+      document.getElementById('input-url').value = '';
+      document.getElementById('wifi-ssid').value = '';
+      document.getElementById('wifi-pass').value = '';
+      document.querySelector('input[name="wifi-sec"][value="WPA"]').checked = true;
+      ['card-first', 'card-last', 'card-phone', 'card-email', 'card-org', 'card-web', 'card-addr',
+        'email-to', 'email-sub', 'email-body', 'sms-phone', 'sms-msg', 'wa-phone', 'wa-msg'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+      generatePayload();
+    }
+
+
+
+    function handleFormatChange(format) {
+      const sizeInputs = document.querySelectorAll('input[name="export-size"]');
+      const sizeLabels = document.querySelectorAll('.size-option-label');
+      if (format === 'svg') {
+        sizeInputs.forEach(input => input.disabled = true);
+        sizeLabels.forEach(label => {
+          label.classList.add('opacity-50', 'pointer-events-none');
+          label.classList.remove('cursor-pointer');
+        });
+      } else {
+        sizeInputs.forEach(input => input.disabled = false);
+        sizeLabels.forEach(label => {
+          label.classList.remove('opacity-50', 'pointer-events-none');
+          label.classList.add('cursor-pointer');
+        });
+      }
+    }
+
+    function setButtonFeedback(btn, success, overrideText) {
+      const originalHTML = btn.innerHTML;
+      const isPrimary = btn.classList.contains('bg-brand-600');
+
+      const successClasses = isPrimary
+        ? ['bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20']
+        : ['bg-emerald-100', 'text-emerald-600', 'hover:bg-emerald-200', 'hover:text-emerald-700'];
+      const errorClasses = isPrimary
+        ? ['bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20']
+        : ['bg-red-100', 'text-red-600', 'hover:bg-red-200', 'hover:text-red-700'];
+
+      const originalClasses = isPrimary
+        ? ['bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20']
+        : ['bg-zinc-100', 'text-zinc-600', 'hover:bg-zinc-200', 'hover:text-zinc-900'];
+
+      const targetClasses = success ? successClasses : errorClasses;
+
+      btn.classList.remove(...originalClasses);
+      btn.classList.add(...targetClasses);
+
+      const iconName = success ? 'check' : 'alert-triangle';
+      const iconClass = isPrimary ? 'w-4 h-4' : 'w-5 h-5';
+
+      if (overrideText && isPrimary) {
+        btn.innerHTML = `<i data-lucide="${iconName}" class="${iconClass}"></i><span>${overrideText}</span>`;
+      } else {
+        btn.innerHTML = `<i data-lucide="${iconName}" class="${iconClass}"></i>`;
+      }
+      lucide.createIcons({ root: btn });
+
+      setTimeout(() => {
+        btn.classList.remove(...targetClasses);
+        btn.classList.add(...originalClasses);
+        btn.innerHTML = originalHTML;
+      }, 2000);
+    }
+
+
+    // --- Utilities ---
+    function getCornerStyles(dotStyle) {
+      if (dotStyle === 'dots') return { square: 'dot', dot: 'dot' };
+      if (dotStyle === 'square') return { square: 'square', dot: 'square' };
+      return { square: 'extra-rounded', dot: 'dot' };
+    }
+
+    function setupMobileHeight() {
+      const app = document.getElementById('app-wrapper');
+      if (!app) return;
+
+      function setHeight() {
+        if (window.innerWidth >= 640) {
+          app.style.height = '';
+          return;
+        }
+        if (
+          document.activeElement &&
+          (document.activeElement.tagName === 'INPUT' ||
+            document.activeElement.tagName === 'TEXTAREA')
+        ) {
+          return;
+        }
+        app.style.height = `${window.innerHeight}px`;
+      }
+
+      window.addEventListener('resize', setHeight);
+      setHeight();
+    }
+
+    function escapeWifiString(str) {
+      return str.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/"/g, '\\"');
+    }
+
+  </script>
+</body>
+
+</html>
