@@ -42,15 +42,6 @@
                 700: '#1d4ed8',
               },
             },
-            animation: {
-              'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            },
-            keyframes: {
-              slideUp: {
-                '0%': { transform: 'translateY(20px)', opacity: '0' },
-                '100%': { transform: 'translateY(0)', opacity: '1' },
-              },
-            },
             transitionProperty: {
               width: 'width',
               spacing: 'margin, padding',
@@ -105,7 +96,7 @@
     <!-- Main App Container -->
     <div
       id="app-wrapper"
-      class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border animate-slide-up"
+      class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border"
     >
       <!-- Header -->
       <header
@@ -865,65 +856,96 @@
 
     <!-- Application Logic -->
     <script>
+      // --- Constants & Config ---
+      // (None)
+
+      // --- State Management ---
+      // (None)
+
+      // --- DOM Elements ---
+      const els = {
+        appWrapper: document.getElementById('app-wrapper'),
+        profileForm: document.getElementById('profile-form'),
+        profileName: document.getElementById('profileName'),
+        profileDescription: document.getElementById('profileDescription'),
+        profileIdentifier: document.getElementById('profileIdentifier'),
+        organizationName: document.getElementById('organizationName'),
+        payloadRemovalDisallowed: document.getElementById('payloadRemovalDisallowed'),
+        dnsName: document.getElementById('dnsName'),
+        dnsDescription: document.getElementById('dnsDescription'),
+        dnsIdentifier: document.getElementById('dnsIdentifier'),
+        serverURL: document.getElementById('serverURL'),
+        serverAddresses: document.getElementById('serverAddresses'),
+        allowFailover: document.getElementById('allowFailover'),
+        prohibitDisablement: document.getElementById('prohibitDisablement'),
+        ifaceWifi: document.getElementById('ifaceWifi'),
+        ifaceCellular: document.getElementById('ifaceCellular'),
+        ifaceEthernet: document.getElementById('ifaceEthernet'),
+        excludedDomains: document.getElementById('excludedDomains'),
+        excludedWifi: document.getElementById('excludedWifi'),
+        generateBtn: document.getElementById('generateBtn'),
+        btnIcon: document.getElementById('btnIcon'),
+        btnText: document.getElementById('btnText'),
+        urlLabel: document.getElementById('urlLabel'),
+        urlHelpText: document.getElementById('urlHelpText'),
+        protocolRadios: document.querySelectorAll('input[name="dnsProtocol"]')
+      };
+
+      // --- Initialization ---
       document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
         setupMobileHeight();
+        setupEventListeners();
+        
+        // Initial UI State
+        const activeProtocol = document.querySelector('input[name="dnsProtocol"]:checked');
+        if(activeProtocol) updateProtocolUI(activeProtocol.value);
       });
 
-      function setupMobileHeight() {
-        const app = document.getElementById('app-wrapper');
-        if (!app) return;
+      // --- Event Listeners ---
+      function setupEventListeners() {
+        els.protocolRadios.forEach((radio) => {
+          radio.addEventListener('change', (e) => {
+            updateProtocolUI(e.target.value);
+          });
+        });
 
-        function setHeight() {
-          if (window.innerWidth >= 640) {
-            app.style.height = '';
-            return;
-          }
-          if (
-            document.activeElement &&
-            (document.activeElement.tagName === 'INPUT' ||
-              document.activeElement.tagName === 'TEXTAREA')
-          ) {
-            return;
-          }
-          app.style.height = `${window.innerHeight}px`;
-        }
-
-        window.addEventListener('resize', setHeight);
-        setHeight();
-      }
-
-      function toggleAccordion(contentId, iconId) {
-        const content = document.getElementById(contentId);
-        const icon = document.getElementById(iconId);
-        const isHidden = content.classList.contains('hidden');
-        content.classList.toggle('hidden', !isHidden);
-        icon.style.transform = isHidden ? 'rotate(180deg)' : '';
-      }
-
-      function generateUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-          const r = (Math.random() * 16) | 0,
-            v = c === 'x' ? r : (r & 0x3) | 0x8;
-          return v.toString(16).toUpperCase();
+        els.profileForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          handleGenerate();
         });
       }
 
-      function escapeXml(unsafe) {
-        return unsafe.replace(/[<>&'"]/g, function (c) {
-          switch (c) {
-            case '<':
-              return '&lt;';
-            case '>':
-              return '&gt;';
-            case '&':
-              return '&amp;';
-            case "'":
-              return '&apos;';
-            case '"':
-              return '&quot;';
-          }
+      // --- Core Logic ---
+      function handleGenerate() {
+        const payloadScope = document.querySelector('input[name="payloadScope"]:checked').value;
+        const dnsProtocol = document.querySelector('input[name="dnsProtocol"]:checked').value;
+
+        const configXml = generateMobileConfig({
+          profileName: els.profileName.value.trim(),
+          profileDescription: els.profileDescription.value.trim(),
+          profileIdentifier: els.profileIdentifier.value.trim(),
+          organizationName: els.organizationName.value.trim(),
+          payloadScope,
+          payloadRemovalDisallowed: els.payloadRemovalDisallowed.checked,
+          dnsName: els.dnsName.value.trim(),
+          dnsDescription: els.dnsDescription.value.trim(),
+          dnsIdentifier: els.dnsIdentifier.value.trim(),
+          dnsProtocol,
+          serverURL: els.serverURL.value.trim(),
+          serverAddresses: els.serverAddresses.value,
+          allowFailover: els.allowFailover.checked,
+          prohibitDisablement: els.prohibitDisablement.checked,
+          ifaceWifi: els.ifaceWifi.checked,
+          ifaceCellular: els.ifaceCellular.checked,
+          ifaceEthernet: els.ifaceEthernet.checked,
+          excludedDomains: els.excludedDomains.value,
+          excludedWifi: els.excludedWifi.value,
         });
+
+        const filename = els.profileName.value.trim().replace(/\s+/g, '_').toLowerCase() + '.mobileconfig';
+        downloadConfig(filename, configXml);
+        showSuccessState();
       }
 
       function generateMobileConfig(data) {
@@ -1116,113 +1138,102 @@
         document.body.removeChild(a);
       }
 
-      const protocolRadios = document.querySelectorAll('input[name="dnsProtocol"]');
-      const urlLabel = document.getElementById('urlLabel');
-      const serverURL = document.getElementById('serverURL');
-      const urlHelpText = document.getElementById('urlHelpText');
-
+      // --- UI Updates ---
       function updateProtocolUI(protocol) {
         if (protocol === 'HTTPS') {
-          urlLabel.textContent = 'Server URL (DoH)';
-          serverURL.placeholder = 'https://cloudflare-dns.com/dns-query';
-          urlHelpText.textContent = 'The HTTPS endpoint of your DNS provider.';
+          els.urlLabel.textContent = 'Server URL (DoH)';
+          els.serverURL.placeholder = 'https://cloudflare-dns.com/dns-query';
+          els.urlHelpText.textContent = 'The HTTPS endpoint of your DNS provider.';
         } else {
-          urlLabel.textContent = 'Server Name (DoT)';
-          serverURL.placeholder = '1dot1dot1dot1.cloudflare-dns.com';
-          urlHelpText.textContent = 'The TLS hostname of your DNS provider.';
+          els.urlLabel.textContent = 'Server Name (DoT)';
+          els.serverURL.placeholder = '1dot1dot1dot1.cloudflare-dns.com';
+          els.urlHelpText.textContent = 'The TLS hostname of your DNS provider.';
         }
       }
 
-      protocolRadios.forEach((radio) => {
-        radio.addEventListener('change', (e) => {
-          updateProtocolUI(e.target.value);
-        });
-      });
+      function toggleAccordion(contentId, iconId) {
+        const content = document.getElementById(contentId);
+        const icon = document.getElementById(iconId);
+        const isHidden = content.classList.contains('hidden');
+        content.classList.toggle('hidden', !isHidden);
+        icon.style.transform = isHidden ? 'rotate(180deg)' : '';
+      }
 
-      updateProtocolUI(document.querySelector('input[name="dnsProtocol"]:checked').value);
+      function showSuccessState() {
+        const originalIconName = els.btnIcon.getAttribute('data-lucide');
+        const originalText = els.btnText.textContent;
 
-      document.getElementById('profile-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const profileName = document.getElementById('profileName').value.trim();
-        const profileDescription = document.getElementById('profileDescription').value.trim();
-        const profileIdentifier = document.getElementById('profileIdentifier').value.trim();
-        const organizationName = document.getElementById('organizationName').value.trim();
-        const payloadScope = document.querySelector('input[name="payloadScope"]:checked').value;
-        const payloadRemovalDisallowed = document.getElementById(
-          'payloadRemovalDisallowed',
-        ).checked;
-        const dnsName = document.getElementById('dnsName').value.trim();
-        const dnsDescription = document.getElementById('dnsDescription').value.trim();
-        const dnsIdentifier = document.getElementById('dnsIdentifier').value.trim();
-        const dnsProtocol = document.querySelector('input[name="dnsProtocol"]:checked').value;
-        const serverURL = document.getElementById('serverURL').value.trim();
-        const serverAddresses = document.getElementById('serverAddresses').value;
-        const allowFailover = document.getElementById('allowFailover').checked;
-        const prohibitDisablement = document.getElementById('prohibitDisablement').checked;
-        const ifaceWifi = document.getElementById('ifaceWifi').checked;
-        const ifaceCellular = document.getElementById('ifaceCellular').checked;
-        const ifaceEthernet = document.getElementById('ifaceEthernet').checked;
-        const excludedDomains = document.getElementById('excludedDomains').value;
-        const excludedWifi = document.getElementById('excludedWifi').value;
-
-        const configXml = generateMobileConfig({
-          profileName,
-          profileDescription,
-          profileIdentifier,
-          organizationName,
-          payloadScope,
-          payloadRemovalDisallowed,
-          dnsName,
-          dnsDescription,
-          dnsIdentifier,
-          dnsProtocol,
-          serverURL,
-          serverAddresses,
-          allowFailover,
-          prohibitDisablement,
-          ifaceWifi,
-          ifaceCellular,
-          ifaceEthernet,
-          excludedDomains,
-          excludedWifi,
-        });
-
-        const filename = profileName.replace(/\s+/g, '_').toLowerCase() + '.mobileconfig';
-        downloadConfig(filename, configXml);
-
-        const btn = document.getElementById('generateBtn');
-        const btnIcon = document.getElementById('btnIcon');
-        const btnText = document.getElementById('btnText');
-
-        const originalIconName = btnIcon.getAttribute('data-lucide');
-        const originalText = btnText.textContent;
-
-        btn.classList.remove(
+        els.generateBtn.classList.remove(
           'bg-brand-600',
           'hover:bg-brand-700',
           'active:bg-brand-800',
           'shadow-brand-500/20',
         );
-        btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20');
+        els.generateBtn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20');
 
-        btnIcon.setAttribute('data-lucide', 'check');
-        btnText.textContent = 'Downloaded!';
+        els.btnIcon.setAttribute('data-lucide', 'check');
+        els.btnText.textContent = 'Downloaded!';
         lucide.createIcons();
 
         setTimeout(() => {
-          btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20');
-          btn.classList.add(
+          els.generateBtn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20');
+          els.generateBtn.classList.add(
             'bg-brand-600',
             'hover:bg-brand-700',
             'active:bg-brand-800',
             'shadow-brand-500/20',
           );
-          btnIcon.setAttribute('data-lucide', originalIconName);
-          btnText.textContent = originalText;
+          els.btnIcon.setAttribute('data-lucide', originalIconName);
+          els.btnText.textContent = originalText;
           lucide.createIcons();
         }, 2500);
-      });
+      }
+
+      // --- Utilities ---
+      function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+          const r = (Math.random() * 16) | 0,
+            v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16).toUpperCase();
+        });
+      }
+
+      function escapeXml(unsafe) {
+        return unsafe.replace(/[<>&'"]/g, function (c) {
+          switch (c) {
+            case '<':
+              return '&lt;';
+            case '>':
+              return '&gt;';
+            case '&':
+              return '&amp;';
+            case "'":
+              return '&apos;';
+            case '"':
+              return '&quot;';
+          }
+        });
+      }
+
+      function setupMobileHeight() {
+        if (!els.appWrapper) return;
+        function setHeight() {
+          if (window.innerWidth >= 640) {
+            els.appWrapper.style.height = '';
+            return;
+          }
+          if (
+            document.activeElement &&
+            (document.activeElement.tagName === 'INPUT' ||
+              document.activeElement.tagName === 'TEXTAREA')
+          ) {
+            return;
+          }
+          els.appWrapper.style.height = `${window.innerHeight}px`;
+        }
+        window.addEventListener('resize', setHeight);
+        setHeight();
+      }
     </script>
   </body>
 </html>
