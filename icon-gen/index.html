@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Convert any image into a compliant macOS icon pack." />
+  <title>macOS Icon Generator</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Fonts: Geist, Geist Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Geist', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Custom scrollbar for desktop */
+    @media (min-width: 640px) {
+      html {
+        scrollbar-width: thin;
+        scrollbar-color: #d4d4d8 transparent;
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #d4d4d8;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1aa;
+      }
+    }
+
+    /* Additional specific styles */
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+      border: 1px solid #e4e4e7;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body class="bg-[#f5f5f5] text-zinc-800 h-[100dvh] flex justify-center overflow-hidden">
+  <!-- Main App Container -->
+  <div id="app-wrapper"
+    class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border">
+    <!-- Header -->
+    <header id="appHeader"
+      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex flex-col gap-2 flex-shrink-0 transition-shadow duration-200">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div
+          class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
+          <i data-lucide="monitor" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-2xl tracking-tight text-zinc-900 leading-tight">macOS Icon Generator</h1>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sticky Header Group (Icon Preview + Separator) -->
+    <div id="stickyHeader" class="flex-shrink-0 z-10 relative transition-shadow duration-300">
+      <div class="bg-zinc-50/50 px-4 sm:px-6 py-4 relative flex justify-center">
+        <div id="dropZone"
+          class="bg-white border border-zinc-200 hover:border-brand-500 hover:bg-brand-50 cursor-pointer rounded-2xl p-4 shadow-sm flex flex-col items-center relative w-fit mx-auto transition-all duration-200 group">
+          <div class="relative flex items-center justify-center w-[200px] h-[200px]">
+            <canvas id="previewCanvas" class="w-full h-full object-contain relative z-10 pointer-events-none"></canvas>
+
+            <!-- Hover overlay to indicate it's clickable to change image -->
+            <div id="hoverOverlay"
+              class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-[2rem] flex items-center justify-center flex-col text-brand-600 hidden pointer-events-none">
+              <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
+              <span class="text-[10px] uppercase font-bold tracking-wider">Change Image</span>
+            </div>
+
+            <!-- Placeholder for when no image is loaded -->
+            <div id="previewPlaceholder"
+              class="absolute inset-0 flex items-center justify-center flex-col text-zinc-400 group-hover:text-brand-600 rounded-[2rem] transition-all pointer-events-none">
+              <i data-lucide="upload-cloud" class="w-8 h-8 mb-2"></i>
+              <span class="text-[10px] uppercase font-bold tracking-wider">Upload Image</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-zinc-50/50 relative">
+        <hr class="border-zinc-200" />
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth p-4 sm:p-6" id="mainScroll">
+      <input type="file" id="fileInput" class="hidden"
+        accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg">
+
+      <div class="space-y-6 sm:space-y-8">
+
+        <!-- Configuration Section -->
+        <div>
+          <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+              <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
+            </div>
+            <h2 class="font-bold text-zinc-900 tracking-tight">Layout Settings</h2>
+          </div>
+
+          <div class="bg-white border border-zinc-200 rounded-xl shadow-sm divide-y divide-zinc-100">
+            <!-- Image Fitting -->
+            <div class="flex justify-between items-center p-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-zinc-900">Image Fitting</span>
+                <span class="text-xs text-zinc-500">Adjusts how the image is adapted</span>
+              </div>
+              <select id="fittingSelect"
+                class="bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block px-3 py-2 outline-none cursor-pointer transition-all">
+                <option value="cover" selected>Fill</option>
+                <option value="contain">Fit</option>
+                <option value="center">Center</option>
+              </select>
+            </div>
+
+            <!-- Enable Squircle -->
+            <div class="flex justify-between items-center p-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-zinc-900">Enable Squircle</span>
+                <span class="text-xs text-zinc-500">Applies shape styling to the generated icon</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="squircleToggle" checked class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500">
+                </div>
+              </label>
+            </div>
+
+            <!-- Background Toggle -->
+            <div class="flex justify-between items-center p-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-zinc-900">Enable Background</span>
+                <span class="text-xs text-zinc-500">Adds background color to the generated icon</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="bgToggle" class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
+                </div>
+              </label>
+            </div>
+
+            <!-- Custom Background Color -->
+            <div class="flex justify-between items-center p-4" id="colorRow" style="display: none;">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-zinc-900">Background Color</span>
+                <span class="text-xs text-zinc-500">Select the color for the background</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="color" id="tileColorInput" value="#ffffff"
+                  class="w-7 h-7 bg-transparent border-none cursor-pointer appearance-none disabled:opacity-50">
+              </div>
+            </div>
+
+            <!-- Padding Toggle -->
+            <div class="flex justify-between items-center p-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-zinc-900">Enable Padding</span>
+                <span class="text-xs text-zinc-500">Adds extra margins (following Apple guidelines)</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="paddingToggle" class="sr-only peer" checked>
+                <div
+                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
+                </div>
+              </label>
+            </div>
+
+            <!-- Shadow Toggle -->
+            <div class="flex justify-between items-center p-4">
+              <div class="flex flex-col gap-1">
+                <span class="text-sm font-medium text-zinc-900">Enable Shadow</span>
+                <span class="text-xs text-zinc-500">Adds subtle shadow (following Apple guidelines)</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="shadowToggle" class="sr-only peer" checked>
+                <div
+                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Sizes Section -->
+        <div>
+          <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+            </div>
+            <h2 class="font-bold text-zinc-900 tracking-tight">Export Sizes</h2>
+          </div>
+
+          <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 sm:p-6">
+            <p class="text-xs text-zinc-500 mb-4 sm:mb-6">Select the icon sizes to include in the generated .icns file.
+              Sizes larger than your original image are automatically disabled.</p>
+            <div class="flex flex-wrap gap-2 sm:gap-3" id="sizeCheckboxes">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="selectAllSizes" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 transition-all">
+                <span class="text-sm font-medium text-zinc-700">All</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="16" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">16px</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="32" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">32px</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="64" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">64px</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="128" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">128px</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="256" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">256px</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="512" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">512px</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" value="1024" checked
+                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
+                <span
+                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">1024px</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Action Bar -->
+    <div
+      class="bg-white border-t border-zinc-200 p-4 sm:px-6 sm:py-4 flex gap-2 sm:gap-3 items-center justify-between flex-shrink-0 z-20">
+      <button id="convertBtn" disabled
+        class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:cursor-not-allowed disabled:shadow-none text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 group">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span>Generate & Download</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Script Architecture -->
+  <script>
+    // --- Constants & Config ---
+    const CONFIG = {
+      iconTypes: [
+        { typeId: 'ic04', size: 16 },    // 16x16
+        { typeId: 'ic11', size: 32 },    // 16x16@2x
+        { typeId: 'ic05', size: 32 },    // 32x32
+        { typeId: 'ic12', size: 64 },    // 32x32@2x
+        { typeId: 'ic07', size: 128 },   // 128x128
+        { typeId: 'ic13', size: 256 },   // 128x128@2x
+        { typeId: 'ic08', size: 256 },   // 256x256
+        { typeId: 'ic14', size: 512 },   // 256x256@2x
+        { typeId: 'ic09', size: 512 },   // 512x512
+        { typeId: 'ic10', size: 1024 }   // 512x512@2x
+      ],
+      squircleN: 2.4,
+      squircleCornerRatio: 0.261
+    };
+
+    // --- State Management ---
+    let state = {
+      sourceImage: null,
+      currentObjectUrl: null,
+      originalFilename: 'icon.png',
+      maxSourceSize: Infinity,
+      manualBgEnabled: false
+    };
+
+    // --- DOM Elements ---
+    const els = {
+      appWrapper: document.getElementById('app-wrapper'),
+      mainScroll: document.getElementById('mainScroll'),
+      appHeader: document.getElementById('appHeader'),
+
+      fileInput: document.getElementById('fileInput'),
+      dropZone: document.getElementById('dropZone'),
+      convertBtn: document.getElementById('convertBtn'),
+
+      paddingToggle: document.getElementById('paddingToggle'),
+      shadowToggle: document.getElementById('shadowToggle'),
+      fittingSelect: document.getElementById('fittingSelect'),
+      squircleToggle: document.getElementById('squircleToggle'),
+      bgToggle: document.getElementById('bgToggle'),
+      colorRow: document.getElementById('colorRow'),
+      tileColorInput: document.getElementById('tileColorInput'),
+
+      stickyHeader: document.getElementById('stickyHeader'),
+      previewCanvas: document.getElementById('previewCanvas'),
+      previewPlaceholder: document.getElementById('previewPlaceholder'),
+      hoverOverlay: document.getElementById('hoverOverlay'),
+      selectAllSizes: document.getElementById('selectAllSizes')
+    };
+
+    // --- Initialization ---
+    function init() {
+      lucide.createIcons();
+      setupMobileHeight();
+      bindEvents();
+    }
+
+    // --- Event Listeners ---
+    function bindEvents() {
+      window.addEventListener('resize', setupMobileHeight);
+
+      // Header shadow on scroll
+      els.mainScroll.addEventListener('scroll', () => {
+        if (els.mainScroll.scrollTop > 10) {
+          els.stickyHeader.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
+        } else {
+          els.stickyHeader.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
+        }
+      });
+
+      // Trigger file dialog
+      els.dropZone.addEventListener('click', () => els.fileInput.click());
+
+      // Prevent defaults on drag/drop events globally to avoid page navigation
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        els.dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+
+      // Border highlights on drag hover
+      ['dragenter', 'dragover'].forEach(eventName => {
+        els.dropZone.addEventListener(eventName, () => {
+          els.dropZone.classList.add('border-brand-500', 'bg-brand-50');
+          els.dropZone.classList.remove('border-zinc-200');
+        }, false);
+      });
+      ['dragleave', 'drop'].forEach(eventName => {
+        els.dropZone.addEventListener(eventName, () => {
+          els.dropZone.classList.remove('border-brand-500', 'bg-brand-50');
+          els.dropZone.classList.add('border-zinc-200');
+        }, false);
+      });
+
+      // Handle drops
+      els.dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length > 0) {
+          handleFile(dt.files[0]);
+        }
+      });
+
+      // Handle file input changes
+      els.fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleFile(e.target.files[0]);
+        }
+      });
+
+      // Listeners for live preview updates
+      [els.paddingToggle, els.shadowToggle, els.squircleToggle].forEach(el => {
+        el.addEventListener('change', updateLivePreview);
+      });
+
+      els.fittingSelect.addEventListener('change', () => {
+        if (els.fittingSelect.value === 'contain' || els.fittingSelect.value === 'center') {
+          els.bgToggle.checked = true;
+          els.bgToggle.disabled = true;
+          els.colorRow.style.display = 'flex';
+        } else {
+          els.bgToggle.disabled = false;
+          els.bgToggle.checked = state.manualBgEnabled;
+          els.colorRow.style.display = els.bgToggle.checked ? 'flex' : 'none';
+        }
+        updateLivePreview();
+      });
+
+      // Background toggle shows color row
+      els.bgToggle.addEventListener('change', () => {
+        state.manualBgEnabled = els.bgToggle.checked;
+        els.colorRow.style.display = els.bgToggle.checked ? 'flex' : 'none';
+        updateLivePreview();
+      });
+
+      els.tileColorInput.addEventListener('input', (e) => {
+        updateLivePreview();
+      });
+
+      // All Sizes Toggle
+      els.selectAllSizes.addEventListener('change', updateCheckboxes);
+
+      // Convert Action
+      els.convertBtn.addEventListener('click', generateAndDownload);
+
+      updateCheckboxes();
+    }
+
+    function updateCheckboxes() {
+      const isAllChecked = els.selectAllSizes.checked;
+      const maxSourceSize = state.maxSourceSize || Infinity;
+
+      document.querySelectorAll('.size-cb').forEach(cb => {
+        const size = parseInt(cb.value);
+        const isValid = size <= maxSourceSize;
+
+        if (!isValid) {
+          cb.checked = false;
+          cb.disabled = true;
+        } else {
+          if (isAllChecked) {
+            cb.checked = true;
+            cb.disabled = true;
+          } else {
+            cb.disabled = false;
+          }
+        }
+      });
+    }
+
+    // --- Core Logic ---
+    // Image Processing
+    function handleFile(file) {
+      if (!isValidImageFile(file)) {
+        alert('Error: Please select a valid image file (PNG, JPG, WebP, SVG).');
+        return;
+      }
+
+      if (state.currentObjectUrl) {
+        URL.revokeObjectURL(state.currentObjectUrl);
+      }
+      state.currentObjectUrl = URL.createObjectURL(file);
+
+      const img = new Image();
+      img.onload = () => {
+        state.sourceImage = img;
+        state.originalFilename = file.name;
+
+        state.maxSourceSize = Math.max(img.width, img.height);
+        updateCheckboxes();
+
+        els.hoverOverlay.classList.remove('hidden');
+        els.hoverOverlay.classList.add('flex');
+
+        els.previewPlaceholder.classList.add('hidden');
+        els.previewPlaceholder.classList.remove('flex');
+
+        els.convertBtn.disabled = false;
+
+        updateLivePreview();
+      };
+      img.onerror = () => {
+        alert('Error loading image file.');
+      };
+      img.src = state.currentObjectUrl;
+    }
+
+    function updateLivePreview() {
+      if (!state.sourceImage) return;
+
+      els.previewCanvas.width = 256;
+      els.previewCanvas.height = 256;
+      const ctx = els.previewCanvas.getContext('2d');
+      ctx.clearRect(0, 0, 256, 256);
+
+      const usePadding = els.paddingToggle.checked;
+      const useShadow = els.shadowToggle.checked;
+      const fittingMode = els.fittingSelect.value;
+      const enableSquircle = els.squircleToggle.checked;
+      const enableBg = els.bgToggle.checked;
+      const squircleBgColor = els.tileColorInput.value;
+
+      const { scaledSize, padding } = getLayoutDimensions(256, usePadding);
+      const drawWidth = scaledSize;
+      const drawHeight = scaledSize;
+      const dx = padding;
+      const dy = padding;
+
+      ctx.save();
+
+      if (enableSquircle) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 256;
+        tempCanvas.height = 256;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        if (enableBg) {
+          tempCtx.fillStyle = squircleBgColor;
+          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+          tempCtx.fill();
+        }
+
+        pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+        tempCtx.clip();
+
+        if (fittingMode === 'cover' || fittingMode === 'contain') {
+          drawImageFormatted(tempCtx, state.sourceImage, dx, dy, drawWidth, drawHeight, fittingMode);
+        } else if (fittingMode === 'center') {
+          const innerPadding = drawWidth * 0.15;
+          const innerWidth = drawWidth - (innerPadding * 2);
+          const innerHeight = drawHeight - (innerPadding * 2);
+          drawImageFormatted(tempCtx, state.sourceImage, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+        }
+
+        if (useShadow) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 256 * 0.013;
+          ctx.shadowOffsetY = 256 * 0.0095;
+          ctx.shadowOffsetX = 0;
+        }
+        ctx.drawImage(tempCanvas, 0, 0);
+      } else {
+        if (useShadow) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 256 * 0.013;
+          ctx.shadowOffsetY = 256 * 0.0095;
+          ctx.shadowOffsetX = 0;
+        }
+        if (enableBg) {
+          ctx.fillStyle = squircleBgColor;
+          ctx.fillRect(dx, dy, drawWidth, drawHeight);
+          ctx.shadowColor = 'transparent';
+        }
+
+        if (fittingMode === 'cover' || fittingMode === 'contain') {
+          drawImageFormatted(ctx, state.sourceImage, dx, dy, drawWidth, drawHeight, fittingMode);
+        } else if (fittingMode === 'center') {
+          const innerPadding = drawWidth * 0.15;
+          const innerWidth = drawWidth - (innerPadding * 2);
+          const innerHeight = drawHeight - (innerPadding * 2);
+          drawImageFormatted(ctx, state.sourceImage, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+        }
+      }
+      ctx.restore();
+    }
+
+    function setButtonFeedback(btn, success, overrideText) {
+      const originalHTML = btn.innerHTML;
+      const successClasses = ['bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20'];
+      const errorClasses = ['bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20'];
+      const originalClasses = ['bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20'];
+      const targetClasses = success ? successClasses : errorClasses;
+
+      btn.classList.remove(...originalClasses);
+      btn.classList.add(...targetClasses);
+
+      const iconName = success ? 'check' : 'alert-triangle';
+      if (overrideText) {
+        btn.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i><span>${overrideText}</span>`;
+      } else {
+        btn.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
+      }
+      lucide.createIcons({ root: btn });
+
+      setTimeout(() => {
+        btn.classList.remove(...targetClasses);
+        btn.classList.add(...originalClasses);
+        btn.innerHTML = originalHTML;
+      }, 2000);
+    }
+
+    async function generateAndDownload() {
+      if (!state.sourceImage) return;
+
+      const btn = els.convertBtn;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Generating...</span>`;
+      lucide.createIcons({ root: btn });
+      btn.disabled = true;
+
+      try {
+        // Add a small delay to allow UI to update to loading state
+        await new Promise(r => setTimeout(r, 50));
+
+        const iconEntries = [];
+        const usePadding = els.paddingToggle.checked;
+        const useShadow = els.shadowToggle.checked;
+        const fittingMode = els.fittingSelect.value;
+        const enableSquircle = els.squircleToggle.checked;
+        const enableBg = els.bgToggle.checked;
+        const squircleBgColor = els.tileColorInput.value;
+
+        const selectedSizes = Array.from(document.querySelectorAll('.size-cb:checked')).map(cb => parseInt(cb.value));
+        if (selectedSizes.length === 0) {
+          alert('Please select at least one size to export.');
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          return;
+        }
+
+        const targetsToBuild = CONFIG.iconTypes.filter(t => selectedSizes.includes(t.size));
+
+        for (const target of targetsToBuild) {
+          const pngBlob = await processImageToBlob(state.sourceImage, target.size, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor);
+          const arrayBuffer = await pngBlob.arrayBuffer();
+          iconEntries.push({ typeId: target.typeId, bytes: arrayBuffer });
+        }
+
+        const icnsBlob = await buildIcnsBinary(iconEntries);
+        const downloadUrl = URL.createObjectURL(icnsBlob);
+        const originalName = state.originalFilename;
+        const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || 'icon';
+
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `${baseName}.icns`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
+
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        setButtonFeedback(btn, true, 'Downloaded!');
+      } catch (err) {
+        console.error(err);
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        setButtonFeedback(btn, false, 'Failed');
+      }
+    }
+
+    // --- UI Updates ---
+    // (No UI Updates defined)
+
+    // --- Utilities ---
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function isValidImageFile(file) {
+      if (!file) return false;
+      if (file.type && file.type.startsWith('image/')) return true;
+
+      const fileName = file.name.toLowerCase();
+      return fileName.endsWith('.png') ||
+        fileName.endsWith('.jpg') ||
+        fileName.endsWith('.jpeg') ||
+        fileName.endsWith('.webp') ||
+        fileName.endsWith('.svg');
+    }
+
+    function pathSquircle(ctx, x, y, width, height) {
+      const n = CONFIG.squircleN;
+      const fp = Math.round(Math.min(width, height) * CONFIG.squircleCornerRatio);
+      const steps = 64;
+
+      function cornerInset(d) {
+        if (d >= fp) return 0;
+        if (d <= 0) return fp;
+        return fp - fp * Math.pow(1 - Math.pow((fp - d) / fp, n), 1 / n);
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(x + fp, y);
+      ctx.lineTo(x + width - fp, y);
+
+      for (let i = 1; i <= steps; i++) {
+        const dy = (i / steps) * fp;
+        const dx = cornerInset(dy);
+        ctx.lineTo(x + width - dx, y + dy);
+      }
+
+      ctx.lineTo(x + width, y + height - fp);
+
+      for (let i = 1; i <= steps; i++) {
+        const db = fp - (i / steps) * fp;
+        const dx = cornerInset(db);
+        ctx.lineTo(x + width - dx, y + height - db);
+      }
+
+      ctx.lineTo(x + fp, y + height);
+
+      for (let i = 1; i <= steps; i++) {
+        const db = (i / steps) * fp;
+        const dx = cornerInset(db);
+        ctx.lineTo(x + dx, y + height - db);
+      }
+
+      ctx.lineTo(x, y + fp);
+
+      for (let i = 1; i <= steps; i++) {
+        const dy = fp - (i / steps) * fp;
+        const dx = cornerInset(dy);
+        ctx.lineTo(x + dx, y + dy);
+      }
+
+      ctx.closePath();
+    }
+
+    function drawImageFormatted(ctx, img, dx, dy, dWidth, dHeight, fittingMode) {
+      if (fittingMode === 'cover') {
+        const imgRatio = img.width / img.height;
+        const destRatio = dWidth / dHeight;
+        let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+
+        if (imgRatio > destRatio) {
+          sWidth = img.height * destRatio;
+          sx = (img.width - sWidth) / 2;
+        } else if (imgRatio < destRatio) {
+          sHeight = img.width / destRatio;
+          sy = (img.height - sHeight) / 2;
+        }
+        ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+      } else {
+        let drawWidth = dWidth, drawHeight = dHeight, posX = dx, posY = dy;
+        if (img.width > img.height) {
+          drawHeight = dHeight * (img.height / img.width);
+          posY = dy + (dHeight - drawHeight) / 2;
+        } else if (img.height > img.width) {
+          drawWidth = dWidth * (img.width / img.height);
+          posX = dx + (dWidth - drawWidth) / 2;
+        }
+        ctx.drawImage(img, posX, posY, drawWidth, drawHeight);
+      }
+    }
+
+    function getLayoutDimensions(targetSize, usePadding) {
+      let scaledSize = targetSize;
+      if (usePadding) {
+        switch (targetSize) {
+          case 1024: scaledSize = 824; break;
+          case 512: scaledSize = 412; break;
+          case 256: scaledSize = 206; break;
+          case 128: scaledSize = 103; break;
+          case 64: scaledSize = 52; break;
+          case 32: scaledSize = 28; break;
+          case 16: scaledSize = 14; break;
+          default: scaledSize = Math.round(targetSize * 0.8047); break;
+        }
+      }
+      const padding = (targetSize - scaledSize) / 2;
+      return { scaledSize, padding };
+    }
+
+    function processImageToBlob(img, targetSize, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const ctx = canvas.getContext('2d');
+
+        const { scaledSize, padding } = getLayoutDimensions(targetSize, usePadding);
+        const drawWidth = scaledSize, drawHeight = scaledSize, dx = padding, dy = padding;
+
+        ctx.save();
+
+        if (enableSquircle) {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = targetSize;
+          tempCanvas.height = targetSize;
+          const tempCtx = tempCanvas.getContext('2d');
+
+          if (enableBg) {
+            tempCtx.fillStyle = squircleBgColor;
+            pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+            tempCtx.fill();
+          }
+
+          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+          tempCtx.clip();
+
+          if (fittingMode === 'cover' || fittingMode === 'contain') {
+            drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
+          } else if (fittingMode === 'center') {
+            const innerPadding = drawWidth * 0.15;
+            const innerWidth = drawWidth - (innerPadding * 2);
+            const innerHeight = drawHeight - (innerPadding * 2);
+            drawImageFormatted(tempCtx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+          }
+
+          if (useShadow) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = targetSize * 0.013;
+            ctx.shadowOffsetY = targetSize * 0.0095;
+            ctx.shadowOffsetX = 0;
+          }
+          ctx.drawImage(tempCanvas, 0, 0);
+        } else {
+          if (useShadow) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = targetSize * 0.013;
+            ctx.shadowOffsetY = targetSize * 0.0095;
+            ctx.shadowOffsetX = 0;
+          }
+          if (enableBg) {
+            ctx.fillStyle = squircleBgColor;
+            ctx.fillRect(dx, dy, drawWidth, drawHeight);
+            ctx.shadowColor = 'transparent';
+          }
+
+          if (fittingMode === 'cover' || fittingMode === 'contain') {
+            drawImageFormatted(ctx, img, dx, dy, drawWidth, drawHeight, fittingMode);
+          } else if (fittingMode === 'center') {
+            const innerPadding = drawWidth * 0.15;
+            const innerWidth = drawWidth - (innerPadding * 2);
+            const innerHeight = drawHeight - (innerPadding * 2);
+            drawImageFormatted(ctx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+          }
+        }
+        ctx.restore();
+        canvas.toBlob((blob) => resolve(blob), 'image/png');
+      });
+    }
+
+    async function buildIcnsBinary(iconEntries) {
+      let totalBytes = 8;
+      for (const entry of iconEntries) {
+        totalBytes += 8 + entry.bytes.byteLength;
+      }
+      const buffer = new ArrayBuffer(totalBytes);
+      const view = new DataView(buffer);
+
+      view.setUint32(0, 0x69636E73);
+      view.setUint32(4, totalBytes);
+
+      let offset = 8;
+      for (const entry of iconEntries) {
+        const idUint32 = (entry.typeId.charCodeAt(0) << 24) |
+          (entry.typeId.charCodeAt(1) << 16) |
+          (entry.typeId.charCodeAt(2) << 8) |
+          (entry.typeId.charCodeAt(3));
+
+        view.setUint32(offset, idUint32);
+        view.setUint32(offset + 4, entry.bytes.byteLength + 8);
+        new Uint8Array(buffer, offset + 8, entry.bytes.byteLength).set(new Uint8Array(entry.bytes));
+        offset += 8 + entry.bytes.byteLength;
+      }
+      return new Blob([buffer], { type: 'image/x-icns' });
+    }
+
+    function setupMobileHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      if (els.appWrapper && window.innerWidth < 640) {
+        els.appWrapper.style.height = `${window.innerHeight}px`;
+      } else if (els.appWrapper) {
+        els.appWrapper.style.height = '';
+      }
+    }
+
+    // Boot
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+
+</html>

@@ -12,6 +12,7 @@ A small collection of *mini apps* built with *web technologies*. Vibe-coded with
 | [Blank Page](https://vietanhbui2000.pages.dev/mini-apps/blank-page/) | An infinite blank page to write down what's on your mind. | [`./blank-page`](./blank-page) |
 | [Clock Widget Builder](https://vietanhbui2000.pages.dev/mini-apps/clock-widget-builder/) | Create a clock widget for Obsidian/Notion with many customizations. | [`./clock-widget-builder`](./clock-widget-builder) |
 | [Apple DNS Profile Generator](https://vietanhbui2000.pages.dev/mini-apps/dns-profile-gen/) | Secure DNS configuration profile generator for Apple devices. | [`./dns-profile-gen`](./dns-profile-gen) |
+| [macOS Icon Generator](https://vietanhbui2000.pages.dev/mini-apps/icon-gen/) | Convert any image into a compliant macOS icon pack. | [`./icon-gen`](./icon-gen) |
 | [QR Code Generator](https://vietanhbui2000.pages.dev/mini-apps/qr-code-gen/) | Simple, customizable QR Code generator. | [`./qr-code-gen`](./qr-code-gen) |
 | [Minimal YouTube Player](https://vietanhbui2000.pages.dev/mini-apps/minimal-youtube-player/) | Play any YouTube video or livestream without distraction. | [`./minimal-youtube-player`](./minimal-youtube-player) |
 | [Year Left](https://vietanhbui2000.pages.dev/mini-apps/year-left/) | See the current year progress at a glance. | [`./year-left`](./year-left) |
