@@ -114,7 +114,7 @@
     <!-- Header -->
     <header
       class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
         <div
           class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
           <i data-lucide="qr-code" class="w-4 h-4"></i>
@@ -127,34 +127,35 @@
       </div>
     </header>
 
-    <!-- Sticky QR Preview Container -->
-    <div class="flex-shrink-0 bg-zinc-50/50 px-4 sm:px-6 pt-4 sm:pt-6 pb-6 z-10 relative">
-      <div class="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col items-center relative">
-        <div id="qr-card" class="relative flex items-center justify-center w-[200px] h-[200px]">
-          <div id="qr-canvas-holder" class="w-full h-full flex items-center justify-center">
-            <!-- Rendered canvas / svg goes here -->
-          </div>
-          <!-- Loading Indicator -->
-          <div id="qr-loading"
-            class="absolute inset-0 bg-white/80 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
-            <i data-lucide="loader-2" class="w-6 h-6 text-brand-500 animate-spin"></i>
+    <!-- Sticky Header Group (QR Preview + Separator) -->
+    <div id="stickyHeader" class="flex-shrink-0 z-10 relative transition-shadow duration-300">
+      <!-- Sticky QR Preview Container -->
+      <div class="bg-zinc-50/50 px-4 sm:px-6 py-4 relative flex justify-center">
+        <div
+          class="bg-white border border-zinc-200 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col items-center relative w-fit mx-auto">
+          <div id="qr-card" class="relative flex items-center justify-center w-[200px] h-[200px]">
+            <div id="qr-canvas-holder" class="w-full h-full flex items-center justify-center">
+              <!-- Rendered canvas / svg goes here -->
+            </div>
+            <!-- Loading Indicator -->
+            <div id="qr-loading"
+              class="absolute inset-0 bg-white/80 flex items-center justify-center opacity-0 pointer-events-none transition-opacity">
+              <i data-lucide="loader-2" class="w-6 h-6 text-brand-500 animate-spin"></i>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="px-4 sm:px-6 bg-zinc-50/50 z-10 relative flex-shrink-0">
-      <hr class="border-zinc-200" />
+      <div class="bg-zinc-50/50 relative">
+        <hr class="border-zinc-200" />
+      </div>
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth px-4 sm:px-6 py-6" id="mainScroll">
-      <div class="space-y-6">
-
-        <!-- ═══════════════════════════════ -->
-        <!--         DATA SECTION            -->
-        <!-- ═══════════════════════════════ -->
+    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth p-4 sm:p-6" id="mainScroll">
+      <div class="space-y-4 sm:space-y-6">
+        <!-- DATA SECTION -->
         <div>
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-4 sm:mb-6">
             <div class="flex items-center gap-2">
               <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
                 <i data-lucide="database" class="w-3.5 h-3.5"></i>
@@ -169,11 +170,11 @@
 
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                 Data Type
               </label>
               <select id="dataTypeSelector" onchange="switchDataType(this.value)"
-                class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm font-medium">
+                class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm font-medium">
                 <option value="url" selected>Text / Link</option>
                 <option value="wifi">Wi-Fi Network</option>
                 <option value="vcard">Contact (vCard)</option>
@@ -190,13 +191,13 @@
               <div id="form-url" class="space-y-3">
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
                     <span>Content</span>
                     <span
                       class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
                   </label>
                   <textarea id="input-url" rows="3"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium resize-y min-h-[60px]"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium resize-y min-h-[60px]"
                     placeholder="Enter text or paste a link (e.g. https://example.com)"
                     oninput="onFormChange()"></textarea>
                 </div>
@@ -206,28 +207,28 @@
               <div id="form-wifi" class="hidden space-y-4">
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
                     <span>Network Name (SSID)</span>
                     <span
                       class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
                   </label>
                   <input type="text" id="wifi-ssid"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium"
                     placeholder="My Wi-Fi" oninput="onFormChange()" />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                  <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                     Network Password
                   </label>
                   <input type="password" id="wifi-pass"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 text-sm font-medium"
                     placeholder="1234567890" oninput="onFormChange()" />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                  <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                     Security Type
                   </label>
-                  <div class="grid grid-cols-3 gap-3">
+                  <div class="grid grid-cols-3 gap-2 sm:gap-3">
                     <label
                       class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
                       <input type="radio" name="wifi-sec" value="WPA" class="peer sr-only" checked
@@ -259,57 +260,57 @@
 
               <!-- Contact (vCard) Form -->
               <div id="form-vcard" class="hidden space-y-4">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">First
+                    <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">First
                       Name</label>
                     <input type="text" id="card-first"
-                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                       placeholder="John" oninput="onFormChange()" />
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Last
+                    <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Last
                       Name</label>
                     <input type="text" id="card-last"
-                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                       placeholder="Doe" oninput="onFormChange()" />
                   </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2 sm:gap-3">
                   <div>
                     <label
-                      class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Phone</label>
+                      class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Phone</label>
                     <input type="tel" id="card-phone"
-                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                       placeholder="+1234567890" oninput="onFormChange()" />
                   </div>
                   <div>
                     <label
-                      class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Email</label>
+                      class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Email</label>
                     <input type="email" id="card-email"
-                      class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                      class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                       placeholder="john@example.com" oninput="onFormChange()" />
                   </div>
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Organization</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Organization</label>
                   <input type="text" id="card-org"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="Company Inc." oninput="onFormChange()" />
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Website</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Website</label>
                   <input type="url" id="card-web"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="https://example.com" oninput="onFormChange()" />
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Address</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Address</label>
                   <input type="text" id="card-addr"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="Street, City, Country" oninput="onFormChange()" />
                 </div>
               </div>
@@ -318,27 +319,27 @@
               <div id="form-email" class="hidden space-y-4">
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
                     <span>Recipient Email</span>
                     <span
                       class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
                   </label>
                   <input type="email" id="email-to"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="hello@example.com" oninput="onFormChange()" />
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Subject</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Subject</label>
                   <input type="text" id="email-sub"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="Email Subject" oninput="onFormChange()" />
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Message</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Message</label>
                   <textarea id="email-body" rows="2"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
                     placeholder="Message contents..." oninput="onFormChange()"></textarea>
                 </div>
               </div>
@@ -347,20 +348,20 @@
               <div id="form-sms" class="hidden space-y-4">
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
                     <span>Phone Number</span>
                     <span
                       class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
                   </label>
                   <input type="tel" id="sms-phone"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="+15551234567" oninput="onFormChange()" />
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Message</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Message</label>
                   <textarea id="sms-msg" rows="2"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
                     placeholder="SMS text..." oninput="onFormChange()"></textarea>
                 </div>
               </div>
@@ -369,20 +370,20 @@
               <div id="form-whatsapp" class="hidden space-y-4">
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
                     <span>Phone Number</span>
                     <span
                       class="bg-brand-100 text-brand-600 px-1.5 py-0.5 rounded text-[10px] tracking-widest font-bold">REQUIRED</span>
                   </label>
                   <input type="tel" id="wa-phone"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium"
                     placeholder="15551234567 (with country code)" oninput="onFormChange()" />
                 </div>
                 <div>
                   <label
-                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Message</label>
+                    class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Message</label>
                   <textarea id="wa-msg" rows="2"
-                    class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
+                    class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none placeholder-zinc-400 text-sm font-medium resize-y"
                     placeholder="Pre-filled message..." oninput="onFormChange()"></textarea>
                 </div>
               </div>
@@ -391,13 +392,10 @@
         </div>
 
         <hr class="border-zinc-200" />
-
-        <!-- ════════════════════════════════════════ -->
-        <!--         STYLING CONFIGURATION ACCORDION  -->
-        <!-- ════════════════════════════════════════ -->
+        <!-- STYLING CONFIGURATION ACCORDION -->
         <div>
           <button type="button" onclick="toggleAccordion('stylingAdvanced', 'stylingAdvancedIcon')"
-            class="w-full flex items-center justify-between mb-4 group">
+            class="w-full flex items-center justify-between mb-4 sm:mb-6 group">
             <div class="flex items-center gap-2">
               <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
                 <i data-lucide="palette" class="w-3.5 h-3.5"></i>
@@ -408,13 +406,13 @@
             <i data-lucide="chevron-down" id="stylingAdvancedIcon"
               class="w-4 h-4 text-zinc-400 transition-transform duration-200"></i>
           </button>
-          <div id="stylingAdvanced" class="hidden space-y-5">
+          <div id="stylingAdvanced" class="hidden space-y-4 sm:space-y-6">
 
             <!-- Patterns & Colors -->
             <div>
-              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Dot
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Dot
                 Pattern</label>
-              <div class="grid grid-cols-3 gap-3 mb-3">
+              <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-3">
                 <label
                   class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
                   <input type="radio" name="dot-style" value="square" class="peer sr-only" checked
@@ -439,61 +437,64 @@
             </div>
 
             <!-- Padding & Transparent BG -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-2 sm:gap-3">
               <div>
                 <label
-                  class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                  <span>Margin Padding</span>
+                  class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
+                  <span>Padding</span>
                   <span id="padding-val" class="text-zinc-400 font-mono text-xs">0</span>
                 </label>
                 <div class="flex items-center w-full p-3 bg-white border border-zinc-200 rounded-xl h-[50px]">
                   <input type="range" id="qr-padding" min="0" max="10" value="0" step="1" oninput="updateQRStyling()"
-                    class="w-full accent-brand-500 cursor-pointer" />
+                    class="block w-full accent-brand-500 cursor-pointer" />
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                   Background
                 </label>
-                <label
-                  class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm focus:outline-none transition-all hover:border-brand-200 group h-[50px]">
-                  <input type="checkbox" id="bg-transparent" class="peer sr-only" onchange="updateQRStyling()" />
+                <div
+                  class="relative flex rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 group h-[50px]">
                   <div class="flex items-center justify-between w-full h-full">
                     <div class="flex items-center gap-2">
-                      <i data-lucide="square-dashed"
-                        class="w-4 h-4 text-zinc-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
-                      <span class="text-sm font-semibold text-zinc-900">Transparent</span>
+                      <i data-lucide="square-dashed" class="w-4 h-4 text-zinc-400"></i>
+                      <span class="text-sm font-medium text-zinc-700">Transparent</span>
                     </div>
-                    <div
-                      class="relative inline-flex h-5 w-9 items-center rounded-full bg-zinc-200 transition-colors group-has-[:checked]:bg-brand-600 flex-shrink-0">
+                    <label
+                      class="relative inline-flex h-5 w-9 items-center rounded-full bg-zinc-200 transition-colors group-has-[:checked]:bg-brand-600 flex-shrink-0 cursor-pointer">
+                      <input type="checkbox" id="bg-transparent" class="peer sr-only" onchange="updateQRStyling()" />
                       <span
                         class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-5"></span>
-                    </div>
+                    </label>
                   </div>
-                </label>
+                </div>
               </div>
             </div>
 
             <!-- Colors -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-2 sm:gap-3">
               <div>
-                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Foreground
+                <label
+                  class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Foreground
                   Color</label>
                 <div
-                  class="flex items-center gap-3 w-full p-3 bg-white border border-zinc-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500">
+                  class="flex items-center gap-2 sm:gap-3 w-full p-3 bg-white border border-zinc-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500">
                   <input type="color" id="dot-solid" value="#18181b"
-                    class="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent" oninput="updateQRStyling()" />
+                    class="block w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    oninput="updateQRStyling()" />
                   <span class="text-sm font-medium text-zinc-700">QR Code</span>
                 </div>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Background
+                <label
+                  class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Background
                   Color</label>
                 <div
-                  class="flex items-center gap-3 w-full p-3 bg-white border border-zinc-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500">
+                  class="flex items-center gap-2 sm:gap-3 w-full p-3 bg-white border border-zinc-200 rounded-xl focus-within:ring-2 focus-within:ring-brand-500">
                   <input type="color" id="bg-solid" value="#ffffff"
-                    class="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent" oninput="updateQRStyling()" />
+                    class="block w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    oninput="updateQRStyling()" />
                   <span class="text-sm font-medium text-zinc-700">Canvas</span>
                 </div>
               </div>
@@ -502,7 +503,7 @@
             <!-- Error Correction -->
             <div>
               <label
-                class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3 flex items-center justify-between">
                 <span>Error Correction Level</span>
                 <div class="relative group cursor-help">
                   <i data-lucide="info" class="w-3.5 h-3.5 text-zinc-400 hover:text-zinc-600 transition-colors"></i>
@@ -514,7 +515,7 @@
                 </div>
               </label>
               <select id="qr-ecc" onchange="updateQRStyling()"
-                class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all text-sm font-medium">
+                class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all text-sm font-medium">
                 <option value="L">Low (7%)</option>
                 <option value="M">Medium (15%)</option>
                 <option value="Q" selected>Quartile (25%)</option>
@@ -524,61 +525,100 @@
 
             <!-- Logo Options -->
             <div>
-              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">Upload
-                Logo</label>
-              <div class="flex items-center gap-3">
-                <label
-                  class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-zinc-300 bg-white rounded-xl py-4 hover:border-brand-500 hover:bg-zinc-50 cursor-pointer transition-colors px-4 text-center">
-                  <i data-lucide="image" class="w-5 h-5 text-zinc-400 mb-1"></i>
-                  <span class="text-xs font-bold text-zinc-700">Choose Image File</span>
-                  <input type="file" id="logo-uploader" class="hidden" accept="image/*"
+              <label
+                class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">Logo</label>
+
+              <!-- Initial Upload State -->
+              <label id="logo-upload-box"
+                class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-300 bg-white rounded-xl h-[80px] sm:h-[99px] hover:border-brand-500 hover:bg-zinc-50 cursor-pointer transition-colors px-4 text-center group"
+                ondragover="handleLogoDragOver(event)" ondragleave="handleLogoDragLeave(event)"
+                ondrop="handleLogoDrop(event)">
+                <i data-lucide="upload-cloud"
+                  class="w-5 h-5 text-zinc-400 group-hover:text-brand-600 transition-colors mb-1 pointer-events-none"></i>
+                <span
+                  class="text-[10px] uppercase font-bold tracking-wider text-zinc-400 group-hover:text-brand-600 transition-colors pointer-events-none">Upload
+                  Image</span>
+                <input type="file" id="logo-uploader" class="block hidden" accept="image/*"
+                  onchange="handleLogoUpload(event)" />
+              </label>
+
+              <!-- Uploaded State: 3 Columns -->
+              <div id="logo-preview-box"
+                class="hidden grid grid-cols-[80px_1fr_36px] sm:grid-cols-[99px_1fr_45px] gap-2 sm:gap-3">
+                <!-- Col 1: Selected image -->
+                <label id="logo-preview-container"
+                  class="rounded-xl border border-zinc-200 bg-white p-2 flex items-center justify-center shadow-sm overflow-hidden h-[80px] sm:h-[99px] cursor-pointer hover:border-brand-500 hover:bg-brand-50 transition-all relative group"
+                  ondragover="handleLogoDragOver(event)" ondragleave="handleLogoDragLeave(event)"
+                  ondrop="handleLogoDrop(event)">
+                  <img id="logo-preview-img" class="max-w-full max-h-full object-contain relative z-10" src=""
+                    alt="logo" />
+
+                  <!-- Hover overlay -->
+                  <div
+                    class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center flex-col text-brand-600 pointer-events-none rounded-xl">
+                    <i data-lucide="image-plus" class="w-5 h-5 mb-1"></i>
+                    <span class="text-[8px] uppercase font-bold tracking-wider">Change Image</span>
+                  </div>
+
+                  <input type="file" id="logo-uploader-change" class="block hidden" accept="image/*"
                     onchange="handleLogoUpload(event)" />
                 </label>
-                <div id="logo-preview-box" class="hidden flex-col items-center gap-1.5 w-16">
-                  <div
-                    class="w-12 h-12 rounded-xl border border-zinc-200 bg-white p-1 flex items-center justify-center overflow-hidden shadow-sm">
-                    <img id="logo-preview-img" class="max-w-full max-h-full object-contain" src="" alt="logo" />
+
+                <!-- Col 2: Options -->
+                <div class="flex flex-col justify-between h-[80px] sm:h-[99px] py-1">
+                  <!-- Row 1: Force Square -->
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Force Square</label>
+                    <label
+                      class="relative inline-flex h-4 w-7 items-center rounded-full bg-zinc-200 transition-colors has-[:checked]:bg-brand-600 flex-shrink-0 cursor-pointer">
+                      <input type="checkbox" id="logo-force-square" class="peer sr-only" checked
+                        onchange="updateQRStyling()" />
+                      <span
+                        class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform translate-x-[2px] peer-checked:translate-x-[14px]"></span>
+                    </label>
                   </div>
+
+                  <!-- Row 2: Size -->
+                  <div class="flex items-center gap-2">
+                    <label
+                      class="w-[72px] text-[10px] font-semibold text-zinc-500 uppercase tracking-wider flex justify-between">
+                      <span>Size</span><span id="logo-size-val" class="text-zinc-400 font-mono">1</span>
+                    </label>
+                    <input type="range" id="logo-size" min="1" max="5" value="1" step="1" oninput="updateQRStyling()"
+                      class="block flex-1 accent-brand-500 h-1 cursor-pointer" />
+                  </div>
+
+                  <!-- Row 3: Padding -->
+                  <div class="flex items-center gap-2">
+                    <label
+                      class="w-[72px] text-[10px] font-semibold text-zinc-500 uppercase tracking-wider flex justify-between">
+                      <span>Padding</span><span id="logo-padding-val" class="text-zinc-400 font-mono">0</span>
+                    </label>
+                    <input type="range" id="logo-padding" min="0" max="5" value="0" step="1" oninput="updateQRStyling()"
+                      class="block flex-1 accent-brand-500 h-1 cursor-pointer" />
+                  </div>
+                </div>
+
+                <!-- Col 3: Actions -->
+                <div class="flex flex-col gap-2 h-[80px] sm:h-[99px]">
                   <button type="button" onclick="removeLogo()"
-                    class="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-wider">Remove</button>
+                    class="flex-1 rounded-xl border border-zinc-200 bg-white flex items-center justify-center shadow-sm hover:border-red-500 hover:bg-red-50 cursor-pointer transition-colors group"
+                    title="Remove Image">
+                    <i data-lucide="trash-2"
+                      class="w-4 h-4 text-zinc-400 group-hover:text-red-500 transition-colors"></i>
+                  </button>
                 </div>
               </div>
-            </div>
-
-            <div id="logo-options-group" class="hidden">
-              <label
-                class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-4 shadow-sm focus:outline-none transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group">
-                <input type="checkbox" id="logo-clear-bg" class="peer sr-only" checked onchange="updateQRStyling()" />
-                <div class="flex items-center justify-between w-full h-full">
-                  <div class="flex items-center gap-3">
-                    <i data-lucide="layers"
-                      class="w-5 h-5 text-zinc-400 group-has-[:checked]:text-brand-600 transition-colors"></i>
-                    <div class="flex flex-col">
-                      <span class="text-sm font-semibold text-zinc-900">Clear Background Behind Logo</span>
-                      <span class="block text-xs text-zinc-500 mt-0.5 leading-snug">Removes QR dots under the
-                        image</span>
-                    </div>
-                  </div>
-                  <div
-                    class="relative inline-flex h-6 w-11 items-center rounded-full bg-zinc-200 transition-colors group-has-[:checked]:bg-brand-600">
-                    <span
-                      class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1 group-has-[:checked]:translate-x-6"></span>
-                  </div>
-                </div>
-              </label>
             </div>
 
           </div>
         </div>
 
         <hr class="border-zinc-200" />
-
-        <!-- ════════════════════════════════════════ -->
-        <!--         EXPORT SETTINGS ACCORDION        -->
-        <!-- ════════════════════════════════════════ -->
+        <!-- EXPORT SETTINGS ACCORDION -->
         <div>
           <button type="button" onclick="toggleAccordion('exportSettings', 'exportSettingsIcon')"
-            class="w-full flex items-center justify-between mb-4 group">
+            class="w-full flex items-center justify-between mb-4 sm:mb-6 group">
             <div class="flex items-center gap-2">
               <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
@@ -589,21 +629,21 @@
             <i data-lucide="chevron-down" id="exportSettingsIcon"
               class="w-4 h-4 text-zinc-400 transition-transform duration-200"></i>
           </button>
-          <div id="exportSettings" class="hidden space-y-5">
+          <div id="exportSettings" class="hidden space-y-4 sm:space-y-6">
             <div>
-              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                 File Name
               </label>
               <input type="text" id="export-filename"
-                class="w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm font-medium"
+                class="block w-full p-3 bg-white border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-sm font-medium"
                 placeholder="qrcode" />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                 Export Format
               </label>
-              <div class="grid grid-cols-3 gap-3">
+              <div class="grid grid-cols-3 gap-2 sm:gap-3">
                 <label
                   class="relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
                   <input type="radio" name="export-format" value="png" class="sr-only" checked
@@ -626,10 +666,10 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
+              <label class="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 sm:mb-3">
                 Size
               </label>
-              <div class="grid grid-cols-3 gap-3">
+              <div class="grid grid-cols-3 gap-2 sm:gap-3">
                 <label
                   class="size-option-label relative flex cursor-pointer rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:border-brand-200 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-500 group justify-center text-center">
                   <input type="radio" name="export-size" value="512" class="sr-only" />
@@ -654,7 +694,7 @@
 
     <!-- Bottom Sticky Action Bar -->
     <div
-      class="bg-white border-t border-zinc-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-3 items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+      class="bg-white border-t border-zinc-200 px-4 sm:px-6 py-4 sm:py-4 flex gap-2 sm:gap-3 items-center justify-between z-20 flex-shrink-0">
       <button onclick="triggerQRDownload(this)"
         class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-center gap-2 group">
         <i data-lucide="download" class="w-4 h-4"></i>
@@ -679,13 +719,19 @@
   </div>
 
   <!-- Application Script logic -->
-  <script>      // --- Constants & Config ---
-    // (None)
+  <script>
+    // --- Constants & Config ---
+    const CONFIG = {};
 
     // --- State Management ---
     let currentDataType = 'url';
     let qrCodeInstance = null;
     let activeLogo = null;
+    let activeLogoImg = null;
+    let activeLogoProcessed = null;
+    let activeLogoNaturalWidth = 0;
+    let activeLogoNaturalHeight = 0;
+    let activeLogoAspectRatio = 1;
 
     const activeVisuals = {
       dotStyle: 'square',
@@ -694,7 +740,9 @@
       bgColor: '#ffffff',
       bgTransparent: false,
       padding: 0,
-      logoClearBg: true
+      logoSize: 1,
+      logoForceSquare: true,
+      logoPaddingValue: 0
     };
 
     // --- DOM Elements ---
@@ -702,42 +750,160 @@
       qrCanvasHolder: document.getElementById('qr-canvas-holder'),
       qrLoading: document.getElementById('qr-loading'),
       charCounter: document.getElementById('char-counter'),
+      logoUploadBox: document.getElementById('logo-upload-box'),
       logoPreviewBox: document.getElementById('logo-preview-box'),
       logoPreviewImg: document.getElementById('logo-preview-img'),
-      logoOptionsGroup: document.getElementById('logo-options-group'),
-      exportFilename: document.getElementById('export-filename')
+      exportFilename: document.getElementById('export-filename'),
+      mainScroll: document.getElementById('mainScroll'),
+      stickyHeader: document.getElementById('stickyHeader'),
     };
 
     // --- Initialization ---
+    // Boot
     document.addEventListener('DOMContentLoaded', () => {
       setupMobileHeight();
       initQRCode();
       resetInputs();
       lucide.createIcons();
+
+      document.addEventListener('dragover', (e) => e.preventDefault());
+      document.addEventListener('drop', (e) => e.preventDefault());
+
+      els.mainScroll.addEventListener('scroll', () => {
+        if (els.mainScroll.scrollTop > 10) {
+          els.stickyHeader.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
+        } else {
+          els.stickyHeader.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
+        }
+      });
     });
 
     // --- Event Listeners ---
-    function handleLogoUpload(event) {
-      const file = event.target.files[0];
+    function processLogoFile(file) {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function (e) {
         activeLogo = e.target.result;
         els.logoPreviewImg.src = activeLogo;
+
+        els.logoUploadBox.classList.add('hidden');
+        els.logoUploadBox.classList.remove('flex');
+
         els.logoPreviewBox.classList.remove('hidden');
-        els.logoPreviewBox.classList.add('flex');
-        els.logoOptionsGroup.classList.remove('hidden');
-        updateQRStyling();
+
+        const img = new Image();
+        img.onload = () => {
+          activeLogoImg = img;
+          activeLogoNaturalWidth = img.width;
+          activeLogoNaturalHeight = img.height;
+
+          const maxDim = Math.max(img.width, img.height);
+          const minDim = Math.min(img.width, img.height);
+          activeLogoAspectRatio = minDim ? (maxDim / minDim) : 1;
+
+          buildLogoImage();
+          updateQRStyling();
+        };
+        img.src = activeLogo;
       };
       reader.readAsDataURL(file);
     }
 
+    function handleLogoUpload(event) {
+      processLogoFile(event.target.files[0]);
+    }
+
+    function handleLogoDragOver(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const el = event.currentTarget;
+      el.classList.add('border-brand-500', 'bg-brand-50');
+      el.classList.remove('border-zinc-300', 'border-zinc-200');
+    }
+
+    function handleLogoDragLeave(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const el = event.currentTarget;
+      el.classList.remove('border-brand-500', 'bg-brand-50');
+      if (el.id === 'logo-upload-box') {
+        el.classList.add('border-zinc-300');
+      } else {
+        el.classList.add('border-zinc-200');
+      }
+    }
+
+    function handleLogoDrop(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const el = event.currentTarget;
+      el.classList.remove('border-brand-500', 'bg-brand-50');
+      if (el.id === 'logo-upload-box') {
+        el.classList.add('border-zinc-300');
+      } else {
+        el.classList.add('border-zinc-200');
+      }
+
+      const dt = event.dataTransfer;
+      if (dt && dt.files && dt.files.length > 0) {
+        processLogoFile(dt.files[0]);
+      }
+    }
+
+    function buildLogoImage() {
+      if (!activeLogoImg || !activeLogoNaturalWidth) {
+        activeLogoProcessed = null;
+        return;
+      }
+      const w = activeLogoNaturalWidth;
+      const h = activeLogoNaturalHeight;
+      const forceSquare = activeVisuals.logoForceSquare;
+      const padLevel = activeVisuals.logoPaddingValue;
+
+      if (padLevel === 0 && !forceSquare) {
+        // No padding and no force square — use the original image directly
+        activeLogoProcessed = activeLogo;
+        return;
+      }
+
+      // Base canvas size: if forcing square, use max dimension; otherwise use original
+      let canvasW = forceSquare ? Math.max(w, h) : w;
+      let canvasH = forceSquare ? Math.max(w, h) : h;
+
+      // Add padding as a percentage of the base canvas size
+      const padFraction = padLevel * 0.04; // 0 to 0.40
+      const padX = Math.round(canvasW * padFraction);
+      const padY = Math.round(canvasH * padFraction);
+      const totalW = canvasW + padX * 2;
+      const totalH = canvasH + padY * 2;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = totalW;
+      canvas.height = totalH;
+      const ctx = canvas.getContext('2d');
+      const dx = padX + (canvasW - w) / 2;
+      const dy = padY + (canvasH - h) / 2;
+
+      ctx.drawImage(activeLogoImg, dx, dy, w, h);
+      activeLogoProcessed = canvas.toDataURL('image/png');
+    }
+
     function removeLogo() {
       activeLogo = null;
+      activeLogoImg = null;
+      activeLogoProcessed = null;
+      activeLogoNaturalWidth = 0;
+      activeLogoNaturalHeight = 0;
+      activeLogoAspectRatio = 1;
       els.logoPreviewBox.classList.add('hidden');
-      els.logoPreviewBox.classList.remove('flex');
-      els.logoOptionsGroup.classList.add('hidden');
+
+      els.logoUploadBox.classList.remove('hidden');
+      els.logoUploadBox.classList.add('flex');
+
       document.getElementById('logo-uploader').value = '';
+      const changeUploader = document.getElementById('logo-uploader-change');
+      if (changeUploader) changeUploader.value = '';
+
       updateQRStyling();
     }
 
@@ -804,12 +970,14 @@
         backgroundOptions: { color: activeVisuals.bgTransparent ? 'transparent' : activeVisuals.bgColor },
         cornersSquareOptions: { type: corners.square, color: activeVisuals.dotColor },
         cornersDotOptions: { type: corners.dot, color: activeVisuals.dotColor },
-        image: activeLogo,
+        image: activeLogoProcessed || activeLogo,
         imageOptions: {
           crossOrigin: "anonymous",
-          hideBackgroundDots: activeVisuals.logoClearBg,
-          imageSize: 0.25,
-          margin: 6
+          hideBackgroundDots: true,
+          imageSize: ([0.15, 0.22, 0.30, 0.38, 0.46][activeVisuals.logoSize - 1] || 0.15)
+            * (activeVisuals.logoForceSquare ? activeLogoAspectRatio : 1)
+            * (1 + 2 * (activeVisuals.logoPaddingValue * 0.04)),
+          margin: 0
         }
       };
     }
@@ -926,7 +1094,29 @@
       activeVisuals.dotColor = document.getElementById('dot-solid').value;
       activeVisuals.bgColor = document.getElementById('bg-solid').value;
       activeVisuals.ecc = document.getElementById('qr-ecc').value;
-      activeVisuals.logoClearBg = document.getElementById('logo-clear-bg').checked;
+
+      const logoSizeEl = document.getElementById('logo-size');
+      if (logoSizeEl) {
+        activeVisuals.logoSize = parseInt(logoSizeEl.value);
+        document.getElementById('logo-size-val').textContent = activeVisuals.logoSize;
+      }
+
+      const logoForceSquareEl = document.getElementById('logo-force-square');
+      if (logoForceSquareEl) {
+        activeVisuals.logoForceSquare = logoForceSquareEl.checked;
+      }
+
+      const logoPaddingEl = document.getElementById('logo-padding');
+      if (logoPaddingEl) {
+        activeVisuals.logoPaddingValue = parseInt(logoPaddingEl.value);
+        document.getElementById('logo-padding-val').textContent = activeVisuals.logoPaddingValue;
+      }
+
+      // Rebuild the logo canvas whenever force-square or padding changes
+      if (activeLogo) {
+        buildLogoImage();
+      }
+
       activeVisuals.bgTransparent = document.getElementById('bg-transparent').checked;
       activeVisuals.padding = parseInt(document.getElementById('qr-padding').value);
 
