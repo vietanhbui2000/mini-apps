@@ -5,3 +5,4 @@ package.json
 .prettierrc
 .prettierignore
 eslint.config.mjs
+AGENTS.md
