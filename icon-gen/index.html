@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="Convert any image into a compliant macOS icon pack." />
+  <meta name="description"
+    content="Convert any image into a compliant macOS icon pack, or create custom folder icons." />
   <title>macOS Icon Generator</title>
 
   <!-- Tailwind CSS -->
@@ -88,6 +89,49 @@
       border: 1px solid #e4e4e7;
       border-radius: 50%;
     }
+
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.15s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .color-swatch.active {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+    }
+
+    .color-swatch.active::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .seg-btn {
+      transition: all 0.15s ease;
+    }
+
+    .seg-btn.active {
+      background: white;
+      color: #18181b;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .seg-btn:not(.active) {
+      background: transparent;
+      color: #71717a;
+    }
+
+    .seg-btn:not(.active):hover {
+      color: #52525b;
+    }
   </style>
 </head>
 
@@ -95,9 +139,10 @@
   <!-- Main App Container -->
   <div id="app-wrapper"
     class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border">
+
     <!-- Header -->
     <header id="appHeader"
-      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex flex-col gap-2 flex-shrink-0 transition-shadow duration-200">
+      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex items-center flex-shrink-0 transition-shadow duration-200">
       <div class="flex items-center gap-2 sm:gap-3">
         <div
           class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
@@ -109,201 +154,368 @@
       </div>
     </header>
 
-    <!-- Sticky Header Group (Icon Preview + Separator) -->
-    <div id="stickyHeader" class="flex-shrink-0 z-10 relative transition-shadow duration-300">
-      <div class="bg-zinc-50/50 px-4 sm:px-6 py-4 relative flex justify-center">
-        <div id="dropZone"
-          class="bg-white border border-zinc-200 hover:border-brand-500 hover:bg-brand-50 cursor-pointer rounded-2xl p-4 shadow-sm flex flex-col items-center relative w-fit mx-auto transition-all duration-200 group">
-          <div class="relative flex items-center justify-center w-[200px] h-[200px]">
-            <canvas id="previewCanvas" class="w-full h-full object-contain relative z-10 pointer-events-none"></canvas>
-
-            <!-- Hover overlay to indicate it's clickable to change image -->
-            <div id="hoverOverlay"
-              class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-[2rem] flex items-center justify-center flex-col text-brand-600 hidden pointer-events-none">
-              <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
-              <span class="text-[10px] uppercase font-bold tracking-wider">Change Image</span>
-            </div>
-
-            <!-- Placeholder for when no image is loaded -->
-            <div id="previewPlaceholder"
-              class="absolute inset-0 flex items-center justify-center flex-col text-zinc-400 group-hover:text-brand-600 rounded-[2rem] transition-all pointer-events-none">
-              <i data-lucide="upload-cloud" class="w-8 h-8 mb-2"></i>
-              <span class="text-[10px] uppercase font-bold tracking-wider">Upload Image</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="bg-zinc-50/50 relative">
-        <hr class="border-zinc-200" />
+    <!-- Dynamic Sticky Header (Tabs) -->
+    <div id="stickyHeader"
+      class="z-30 bg-white border-b border-zinc-200 p-4 sm:px-6 sm:py-4 flex-shrink-0 transition-shadow duration-300">
+      <div class="flex gap-1 bg-zinc-100 border border-zinc-200/50 rounded-full p-1 shadow-inner w-full">
+        <button id="tabApp"
+          class="seg-btn active flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full text-sm font-medium">
+          <i data-lucide="image" class="w-3.5 h-3.5"></i><span>App Icon</span>
+        </button>
+        <button id="tabFolder"
+          class="seg-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full text-sm font-medium">
+          <i data-lucide="folder" class="w-3.5 h-3.5"></i><span>Folder Icon</span>
+        </button>
       </div>
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth p-4 sm:p-6" id="mainScroll">
-      <input type="file" id="fileInput" class="hidden"
-        accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg">
+    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth" id="mainScroll">
 
-      <div class="space-y-6 sm:space-y-8">
-
-        <!-- Configuration Section -->
-        <div>
-          <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-            <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
-              <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
-            </div>
-            <h2 class="font-bold text-zinc-900 tracking-tight">Layout Settings</h2>
+      <!-- Sticky Preview Box -->
+      <div id="stickyPreview"
+        class="sticky top-0 z-20 bg-[#fdfdfd] px-4 sm:px-6 py-4 sm:py-6 border-b border-transparent transition-all duration-300">
+        <div id="dropZone"
+          class="bg-[#f5f5f5] border border-zinc-200 hover:border-brand-500 cursor-pointer rounded-2xl p-4 shadow-sm flex flex-col items-center relative w-fit mx-auto transition-all duration-200 group overflow-hidden">
+          <div class="relative flex items-center justify-center w-[200px] h-[200px]">
+            <canvas id="previewCanvas" class="w-full h-full object-contain relative z-10 pointer-events-none"></canvas>
           </div>
 
-          <div class="bg-white border border-zinc-200 rounded-xl shadow-sm divide-y divide-zinc-100">
-            <!-- Image Fitting -->
-            <div class="flex justify-between items-center p-4 sm:p-6">
-              <div class="flex flex-col gap-1">
-                <span class="text-sm font-medium text-zinc-900">Image Fitting</span>
-                <span class="text-xs text-zinc-500">Adjusts how the image is adapted</span>
-              </div>
-              <select id="fittingSelect"
-                class="bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block px-3 py-2 outline-none cursor-pointer transition-all">
-                <option value="cover" selected>Fill</option>
-                <option value="contain">Fit</option>
-                <option value="center">Center</option>
-              </select>
+          <!-- Hover overlay to indicate it's clickable to change image -->
+          <div id="hoverOverlay"
+            class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center flex-col text-brand-600 hidden pointer-events-none">
+            <div id="hoverOverlayIconWrapper">
+              <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
             </div>
+            <span id="hoverOverlayText" class="text-[10px] uppercase font-bold tracking-wider">Change Image</span>
+          </div>
 
-            <!-- Enable Squircle -->
-            <div class="flex justify-between items-center p-4 sm:p-6">
-              <div class="flex flex-col gap-1">
-                <span class="text-sm font-medium text-zinc-900">Enable Squircle</span>
-                <span class="text-xs text-zinc-500">Applies shape styling to the generated icon</span>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="squircleToggle" checked class="sr-only peer">
-                <div
-                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500">
-                </div>
-              </label>
-            </div>
-
-            <!-- Background Toggle -->
-            <div class="flex justify-between items-center p-4 sm:p-6">
-              <div class="flex flex-col gap-1">
-                <span class="text-sm font-medium text-zinc-900">Enable Background</span>
-                <span class="text-xs text-zinc-500">Adds background color to the generated icon</span>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="bgToggle" class="sr-only peer">
-                <div
-                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
-                </div>
-              </label>
-            </div>
-
-            <!-- Custom Background Color -->
-            <div class="flex justify-between items-center p-4 sm:p-6" id="colorRow" style="display: none;">
-              <div class="flex flex-col gap-1">
-                <span class="text-sm font-medium text-zinc-900">Background Color</span>
-                <span class="text-xs text-zinc-500">Select the color for the background</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="color" id="tileColorInput" value="#ffffff"
-                  class="w-7 h-7 bg-transparent border-none cursor-pointer appearance-none disabled:opacity-50">
-              </div>
-            </div>
-
-            <!-- Padding Toggle -->
-            <div class="flex justify-between items-center p-4 sm:p-6">
-              <div class="flex flex-col gap-1">
-                <span class="text-sm font-medium text-zinc-900">Enable Padding</span>
-                <span class="text-xs text-zinc-500">Adds extra margins (following Apple guidelines)</span>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="paddingToggle" class="sr-only peer" checked>
-                <div
-                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
-                </div>
-              </label>
-            </div>
-
-            <!-- Shadow Toggle -->
-            <div class="flex justify-between items-center p-4 sm:p-6">
-              <div class="flex flex-col gap-1">
-                <span class="text-sm font-medium text-zinc-900">Enable Shadow</span>
-                <span class="text-xs text-zinc-500">Adds subtle shadow (following Apple guidelines)</span>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="shadowToggle" class="sr-only peer" checked>
-                <div
-                  class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
-                </div>
-              </label>
-            </div>
+          <!-- Placeholder for when no image is loaded -->
+          <div id="previewPlaceholder"
+            class="absolute inset-0 flex items-center justify-center flex-col text-zinc-400 group-hover:text-brand-600 transition-all pointer-events-none">
+            <i data-lucide="upload-cloud" class="w-8 h-8 mb-2"></i>
+            <span id="previewPlaceholderText" class="text-[10px] uppercase font-bold tracking-wider">Upload Image</span>
           </div>
         </div>
-
-        <!-- Export Sizes Section -->
-        <div>
-          <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-            <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
-              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-            </div>
-            <h2 class="font-bold text-zinc-900 tracking-tight">Export Sizes</h2>
-          </div>
-
-          <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 sm:p-6">
-            <p class="text-xs text-zinc-500 mb-4 sm:mb-6">Select the icon sizes to include in the generated .icns file.
-              Sizes larger than your original image are automatically disabled.</p>
-            <div class="flex flex-wrap gap-2 sm:gap-3" id="sizeCheckboxes">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" id="selectAllSizes" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 transition-all">
-                <span class="text-sm font-medium text-zinc-700">All</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="16" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">16px</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="32" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">32px</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="64" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">64px</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="128" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">128px</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="256" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">256px</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="512" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">512px</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" value="1024" checked
-                  class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb">
-                <span
-                  class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">1024px</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
       </div>
+
+      <div class="p-4 sm:p-6">
+        <input type="file" id="fileInput" class="hidden"
+          accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg">
+
+        <!-- App Icon Panel -->
+        <div id="panelApp">
+          <div class="space-y-6 sm:space-y-8">
+            <!-- Configuration Section -->
+            <div>
+              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                  <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
+                </div>
+                <h2 class="font-bold text-zinc-900 tracking-tight">Icon Settings</h2>
+              </div>
+
+              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm divide-y divide-zinc-100">
+                <!-- Image Fitting -->
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-zinc-900">Image Fitting</span>
+                    <span class="text-xs text-zinc-500">Adjusts how the image is adapted</span>
+                  </div>
+                  <select id="fittingSelect"
+                    class="bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block px-3 py-2 outline-none cursor-pointer transition-all">
+                    <option value="cover" selected>Fill</option>
+                    <option value="contain">Fit</option>
+                    <option value="center">Center</option>
+                  </select>
+                </div>
+
+                <!-- Enable Squircle -->
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-zinc-900">Enable Squircle</span>
+                    <span class="text-xs text-zinc-500">Applies shape styling to the generated icon</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="squircleToggle" checked class="sr-only peer">
+                    <div
+                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500">
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Background Toggle -->
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-zinc-900">Enable Background</span>
+                    <span class="text-xs text-zinc-500">Adds background color to the generated icon</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="bgToggle" class="sr-only peer">
+                    <div
+                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Custom Background Color -->
+                <div class="flex justify-between items-center p-4 sm:p-6" id="colorRow" style="display: none;">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-zinc-900">Background Color</span>
+                    <span class="text-xs text-zinc-500">Select the color for the background</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <input type="color" id="tileColorInput" value="#ffffff"
+                      class="w-7 h-7 bg-transparent border-none cursor-pointer appearance-none disabled:opacity-50">
+                  </div>
+                </div>
+
+                <!-- Padding Toggle -->
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-zinc-900">Enable Padding</span>
+                    <span class="text-xs text-zinc-500">Adds extra margins (following Apple guidelines)</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="paddingToggle" class="sr-only peer" checked>
+                    <div
+                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Shadow Toggle -->
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1">
+                    <span class="text-sm font-medium text-zinc-900">Enable Shadow</span>
+                    <span class="text-xs text-zinc-500">Adds subtle shadow (following Apple guidelines)</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="shadowToggle" class="sr-only peer" checked>
+                    <div
+                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Export Sizes Section -->
+            <div>
+              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
+                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                </div>
+                <h2 class="font-bold text-zinc-900 tracking-tight">Export Sizes</h2>
+              </div>
+
+              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 sm:p-6">
+                <p class="text-xs text-zinc-500 mb-4 sm:mb-6">Select the icon sizes to include in the generated .icns
+                  file
+                  Sizes larger than your original image are automatically disabled.</p>
+                <div class="flex flex-wrap gap-2 sm:gap-3" id="sizeCheckboxes">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="selectAllSizes" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 transition-all">
+                    <span class="text-sm font-medium text-zinc-700">All</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="16" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">16px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="32" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">32px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="64" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">64px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="128" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">128px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="256" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">256px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="512" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">512px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="1024" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">1024px</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Folder Icon Panel -->
+        <div id="panelFolder" class="hidden">
+          <div class="space-y-6 sm:space-y-8">
+            <!-- Icon Settings -->
+            <div>
+              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white"><i
+                    data-lucide="settings-2" class="w-3.5 h-3.5"></i></div>
+                <h2 class="font-bold text-zinc-900 tracking-tight">Icon Settings</h2>
+              </div>
+              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm divide-y divide-zinc-100">
+                <div class="p-4 sm:p-6">
+                  <div class="flex flex-col gap-3">
+                    <span class="text-sm font-medium text-zinc-900">Folder Variant</span>
+                    <div class="flex gap-2">
+                      <button id="folderVariantEmptyBtn"
+                        class="folder-variant-btn active flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-brand-500 bg-brand-50 text-brand-700 transition-all"
+                        data-value="empty">Empty</button>
+                      <button id="folderVariantFilledBtn"
+                        class="folder-variant-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
+                        data-value="filled">Filled</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 sm:p-6">
+                  <div class="flex flex-col gap-3">
+                    <span class="text-sm font-medium text-zinc-900">Folder Color</span>
+                    <div class="flex items-center justify-between w-full">
+                      <div class="contents" id="folderColorSwatches"></div>
+                      <div class="h-6 w-px bg-zinc-200"></div>
+                      <input type="color" id="folderColorCustom" value="#339DE0"
+                        class="w-7 h-7 bg-transparent border-none p-0 cursor-pointer appearance-none shrink-0"
+                        title="Custom Color">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-4 sm:p-6">
+                  <div class="flex flex-col gap-3">
+                    <span class="text-sm font-medium text-zinc-900">Artwork Type</span>
+                    <div class="flex gap-2">
+                      <button id="folderArtworkTypeImageBtn"
+                        class="folder-artwork-type-btn active flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-brand-500 bg-brand-50 text-brand-700 transition-all"
+                        data-value="image">Image</button>
+                      <button id="folderArtworkTypeTextBtn"
+                        class="folder-artwork-type-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
+                        data-value="text">Text</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="folderArtworkTextContainer" class="p-4 sm:p-6 hidden">
+                  <div class="flex flex-col gap-3">
+                    <span class="text-sm font-medium text-zinc-900">Artwork Content</span>
+                    <input type="text" id="folderArtworkTextInput" maxlength="20" placeholder="Enter text..."
+                      class="w-full px-4 py-2 border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1"><span class="text-sm font-medium text-zinc-900">Artwork
+                      Size</span><span class="text-xs text-zinc-500">Adjust artwork size on the folder</span></div>
+                  <div class="flex items-center gap-3">
+                    <span id="zoomValueText" class="text-sm text-zinc-500 w-10 text-right">60%</span>
+                    <input type="range" id="iconZoomSlider" min="0.1" max="1.0" value="0.6" step="0.05"
+                      class="w-24 accent-brand-600">
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center p-4 sm:p-6">
+                  <div class="flex flex-col gap-1"><span class="text-sm font-medium text-zinc-900">Enable Adaptive
+                      Coloring</span><span class="text-xs text-zinc-500">Tints the artwork to match the folder
+                      color</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer" id="adaptColorToggleLabel"><input
+                      type="checkbox" id="adaptColorToggle" checked class="sr-only peer">
+                    <div
+                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Folder Sizes -->
+            <div>
+              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white"><i
+                    data-lucide="layers" class="w-3.5 h-3.5"></i></div>
+                <h2 class="font-bold text-zinc-900 tracking-tight">Export Sizes</h2>
+              </div>
+              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 sm:p-6">
+                <p class="text-xs text-zinc-500 mb-4 sm:mb-6">Select the icon sizes to include in the generated .icns
+                  file</p>
+                <div class="flex flex-wrap gap-2 sm:gap-3" id="folderSizeCheckboxes">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="selectAllFolderSizes" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 transition-all">
+                    <span class="text-sm font-medium text-zinc-700">All</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="16" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">16px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="32" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">32px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="64" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">64px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="128" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">128px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="256" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">256px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="512" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">512px</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" value="1024" checked
+                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
+                    <span
+                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">1024px</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
 
     <!-- Action Bar -->
@@ -335,16 +547,65 @@
         { typeId: 'ic10', size: 1024 }   // 512x512@2x
       ],
       squircleN: 2.4,
-      squircleCornerRatio: 0.261
+      squircleCornerRatio: 0.261,
+
+      folderColors: [
+        { id: 'default', label: 'Default', hex: '#339DE0' },
+        { id: 'green', label: 'Green', hex: '#18AB68' },
+        { id: 'lime', label: 'Lime', hex: '#3AAD4B' },
+        { id: 'yellow', label: 'Yellow', hex: '#CAA41B' },
+        { id: 'orange', label: 'Orange', hex: '#CD6F04' },
+        { id: 'red', label: 'Red', hex: '#CE2D24' },
+        { id: 'purple', label: 'Purple', hex: '#833F9D' },
+        { id: 'gray', label: 'Gray', hex: '#666666' },
+        { id: 'black', label: 'Black', hex: '#111111' },
+      ],
+      folderVariants: { empty: 'assets/empty.png', filled: 'assets/filled.png' }
     };
+
+    const imageCache = {};
+
+    // --- Helper ---
+    function applyFolderTint(ctx, fImg, width, height, colorHex) {
+      if (!colorHex || colorHex.toUpperCase() === '#339DE0') return; // Default blue, no tint needed
+      ctx.globalCompositeOperation = 'color';
+      ctx.fillStyle = colorHex;
+      ctx.fillRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.drawImage(fImg, 0, 0, width, height);
+      ctx.globalCompositeOperation = 'source-over';
+    }
 
     // --- State Management ---
     let state = {
-      sourceImage: null,
-      currentObjectUrl: null,
-      originalFilename: 'icon.png',
-      maxSourceSize: Infinity,
-      manualBgEnabled: false
+      mode: 'app', // 'app' | 'folder'
+      app: {
+        sourceImage: null,
+        currentObjectUrl: null,
+        originalFilename: 'icon.png',
+        maxSourceSize: Infinity,
+        manualBgEnabled: false,
+        paddingEnabled: true,
+        shadowEnabled: true,
+        fittingMode: 'cover',
+        squircleEnabled: true,
+        bgEnabled: false,
+        bgColor: '#ffffff'
+      },
+      folder: {
+        sourceImage: null,
+        currentObjectUrl: null,
+        originalFilename: 'icon.png',
+        maxSourceSize: Infinity,
+        variant: 'empty',
+        colorId: 'default',
+        customColor: null,
+        artworkType: 'image',
+        artworkText: '',
+        artworkTextCanvas: null,
+        adaptColorEnabled: true,
+        zoom: 0.6
+      }
     };
 
     // --- DOM Elements ---
@@ -352,6 +613,12 @@
       appWrapper: document.getElementById('app-wrapper'),
       mainScroll: document.getElementById('mainScroll'),
       appHeader: document.getElementById('appHeader'),
+      stickyHeader: document.getElementById('stickyHeader'),
+      stickyPreview: document.getElementById('stickyPreview'),
+      tabApp: document.getElementById('tabApp'),
+      tabFolder: document.getElementById('tabFolder'),
+      panelApp: document.getElementById('panelApp'),
+      panelFolder: document.getElementById('panelFolder'),
 
       fileInput: document.getElementById('fileInput'),
       dropZone: document.getElementById('dropZone'),
@@ -364,19 +631,49 @@
       bgToggle: document.getElementById('bgToggle'),
       colorRow: document.getElementById('colorRow'),
       tileColorInput: document.getElementById('tileColorInput'),
+      iconZoomSlider: document.getElementById('iconZoomSlider'),
+      zoomValueText: document.getElementById('zoomValueText'),
+      adaptColorToggle: document.getElementById('adaptColorToggle'),
+      adaptColorToggleLabel: document.getElementById('adaptColorToggleLabel'),
 
-      stickyHeader: document.getElementById('stickyHeader'),
+      folderVariantBtns: document.querySelectorAll('.folder-variant-btn'),
+      folderColorSwatches: document.getElementById('folderColorSwatches'),
+      folderColorCustom: document.getElementById('folderColorCustom'),
+      folderArtworkTypeBtns: document.querySelectorAll('.folder-artwork-type-btn'),
+      folderArtworkTextContainer: document.getElementById('folderArtworkTextContainer'),
+      folderArtworkTextInput: document.getElementById('folderArtworkTextInput'),
+
       previewCanvas: document.getElementById('previewCanvas'),
       previewPlaceholder: document.getElementById('previewPlaceholder'),
+      previewPlaceholderText: document.getElementById('previewPlaceholderText'),
       hoverOverlay: document.getElementById('hoverOverlay'),
-      selectAllSizes: document.getElementById('selectAllSizes')
+      hoverOverlayText: document.getElementById('hoverOverlayText'),
+      hoverOverlayIconWrapper: document.getElementById('hoverOverlayIconWrapper'),
+
+      selectAllSizes: document.getElementById('selectAllSizes'),
+      selectAllFolderSizes: document.getElementById('selectAllFolderSizes')
     };
 
     // --- Initialization ---
     function init() {
       lucide.createIcons();
       setupMobileHeight();
+      buildColorSwatches();
       bindEvents();
+    }
+
+    // --- UI Setup ---
+    function buildColorSwatches() {
+      els.folderColorSwatches.innerHTML = '';
+      CONFIG.folderColors.forEach(c => {
+        const d = document.createElement('div');
+        d.className = 'color-swatch' + (c.id === state.folder.colorId ? ' active' : '');
+        d.style.backgroundColor = c.hex;
+        d.dataset.id = c.id;
+        d.title = c.label;
+        d.addEventListener('click', () => setFolderColor(c.id));
+        els.folderColorSwatches.appendChild(d);
+      });
     }
 
     // --- Event Listeners ---
@@ -386,11 +683,17 @@
       // Header shadow on scroll
       els.mainScroll.addEventListener('scroll', () => {
         if (els.mainScroll.scrollTop > 10) {
-          els.stickyHeader.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
+          els.stickyPreview.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]', 'border-zinc-200/50');
+          els.stickyPreview.classList.remove('border-transparent');
         } else {
-          els.stickyHeader.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
+          els.stickyPreview.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]', 'border-zinc-200/50');
+          els.stickyPreview.classList.add('border-transparent');
         }
       });
+
+      // Tabs
+      els.tabApp.addEventListener('click', () => setMode('app'));
+      els.tabFolder.addEventListener('click', () => setMode('folder'));
 
       // Trigger file dialog
       els.dropZone.addEventListener('click', () => els.fileInput.click());
@@ -404,12 +707,14 @@
       // Border highlights on drag hover
       ['dragenter', 'dragover'].forEach(eventName => {
         els.dropZone.addEventListener(eventName, () => {
+          if (state.mode === 'folder' && state.folder.artworkType === 'text') return;
           els.dropZone.classList.add('border-brand-500', 'bg-brand-50');
           els.dropZone.classList.remove('border-zinc-200');
         }, false);
       });
       ['dragleave', 'drop'].forEach(eventName => {
         els.dropZone.addEventListener(eventName, () => {
+          if (state.mode === 'folder' && state.folder.artworkType === 'text') return;
           els.dropZone.classList.remove('border-brand-500', 'bg-brand-50');
           els.dropZone.classList.add('border-zinc-200');
         }, false);
@@ -427,22 +732,26 @@
       els.fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) {
           handleFile(e.target.files[0]);
+          els.fileInput.value = '';
         }
       });
 
-      // Listeners for live preview updates
-      [els.paddingToggle, els.shadowToggle, els.squircleToggle].forEach(el => {
-        el.addEventListener('change', updateLivePreview);
-      });
+      // Listeners for live preview updates (App)
+      els.paddingToggle.addEventListener('change', () => { state.app.paddingEnabled = els.paddingToggle.checked; updateLivePreview(); });
+      els.shadowToggle.addEventListener('change', () => { state.app.shadowEnabled = els.shadowToggle.checked; updateLivePreview(); });
+      els.squircleToggle.addEventListener('change', () => { state.app.squircleEnabled = els.squircleToggle.checked; updateLivePreview(); });
 
       els.fittingSelect.addEventListener('change', () => {
+        state.app.fittingMode = els.fittingSelect.value;
         if (els.fittingSelect.value === 'contain' || els.fittingSelect.value === 'center') {
           els.bgToggle.checked = true;
           els.bgToggle.disabled = true;
+          state.app.bgEnabled = true;
           els.colorRow.style.display = 'flex';
         } else {
           els.bgToggle.disabled = false;
-          els.bgToggle.checked = state.manualBgEnabled;
+          els.bgToggle.checked = state.app.manualBgEnabled;
+          state.app.bgEnabled = state.app.manualBgEnabled;
           els.colorRow.style.display = els.bgToggle.checked ? 'flex' : 'none';
         }
         updateLivePreview();
@@ -450,29 +759,181 @@
 
       // Background toggle shows color row
       els.bgToggle.addEventListener('change', () => {
-        state.manualBgEnabled = els.bgToggle.checked;
+        state.app.manualBgEnabled = els.bgToggle.checked;
+        state.app.bgEnabled = els.bgToggle.checked;
         els.colorRow.style.display = els.bgToggle.checked ? 'flex' : 'none';
         updateLivePreview();
       });
 
-      els.tileColorInput.addEventListener('input', (e) => {
+      els.tileColorInput.addEventListener('input', () => {
+        state.app.bgColor = els.tileColorInput.value;
+        updateLivePreview();
+      });
+
+      // Listeners for Folder mode settings
+      els.folderVariantBtns.forEach(b => b.addEventListener('click', () => setFolderVariant(b.dataset.value)));
+      els.folderArtworkTypeBtns.forEach(b => b.addEventListener('click', () => setFolderArtworkType(b.dataset.value)));
+      els.folderArtworkTextInput.addEventListener('input', (e) => {
+        state.folder.artworkText = e.target.value;
+        state.folder.artworkTextCanvas = createTextIcon(state.folder.artworkText.trim());
+        updateLivePreview();
+        updateUIState();
+      });
+
+      els.folderColorCustom.addEventListener('input', (e) => {
+        state.folder.customColor = e.target.value;
+        state.folder.colorId = 'custom';
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+        updateLivePreview();
+      });
+
+      els.adaptColorToggle.addEventListener('change', () => {
+        state.folder.adaptColorEnabled = els.adaptColorToggle.checked;
+        updateLivePreview();
+      });
+      els.iconZoomSlider.addEventListener('input', () => {
+        state.folder.zoom = parseFloat(els.iconZoomSlider.value) || 1;
+        els.zoomValueText.textContent = Math.round(state.folder.zoom * 100) + '%';
         updateLivePreview();
       });
 
       // All Sizes Toggle
-      els.selectAllSizes.addEventListener('change', updateCheckboxes);
+      els.selectAllSizes.addEventListener('change', () => updateCheckboxes('app'));
+      els.selectAllFolderSizes.addEventListener('change', () => updateCheckboxes('folder'));
 
       // Convert Action
       els.convertBtn.addEventListener('click', generateAndDownload);
-
-      updateCheckboxes();
     }
 
-    function updateCheckboxes() {
-      const isAllChecked = els.selectAllSizes.checked;
-      const maxSourceSize = state.maxSourceSize || Infinity;
+    // --- Mode Handlers ---
+    function setMode(m) {
+      state.mode = m;
 
-      document.querySelectorAll('.size-cb').forEach(cb => {
+      const isApp = m === 'app';
+      els.tabApp.classList.toggle('active', isApp);
+      els.tabFolder.classList.toggle('active', !isApp);
+
+      els.panelApp.classList.toggle('hidden', !isApp);
+      els.panelFolder.classList.toggle('hidden', isApp);
+
+      updateUIState();
+      updateCheckboxes(m);
+      updateLivePreview();
+    }
+
+    function setFolderVariant(val) {
+      state.folder.variant = val;
+      els.folderVariantBtns.forEach(b => {
+        const on = b.dataset.value === val;
+        b.classList.toggle('active', on);
+        b.style.borderColor = on ? '#3b82f6' : '#e4e4e7';
+        b.style.backgroundColor = on ? '#eff6ff' : 'white';
+        b.style.color = on ? '#1d4ed8' : '#3f3f46';
+      });
+      updateLivePreview();
+    }
+
+    function setFolderArtworkType(val) {
+      state.folder.artworkType = val;
+      els.folderArtworkTypeBtns.forEach(b => {
+        const on = b.dataset.value === val;
+        b.classList.toggle('active', on);
+        b.style.borderColor = on ? '#3b82f6' : '#e4e4e7';
+        b.style.backgroundColor = on ? '#eff6ff' : 'white';
+        b.style.color = on ? '#1d4ed8' : '#3f3f46';
+      });
+      els.folderArtworkTextContainer.classList.toggle('hidden', val !== 'text');
+      updateUIState();
+      updateCheckboxes('folder');
+      updateLivePreview();
+    }
+
+    function setFolderColor(id) {
+      state.folder.colorId = id;
+      state.folder.customColor = null;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('active', s.dataset.id === id));
+      updateLivePreview();
+    }
+
+    function updateUIState() {
+      const isApp = state.mode === 'app';
+      const curState = isApp ? state.app : state.folder;
+      const hasImage = !!curState.sourceImage;
+      const isTextMode = !isApp && state.folder.artworkType === 'text';
+
+      // Dropzone pointer events and styling
+      if (isTextMode) {
+        els.dropZone.classList.remove('cursor-pointer', 'hover:border-brand-500');
+        els.dropZone.style.pointerEvents = 'none';
+        els.convertBtn.disabled = !state.folder.artworkText.trim();
+      } else {
+        els.dropZone.classList.add('cursor-pointer', 'hover:border-brand-500');
+        els.dropZone.style.pointerEvents = 'auto';
+        if (isApp) {
+          els.convertBtn.disabled = !hasImage;
+        } else {
+          els.convertBtn.disabled = false;
+        }
+      }
+
+      // Adaptive Coloring enforcement for Text Mode
+      if (isTextMode) {
+        els.adaptColorToggle.checked = true;
+        els.adaptColorToggle.disabled = true;
+        state.folder.adaptColorEnabled = true;
+        if (els.adaptColorToggleLabel) {
+          els.adaptColorToggleLabel.classList.remove('cursor-pointer');
+          els.adaptColorToggleLabel.classList.add('cursor-not-allowed');
+        }
+      } else {
+        els.adaptColorToggle.disabled = false;
+        if (els.adaptColorToggleLabel) {
+          els.adaptColorToggleLabel.classList.add('cursor-pointer');
+          els.adaptColorToggleLabel.classList.remove('cursor-not-allowed');
+        }
+      }
+
+      if (isTextMode) {
+        els.previewPlaceholder.classList.add('hidden');
+        els.previewPlaceholder.classList.remove('flex');
+        els.hoverOverlay.classList.remove('flex');
+        els.hoverOverlay.classList.add('hidden');
+      } else {
+        els.hoverOverlay.classList.remove('hidden');
+        els.hoverOverlay.classList.add('flex');
+
+        if (hasImage) {
+          els.previewPlaceholder.classList.add('hidden');
+          els.previewPlaceholder.classList.remove('flex');
+
+          els.hoverOverlayText.textContent = 'Change Image';
+          els.hoverOverlayIconWrapper.innerHTML = '<i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>';
+        } else {
+          els.previewPlaceholder.classList.remove('hidden');
+          els.previewPlaceholder.classList.add('flex');
+
+          els.hoverOverlayText.textContent = 'Upload Image';
+          els.hoverOverlayIconWrapper.innerHTML = '<i data-lucide="upload-cloud" class="w-8 h-8 mb-2"></i>';
+        }
+        lucide.createIcons({ root: els.hoverOverlayIconWrapper });
+      }
+    }
+
+    // --- Core Logic ---
+    function updateCheckboxes(type) {
+      const isFolder = type === 'folder';
+      const allCb = isFolder ? els.selectAllFolderSizes : els.selectAllSizes;
+      const selector = isFolder ? '.size-cb-folder' : '.size-cb-app';
+
+      const isAllChecked = allCb.checked;
+      const curState = state[isFolder ? 'folder' : 'app'];
+      
+      let maxSourceSize = curState.maxSourceSize === undefined ? Infinity : curState.maxSourceSize;
+      if (isFolder && curState.artworkType === 'text') {
+        maxSourceSize = Infinity;
+      }
+
+      document.querySelectorAll(selector).forEach(cb => {
         const size = parseInt(cb.value);
         const isValid = size <= maxSourceSize;
 
@@ -490,130 +951,97 @@
       });
     }
 
-    // --- Core Logic ---
-    // Image Processing
     function handleFile(file) {
       if (!isValidImageFile(file)) {
         alert('Error: Please select a valid image file (PNG, JPG, WebP, SVG).');
         return;
       }
 
-      if (state.currentObjectUrl) {
-        URL.revokeObjectURL(state.currentObjectUrl);
+      const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+
+      const curState = state[state.mode];
+      if (curState.currentObjectUrl) {
+        URL.revokeObjectURL(curState.currentObjectUrl);
       }
-      state.currentObjectUrl = URL.createObjectURL(file);
+      curState.currentObjectUrl = URL.createObjectURL(file);
 
       const img = new Image();
       img.onload = () => {
-        state.sourceImage = img;
-        state.originalFilename = file.name;
+        curState.sourceImage = img;
+        curState.originalFilename = file.name;
+        curState.maxSourceSize = isSvg ? Infinity : Math.max(img.width, img.height);
 
-        state.maxSourceSize = Math.max(img.width, img.height);
-        updateCheckboxes();
+        updateCheckboxes(state.mode);
 
-        els.hoverOverlay.classList.remove('hidden');
-        els.hoverOverlay.classList.add('flex');
-
-        els.previewPlaceholder.classList.add('hidden');
-        els.previewPlaceholder.classList.remove('flex');
-
-        els.convertBtn.disabled = false;
-
+        updateUIState();
         updateLivePreview();
       };
       img.onerror = () => {
         alert('Error loading image file.');
       };
-      img.src = state.currentObjectUrl;
+      img.src = curState.currentObjectUrl;
     }
 
     function updateLivePreview() {
-      if (!state.sourceImage) return;
+      if (state.mode === 'app') {
+        drawAppPreview();
+      } else {
+        drawFolderPreview();
+      }
+    }
 
+    function drawAppPreview() {
       els.previewCanvas.width = 256;
       els.previewCanvas.height = 256;
       const ctx = els.previewCanvas.getContext('2d');
       ctx.clearRect(0, 0, 256, 256);
 
-      const usePadding = els.paddingToggle.checked;
-      const useShadow = els.shadowToggle.checked;
-      const fittingMode = els.fittingSelect.value;
-      const enableSquircle = els.squircleToggle.checked;
-      const enableBg = els.bgToggle.checked;
-      const squircleBgColor = els.tileColorInput.value;
+      if (!state.app.sourceImage) return;
 
-      const { scaledSize, padding } = getLayoutDimensions(256, usePadding);
-      const drawWidth = scaledSize;
-      const drawHeight = scaledSize;
-      const dx = padding;
-      const dy = padding;
+      const usePadding = state.app.paddingEnabled;
+      const useShadow = state.app.shadowEnabled;
+      const fittingMode = state.app.fittingMode;
+      const enableSquircle = state.app.squircleEnabled;
+      const enableBg = state.app.bgEnabled;
+      const squircleBgColor = state.app.bgColor;
 
-      ctx.save();
-
-      if (enableSquircle) {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 256;
-        tempCanvas.height = 256;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        if (enableBg) {
-          tempCtx.fillStyle = squircleBgColor;
-          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-          tempCtx.fill();
-        }
-
-        pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-        tempCtx.clip();
-
-        if (fittingMode === 'cover' || fittingMode === 'contain') {
-          drawImageFormatted(tempCtx, state.sourceImage, dx, dy, drawWidth, drawHeight, fittingMode);
-        } else if (fittingMode === 'center') {
-          const innerPadding = drawWidth * 0.15;
-          const innerWidth = drawWidth - (innerPadding * 2);
-          const innerHeight = drawHeight - (innerPadding * 2);
-          drawImageFormatted(tempCtx, state.sourceImage, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
-        }
-
-        if (useShadow) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 256 * 0.013;
-          ctx.shadowOffsetY = 256 * 0.0095;
-          ctx.shadowOffsetX = 0;
-        }
-        ctx.drawImage(tempCanvas, 0, 0);
-      } else {
-        if (useShadow) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = 256 * 0.013;
-          ctx.shadowOffsetY = 256 * 0.0095;
-          ctx.shadowOffsetX = 0;
-        }
-        if (enableBg) {
-          ctx.fillStyle = squircleBgColor;
-          ctx.fillRect(dx, dy, drawWidth, drawHeight);
-          ctx.shadowColor = 'transparent';
-        }
-
-        if (fittingMode === 'cover' || fittingMode === 'contain') {
-          drawImageFormatted(ctx, state.sourceImage, dx, dy, drawWidth, drawHeight, fittingMode);
-        } else if (fittingMode === 'center') {
-          const innerPadding = drawWidth * 0.15;
-          const innerWidth = drawWidth - (innerPadding * 2);
-          const innerHeight = drawHeight - (innerPadding * 2);
-          drawImageFormatted(ctx, state.sourceImage, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
-        }
-      }
-      ctx.restore();
+      const previewCanvasResult = processImageToCanvas(state.app.sourceImage, 256, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor);
+      ctx.drawImage(previewCanvasResult, 0, 0);
     }
 
+    async function drawFolderPreview() {
+      try {
+        els.previewCanvas.width = 256;
+        els.previewCanvas.height = 256;
+        const ctx = els.previewCanvas.getContext('2d');
+        ctx.clearRect(0, 0, 256, 256);
+
+        const fPath = CONFIG.folderVariants[state.folder.variant];
+        const fImg = await loadImageCached(fPath);
+
+        const colorHex = state.folder.colorId === 'custom'
+          ? state.folder.customColor
+          : (CONFIG.folderColors.find(c => c.id === state.folder.colorId)?.hex || '#339DE0');
+
+        const uImg = getFolderArtwork();
+
+        const previewCanvasResult = renderFolderToCanvas(fImg, uImg, 256, colorHex);
+        ctx.drawImage(previewCanvasResult, 0, 0);
+      } catch (e) {
+        console.error("drawFolderPreview error:", e);
+      }
+    }
+
+    let btnTimeout = null;
     function setButtonFeedback(btn, success, overrideText) {
-      const originalHTML = btn.innerHTML;
+      if (btnTimeout) clearTimeout(btnTimeout);
+
       const successClasses = ['bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20'];
       const errorClasses = ['bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20'];
       const originalClasses = ['bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20'];
       const targetClasses = success ? successClasses : errorClasses;
 
-      btn.classList.remove(...originalClasses);
+      btn.classList.remove(...originalClasses, ...errorClasses, ...successClasses);
       btn.classList.add(...targetClasses);
 
       const iconName = success ? 'check' : 'alert-triangle';
@@ -624,79 +1052,129 @@
       }
       lucide.createIcons({ root: btn });
 
-      setTimeout(() => {
+      btnTimeout = setTimeout(() => {
         btn.classList.remove(...targetClasses);
         btn.classList.add(...originalClasses);
-        btn.innerHTML = originalHTML;
+        btn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Generate & Download</span>`;
+        lucide.createIcons({ root: btn });
+        btnTimeout = null;
       }, 2000);
     }
 
     async function generateAndDownload() {
-      if (!state.sourceImage) return;
+      const curState = state[state.mode];
+      if (!curState || !curState.sourceImage && state.mode === 'app') return;
+      if (state.mode === 'folder' && state.folder.artworkType === 'text' && !state.folder.artworkText.trim()) return;
+
+      if (btnTimeout) {
+        clearTimeout(btnTimeout);
+        btnTimeout = null;
+      }
 
       const btn = els.convertBtn;
-      const originalHTML = btn.innerHTML;
+      btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20', 'bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20');
+      btn.classList.add('bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20');
+
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Generating...</span>`;
       lucide.createIcons({ root: btn });
       btn.disabled = true;
 
       try {
-        // Add a small delay to allow UI to update to loading state
-        await new Promise(r => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 50)); // UI delay
 
-        const iconEntries = [];
-        const usePadding = els.paddingToggle.checked;
-        const useShadow = els.shadowToggle.checked;
-        const fittingMode = els.fittingSelect.value;
-        const enableSquircle = els.squircleToggle.checked;
-        const enableBg = els.bgToggle.checked;
-        const squircleBgColor = els.tileColorInput.value;
-
-        const selectedSizes = Array.from(document.querySelectorAll('.size-cb:checked')).map(cb => parseInt(cb.value));
-        if (selectedSizes.length === 0) {
-          alert('Please select at least one size to export.');
-          btn.disabled = false;
-          btn.innerHTML = originalHTML;
-          return;
+        if (state.mode === 'app') {
+          await generateAppIcons(curState);
+        } else {
+          await generateFolderIcons(curState);
         }
-
-        const targetsToBuild = CONFIG.iconTypes.filter(t => selectedSizes.includes(t.size));
-
-        for (const target of targetsToBuild) {
-          const pngBlob = await processImageToBlob(state.sourceImage, target.size, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor);
-          const arrayBuffer = await pngBlob.arrayBuffer();
-          iconEntries.push({ typeId: target.typeId, bytes: arrayBuffer });
-        }
-
-        const icnsBlob = await buildIcnsBinary(iconEntries);
-        const downloadUrl = URL.createObjectURL(icnsBlob);
-        const originalName = state.originalFilename;
-        const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || 'icon';
-
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `${baseName}.icns`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
 
         btn.disabled = false;
-        btn.innerHTML = originalHTML;
         setButtonFeedback(btn, true, 'Downloaded!');
       } catch (err) {
         console.error(err);
         btn.disabled = false;
-        btn.innerHTML = originalHTML;
         setButtonFeedback(btn, false, 'Failed');
       }
     }
 
-    // --- UI Updates ---
-    // (No UI Updates defined)
+    async function generateAppIcons(curState) {
+      const iconEntries = [];
+      const usePadding = state.app.paddingEnabled;
+      const useShadow = state.app.shadowEnabled;
+      const fittingMode = state.app.fittingMode;
+      const enableSquircle = state.app.squircleEnabled;
+      const enableBg = state.app.bgEnabled;
+      const squircleBgColor = state.app.bgColor;
+
+      const selectedSizes = Array.from(document.querySelectorAll('.size-cb-app:checked')).map(cb => parseInt(cb.value));
+      if (selectedSizes.length === 0) {
+        throw new Error('Please select at least one size to export.');
+      }
+
+      const targetsToBuild = CONFIG.iconTypes.filter(t => selectedSizes.includes(t.size));
+
+      for (const target of targetsToBuild) {
+        const sizeCanvas = processImageToCanvas(curState.sourceImage, target.size, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor);
+        const pngBlob = await new Promise(res => sizeCanvas.toBlob(res, 'image/png'));
+        const arrayBuffer = await pngBlob.arrayBuffer();
+        iconEntries.push({ typeId: target.typeId, bytes: arrayBuffer });
+      }
+
+      const icnsBlob = await buildIcnsBinary(iconEntries);
+      const originalName = curState.originalFilename;
+      const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || 'icon';
+      downloadBlob(icnsBlob, baseName);
+    }
+
+    async function generateFolderIcons(curState) {
+      const fPath = CONFIG.folderVariants[state.folder.variant];
+      const colorHex = state.folder.colorId === 'custom'
+        ? state.folder.customColor
+        : (CONFIG.folderColors.find(c => c.id === state.folder.colorId)?.hex || '#339DE0');
+
+      const fImg = await loadImageCached(fPath);
+
+      const finalImg = getFolderArtwork();
+
+      const selectedSizes = Array.from(document.querySelectorAll('.size-cb-folder:checked')).map(cb => parseInt(cb.value));
+      if (selectedSizes.length === 0) {
+        throw new Error('Please select at least one size to export.');
+      }
+
+      const iconEntries = [];
+      const targetsToBuild = CONFIG.iconTypes.filter(t => selectedSizes.includes(t.size));
+
+      for (const target of targetsToBuild) {
+        const sizeCanvas = renderFolderToCanvas(fImg, finalImg, target.size, colorHex);
+        const pngBlob = await new Promise(res => sizeCanvas.toBlob(res, 'image/png'));
+        const arrayBuffer = await pngBlob.arrayBuffer();
+        iconEntries.push({ typeId: target.typeId, bytes: arrayBuffer });
+      }
+
+      const icnsBlob = await buildIcnsBinary(iconEntries);
+      const label = state.folder.colorId === 'default' ? `folder-${state.folder.variant}` : `folder-${state.folder.colorId}`;
+      downloadBlob(icnsBlob, label);
+    }
 
     // --- Utilities ---
+    function getFolderArtwork() {
+      if (state.folder.artworkType === 'text') {
+        return getFolderTextArtwork();
+      }
+      return getFolderImageArtwork();
+    }
+
+    function getFolderTextArtwork() {
+      if (state.folder.artworkText.trim()) {
+        return state.folder.artworkTextCanvas || createTextIcon(state.folder.artworkText.trim());
+      }
+      return null;
+    }
+
+    function getFolderImageArtwork() {
+      return state.folder.sourceImage || null;
+    }
+
     function preventDefaults(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -712,6 +1190,16 @@
         fileName.endsWith('.jpeg') ||
         fileName.endsWith('.webp') ||
         fileName.endsWith('.svg');
+    }
+
+    function loadImageCached(src) {
+      if (imageCache[src]) return Promise.resolve(imageCache[src]);
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => { imageCache[src] = img; resolve(img); };
+        img.onerror = reject;
+        img.src = src;
+      });
     }
 
     function pathSquircle(ctx, x, y, width, height) {
@@ -807,74 +1295,199 @@
       return { scaledSize, padding };
     }
 
-    function processImageToBlob(img, targetSize, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor) {
-      return new Promise((resolve) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = targetSize;
-        canvas.height = targetSize;
-        const ctx = canvas.getContext('2d');
+    function processImageToCanvas(img, targetSize, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor) {
+      const canvas = document.createElement('canvas');
+      canvas.width = targetSize;
+      canvas.height = targetSize;
+      const ctx = canvas.getContext('2d');
 
-        const { scaledSize, padding } = getLayoutDimensions(targetSize, usePadding);
-        const drawWidth = scaledSize, drawHeight = scaledSize, dx = padding, dy = padding;
+      const { scaledSize, padding } = getLayoutDimensions(targetSize, usePadding);
+      const drawWidth = scaledSize, drawHeight = scaledSize, dx = padding, dy = padding;
 
-        ctx.save();
+      ctx.save();
 
-        if (enableSquircle) {
-          const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = targetSize;
-          tempCanvas.height = targetSize;
-          const tempCtx = tempCanvas.getContext('2d');
+      if (enableSquircle) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = targetSize;
+        tempCanvas.height = targetSize;
+        const tempCtx = tempCanvas.getContext('2d');
 
-          if (enableBg) {
-            tempCtx.fillStyle = squircleBgColor;
-            pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-            tempCtx.fill();
-          }
-
+        if (enableBg) {
+          tempCtx.fillStyle = squircleBgColor;
           pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-          tempCtx.clip();
-
-          if (fittingMode === 'cover' || fittingMode === 'contain') {
-            drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
-          } else if (fittingMode === 'center') {
-            const innerPadding = drawWidth * 0.15;
-            const innerWidth = drawWidth - (innerPadding * 2);
-            const innerHeight = drawHeight - (innerPadding * 2);
-            drawImageFormatted(tempCtx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
-          }
-
-          if (useShadow) {
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-            ctx.shadowBlur = targetSize * 0.013;
-            ctx.shadowOffsetY = targetSize * 0.0095;
-            ctx.shadowOffsetX = 0;
-          }
-          ctx.drawImage(tempCanvas, 0, 0);
-        } else {
-          if (useShadow) {
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-            ctx.shadowBlur = targetSize * 0.013;
-            ctx.shadowOffsetY = targetSize * 0.0095;
-            ctx.shadowOffsetX = 0;
-          }
-          if (enableBg) {
-            ctx.fillStyle = squircleBgColor;
-            ctx.fillRect(dx, dy, drawWidth, drawHeight);
-            ctx.shadowColor = 'transparent';
-          }
-
-          if (fittingMode === 'cover' || fittingMode === 'contain') {
-            drawImageFormatted(ctx, img, dx, dy, drawWidth, drawHeight, fittingMode);
-          } else if (fittingMode === 'center') {
-            const innerPadding = drawWidth * 0.15;
-            const innerWidth = drawWidth - (innerPadding * 2);
-            const innerHeight = drawHeight - (innerPadding * 2);
-            drawImageFormatted(ctx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
-          }
+          tempCtx.fill();
         }
-        ctx.restore();
-        canvas.toBlob((blob) => resolve(blob), 'image/png');
-      });
+
+        pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+        tempCtx.clip();
+
+        if (fittingMode === 'cover' || fittingMode === 'contain') {
+          drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
+        } else if (fittingMode === 'center') {
+          const innerPadding = drawWidth * 0.15;
+          const innerWidth = drawWidth - (innerPadding * 2);
+          const innerHeight = drawHeight - (innerPadding * 2);
+          drawImageFormatted(tempCtx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+        }
+
+        if (useShadow) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = targetSize * 0.013;
+          ctx.shadowOffsetY = targetSize * 0.0095;
+          ctx.shadowOffsetX = 0;
+        }
+        ctx.drawImage(tempCanvas, 0, 0);
+      } else {
+        if (useShadow) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = targetSize * 0.013;
+          ctx.shadowOffsetY = targetSize * 0.0095;
+          ctx.shadowOffsetX = 0;
+        }
+        if (enableBg) {
+          ctx.fillStyle = squircleBgColor;
+          ctx.fillRect(dx, dy, drawWidth, drawHeight);
+          ctx.shadowColor = 'transparent';
+        }
+
+        if (fittingMode === 'cover' || fittingMode === 'contain') {
+          drawImageFormatted(ctx, img, dx, dy, drawWidth, drawHeight, fittingMode);
+        } else if (fittingMode === 'center') {
+          const innerPadding = drawWidth * 0.15;
+          const innerWidth = drawWidth - (innerPadding * 2);
+          const innerHeight = drawHeight - (innerPadding * 2);
+          drawImageFormatted(ctx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+        }
+      }
+      ctx.restore();
+      return canvas;
+    }
+
+    // Folder Rendering utilities
+    function calcIconDim(iw, ih, maxW, maxH, pref) {
+      const ar = iw / ih;
+      let w, h;
+      if (ar === 1) {
+        w = h = pref;
+      } else if (ar > 1) {
+        w = maxW;
+        h = w / ar;
+        if (h > maxH) { h = maxH; w = h * ar; }
+      } else {
+        h = maxH;
+        w = h * ar;
+        if (w > maxW) { w = maxW; h = w / ar; }
+      }
+      return { w: Math.min(w, maxW), h: Math.min(h, maxH) };
+    }
+
+    function shiftColor(hex, factor) {
+      let c = (hex || '#339DE0').replace('#', '');
+      if (c.length === 3) c = c.split('').map(char => char + char).join('');
+      const num = parseInt(c, 16);
+      let r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+      if (factor > 0) {
+        r = Math.round(r + (255 - r) * factor);
+        g = Math.round(g + (255 - g) * factor);
+        b = Math.round(b + (255 - b) * factor);
+      } else {
+        r = Math.round(r * (1 + factor));
+        g = Math.round(g * (1 + factor));
+        b = Math.round(b * (1 + factor));
+      }
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function createTextIcon(text) {
+      if (!text) return null;
+      const fontSize = 2048;
+      const temp = document.createElement('canvas');
+      const tCtx = temp.getContext('2d');
+      tCtx.font = `bold ${fontSize}px system-ui, sans-serif`;
+      const m = tCtx.measureText(text);
+      const w = Math.max(10, Math.ceil(m.width));
+
+      const c = document.createElement('canvas');
+      c.width = w; c.height = fontSize * 2;
+      const ctx = c.getContext('2d');
+      ctx.font = `bold ${fontSize}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(text, c.width / 2, c.height / 2);
+      return c;
+    }
+
+    function createTintedIcon(img, colorHex, outW, outH) {
+      if (!outW) outW = img.width;
+      if (!outH) outH = img.height;
+      const c = document.createElement('canvas');
+      c.width = outW; c.height = outH;
+      const ctx = c.getContext('2d');
+
+      ctx.drawImage(img, 0, 0, outW, outH);
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = shiftColor(colorHex, -0.10);
+      ctx.fillRect(0, 0, outW, outH);
+
+      return c;
+    }
+
+    function renderFolderToCanvas(fImg, finalImg, sz, colorHex) {
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = sz;
+      const ctx = cv.getContext('2d');
+
+      ctx.drawImage(fImg, 0, 0, sz, sz);
+      applyFolderTint(ctx, fImg, sz, sz, colorHex);
+
+      if (finalImg) {
+        const scale = sz / 1024;
+        const zoom = state.folder.zoom;
+
+        // True physical dimensions based on user measurement 940x756 in 1024 canvas
+        const folderW = 940 * scale;
+        const folderH = 756 * scale;
+        const notchHeight = 135 * scale;
+
+        // Assuming vertical centering of the 756px folder inside the 1024px canvas
+        const offsetY = ((1024 * scale) - folderH) / 2;
+
+        const frontFaceHeight = folderH - notchHeight;
+
+        const startY = offsetY + notchHeight;
+        const areaH = frontFaceHeight;
+
+        // Physical bounds of the folder front face
+        const boundW = folderW;
+        const boundH = frontFaceHeight;
+
+        let maxW = boundW * zoom;
+        let maxH = boundH * zoom;
+        let pref = Math.min(boundW, boundH) * zoom;
+
+        const dim = calcIconDim(finalImg.width, finalImg.height, maxW, maxH, pref);
+        const ix = sz / 2 - dim.w / 2;
+        const iy = startY + areaH / 2 - dim.h / 2;
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        if (state.folder.adaptColorEnabled) {
+          ctx.save();
+          ctx.shadowColor = shiftColor(colorHex, 0.5);
+          ctx.shadowOffsetY = 3 * scale;
+          ctx.shadowBlur = 3 * scale;
+          const outW = Math.max(1, Math.ceil(dim.w * 4));
+          const outH = Math.max(1, Math.ceil(dim.h * 4));
+          const tinted = createTintedIcon(finalImg, colorHex, outW, outH);
+          ctx.drawImage(tinted, ix, iy, dim.w, dim.h);
+          ctx.restore();
+        } else {
+          ctx.drawImage(finalImg, ix, iy, dim.w, dim.h);
+        }
+      }
+      return cv;
     }
 
     async function buildIcnsBinary(iconEntries) {
@@ -885,7 +1498,7 @@
       const buffer = new ArrayBuffer(totalBytes);
       const view = new DataView(buffer);
 
-      view.setUint32(0, 0x69636E73);
+      view.setUint32(0, 0x69636E73); // 'icns'
       view.setUint32(4, totalBytes);
 
       let offset = 8;
@@ -903,9 +1516,18 @@
       return new Blob([buffer], { type: 'image/x-icns' });
     }
 
+    function downloadBlob(blob, name) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${name}.icns`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+
     function setupMobileHeight() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
       if (els.appWrapper && window.innerWidth < 640) {
         els.appWrapper.style.height = `${window.innerHeight}px`;
       } else if (els.appWrapper) {
