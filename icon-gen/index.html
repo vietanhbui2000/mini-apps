@@ -388,13 +388,16 @@
                       <button id="folderVariantFilledBtn"
                         class="folder-variant-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
                         data-value="filled">Filled</button>
+                      <button id="folderVariantCutoutBtn"
+                        class="folder-variant-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
+                        data-value="cutout">Cutout</button>
                     </div>
                   </div>
                 </div>
-                <div class="p-4 sm:p-6">
+                <div class="p-4 sm:p-6 transition-opacity" id="folderColorRow">
                   <div class="flex flex-col gap-3">
                     <span class="text-sm font-medium text-zinc-900">Folder Color</span>
-                    <div class="flex items-center justify-between w-full">
+                    <div class="relative flex items-center justify-between w-full" id="folderColorControls">
                       <div class="contents" id="folderColorSwatches"></div>
                       <div class="h-6 w-px bg-zinc-200"></div>
                       <input type="color" id="folderColorCustom" value="#339DE0"
@@ -404,10 +407,10 @@
                   </div>
                 </div>
 
-                <div class="p-4 sm:p-6">
+                <div class="p-4 sm:p-6 transition-opacity" id="folderArtworkTypeRow">
                   <div class="flex flex-col gap-3">
                     <span class="text-sm font-medium text-zinc-900">Artwork Type</span>
-                    <div class="flex gap-2">
+                    <div class="relative flex gap-2" id="folderArtworkTypeControls">
                       <button id="folderArtworkTypeImageBtn"
                         class="folder-artwork-type-btn active flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-brand-500 bg-brand-50 text-brand-700 transition-all"
                         data-value="image">Image</button>
@@ -418,7 +421,7 @@
                   </div>
                 </div>
 
-                <div id="folderArtworkTextContainer" class="p-4 sm:p-6 hidden">
+                <div id="folderArtworkTextContainer" class="p-4 sm:p-6 hidden transition-opacity">
                   <div class="flex flex-col gap-3">
                     <span class="text-sm font-medium text-zinc-900">Artwork Content</span>
                     <input type="text" id="folderArtworkTextInput" maxlength="20" placeholder="Enter text..."
@@ -426,17 +429,17 @@
                   </div>
                 </div>
 
-                <div class="flex justify-between items-center p-4 sm:p-6">
+                <div class="flex justify-between items-center p-4 sm:p-6 transition-opacity" id="folderArtworkSizeRow">
                   <div class="flex flex-col gap-1"><span class="text-sm font-medium text-zinc-900">Artwork
                       Size</span><span class="text-xs text-zinc-500">Adjust artwork size on the folder</span></div>
-                  <div class="flex items-center gap-3">
+                  <div class="relative flex items-center gap-3" id="folderArtworkSizeControls">
                     <span id="zoomValueText" class="text-sm text-zinc-500 w-10 text-right">60%</span>
                     <input type="range" id="iconZoomSlider" min="0.1" max="1.0" value="0.6" step="0.05"
                       class="w-24 accent-brand-600">
                   </div>
                 </div>
 
-                <div class="flex justify-between items-center p-4 sm:p-6">
+                <div class="flex justify-between items-center p-4 sm:p-6 transition-opacity" id="folderAdaptiveColorRow">
                   <div class="flex flex-col gap-1"><span class="text-sm font-medium text-zinc-900">Enable Adaptive
                       Coloring</span><span class="text-xs text-zinc-500">Tints the artwork to match the folder
                       color</span>
@@ -560,7 +563,7 @@
         { id: 'gray', label: 'Gray', hex: '#666666' },
         { id: 'black', label: 'Black', hex: '#111111' },
       ],
-      folderVariants: { empty: 'assets/empty.png', filled: 'assets/filled.png' }
+      folderVariants: { empty: 'assets/empty.png', filled: 'assets/filled.png', cutout: 'assets/vector.svg' }
     };
 
     const imageCache = {};
@@ -830,7 +833,13 @@
         b.style.backgroundColor = on ? '#eff6ff' : 'white';
         b.style.color = on ? '#1d4ed8' : '#3f3f46';
       });
-      updateLivePreview();
+
+      if (val === 'cutout' && state.folder.artworkType === 'text') {
+        setFolderArtworkType('image');
+      } else {
+        updateUIState();
+        updateLivePreview();
+      }
     }
 
     function setFolderArtworkType(val) {
@@ -860,6 +869,34 @@
       const curState = isApp ? state.app : state.folder;
       const hasImage = !!curState.sourceImage;
       const isTextMode = !isApp && state.folder.artworkType === 'text';
+      const isCutout = !isApp && state.folder.variant === 'cutout';
+
+      ['folderColorRow', 'folderArtworkTypeRow', 'folderArtworkTextContainer', 'folderArtworkSizeRow', 'folderAdaptiveColorRow'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (isCutout) {
+            el.classList.add('opacity-50');
+          } else {
+            el.classList.remove('opacity-50');
+          }
+        }
+      });
+
+      ['folderColorControls', 'folderArtworkTypeControls', 'folderArtworkSizeControls', 'adaptColorToggleLabel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (isCutout) {
+            if (!el.querySelector('.cutout-overlay')) {
+              const overlay = document.createElement('div');
+              overlay.className = 'cutout-overlay absolute inset-0 z-10 cursor-not-allowed';
+              el.appendChild(overlay);
+            }
+          } else {
+            const overlay = el.querySelector('.cutout-overlay');
+            if (overlay) overlay.remove();
+          }
+        }
+      });
 
       // Dropzone pointer events and styling
       if (isTextMode) {
@@ -872,7 +909,11 @@
         if (isApp) {
           els.convertBtn.disabled = !hasImage;
         } else {
-          els.convertBtn.disabled = false;
+          if (isCutout) {
+            els.convertBtn.disabled = !hasImage;
+          } else {
+            els.convertBtn.disabled = false;
+          }
         }
       }
 
@@ -1448,6 +1489,31 @@
       const cv = document.createElement('canvas');
       cv.width = cv.height = sz;
       const ctx = cv.getContext('2d');
+
+      if (state.folder.variant === 'cutout') {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = sz;
+        tempCanvas.height = sz;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        if (finalImg) {
+          drawImageFormatted(tempCtx, finalImg, 0, 0, sz, sz, 'cover');
+          tempCtx.globalCompositeOperation = 'destination-in';
+          tempCtx.drawImage(fImg, 0, 0, sz, sz);
+        } else {
+          tempCtx.drawImage(fImg, 0, 0, sz, sz);
+        }
+        
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.50)';
+        ctx.shadowBlur = sz * (22 / 1024);
+        ctx.shadowOffsetY = sz * (8 / 1024);
+        ctx.shadowOffsetX = 0;
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.restore();
+        
+        return cv;
+      }
 
       ctx.drawImage(fImg, 0, 0, sz, sz);
       applyFolderTint(ctx, fImg, sz, sz, colorHex);
