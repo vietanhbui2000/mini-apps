@@ -1332,16 +1332,16 @@
 
         if (useShadow) {
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = targetSize * 0.013;
-          ctx.shadowOffsetY = targetSize * 0.0095;
+          ctx.shadowBlur = targetSize * 0.026;
+          ctx.shadowOffsetY = targetSize * 0.0078;
           ctx.shadowOffsetX = 0;
         }
         ctx.drawImage(tempCanvas, 0, 0);
       } else {
         if (useShadow) {
           ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = targetSize * 0.013;
-          ctx.shadowOffsetY = targetSize * 0.0095;
+          ctx.shadowBlur = targetSize * 0.026;
+          ctx.shadowOffsetY = targetSize * 0.0078;
           ctx.shadowOffsetX = 0;
         }
         if (enableBg) {
@@ -1381,7 +1381,11 @@
       return { w: Math.min(w, maxW), h: Math.min(h, maxH) };
     }
 
+    const colorShiftCache = {};
     function shiftColor(hex, factor) {
+      const key = hex + '_' + factor;
+      if (colorShiftCache[key]) return colorShiftCache[key];
+
       let c = (hex || '#339DE0').replace('#', '');
       if (c.length === 3) c = c.split('').map(char => char + char).join('');
       const num = parseInt(c, 16);
@@ -1395,7 +1399,9 @@
         g = Math.round(g * (1 + factor));
         b = Math.round(b * (1 + factor));
       }
-      return `rgb(${r}, ${g}, ${b})`;
+      const result = `rgb(${r}, ${g}, ${b})`;
+      colorShiftCache[key] = result;
+      return result;
     }
 
     function createTextIcon(text) {
@@ -1418,19 +1424,24 @@
       return c;
     }
 
+    const sharedTintCanvas = document.createElement('canvas');
+    const sharedTintCtx = sharedTintCanvas.getContext('2d');
+
     function createTintedIcon(img, colorHex, outW, outH) {
       if (!outW) outW = img.width;
       if (!outH) outH = img.height;
-      const c = document.createElement('canvas');
-      c.width = outW; c.height = outH;
-      const ctx = c.getContext('2d');
+      
+      sharedTintCanvas.width = outW; 
+      sharedTintCanvas.height = outH;
 
-      ctx.drawImage(img, 0, 0, outW, outH);
-      ctx.globalCompositeOperation = 'source-in';
-      ctx.fillStyle = shiftColor(colorHex, -0.10);
-      ctx.fillRect(0, 0, outW, outH);
+      sharedTintCtx.globalCompositeOperation = 'source-over';
+      sharedTintCtx.drawImage(img, 0, 0, outW, outH);
+      
+      sharedTintCtx.globalCompositeOperation = 'source-in';
+      sharedTintCtx.fillStyle = shiftColor(colorHex, -0.10);
+      sharedTintCtx.fillRect(0, 0, outW, outH);
 
-      return c;
+      return sharedTintCanvas;
     }
 
     function renderFolderToCanvas(fImg, finalImg, sz, colorHex) {
