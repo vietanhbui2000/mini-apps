@@ -1162,9 +1162,8 @@
       }
 
       const icnsBlob = await buildIcnsBinary(iconEntries);
-      const originalName = curState.originalFilename;
-      const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || 'icon';
-      downloadBlob(icnsBlob, baseName);
+      const maxSize = Math.max(...selectedSizes);
+      downloadBlob(icnsBlob, `app_${maxSize}x`);
     }
 
     async function generateFolderIcons(curState) {
@@ -1193,8 +1192,8 @@
       }
 
       const icnsBlob = await buildIcnsBinary(iconEntries);
-      const label = state.folder.colorId === 'default' ? `folder-${state.folder.variant}` : `folder-${state.folder.colorId}`;
-      downloadBlob(icnsBlob, label);
+      const maxSize = Math.max(...selectedSizes);
+      downloadBlob(icnsBlob, `folder_${maxSize}x`);
     }
 
     // --- Utilities ---
