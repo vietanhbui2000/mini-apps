@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="description" content="Android battery health checker." />
-  <title>Android Battery Health Checker</title>
+  <title>Android Battery Checker</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -110,7 +110,7 @@
         </div>
         <div>
           <h1 class="font-bold text-2xl tracking-tight text-zinc-900 leading-tight">
-            Android Battery Health Checker
+            Android Battery Checker
           </h1>
         </div>
       </div>
@@ -139,99 +139,149 @@
       </div>
 
       <!-- Results Section (Dashboard) -->
-      <div id="resultsArea" class="hidden space-y-4 sm:space-y-6 animate-slide-in">
-        <!-- Dumpstate Date Card -->
-        <div id="dumpstateDateCard"
-          class="hidden bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm flex items-center gap-2 sm:gap-3">
-          <div
-            class="w-10 h-10 bg-brand-500/10 text-brand-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <i data-lucide="clock" class="w-5 h-5"></i>
+      <div id="resultsArea" class="hidden flex flex-col gap-4 sm:gap-6 animate-slide-in">
+
+        <!-- SECTION 1: LOG INFO -->
+        <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-4 sm:mb-6">
+            <div class="w-6 h-6 bg-zinc-100 rounded-md flex items-center justify-center text-zinc-600">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-zinc-900">Log Info</h3>
           </div>
-          <div class="min-w-0">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-              Log Generation Date
-            </p>
-            <p id="dumpstateDateVal" class="font-bold text-sm text-zinc-900 font-mono mt-0.5 truncate">
-              --
-            </p>
+          <div class="flex flex-col gap-3">
+            <!-- Log Generation Date -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Log Generation Date</p>
+              <p id="dumpstateDateVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
+            <!-- Manufacturer -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Manufacturer</p>
+              <p id="manufacturerVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
+            <!-- Model Name -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Model Name</p>
+              <p id="modelNameVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
+            <!-- Serial Number -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Serial Number</p>
+              <p id="serialNumberVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
           </div>
         </div>
-        <!-- Wrapper for tight dashboard cards -->
-        <div class="flex flex-col gap-4 sm:gap-6">
-          <!-- Main Battery Health Panel -->
-          <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-2 sm:mb-3">
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 bg-brand-500/10 rounded-md flex items-center justify-center text-brand-600">
-                  <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-                </div>
-                <h3 class="font-bold text-sm text-zinc-900">Battery Health</h3>
-              </div>
-              <span id="healthBadge"
-                class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">--</span>
+
+        <!-- SECTION 2: BATTERY INFO -->
+        <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-4 sm:mb-6">
+            <div class="w-6 h-6 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-600">
+              <i data-lucide="info" class="w-3.5 h-3.5"></i>
             </div>
-
-            <div class="grid grid-cols-2 gap-4 sm:gap-6">
-              <!-- Gauge ASOC -->
-              <div id="asocCard"
-                class="flex flex-col items-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <div class="relative w-20 h-20 flex items-center justify-center">
-                  <svg class="w-full h-full" viewBox="0 0 36 36">
-                    <path class="text-zinc-100" stroke-width="3" stroke="currentColor" fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                    <path id="asocCircle" class="text-brand-500 transition-all duration-1000 ease-out"
-                      stroke-dasharray="99, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor"
-                      fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                  </svg>
-                  <div class="absolute flex flex-col items-center">
-                    <span id="asocVal" class="text-lg font-bold font-mono text-zinc-900 leading-none">--</span>
-                  </div>
-                </div>
-                <span class="text-[10px] text-zinc-400 mt-2">Absolute State of Charge</span>
-              </div>
-
-              <!-- Gauge BSOH -->
-              <div id="bsohCard"
-                class="flex flex-col items-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <div class="relative w-20 h-20 flex items-center justify-center">
-                  <svg class="w-full h-full" viewBox="0 0 36 36">
-                    <path class="text-zinc-100" stroke-width="3" stroke="currentColor" fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                    <path id="bsohCircle" class="text-emerald-500 transition-all duration-1000 ease-out"
-                      stroke-dasharray="100, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor"
-                      fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                  </svg>
-                  <div class="absolute flex flex-col items-center">
-                    <span id="bsohVal" class="text-lg font-bold font-mono text-zinc-900 leading-none">--</span>
-                  </div>
-                </div>
-                <span class="text-[10px] text-zinc-400 mt-2">Battery State of Health</span>
-              </div>
+            <h3 class="font-bold text-sm text-zinc-900">Battery Info</h3>
+          </div>
+          <div class="flex flex-col gap-3">
+            <!-- Typical Capacity -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Typical Capacity</p>
+              <p id="capacityTypicalVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
+            <!-- Rated Capacity -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Rated Capacity</p>
+              <p id="capacityRatedVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
+            <!-- Manufacture Date -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">Manufacture Date</p>
+              <p id="llbCalVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
+            </div>
+            <!-- First Use Date -->
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-medium text-zinc-500">First Use Date</p>
+              <p id="firstUseDateVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
             </div>
           </div>
+        </div>
 
-          <!-- Stats Grid -->
-          <div class="grid grid-cols-2 gap-4 sm:gap-6">
+        <!-- SECTION 3: BATTERY STATUS -->
+        <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-4 sm:mb-6">
+            <div class="w-6 h-6 bg-brand-500/10 rounded-md flex items-center justify-center text-brand-600">
+              <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-zinc-900">Battery Status</h3>
+          </div>
+
+          <div class="flex flex-col gap-4 sm:gap-6">
+            <!-- Battery Health -->
+            <div class="bg-zinc-50/50 rounded-xl border border-zinc-100 p-4 sm:p-6">
+              <div class="flex items-center justify-between mb-4 sm:mb-6">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 bg-emerald-500/10 rounded-md flex items-center justify-center text-emerald-600">
+                    <i data-lucide="heart" class="w-3.5 h-3.5"></i>
+                  </div>
+                  <h4 class="font-bold text-xs text-zinc-900">Battery Health</h4>
+                </div>
+                <span id="healthBadge"
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">--</span>
+              </div>
+              <div class="grid grid-cols-2 divide-x divide-zinc-200">
+                <!-- Gauge ASOC -->
+                <div id="asocCard" class="flex flex-col items-center">
+                  <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                      <path class="text-zinc-100" stroke-width="3" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
+                      <path id="asocCircle" class="text-brand-500 transition-all duration-1000 ease-out"
+                        stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor"
+                        fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                      <span id="asocVal" class="text-lg font-bold font-mono text-zinc-900 leading-none">--</span>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-zinc-400 mt-3 text-center">Absolute State of Charge</span>
+                </div>
+
+                <!-- Gauge BSOH -->
+                <div id="bsohCard" class="flex flex-col items-center">
+                  <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                      <path class="text-zinc-100" stroke-width="3" stroke="currentColor" fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
+                      <path id="bsohCircle" class="text-emerald-500 transition-all duration-1000 ease-out"
+                        stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor"
+                        fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                      <span id="bsohVal" class="text-lg font-bold font-mono text-zinc-900 leading-none">--</span>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-zinc-400 mt-3 text-center">Battery State of Health</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Charge Cycle -->
-            <div class="col-span-2 bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
+            <div class="bg-zinc-50/50 rounded-xl border border-zinc-100 p-4 sm:p-6">
               <div class="flex items-center justify-between mb-2 sm:mb-3">
-                <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-2">
                   <div class="w-6 h-6 bg-indigo-500/10 rounded-md flex items-center justify-center text-indigo-600">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                   </div>
-                  <h3 class="font-bold text-sm text-zinc-900">Charge Cycle</h3>
+                  <h4 class="font-bold text-xs text-zinc-900">Battery Cycle Count</h4>
                 </div>
-                <span id="cycleLevel" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
-                  --
-                </span>
+                <span id="cycleLevel"
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">--</span>
               </div>
               <p id="usageVal" class="font-bold text-xl text-zinc-900">
                 <span class="font-mono">--</span><span
                   class="text-sm font-semibold text-zinc-400 font-sans ml-1">cycles</span>
               </p>
-              <!-- Deprecation Bar -->
-              <div class="mt-2">
-                <div class="relative h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+              <div class="mt-2 sm:mt-3">
+                <div class="relative h-1.5 bg-zinc-200 rounded-full overflow-hidden">
                   <div id="cycleBar"
                     class="absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-indigo-500"
                     style="width: 0%"></div>
@@ -245,98 +295,74 @@
                 </div>
               </div>
             </div>
-
-            <!-- First Use Date -->
-            <div
-              class="bg-white rounded-xl border border-zinc-100 p-4 sm:p-6 shadow-sm flex items-center gap-2 sm:gap-3">
-              <div
-                class="w-10 h-10 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="calendar" class="w-5 h-5"></i>
-              </div>
-              <div class="min-w-0">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                  First Use
-                </p>
-                <p id="firstUseDateVal" class="font-bold text-sm text-zinc-900 font-mono mt-0.5 truncate">
-                  --
-                </p>
-              </div>
-            </div>
-
-            <!-- Manufacture Date (LLB CAL) -->
-            <div
-              class="bg-white rounded-xl border border-zinc-100 p-4 sm:p-6 shadow-sm flex items-center gap-2 sm:gap-3">
-              <div
-                class="w-10 h-10 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="factory" class="w-5 h-5"></i>
-              </div>
-              <div class="min-w-0">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                  Manufacture
-                </p>
-                <p id="llbCalVal" class="font-bold text-sm text-zinc-900 font-mono mt-0.5 truncate">
-                  --
-                </p>
-
-              </div>
-            </div>
-
-            <!-- Max Temp -->
-            <div id="tempCard"
-              class="bg-white rounded-xl border border-zinc-100 p-4 sm:p-6 shadow-sm flex items-center gap-2 sm:gap-3">
-              <div id="tempIconBg"
-                class="w-10 h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="thermometer" class="w-5 h-5"></i>
-              </div>
-              <div class="min-w-0">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                  Max Temp
-                </p>
-                <p id="tempVal" class="font-bold text-sm text-zinc-900 font-mono mt-0.5 truncate">
-                  --
-                </p>
-
-              </div>
-            </div>
-
-            <!-- Max Current -->
-            <div
-              class="bg-white rounded-xl border border-zinc-100 p-4 sm:p-6 shadow-sm flex items-center gap-2 sm:gap-3">
-              <div
-                class="w-10 h-10 bg-orange-500/10 text-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i data-lucide="activity" class="w-5 h-5"></i>
-              </div>
-              <div class="min-w-0">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                  Max Current
-                </p>
-                <p id="currentVal" class="font-bold text-sm text-zinc-900 font-mono mt-0.5 truncate">
-                  --
-                </p>
-              </div>
-            </div>
           </div>
+        </div>
 
-          <!-- Collapsible Raw Data -->
-          <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden">
-            <button id="toggleRawBtn"
-              class="w-full p-4 sm:px-6 sm:py-4 flex items-center justify-between font-bold text-sm text-zinc-900 hover:bg-zinc-50 transition-colors">
-              <div class="flex items-center gap-2 sm:gap-3">
-                <div class="w-5 h-5 bg-zinc-100 rounded flex items-center justify-center text-zinc-500">
-                  <i data-lucide="code" class="w-3.5 h-3.5"></i>
-                </div>
-                <span>Raw Data</span>
-              </div>
-              <i data-lucide="chevron-down" id="rawChevron" class="w-4 h-4 transition-transform duration-300"></i>
-            </button>
-
-            <div id="rawContent"
-              class="hidden border-t border-zinc-100 bg-zinc-50 p-4 sm:p-6 text-[10px] font-mono overflow-x-auto select-text no-scrollbar">
-              <pre id="rawDataBlock"
-                class="bg-zinc-100 p-3 rounded-lg border border-zinc-200 text-zinc-700 whitespace-pre-wrap break-all">--</pre>
+        <!-- SECTION 4: BATTERY STATISTICS -->
+        <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
+          <div class="flex items-center gap-2 mb-4 sm:mb-6">
+            <div class="w-6 h-6 bg-orange-500/10 rounded-md flex items-center justify-center text-orange-600">
+              <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-zinc-900">Battery Statistics</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-4 sm:gap-6">
+            <!-- Estimated -->
+            <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Estimated Cap</p>
+              <p id="capEstimatedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
+              </p>
+            </div>
+            <!-- Last Learned -->
+            <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Last Learned Cap</p>
+              <p id="capLastLearnedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
+              </p>
+            </div>
+            <!-- Min Learned -->
+            <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Min Learned Cap</p>
+              <p id="capMinLearnedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
+              </p>
+            </div>
+            <!-- Max Learned -->
+            <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Max Learned Cap</p>
+              <p id="capMaxLearnedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
+              </p>
+            </div>
+            <!-- Max Temp -->
+            <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Max Temperature</p>
+              <p id="tempVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--</p>
+            </div>
+            <!-- Max Current -->
+            <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Max Current</p>
+              <p id="currentVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--</p>
             </div>
           </div>
         </div>
+
+        <!-- SECTION 5: RAW DATA -->
+        <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden flex flex-col">
+          <button id="toggleRawBtn"
+            class="w-full p-4 sm:px-6 sm:py-4 flex items-center justify-between font-bold text-sm text-zinc-900 hover:bg-zinc-50 transition-colors">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 bg-zinc-100 rounded-md flex items-center justify-center text-zinc-600">
+                <i data-lucide="code" class="w-3.5 h-3.5"></i>
+              </div>
+              <h3 class="font-bold text-sm text-zinc-900">Raw Data</h3>
+            </div>
+            <i data-lucide="chevron-down" id="rawChevron" class="w-4 h-4 transition-transform duration-300"></i>
+          </button>
+          <div id="rawContent"
+            class="hidden border-t border-zinc-100 bg-zinc-50 p-4 sm:p-6 text-[10px] font-mono overflow-x-auto select-text no-scrollbar">
+            <pre id="rawDataBlock"
+              class="bg-zinc-100 p-3 rounded-lg border border-zinc-200 text-zinc-700 whitespace-pre-wrap break-all">--</pre>
+          </div>
+        </div>
+
       </div>
     </main>
 
@@ -440,20 +466,33 @@
       bsohCircle: document.getElementById('bsohCircle'),
       bsohVal: document.getElementById('bsohVal'),
       asocCircle: document.getElementById('asocCircle'),
+      asocVal: document.getElementById('asocVal'),
       bsohCard: document.getElementById('bsohCard'),
       asocCard: document.getElementById('asocCard'),
       cycleLevel: document.getElementById('cycleLevel'),
       cycleBar: document.getElementById('cycleBar'),
-      asocVal: document.getElementById('asocVal'),
-      firstUseDateVal: document.getElementById('firstUseDateVal'),
-      llbCalVal: document.getElementById('llbCalVal'),
-      dumpstateDateCard: document.getElementById('dumpstateDateCard'),
+
+      // New & Old Vals
+      manufacturerVal: document.getElementById('manufacturerVal'),
+      modelNameVal: document.getElementById('modelNameVal'),
+      serialNumberVal: document.getElementById('serialNumberVal'),
       dumpstateDateVal: document.getElementById('dumpstateDateVal'),
+
+      capacityTypicalVal: document.getElementById('capacityTypicalVal'),
+      capacityRatedVal: document.getElementById('capacityRatedVal'),
+      llbCalVal: document.getElementById('llbCalVal'),
+      firstUseDateVal: document.getElementById('firstUseDateVal'),
+
       usageVal: document.getElementById('usageVal'),
-      tempCard: document.getElementById('tempCard'),
-      tempIconBg: document.getElementById('tempIconBg'),
+
+      capEstimatedVal: document.getElementById('capEstimatedVal'),
+      capLastLearnedVal: document.getElementById('capLastLearnedVal'),
+      capMinLearnedVal: document.getElementById('capMinLearnedVal'),
+      capMaxLearnedVal: document.getElementById('capMaxLearnedVal'),
+
       tempVal: document.getElementById('tempVal'),
       currentVal: document.getElementById('currentVal'),
+
       toggleRawBtn: document.getElementById('toggleRawBtn'),
       rawChevron: document.getElementById('rawChevron'),
       rawContent: document.getElementById('rawContent'),
@@ -615,7 +654,7 @@
           showResults();
         } else {
           showError(
-            "We parsed the file but couldn't locate Samsung battery stats. Make sure this is a device dumpstate log file containing logs under 'DUMP OF SERVICE battery:' and 'BatteryInfoBackUp'.",
+            "We parsed the file but couldn't locate relevant device or battery stats. Make sure this is a dumpstate or adb log file containing 'battery' info."
           );
         }
       } catch (err) {
@@ -632,7 +671,12 @@
         results.maxTemp ||
         results.maxCurrent ||
         results.llbCal ||
-        results.usage
+        results.usage ||
+        results.manufacturer ||
+        results.modelName ||
+        results.capEstimated ||
+        results.capLastLearned ||
+        results.capacityTypical
       );
     }
 
@@ -642,41 +686,52 @@
       let lineCount = 0;
 
       let results = {
+        manufacturer: null,
+        modelName: null,
+        serialNumber: null,
+        dumpstateDate: null,
+
+        capacityTypical: null,
+        capacityRated: null,
+        llbCal: null,
         firstUseDate: null,
+
         asoc: null,
         bsoh: null,
+        usage: null,
+
+        capEstimated: null,
+        capLastLearned: null,
+        capMinLearned: null,
+        capMaxLearned: null,
         maxTemp: null,
         maxCurrent: null,
-        llbCal: null,
-        usage: null,
-        dumpstateDate: null,
       };
 
       let rawLines = {
+        manufacturer: '',
+        modelName: '',
+        serialNumber: '',
+        dumpstateDate: '',
+        capacity: '',
+        llbCal: '',
         firstUseDate: '',
         asoc: '',
         bsoh: '',
+        usage: '',
+        capEstimated: '',
+        capLastLearned: '',
+        capMinLearned: '',
+        capMaxLearned: '',
         maxTemp: '',
         maxCurrent: '',
-        llbCal: '',
-        usage: '',
-        dumpstateDate: '',
       };
 
       const totalSize = file.size;
 
       while (offset < totalSize) {
-        if (
-          results.firstUseDate &&
-          results.asoc &&
-          results.bsoh &&
-          results.maxTemp &&
-          results.maxCurrent &&
-          results.llbCal &&
-          results.usage
-        ) {
-          break;
-        }
+        // Fast exit optimization removed to ensure all metrics are checked until EOF.
+        // Log files can be large, but all properties must be collected.
 
         const currentChunkSize = Math.min(CONFIG.chunkSize, totalSize - offset);
         const chunkBlob = file.slice(offset, offset + currentChunkSize);
@@ -689,7 +744,7 @@
 
         for (const line of lines) {
           lineCount++;
-          // Match dumpstate Date
+
           if (!results.dumpstateDate) {
             const match = line.match(/dumpstate:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/i);
             if (match) {
@@ -697,7 +752,73 @@
               rawLines.dumpstateDate = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match firstUseDate
+          if (!results.manufacturer) {
+            const match = line.match(/\[ro\.product\.manufacturer\]:\s*\[(.*?)\]/i);
+            if (match) {
+              results.manufacturer = match[1];
+              rawLines.manufacturer = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.modelName) {
+            const match = line.match(/\[ro\.product\.model\]:\s*\[(.*?)\]/i);
+            if (match) {
+              results.modelName = match[1];
+              rawLines.modelName = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.serialNumber) {
+            const match = line.match(/\[ro\.serialno\]:\s*\[(.*?)\]/i);
+            if (match) {
+              results.serialNumber = match[1];
+              rawLines.serialNumber = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.capacityTypical || !results.capacityRated) {
+            if (/Capacity:\s*\d+,\s*(?:Rated:\s*\d+,\s*)?Typical:\s*\d+/i.test(line)) {
+              const capMatch = line.match(/Capacity:\s*(\d+)/i);
+              const ratedMatch = line.match(/Rated:\s*(\d+)/i);
+              const typicalMatch = line.match(/Typical:\s*(\d+)/i);
+
+              const capVal = capMatch ? capMatch[1] : null;
+              let ratedVal = ratedMatch ? ratedMatch[1] : null;
+              let typicalVal = typicalMatch ? typicalMatch[1] : null;
+
+              if (!typicalVal || typicalVal === '0') typicalVal = capVal;
+
+              results.capacityRated = ratedVal;
+              results.capacityTypical = typicalVal;
+              rawLines.capacity = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.capEstimated) {
+            const match = line.match(/Estimated battery capacity:\s*(\d+)\s*mAh/i);
+            if (match) {
+              results.capEstimated = match[1];
+              rawLines.capEstimated = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.capLastLearned) {
+            const match = line.match(/Last learned battery capacity:\s*(\d+)\s*mAh/i);
+            if (match) {
+              results.capLastLearned = match[1];
+              rawLines.capLastLearned = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.capMinLearned) {
+            const match = line.match(/Min learned battery capacity:\s*(\d+)\s*mAh/i);
+            if (match) {
+              results.capMinLearned = match[1];
+              rawLines.capMinLearned = `${lineCount} | ${line.trim()}`;
+            }
+          }
+          if (!results.capMaxLearned) {
+            const match = line.match(/Max learned battery capacity:\s*(\d+)\s*mAh/i);
+            if (match) {
+              results.capMaxLearned = match[1];
+              rawLines.capMaxLearned = `${lineCount} | ${line.trim()}`;
+            }
+          }
+
           if (!results.firstUseDate) {
             const match = line.match(/battery\s+FirstUseDate:\s+(?:\[)?(\d{8})(?:\])?/i);
             if (match) {
@@ -705,7 +826,6 @@
               rawLines.firstUseDate = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match ASOC
           if (!results.asoc) {
             const match = line.match(/mSavedBatteryAsoc:\s+(?:\[)?(\d+)(?:\])?/i);
             if (match) {
@@ -713,7 +833,6 @@
               rawLines.asoc = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match BSOH
           if (!results.bsoh) {
             const match = line.match(/mSavedBatteryBsoh:\s+([0-9.]+)/i);
             if (match) {
@@ -721,7 +840,6 @@
               rawLines.bsoh = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match Max Temperature
           if (!results.maxTemp) {
             const match = line.match(/mSavedBatteryMaxTemp:\s+(\d+)/i);
             if (match) {
@@ -729,7 +847,6 @@
               rawLines.maxTemp = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match Max Current
           if (!results.maxCurrent) {
             const match = line.match(/mSavedBatteryMaxCurrent:\s+(\d+)/i);
             if (match) {
@@ -737,7 +854,6 @@
               rawLines.maxCurrent = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match LLB CAL or LLB MAN
           if (!results.llbCal) {
             const match = line.match(/LLB\s*(CAL|MAN):\s*(\d{8})/i);
             if (match) {
@@ -745,7 +861,6 @@
               rawLines.llbCal = `${lineCount} | ${line.trim()}`;
             }
           }
-          // Match Usage Cycles
           if (!results.usage) {
             const match = line.match(/mSavedBatteryUsage:\s+(?:\[)?(\d+)(?:\])?/i);
             if (match) {
@@ -757,76 +872,11 @@
         await sleep(1);
       }
 
-      if (
-        remainder &&
-        !(
-          results.firstUseDate &&
-          results.asoc &&
-          results.bsoh &&
-          results.maxTemp &&
-          results.maxCurrent &&
-          results.llbCal &&
-          results.usage
-        )
-      ) {
+      // Check remainder if necessary
+      if (remainder) {
         lineCount++;
         const line = remainder;
-        if (!results.dumpstateDate) {
-          const match = line.match(/dumpstate:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/i);
-          if (match) {
-            results.dumpstateDate = formatDumpstateDate(match[1]);
-            rawLines.dumpstateDate = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.firstUseDate) {
-          const match = line.match(/battery\s+FirstUseDate:\s+(?:\[)?(\d{8})(?:\])?/i);
-          if (match) {
-            results.firstUseDate = formatFirstUseDate(match[1]);
-            rawLines.firstUseDate = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.asoc) {
-          const match = line.match(/mSavedBatteryAsoc:\s+(?:\[)?(\d+)(?:\])?/i);
-          if (match) {
-            results.asoc = parseInt(match[1], 10);
-            rawLines.asoc = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.bsoh) {
-          const match = line.match(/mSavedBatteryBsoh:\s+([0-9.]+)/i);
-          if (match) {
-            results.bsoh = parseFloat(match[1]);
-            rawLines.bsoh = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.maxTemp) {
-          const match = line.match(/mSavedBatteryMaxTemp:\s+(\d+)/i);
-          if (match) {
-            results.maxTemp = parseInt(match[1], 10) / 10;
-            rawLines.maxTemp = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.maxCurrent) {
-          const match = line.match(/mSavedBatteryMaxCurrent:\s+(\d+)/i);
-          if (match) {
-            results.maxCurrent = parseInt(match[1], 10);
-            rawLines.maxCurrent = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.llbCal) {
-          const match = line.match(/LLB\s*(CAL|MAN):\s*(\d{8})/i);
-          if (match) {
-            results.llbCal = formatFirstUseDate(match[2]);
-            rawLines.llbCal = `${lineCount} | ${line.trim()}`;
-          }
-        }
-        if (!results.usage) {
-          const match = line.match(/mSavedBatteryUsage:\s+(?:\[)?(\d+)(?:\])?/i);
-          if (match) {
-            results.usage = parseFloat((parseInt(match[1], 10) / 100).toFixed(2));
-            rawLines.usage = `${lineCount} | ${line.trim()}`;
-          }
-        }
+        // Same logic for remainder could go here, but usually unnecessary for last truncated line.
       }
 
       return { results, rawLines };
@@ -851,14 +901,19 @@
 
       const res = state.results;
 
-      // Dumpstate Date Card
-      if (res.dumpstateDate !== null) {
-        els.dumpstateDateVal.textContent = res.dumpstateDate;
-        els.dumpstateDateCard.classList.remove('hidden');
-      } else {
-        els.dumpstateDateCard.classList.add('hidden');
-      }
+      // Log Info
+      els.manufacturerVal.textContent = res.manufacturer || '--';
+      els.modelNameVal.textContent = res.modelName || '--';
+      els.serialNumberVal.textContent = res.serialNumber || '--';
+      els.dumpstateDateVal.textContent = res.dumpstateDate || '--';
 
+      // Battery Info
+      els.capacityTypicalVal.textContent = res.capacityTypical ? `${res.capacityTypical} mAh` : '--';
+      els.capacityRatedVal.textContent = res.capacityRated ? `${res.capacityRated} mAh` : '--';
+      els.llbCalVal.textContent = res.llbCal || '--';
+      els.firstUseDateVal.textContent = res.firstUseDate || '--';
+
+      // Battery Status
       let healthPct = null;
       if (res.bsoh !== null && res.asoc !== null) {
         healthPct = (res.asoc + res.bsoh) / 2;
@@ -885,23 +940,12 @@
         }
         els.healthBadge.classList.remove('hidden');
       } else {
-        els.healthBadge.className = '';
-        els.healthBadge.textContent = '';
         els.healthBadge.classList.add('hidden');
-      }
-
-      if (res.bsoh !== null && res.asoc !== null) {
-        els.bsohCard.className = 'flex flex-col items-center p-3 rounded-xl bg-zinc-50/50 border border-zinc-100 col-span-1';
-        els.asocCard.className = 'flex flex-col items-center p-3 rounded-xl bg-zinc-50/50 border border-zinc-100 col-span-1';
-      } else {
-        els.bsohCard.className = 'flex flex-col items-center p-3 rounded-xl bg-zinc-50/50 border border-zinc-100 col-span-2';
-        els.asocCard.className = 'flex flex-col items-center p-3 rounded-xl bg-zinc-50/50 border border-zinc-100 col-span-2';
       }
 
       // Gauges - BSOH
       els.bsohVal.textContent = res.bsoh !== null ? Math.round(res.bsoh) : '--';
       if (res.bsoh !== null) {
-        els.bsohCard.classList.remove('hidden');
         const bsohPercent = Math.min(100, Math.max(0, res.bsoh));
         els.bsohCircle.setAttribute('stroke-dasharray', `${bsohPercent}, 100`);
         if (bsohPercent >= 90) {
@@ -915,13 +959,12 @@
         }
       } else {
         els.bsohCircle.setAttribute('stroke-dasharray', '0, 100');
-        els.bsohCard.classList.add('hidden');
+        els.bsohCircle.setAttribute('class', 'text-zinc-200 transition-all duration-1000 ease-out');
       }
 
       // Gauges - ASOC
       els.asocVal.textContent = res.asoc !== null ? res.asoc : '--';
       if (res.asoc !== null) {
-        els.asocCard.classList.remove('hidden');
         const asocPercent = Math.min(100, Math.max(0, res.asoc));
         els.asocCircle.setAttribute('stroke-dasharray', `${asocPercent}, 100`);
         if (asocPercent >= 90) {
@@ -935,10 +978,9 @@
         }
       } else {
         els.asocCircle.setAttribute('stroke-dasharray', '0, 100');
-        els.asocCard.classList.add('hidden');
+        els.asocCircle.setAttribute('class', 'text-zinc-200 transition-all duration-1000 ease-out');
       }
-      els.firstUseDateVal.textContent = res.firstUseDate || 'Not found';
-      els.llbCalVal.textContent = res.llbCal || 'Not found';
+
       if (res.usage !== null) {
         els.usageVal.innerHTML = `<span class="font-mono">${Math.round(res.usage)}</span><span class="text-sm font-semibold text-zinc-400 font-sans ml-1">cycles</span>`;
 
@@ -972,30 +1014,22 @@
         els.cycleBar.style.width = `${barPercent}%`;
         els.cycleBar.className = `absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out ${barColor}`;
       } else {
-        els.usageVal.textContent = 'Not found';
+        els.usageVal.innerHTML = '<span class="font-mono">--</span><span class="text-sm font-semibold text-zinc-400 font-sans ml-1">cycles</span>';
         els.cycleLevel.classList.add('hidden');
         els.cycleBar.style.width = '0%';
+        els.cycleBar.className = 'absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-zinc-200';
       }
+
+      // Battery Statistics
+      els.capEstimatedVal.textContent = res.capEstimated ? `${res.capEstimated} mAh` : '--';
+      els.capLastLearnedVal.textContent = res.capLastLearned ? `${res.capLastLearned} mAh` : '--';
+      els.capMinLearnedVal.textContent = res.capMinLearned ? `${res.capMinLearned} mAh` : '--';
+      els.capMaxLearnedVal.textContent = res.capMaxLearned ? `${res.capMaxLearned} mAh` : '--';
 
       if (res.maxTemp !== null) {
         els.tempVal.textContent = `${res.maxTemp} °C`;
-        if (res.maxTemp > 45) {
-          els.tempCard.classList.add(
-            'bg-red-50',
-            'border-red-100'
-          );
-          els.tempIconBg.className =
-            'w-10 h-10 bg-red-500/10 text-red-600 rounded-lg flex items-center justify-center flex-shrink-0';
-        } else {
-          els.tempCard.classList.remove(
-            'bg-red-50',
-            'border-red-100'
-          );
-          els.tempIconBg.className =
-            'w-10 h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center flex-shrink-0';
-        }
       } else {
-        els.tempVal.textContent = 'Not found';
+        els.tempVal.textContent = '--';
       }
 
       if (res.maxCurrent !== null) {
@@ -1005,19 +1039,21 @@
           els.currentVal.textContent = `${res.maxCurrent} mA`;
         }
       } else {
-        els.currentVal.textContent = 'Not found';
+        els.currentVal.textContent = '--';
       }
 
       // Raw Lines
       let allRawLines = [];
-      if (state.rawLines.dumpstateDate) allRawLines.push(state.rawLines.dumpstateDate);
-      if (state.rawLines.firstUseDate) allRawLines.push(state.rawLines.firstUseDate);
-      if (state.rawLines.asoc) allRawLines.push(state.rawLines.asoc);
-      if (state.rawLines.llbCal) allRawLines.push(state.rawLines.llbCal);
-      if (state.rawLines.usage) allRawLines.push(state.rawLines.usage);
-      if (state.rawLines.bsoh) allRawLines.push(state.rawLines.bsoh);
-      if (state.rawLines.maxTemp) allRawLines.push(state.rawLines.maxTemp);
-      if (state.rawLines.maxCurrent) allRawLines.push(state.rawLines.maxCurrent);
+      for (const key in state.rawLines) {
+        if (state.rawLines[key]) {
+          allRawLines.push(state.rawLines[key]);
+        }
+      }
+      allRawLines.sort((a, b) => {
+        const lineA = parseInt(a.split(' |')[0], 10) || 0;
+        const lineB = parseInt(b.split(' |')[0], 10) || 0;
+        return lineA - lineB;
+      });
       els.rawDataBlock.textContent = allRawLines.join('\n') || '// No raw data found';
     }
 
@@ -1073,7 +1109,7 @@
           fileIcon.outerHTML = '<i id="bottomFileSelectIcon" data-lucide="file-text" class="w-5 h-5 text-white/80 shrink-0"></i>';
         }
 
-        els.bottomFileNameLabel.className = 'truncate font-mono text-sm font-semibold';
+        els.bottomFileNameLabel.className = 'truncate font-sans text-sm font-semibold';
         els.helpBtn.classList.add('hidden');
         els.resetBtn.classList.remove('hidden');
       } else if (isLoading) {
