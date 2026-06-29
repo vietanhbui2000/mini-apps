@@ -1365,7 +1365,7 @@
         if (fittingMode === 'cover' || fittingMode === 'contain') {
           drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
         } else if (fittingMode === 'center') {
-          const innerPadding = drawWidth * 0.15;
+          const innerPadding = drawWidth * 0.10;
           const innerWidth = drawWidth - (innerPadding * 2);
           const innerHeight = drawHeight - (innerPadding * 2);
           drawImageFormatted(tempCtx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
@@ -1394,7 +1394,7 @@
         if (fittingMode === 'cover' || fittingMode === 'contain') {
           drawImageFormatted(ctx, img, dx, dy, drawWidth, drawHeight, fittingMode);
         } else if (fittingMode === 'center') {
-          const innerPadding = drawWidth * 0.15;
+          const innerPadding = drawWidth * 0.10;
           const innerWidth = drawWidth - (innerPadding * 2);
           const innerHeight = drawHeight - (innerPadding * 2);
           drawImageFormatted(ctx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
