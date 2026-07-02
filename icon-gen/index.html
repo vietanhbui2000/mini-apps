@@ -1372,17 +1372,17 @@
         }
 
         if (useShadow) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = targetSize * 0.026;
-          ctx.shadowOffsetY = targetSize * 0.0078;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
+          ctx.shadowBlur = targetSize * 0.031;
+          ctx.shadowOffsetY = targetSize * 0.009;
           ctx.shadowOffsetX = 0;
         }
         ctx.drawImage(tempCanvas, 0, 0);
       } else {
         if (useShadow) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-          ctx.shadowBlur = targetSize * 0.026;
-          ctx.shadowOffsetY = targetSize * 0.0078;
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
+          ctx.shadowBlur = targetSize * 0.031;
+          ctx.shadowOffsetY = targetSize * 0.009;
           ctx.shadowOffsetX = 0;
         }
         if (enableBg) {
@@ -1551,13 +1551,34 @@
         ctx.imageSmoothingQuality = 'high';
 
         if (state.folder.adaptColorEnabled) {
-          ctx.save();
-          ctx.shadowColor = shiftColor(colorHex, 0.5);
-          ctx.shadowOffsetY = 3 * scale;
-          ctx.shadowBlur = 3 * scale;
           const outW = Math.max(1, Math.ceil(dim.w * 4));
           const outH = Math.max(1, Math.ceil(dim.h * 4));
-          const tinted = createTintedIcon(finalImg, colorHex, outW, outH);
+
+          // 1. Draw highlight drop shadow
+          // Use a temp canvas to prevent shadow from bleeding inside the glyph
+          const shadowCv = document.createElement('canvas');
+          shadowCv.width = sz;
+          shadowCv.height = sz;
+          const sCtx = shadowCv.getContext('2d');
+
+          sCtx.shadowColor = shiftColor(colorHex, 0.5);
+          sCtx.shadowOffsetY = sz + (3 * scale);
+          sCtx.shadowBlur = 3 * scale;
+          sCtx.shadowOffsetX = 0;
+          // Draw out of bounds to cast shadow into bounds
+          sCtx.drawImage(finalImg, ix, iy - sz, dim.w, dim.h);
+
+          // Cut out the glyph interior so the highlight only shows on the outside bottom edge
+          sCtx.globalCompositeOperation = 'destination-out';
+          sCtx.drawImage(finalImg, ix, iy, dim.w, dim.h);
+
+          ctx.drawImage(shadowCv, 0, 0);
+
+          // 2. Draw the darkened glyph with multiply blending
+          ctx.save();
+          ctx.globalCompositeOperation = 'multiply';
+          const tinted = createTintedIcon(finalImg, '#000000', outW, outH);
+          ctx.globalAlpha = 0.15; // Match Apple's ~0.85x darkening ratio
           ctx.drawImage(tinted, ix, iy, dim.w, dim.h);
           ctx.restore();
         } else {
