@@ -380,7 +380,7 @@
         <button id="bottomFileSelectBtn"
           class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white h-12 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-start gap-2 sm:gap-3 group focus:ring-2 focus:ring-brand-500 outline-none text-left border border-transparent truncate">
           <i id="bottomFileSelectIcon" data-lucide="file-text" class="w-5 h-5 text-white/80 shrink-0"></i>
-          <span id="bottomFileNameLabel" class="truncate font-sans text-sm">Select log file...</span>
+          <span id="bottomFileNameLabel" class="truncate font-sans text-sm">Select file...</span>
         </button>
 
         <!-- Help Button -->
@@ -407,7 +407,7 @@
         class="bg-white w-full rounded-t-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
         role="dialog">
         <div class="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 class="text-xl font-bold text-zinc-900">How to generate Android dumpstate?</h2>
+          <h2 class="text-xl font-bold text-zinc-900">How to get an Android dumpstate log?</h2>
           <button id="closeHelpModal" class="text-zinc-400 hover:text-zinc-600 p-2 -mr-2">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
@@ -421,9 +421,8 @@
             </li>
             <li>Tap <span class="font-bold text-zinc-800">"Run dumpstate/logcat"</span>.</li>
             <li>
-              Select <span class="font-bold text-zinc-800">"Copy to SD card"</span> or
-              share/transfer the resulting <code class="font-mono text-zinc-800">.log</code> file to
-              your computer.
+              Select <span class="font-bold text-zinc-800">"Copy to SD card"</span> to get the output <code
+                class="font-mono text-zinc-800">.log</code> file.
             </li>
             <li>
               Alternatively, run
@@ -1114,7 +1113,7 @@
           fileIcon.outerHTML = '<i id="bottomFileSelectIcon" data-lucide="file-text" class="w-5 h-5 text-white/80 shrink-0"></i>';
         }
 
-        els.bottomFileNameLabel.className = 'truncate font-sans text-sm font-semibold';
+        els.bottomFileNameLabel.className = 'truncate font-mono text-sm font-semibold';
         els.helpBtn.classList.add('hidden');
         els.resetBtn.classList.remove('hidden');
       } else if (isLoading) {
@@ -1139,7 +1138,7 @@
         }
 
         els.bottomFileNameLabel.className = 'truncate font-sans text-sm';
-        els.bottomFileNameLabel.textContent = 'Select log file...';
+        els.bottomFileNameLabel.textContent = 'Select file...';
         els.helpBtn.classList.remove('hidden');
         els.resetBtn.classList.add('hidden');
       }
