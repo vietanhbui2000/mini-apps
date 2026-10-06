@@ -2141,6 +2141,16 @@
                     <label><input type="radio" name="p" value="year" />Year</label>
                   </div>
                 </div>
+                <div class="row row-stack" id="shape-row">
+                  <span class="row-text">Shape</span>
+                  <div class="seg" role="radiogroup" aria-label="Shape">
+                    <label><input type="radio" name="sh" value="dot" />Dot</label>
+                    <label><input type="radio" name="sh" value="sparkle" />Sparkle</label>
+                    <label><input type="radio" name="sh" value="star" />Star</label>
+                    <label><input type="radio" name="sh" value="heart" />Heart</label>
+                    <label><input type="radio" name="sh" value="cookie" />Cookie</label>
+                  </div>
+                </div>
                 <label class="row">
                   <span class="row-text">
                     <span>Numbers</span>
@@ -2526,6 +2536,8 @@
         banner: [720, 180],
       };
       const PERIODS = ['day', 'week', 'month', 'year'];
+      // The dots style's mark shapes; the first is the default. Same list in widget.html.
+      const SHAPES = ['dot', 'sparkle', 'star', 'heart', 'cookie'];
       // Where widget links point when this page is opened from a file: a file:// link would
       // only work on this computer.
       const PUBLIC_URL = 'https://vietanhbui2000.pages.dev/mini-apps/widget-maker/';
@@ -2545,7 +2557,6 @@
           tz: 'Asia/Tokyo',
           label: 'Tokyo',
         },
-        { name: 'Minimal', w: 'clock', wide: true, c: 'mono', sec: true },
         { name: 'Month', w: 'calendar', c: '1f8a65', size: 'large' },
         { name: 'Today', w: 'calendar', s: 'today', wide: true, c: 'd93025' },
         { name: 'Year in dots', w: 'progress', wide: true, c: 'a63aa8' },
@@ -2619,6 +2630,7 @@
         results: document.getElementById('results'),
         swatches: document.getElementById('swatches'),
         customSize: document.getElementById('custom-size'),
+        shapeRow: document.getElementById('shape-row'),
         linkOut: document.getElementById('link-out'),
         codeOut: document.getElementById('code-out'),
         snackbar: document.getElementById('snackbar'),
@@ -2759,6 +2771,7 @@
         switch (t.name) {
           case 's':
             w.s = t.value;
+            els.shapeRow.hidden = draft.progress.s !== 'dots';
             break;
           case 'h24':
           case 'sec':
@@ -2788,6 +2801,9 @@
             break;
           case 'txt':
             draft.progress.txt = t.checked;
+            break;
+          case 'sh':
+            draft.progress.sh = t.value;
             break;
           case 'cd-label':
             draft.countdown.label = t.value.slice(0, 40);
@@ -2867,7 +2883,7 @@
           w,
           clock: { s: 'digital', h24: false, sec: false, date: true, tz: '', label: '' },
           calendar: { s: 'month', ws: 1 },
-          progress: { s: 'dots', p: 'year', txt: true },
+          progress: { s: 'dots', p: 'year', txt: true, sh: SHAPES[0] },
           countdown: { s: 'big', label: 'New Year', date: `${year}-01-01` },
           weather: { s: 'now', ...prefs.weather },
           look: {
@@ -2886,7 +2902,7 @@
         const d = baseDraft(p.w);
         const o = d[p.w];
         if (p.s) o.s = p.s;
-        for (const key of ['h24', 'sec', 'date', 'tz', 'label', 'p']) {
+        for (const key of ['h24', 'sec', 'date', 'tz', 'label', 'p', 'sh']) {
           if (key in p) o[key] = p[key];
         }
         if (p.days) {
@@ -2935,6 +2951,7 @@
         } else if (w === 'progress') {
           if (PERIODS.includes(q.get('p'))) o.p = q.get('p');
           o.txt = q.get('txt') !== '0';
+          if (SHAPES.includes(q.get('sh'))) o.sh = q.get('sh');
         } else if (w === 'countdown') {
           const date = q.get('d') || '';
           // Round-trip through a real date so 2026-02-30 doesn't reach the date field.
@@ -3004,6 +3021,7 @@
         } else if (d.w === 'progress') {
           if (o.p !== 'year') q.set('p', o.p);
           if (!o.txt) q.set('txt', '0');
+          if (o.s === 'dots' && o.sh !== SHAPES[0]) q.set('sh', o.sh);
         } else if (d.w === 'countdown') {
           q.set('d', o.date);
           if (o.label.trim()) q.set('lbl', o.label.trim());
@@ -3322,6 +3340,8 @@
         f.ws.value = String(draft.calendar.ws);
         f.p.value = draft.progress.p;
         f.txt.checked = draft.progress.txt;
+        f.sh.value = draft.progress.sh;
+        els.shapeRow.hidden = draft.progress.s !== 'dots';
         f['cd-label'].value = draft.countdown.label;
         f['cd-date'].value = draft.countdown.date;
         f.u.value = draft.weather.u;

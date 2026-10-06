@@ -76,7 +76,13 @@
         cursor: default;
       }
 
+      /* A fixed square box: until the icon font loads, an icon is its ligature name
+         ("partly_cloudy_day"), which would otherwise widen the layout. */
       .icon {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        overflow: hidden;
         font-family: 'Material Symbols Rounded';
         font-weight: normal;
         font-style: normal;
@@ -523,7 +529,15 @@
         width: 100%;
         height: 100%;
         gap: 4vmin;
-        animation: enter var(--spring-ms) var(--spring) both;
+        /* Fade only: layoutDots() measures the grid's place on screen, which a scale would
+           shift while the entrance runs. */
+        animation: fade var(--spring-ms) ease-out both;
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
       }
 
       .dots-text {
@@ -545,88 +559,40 @@
         font-weight: 500;
       }
 
+      /* layoutDots() centers the cells with padding snapped to whole device pixels. */
       .dots {
         display: grid;
         flex: 1;
-        align-content: center;
-        justify-content: center;
+        align-content: start;
+        justify-content: start;
         min-height: 0;
       }
 
+      /* Static marks in the picked shape (--mark, set from script), all one size: past days
+         in primary, today in tertiary, the days ahead muted. */
       .cell {
         display: grid;
         place-items: center;
-        scale: var(--hover, 1);
-        transition: scale 300ms var(--spring);
       }
 
       .cell i {
         display: block;
-        width: 20%;
-        height: 20%;
-        border-radius: 50%;
+        width: var(--mark-size, 44%);
+        height: var(--mark-size, 44%);
         background: var(--outline-variant);
+        mask: var(--mark) center / contain no-repeat;
+        -webkit-mask: var(--mark) center / contain no-repeat;
       }
 
-      /* Year Left's proportions: a sparkle about a third of its cell, so neighbors keep
-         clear space until the hover swell (up to 1.7x) brings them close. */
-      .cell.past i,
-      .cell.now i {
-        width: 36%;
-        height: 36%;
-        border-radius: 0;
+      .cell.past i {
         background: var(--primary);
-        mask: var(--sparkle) center / contain no-repeat;
-        -webkit-mask: var(--sparkle) center / contain no-repeat;
-        opacity: 0.55;
-        animation: twinkle 7s ease-in-out infinite;
-        animation-delay: var(--delay, 0s);
       }
 
       .cell.now i {
-        width: 64%;
-        height: 64%;
         background: var(--tertiary);
-        opacity: 1;
-        filter: drop-shadow(0 0 0.4em var(--tertiary));
-        animation: pulse 3s ease-in-out infinite;
-      }
-
-      @keyframes twinkle {
-        0%,
-        100% {
-          rotate: 0deg;
-          opacity: 0.5;
-        }
-        50% {
-          rotate: 90deg;
-          opacity: 0.9;
-        }
-      }
-
-      @keyframes pulse {
-        50% {
-          rotate: 45deg;
-          scale: 0.8;
-        }
-      }
-
-      /* Tapping the grid lights the past days in sequence. */
-      .ignite .cell.past i {
-        animation: glow 2.4s ease-out both;
-        animation-delay: calc(var(--i) * 4ms);
-      }
-
-      @keyframes glow {
-        20% {
-          background: var(--tertiary);
-          opacity: 1;
-          scale: 1.4;
-        }
       }
 
       /* Motion off stops the decoration. Clock hands keep running: they are the time. */
-      .still .cell i,
       .still .today::before {
         animation-play-state: paused;
       }
@@ -951,7 +917,8 @@
 
     <script>
       // --- Constants & Config ---
-      // Keep these defaults in sync with DEFAULT_SEED and STYLES (first style of each widget) in
+      // Keep these defaults in sync with DEFAULT_SEED, STYLES (first style of each widget) and
+      // SHAPES in
       // index.html: the builder leaves default values out of the URL to keep links short.
       const DEFAULT_SEED = 'a63aa8';
       const WIDGETS = {
@@ -962,6 +929,8 @@
         weather: { styles: ['now', 'forecast'] },
       };
       const PERIODS = ['year', 'month', 'week', 'day'];
+      // Mark shapes for the dots style; the first is the default.
+      const SHAPES = ['dot', 'sparkle', 'star', 'heart', 'cookie'];
       const DAY_MS = 86400000;
       const WEATHER_REFRESH_MS = 30 * 60 * 1000;
       const WEATHER_RETRY_MS = 60 * 1000;
@@ -1008,8 +977,6 @@
       let weatherTimer = 0;
       let weatherPending = ''; // Key of the fetch in flight, so rapid updates don't start a second
       let lastDigits = '';
-      let dotCenters = []; // { cell, x, y, hovered } for the hover effect
-      let hoverFrame = 0;
       let waveFrame = 0;
       let barGeom = null; // { sw, mid, end, amp, wl } for the bar's wave
 
@@ -1022,7 +989,6 @@
       function init() {
         const root = document.documentElement.style;
         root.setProperty('--cookie', svgMask(cookiePath(50, 50, 50, 12, 0.11)));
-        root.setProperty('--sparkle', svgMask(sparklePath()));
         applyColors();
         render();
         bindEvents();
@@ -1035,7 +1001,10 @@
       function bindEvents() {
         DARK_QUERY.addEventListener('change', applyColors);
         new ResizeObserver(() => layout()).observe(els.w);
+        // Fonts change text widths, so fit again whenever one arrives, including the icon
+        // font, which only starts loading once the weather icons are on the page.
         document.fonts?.ready.then(layout);
+        document.fonts?.addEventListener('loadingdone', () => layout());
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) {
             clearTimeout(timer);
@@ -1053,9 +1022,6 @@
           render(true);
         });
 
-        els.w.addEventListener('pointermove', onPointerMove);
-        els.w.addEventListener('pointerleave', clearHover);
-        els.w.addEventListener('click', ignite);
       }
 
       // --- Core Logic ---
@@ -1085,6 +1051,7 @@
           // Progress
           period: PERIODS.includes(q.get('p')) ? q.get('p') : 'year',
           text: q.get('txt') !== '0',
+          shape: SHAPES.includes(q.get('sh')) ? q.get('sh') : SHAPES[0],
           // Countdown
           target: validDate(q.get('d')),
           // Weather
@@ -1469,14 +1436,12 @@
           const cells = [];
           for (let i = 1; i <= p.total; i++) {
             const cls = i < p.done ? 'past' : i === p.done ? 'now' : '';
-            const delay = (-Math.random() * 7).toFixed(2);
-            cells.push(
-              `<span class="cell ${cls}" style="--i:${i};--delay:${delay}s"><i></i></span>`,
-            );
+            cells.push(`<span class="cell ${cls}"><i></i></span>`);
           }
           const text = config.text
             ? `<div class="dots-text"><span class="title">${esc(p.title)}</span><span class="stat num">${pct}% · ${p.left}</span></div>`
             : '';
+          document.documentElement.style.setProperty('--mark', svgMask(markPath(config.shape)));
           els.w.innerHTML = `<div class="dots-wrap">${text}<div class="dots" id="dots">${cells.join('')}</div></div>`;
         } else if (config.s === 'ring') {
           // Like M3's circular indicator: the wave from 12 o'clock to the progress point, a
@@ -1514,10 +1479,13 @@
       }
 
       // Fits the dots into the free space: tries every column count and keeps the one that
-      // gives the biggest cells.
+      // gives the biggest cells. Sizes and the grid's start snap to whole device pixels, with
+      // each mark centered on whole pixels in its cell: otherwise the browser rounds each mark
+      // differently, and some come out larger with their edges clipped flat.
       function layoutDots() {
         const grid = document.getElementById('dots');
         if (!grid) return;
+        grid.style.padding = '0';
         const n = grid.children.length;
         const W = grid.clientWidth;
         const H = grid.clientHeight;
@@ -1526,18 +1494,20 @@
           const size = Math.min(W / cols, H / Math.ceil(n / cols));
           if (size > best.size) best = { size, cols };
         }
-        const size = Math.floor(best.size * 100) / 100;
+        const px = devicePixelRatio || 1;
+        const cell = Math.floor(best.size * px);
+        let mark = Math.round(cell * 0.44);
+        if ((cell - mark) % 2) mark -= 1;
+        const size = cell / px;
+        grid.style.setProperty('--mark-size', `${mark / px}px`);
         grid.style.gridTemplateColumns = `repeat(${best.cols}, ${size}px)`;
         grid.style.gridAutoRows = `${size}px`;
-        // Cell centers, worked out from the grid math so hovering never reads layout per cell.
+        const box = grid.getBoundingClientRect();
         const rows = Math.ceil(n / best.cols);
-        const x0 = (W - best.cols * size) / 2;
-        const y0 = (H - rows * size) / 2;
-        dotCenters = [...grid.children].map((cell, i) => ({
-          cell,
-          x: x0 + ((i % best.cols) + 0.5) * size,
-          y: y0 + (Math.floor(i / best.cols) + 0.5) * size,
-        }));
+        const snap = (start, free) => Math.max(0, Math.round((start + free / 2) * px) / px - start);
+        const left = snap(box.left, W - best.cols * size);
+        const top = snap(box.top, H - rows * size);
+        grid.style.padding = `${top}px 0 0 ${left}px`;
       }
 
       // The wavy bar's geometry, in user units matching the em-sized SVG: a wave up to the
@@ -1766,45 +1736,6 @@
         }
       }
 
-      // Interaction ------------------------------------------------------------------------
-
-      // Dots near the pointer swell, like a magnifier passing over the year. One frame at a
-      // time, with one layout read per frame.
-      function onPointerMove(e) {
-        const grid = document.getElementById('dots');
-        if (!grid || !config.motion || REDUCED_MOTION.matches || hoverFrame) return;
-        hoverFrame = requestAnimationFrame(() => {
-          hoverFrame = 0;
-          const box = grid.getBoundingClientRect();
-          const px = e.clientX - box.left;
-          const py = e.clientY - box.top;
-          const radius = Math.max(40, box.width / 6);
-          for (const dot of dotCenters) {
-            const k = Math.max(0, 1 - Math.hypot(px - dot.x, py - dot.y) / radius);
-            if (k > 0) dot.cell.style.setProperty('--hover', (1 + k * 0.7).toFixed(2));
-            else if (dot.hovered) dot.cell.style.removeProperty('--hover');
-            dot.hovered = k > 0;
-          }
-        });
-      }
-
-      function clearHover() {
-        for (const dot of dotCenters) {
-          if (dot.hovered) dot.cell.style.removeProperty('--hover');
-          dot.hovered = false;
-        }
-      }
-
-      function ignite() {
-        const grid = document.getElementById('dots');
-        if (!grid || !config.motion || REDUCED_MOTION.matches) return;
-        grid.classList.remove('ignite');
-        grid.getBoundingClientRect();
-        grid.classList.add('ignite');
-        clearTimeout(grid.igniteTimer);
-        grid.igniteTimer = setTimeout(() => grid.classList.remove('ignite'), 4000);
-      }
-
       // --- Utilities ---
 
       function hexToOklch(hex) {
@@ -1829,8 +1760,23 @@
         return `${d}Z`;
       }
 
-      // A four-point sparkle, Year Left's ✦, drawn so it renders the same everywhere.
-      function sparklePath() {
+      // The dots style's mark, in a 100 by 100 box. The sparkle is Year Left's ✦.
+      function markPath(shape) {
+        if (shape === 'dot') return 'M50 0A50 50 0 1 1 50 100A50 50 0 1 1 50 0Z';
+        if (shape === 'cookie') return cookiePath(50, 50, 50, 9, 0.12);
+        if (shape === 'heart') {
+          return 'M50 92C20 70 2 52 2 31C2 16 14 6 28 6C38 6 46 12 50 20C54 12 62 6 72 6C86 6 98 16 98 31C98 52 80 70 50 92Z';
+        }
+        if (shape === 'star') {
+          // Five points, the inner corners at 45% of the radius, centered on the box.
+          let d = '';
+          for (let k = 0; k < 10; k++) {
+            const r = k % 2 ? 22.5 : 50;
+            const a = (k * Math.PI) / 5;
+            d += `${k ? 'L' : 'M'}${(50 + r * Math.sin(a)).toFixed(1)} ${(55 - r * Math.cos(a)).toFixed(1)}`;
+          }
+          return `${d}Z`;
+        }
         return 'M50 0C54 36 64 46 100 50C64 54 54 64 50 100C46 64 36 54 0 50C36 46 46 36 50 0Z';
       }
 
