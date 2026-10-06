@@ -1,0 +1,1891 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Widget</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+    <!-- Fonts: Google Sans Flex, Material Symbols (weather icons only) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0&icon_names=clear_night,cloud,foggy,partly_cloudy_day,partly_cloudy_night,rainy,rainy_heavy,rainy_light,snowing,sunny,thunderstorm,weather_mix,weather_snowy&display=block"
+    />
+
+    <style>
+      /* This page is what Notion and Obsidian embed. Everything it shows comes from the URL, so
+         an embed keeps working without storage (third-party frames often have none).
+
+         It never declares color-scheme: when a frame's scheme differs from the page around it,
+         browsers paint the frame opaque, which would put a black or white box behind a
+         transparent widget. Colors are resolved in script instead (see applyColors). */
+
+      /* --- Tokens --- */
+      :root {
+        --font: 'Google Sans Flex', system-ui, sans-serif;
+        --spring: linear(
+          0,
+          0.009,
+          0.035 2.1%,
+          0.141 4.4%,
+          0.723 12.9%,
+          0.938 16.7%,
+          1.017 19.4%,
+          1.067,
+          1.099 24.3%,
+          1.106 25.5%,
+          1.1 26.7%,
+          1.059 31.1%,
+          1.02 36%,
+          0.997 41.9%,
+          0.996 49.2%,
+          1 61.7%
+        );
+        --spring-ms: 700ms;
+      }
+
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      body {
+        color: var(--on-surface);
+        font: 400 16px/1.2 var(--font);
+        font-variation-settings: 'ROND' 60;
+        -webkit-font-smoothing: antialiased;
+        user-select: none;
+        -webkit-user-select: none;
+        cursor: default;
+      }
+
+      .icon {
+        font-family: 'Material Symbols Rounded';
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        -webkit-font-feature-settings: 'liga';
+      }
+
+      /* The frame: optional card fill, with padding that scales with the embed. */
+      #w {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 7vmin;
+        overflow: hidden;
+        container-type: size;
+      }
+
+      #w.card {
+        border-radius: min(28px, 9vmin);
+        background: var(--surface-container);
+      }
+
+      /* Everything inside .fit is sized in em, so fit() scales a whole widget with one
+         font-size. */
+      .fit {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: max-content;
+        animation: enter var(--spring-ms) var(--spring) both;
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          scale: 0.92;
+        }
+      }
+
+      .quiet .fit,
+      .quiet .dots-wrap {
+        animation: none;
+      }
+
+      .num {
+        font-variant-numeric: tabular-nums;
+        font-variation-settings: 'ROND' 100;
+      }
+
+      .muted {
+        color: var(--on-surface-variant);
+      }
+
+      .primary {
+        color: var(--primary);
+      }
+
+      /* M3 Expressive cookie and sparkle shapes, set as masks from script. */
+      .cookie {
+        mask: var(--cookie) center / contain no-repeat;
+        -webkit-mask: var(--cookie) center / contain no-repeat;
+      }
+
+      .message {
+        max-width: 12em;
+        color: var(--on-surface-variant);
+        font-size: 1em;
+        text-align: center;
+        text-wrap: balance;
+      }
+
+      /* --- Clock --- */
+      .clock-label {
+        margin-bottom: 0.15em;
+        color: var(--primary);
+        font-size: 0.32em;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .digital .time {
+        display: flex;
+        align-items: baseline;
+        font-size: 1em;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+
+      .digital .hh {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .digital .sep {
+        margin: 0 0.02em;
+        color: var(--on-surface-variant);
+        font-weight: 300;
+        translate: 0 -0.06em;
+      }
+
+      .blink .sep {
+        animation: blink 2s steps(1) infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      /* Seconds over AM/PM, in a small column beside the minutes. */
+      .digital .suffix {
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+        justify-content: space-between;
+        margin-left: 0.1em;
+        padding: 0.12em 0 0.04em;
+        font-size: 0.3em;
+        letter-spacing: 0.01em;
+      }
+
+      .digital .ss {
+        color: var(--tertiary);
+        font-weight: 600;
+      }
+
+      .digital .ampm,
+      .stack .ampm {
+        color: var(--on-surface-variant);
+        font-weight: 500;
+      }
+
+      .digital .suffix .ampm {
+        margin-top: auto;
+        font-size: 0.8em;
+      }
+
+      .stack .ampm {
+        margin-left: 0.1em;
+        font-size: 0.26em;
+        letter-spacing: 0.02em;
+      }
+
+      /* Digits roll in when they change. */
+      .d {
+        display: inline-block;
+      }
+
+      .clock-date {
+        margin-top: 0.28em;
+        color: var(--on-surface-variant);
+        font-size: 0.24em;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+      }
+
+      .stack .time {
+        display: grid;
+        justify-items: center;
+        font-size: 1em;
+        line-height: 0.86;
+        letter-spacing: -0.04em;
+      }
+
+      .stack .hh {
+        color: var(--primary);
+        font-weight: 800;
+      }
+
+      .stack .mm {
+        color: var(--on-surface);
+        font-weight: 250;
+      }
+
+      .stack .mm-row {
+        display: flex;
+        align-items: baseline;
+      }
+
+      .stack .ss {
+        margin-left: 0.08em;
+        color: var(--tertiary);
+        font-size: 0.3em;
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+
+      .stack .clock-date {
+        margin-top: 0.36em;
+        font-size: 0.2em;
+      }
+
+      .analog svg {
+        display: block;
+        width: 5em;
+        height: 5em;
+        overflow: visible;
+      }
+
+      .analog .clock-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 0.3em;
+        font-size: 0.42em;
+      }
+
+      .analog .clock-label,
+      .analog .clock-date {
+        margin: 0;
+        font-size: 1em;
+      }
+
+      /* Wide frames put the label and date beside the face, and the ring's numbers beside
+         the ring, so a banner isn't mostly empty. */
+      @container (aspect-ratio > 1.6) {
+        .analog,
+        .ring-wrap,
+        .count {
+          flex-direction: row;
+          gap: 0.4em;
+        }
+
+        .analog .clock-meta,
+        .ring-wrap .ring-meta,
+        .count .info {
+          align-items: flex-start;
+          margin-top: 0;
+          text-align: left;
+        }
+
+        .analog .clock-meta {
+          font-size: 0.6em;
+        }
+
+        .count .what {
+          text-align: left;
+        }
+      }
+
+      .face {
+        fill: var(--primary-container);
+      }
+
+      .tick {
+        fill: var(--on-primary-container);
+        opacity: 0.35;
+      }
+
+      .tick.major {
+        opacity: 0.8;
+      }
+
+      .hand {
+        stroke-linecap: round;
+        transform-box: view-box;
+        transform-origin: 100px 100px;
+        animation: spin linear infinite;
+      }
+
+      .hand-h {
+        stroke: var(--primary);
+        stroke-width: 15;
+        animation-duration: 43200s;
+      }
+
+      .hand-m {
+        stroke: var(--on-primary-container);
+        stroke-width: 9;
+        animation-duration: 3600s;
+      }
+
+      .hand-s {
+        fill: var(--tertiary);
+        transform-box: view-box;
+        transform-origin: 100px 100px;
+        animation: spin 60s linear infinite;
+      }
+
+      .cap {
+        fill: var(--on-primary-container);
+      }
+
+      @keyframes spin {
+        to {
+          rotate: 360deg;
+        }
+      }
+
+      /* --- Calendar --- */
+      .month .cal-head {
+        align-self: stretch;
+        margin: 0 0.3em 0.4em;
+        font-size: 0.62em;
+        font-weight: 600;
+      }
+
+      .month .cal-head .year {
+        margin-left: 0.25em;
+        color: var(--on-surface-variant);
+        font-weight: 400;
+      }
+
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1.75em);
+        grid-auto-rows: 1.4em;
+        place-items: center;
+        font-size: 0.5em;
+      }
+
+      .cal-grid .wd {
+        color: var(--on-surface-variant);
+        font-size: 0.8em;
+        font-weight: 600;
+      }
+
+      .cal-grid .day {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 1.3em;
+        height: 1.3em;
+        font-weight: 500;
+      }
+
+      .cal-grid .past {
+        color: var(--on-surface-variant);
+        opacity: 0.6;
+      }
+
+      .cal-grid .weekend:not(.today) {
+        color: var(--on-surface-variant);
+      }
+
+      .cal-grid .today {
+        color: var(--on-primary);
+        font-weight: 700;
+      }
+
+      .cal-grid .today::before {
+        content: '';
+        position: absolute;
+        inset: -0.12em;
+        z-index: -1;
+        background: var(--primary);
+        mask: var(--cookie) center / contain no-repeat;
+        -webkit-mask: var(--cookie) center / contain no-repeat;
+        animation: turn 24s linear infinite;
+      }
+
+      @keyframes turn {
+        to {
+          rotate: 360deg;
+        }
+      }
+
+      .today-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5em;
+      }
+
+      .today-card .big {
+        display: grid;
+        place-items: center;
+        width: 2.6em;
+        height: 2.6em;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font-size: 1em;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+
+      .today-card .big span {
+        font-size: 1.3em;
+      }
+
+      .today-card .side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.12em;
+      }
+
+      .today-card .weekday {
+        color: var(--primary);
+        font-size: 0.5em;
+        font-weight: 650;
+      }
+
+      .today-card .monthyear {
+        color: var(--on-surface-variant);
+        font-size: 0.34em;
+        font-weight: 500;
+      }
+
+      .week-strip {
+        display: flex;
+        gap: 0.12em;
+        margin-top: 0.3em;
+        font-size: 0.24em;
+      }
+
+      .week-strip span {
+        display: grid;
+        place-items: center;
+        width: 1.7em;
+        height: 1.7em;
+        border-radius: 50%;
+        color: var(--on-surface-variant);
+        font-weight: 600;
+      }
+
+      .week-strip .on {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      /* Narrow frames stack the big date over the details. */
+      @container (aspect-ratio < 1.15) {
+        .today-card {
+          flex-direction: column;
+          gap: 0.3em;
+        }
+
+        .today-card .side {
+          align-items: center;
+        }
+      }
+
+      /* --- Progress --- */
+      .dots-wrap {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        gap: 4vmin;
+        animation: enter var(--spring-ms) var(--spring) both;
+      }
+
+      .dots-text {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0 3vmin;
+        font-size: clamp(10px, 7.5vmin, 28px);
+      }
+
+      .dots-text .title {
+        font-size: 1.25em;
+        font-weight: 650;
+      }
+
+      .dots-text .stat {
+        color: var(--on-surface-variant);
+        font-weight: 500;
+      }
+
+      .dots {
+        display: grid;
+        flex: 1;
+        align-content: center;
+        justify-content: center;
+        min-height: 0;
+      }
+
+      .cell {
+        display: grid;
+        place-items: center;
+        scale: var(--hover, 1);
+        transition: scale 300ms var(--spring);
+      }
+
+      .cell i {
+        display: block;
+        width: 26%;
+        height: 26%;
+        border-radius: 50%;
+        background: var(--outline-variant);
+      }
+
+      .cell.past i,
+      .cell.now i {
+        width: 78%;
+        height: 78%;
+        border-radius: 0;
+        background: var(--primary);
+        mask: var(--sparkle) center / contain no-repeat;
+        -webkit-mask: var(--sparkle) center / contain no-repeat;
+        opacity: 0.55;
+        animation: twinkle 7s ease-in-out infinite;
+        animation-delay: var(--delay, 0s);
+      }
+
+      .cell.now i {
+        width: 115%;
+        height: 115%;
+        background: var(--tertiary);
+        opacity: 1;
+        filter: drop-shadow(0 0 0.4em var(--tertiary));
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          rotate: 0deg;
+          opacity: 0.5;
+        }
+        50% {
+          rotate: 90deg;
+          opacity: 0.9;
+        }
+      }
+
+      @keyframes pulse {
+        50% {
+          rotate: 45deg;
+          scale: 0.8;
+        }
+      }
+
+      /* Tapping the grid lights the past days in sequence. */
+      .ignite .cell.past i {
+        animation: glow 2.4s ease-out both;
+        animation-delay: calc(var(--i) * 4ms);
+      }
+
+      @keyframes glow {
+        20% {
+          background: var(--tertiary);
+          opacity: 1;
+          scale: 1.4;
+        }
+      }
+
+      /* Motion off stops the decoration. Clock hands keep running: they are the time. */
+      .still .cell i,
+      .still .today::before {
+        animation-play-state: paused;
+      }
+
+      .bar .pct,
+      .ring-wrap .pct {
+        font-size: 1em;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .pct small {
+        margin-left: 0.04em;
+        color: var(--on-surface-variant);
+        font-size: 0.45em;
+        font-weight: 500;
+      }
+
+      .bar {
+        align-items: stretch;
+      }
+
+      .bar .head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.6em;
+      }
+
+      .bar .title {
+        color: var(--primary);
+        font-size: 0.34em;
+        font-weight: 650;
+      }
+
+      .bar svg {
+        display: block;
+        width: 4.2em;
+        height: 0.3em;
+        margin: 0.2em 0 0.16em;
+        overflow: visible;
+      }
+
+      .bar .stat,
+      .ring-wrap .stat {
+        color: var(--on-surface-variant);
+        font-size: 0.2em;
+        font-weight: 500;
+      }
+
+      .wave,
+      .track {
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .wave {
+        stroke: var(--primary);
+      }
+
+      .track {
+        stroke: var(--secondary-container);
+      }
+
+      .ring-wrap svg {
+        display: block;
+        width: 3em;
+        height: 3em;
+        overflow: visible;
+      }
+
+      .ring-wrap .inner {
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+
+      .ring-wrap .center {
+        position: absolute;
+        display: grid;
+        justify-items: center;
+        gap: 0.05em;
+      }
+
+      .ring-wrap .pct {
+        font-size: 0.8em;
+      }
+
+      .ring-wrap .ring-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 0.2em;
+        font-size: 0.24em;
+      }
+
+      .ring-wrap .title {
+        color: var(--primary);
+        font-weight: 650;
+      }
+
+      .ring-wrap .stat {
+        font-size: 0.85em;
+      }
+
+      /* --- Countdown --- */
+      .count .n {
+        color: var(--primary);
+        font-size: 1em;
+        font-weight: 700;
+        line-height: 0.9;
+        letter-spacing: -0.04em;
+      }
+
+      .count .unit {
+        margin-top: 0.12em;
+        font-size: 0.22em;
+        font-weight: 600;
+      }
+
+      .count .info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .count .what {
+        max-width: 8em;
+        font-size: 0.22em;
+        font-weight: 500;
+        text-wrap: balance;
+      }
+
+      .count .when {
+        margin-top: 0.3em;
+        color: var(--on-surface-variant);
+        font-size: 0.16em;
+        font-weight: 500;
+      }
+
+      .count-row {
+        flex-direction: row;
+        gap: 0.4em;
+      }
+
+      .count-row .badge {
+        display: grid;
+        place-items: center;
+        width: 2em;
+        height: 2em;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .count-row .badge span {
+        font-size: 0.9em;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+      }
+
+      .count-row .side {
+        display: flex;
+        flex-direction: column;
+        gap: 0.06em;
+      }
+
+      .count-row .badge.word span {
+        font-size: 0.45em;
+      }
+
+      .count-row .what {
+        max-width: 8em;
+        font-size: 0.4em;
+        font-weight: 650;
+        text-wrap: balance;
+      }
+
+      .count-row .unit,
+      .count-row .when {
+        color: var(--on-surface-variant);
+        font-size: 0.26em;
+        font-weight: 500;
+      }
+
+      /* --- Weather --- */
+      .weather-now {
+        flex-direction: row;
+        gap: 0.35em;
+      }
+
+      .weather-now .wx-icon {
+        color: var(--primary);
+        font-size: 1.5em;
+      }
+
+      .weather-now .side {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .weather-now .temp {
+        font-size: 1em;
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+      }
+
+      .weather-now .cond {
+        margin-top: 0.12em;
+        font-size: 0.24em;
+        font-weight: 600;
+      }
+
+      .weather-now .meta {
+        color: var(--on-surface-variant);
+        font-size: 0.19em;
+        font-weight: 500;
+      }
+
+      @container (aspect-ratio < 1.15) {
+        .weather-now {
+          flex-direction: column;
+          gap: 0.1em;
+        }
+
+        .weather-now .side {
+          align-items: center;
+        }
+      }
+
+      .forecast .now-row {
+        display: flex;
+        align-items: center;
+        gap: 0.3em;
+        align-self: stretch;
+      }
+
+      .forecast .now-row .wx-icon {
+        color: var(--primary);
+        font-size: 0.8em;
+      }
+
+      .forecast .now-row .temp {
+        font-size: 0.6em;
+        font-weight: 400;
+        letter-spacing: -0.03em;
+      }
+
+      .forecast .now-row .side {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .forecast .now-row .cond {
+        font-size: 0.17em;
+        font-weight: 600;
+      }
+
+      .forecast .now-row .meta {
+        color: var(--on-surface-variant);
+        font-size: 0.14em;
+        font-weight: 500;
+      }
+
+      .days {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.06em;
+        align-self: stretch;
+        margin-top: 0.12em;
+      }
+
+      .days > div {
+        display: grid;
+        justify-items: center;
+        gap: 0.12em;
+        padding: 0.3em 0.2em;
+        border-radius: 0.8em;
+        background: var(--surface-container-high);
+        font-size: 0.2em;
+      }
+
+      .card .days > div {
+        background: var(--surface-container-highest);
+      }
+
+      .days .dn {
+        color: var(--on-surface-variant);
+        font-weight: 600;
+      }
+
+      .days .wx-icon {
+        color: var(--primary);
+        font-size: 1.6em;
+      }
+
+      .days .hi {
+        font-weight: 600;
+      }
+
+      .days .lo {
+        color: var(--on-surface-variant);
+      }
+
+      /* Reduced motion keeps the clock hands, which show the time, and stills the rest. */
+      @media (prefers-reduced-motion: reduce) {
+        :not(.hand, .hand-s),
+        ::before {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="w" role="img"></div>
+
+    <script>
+      // --- Constants & Config ---
+      // Keep these defaults in sync with DEFAULT_SEED and STYLES (first style of each widget) in
+      // index.html: the builder leaves default values out of the URL to keep links short.
+      const DEFAULT_SEED = 'a63aa8';
+      const WIDGETS = {
+        clock: { styles: ['digital', 'analog', 'stack'] },
+        calendar: { styles: ['month', 'today'] },
+        progress: { styles: ['dots', 'bar', 'ring'] },
+        countdown: { styles: ['big', 'compact'] },
+        weather: { styles: ['now', 'forecast'] },
+      };
+      const PERIODS = ['year', 'month', 'week', 'day'];
+      const DAY_MS = 86400000;
+      const WEATHER_REFRESH_MS = 30 * 60 * 1000;
+      const WEATHER_RETRY_MS = 60 * 1000;
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+
+      // WMO weather codes from Open-Meteo, as [label, day icon, night icon].
+      const WEATHER_CODES = {
+        0: ['Clear', 'sunny', 'clear_night'],
+        1: ['Mostly clear', 'partly_cloudy_day', 'partly_cloudy_night'],
+        2: ['Partly cloudy', 'partly_cloudy_day', 'partly_cloudy_night'],
+        3: ['Cloudy', 'cloud', 'cloud'],
+        45: ['Fog', 'foggy', 'foggy'],
+        48: ['Fog', 'foggy', 'foggy'],
+        51: ['Light drizzle', 'rainy_light', 'rainy_light'],
+        53: ['Drizzle', 'rainy_light', 'rainy_light'],
+        55: ['Drizzle', 'rainy_light', 'rainy_light'],
+        56: ['Freezing drizzle', 'weather_mix', 'weather_mix'],
+        57: ['Freezing drizzle', 'weather_mix', 'weather_mix'],
+        61: ['Light rain', 'rainy', 'rainy'],
+        63: ['Rain', 'rainy', 'rainy'],
+        65: ['Heavy rain', 'rainy_heavy', 'rainy_heavy'],
+        66: ['Freezing rain', 'weather_mix', 'weather_mix'],
+        67: ['Freezing rain', 'weather_mix', 'weather_mix'],
+        71: ['Light snow', 'weather_snowy', 'weather_snowy'],
+        73: ['Snow', 'weather_snowy', 'weather_snowy'],
+        75: ['Heavy snow', 'weather_snowy', 'weather_snowy'],
+        77: ['Snow grains', 'weather_snowy', 'weather_snowy'],
+        80: ['Showers', 'rainy', 'rainy'],
+        81: ['Showers', 'rainy', 'rainy'],
+        82: ['Heavy showers', 'rainy_heavy', 'rainy_heavy'],
+        85: ['Snow showers', 'snowing', 'snowing'],
+        86: ['Snow showers', 'snowing', 'snowing'],
+        95: ['Thunderstorm', 'thunderstorm', 'thunderstorm'],
+        96: ['Thunderstorm', 'thunderstorm', 'thunderstorm'],
+        99: ['Thunderstorm', 'thunderstorm', 'thunderstorm'],
+      };
+
+      // --- State Management ---
+      let config = readConfig(location.search);
+      let previewMode = null; // 'light' | 'dark' from the builder, for Auto widgets
+      let timer = 0;
+      let weather = null; // { data, expiresAt, key } | { error, expiresAt, key }
+      let weatherTimer = 0;
+      let weatherPending = ''; // Key of the fetch in flight, so rapid updates don't start a second
+      let lastDigits = '';
+      let dotCenters = []; // { cell, x, y, hovered } for the hover effect
+      let hoverFrame = 0;
+      let waveFrame = 0;
+      let barGeom = null; // { sw, mid, end, amp, wl } for the bar's wave
+
+      // --- DOM Elements ---
+      const els = {
+        w: document.getElementById('w'),
+      };
+
+      // --- Initialization ---
+      function init() {
+        const root = document.documentElement.style;
+        root.setProperty('--cookie', svgMask(cookiePath(50, 50, 50, 12, 0.11)));
+        root.setProperty('--sparkle', svgMask(sparklePath()));
+        applyColors();
+        render();
+        bindEvents();
+        // Tells the builder this page can take settings now, well before fonts finish
+        // loading (the frame's load event waits for them).
+        if (parent !== window) parent.postMessage({ type: 'widget-ready' }, messageTarget());
+      }
+
+      // --- Event Listeners ---
+      function bindEvents() {
+        DARK_QUERY.addEventListener('change', applyColors);
+        new ResizeObserver(() => layout()).observe(els.w);
+        document.fonts?.ready.then(layout);
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            clearTimeout(timer);
+            clearTimeout(weatherTimer);
+          } else render(true);
+        });
+
+        // The builder's live preview sends new settings here instead of reloading the frame.
+        window.addEventListener('message', (e) => {
+          if (e.origin !== location.origin || e.source !== parent) return;
+          if (e.data?.type !== 'widget-config') return;
+          previewMode = e.data.mode === 'light' || e.data.mode === 'dark' ? e.data.mode : null;
+          config = readConfig(e.data.search);
+          applyColors();
+          render(true);
+        });
+
+        els.w.addEventListener('pointermove', onPointerMove);
+        els.w.addEventListener('pointerleave', clearHover);
+        els.w.addEventListener('click', ignite);
+      }
+
+      // --- Core Logic ---
+
+      // Reads and validates every setting. Anything unknown or malformed falls back to its
+      // default, so a hand-edited or truncated link still shows a working widget.
+      function readConfig(search) {
+        const q = new URLSearchParams(search);
+        const w = q.get('w') in WIDGETS ? q.get('w') : 'clock';
+        const styles = WIDGETS[w].styles;
+        const seed = q.get('c');
+        return {
+          w,
+          s: styles.includes(q.get('s')) ? q.get('s') : styles[0],
+          seed: seed === 'mono' || /^[0-9a-f]{6}$/i.test(seed || '') ? seed : DEFAULT_SEED,
+          theme: ['light', 'dark'].includes(q.get('t')) ? q.get('t') : 'auto',
+          card: q.get('bg') === '1',
+          motion: q.get('m') !== '0',
+          // Clock
+          h24: q.get('h') === '24',
+          seconds: q.get('sec') === '1',
+          date: q.get('date') !== '0',
+          tz: validTimeZone(q.get('tz')),
+          label: (q.get('lbl') || '').trim().slice(0, 40),
+          // Calendar
+          weekStart: q.get('ws') === '0' ? 0 : 1,
+          // Progress
+          period: PERIODS.includes(q.get('p')) ? q.get('p') : 'year',
+          text: q.get('txt') !== '0',
+          // Countdown
+          target: validDate(q.get('d')),
+          // Weather
+          lat: coord(q.get('lat'), 90),
+          lon: coord(q.get('lon'), 180),
+          place: (q.get('loc') || '').trim().slice(0, 60),
+          fahrenheit: q.get('u') === 'f',
+        };
+      }
+
+      function validTimeZone(tz) {
+        if (!tz) return '';
+        try {
+          new Intl.DateTimeFormat('en-US', { timeZone: tz });
+          return tz;
+        } catch (err) {
+          return '';
+        }
+      }
+
+      function validDate(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return null;
+        const [y, m, d] = value.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        return date.getMonth() === m - 1 ? date : null;
+      }
+
+      function coord(value, limit) {
+        const n = Number.parseFloat(value);
+        return Number.isFinite(n) && Math.abs(n) <= limit ? n : null;
+      }
+
+      // Colors ----------------------------------------------------------------------------
+
+      // A small tonal palette in the spirit of M3 Tonal Spot, built in OKLCH from one seed:
+      // fixed lightness per role, chroma capped per role, the seed's hue throughout.
+      function applyColors() {
+        const dark = isDark();
+        const mono = config.seed === 'mono';
+        const { c, h } = mono ? { c: 0, h: 0 } : hexToOklch(config.seed);
+        const tone = (l, maxC, dh = 0) => `oklch(${l} ${Math.min(c, maxC).toFixed(3)} ${h + dh})`;
+        const roles = dark
+          ? {
+              primary: tone(0.82, 0.12),
+              'on-primary': tone(0.28, 0.08),
+              'primary-container': tone(0.34, 0.09),
+              'on-primary-container': tone(0.92, 0.05),
+              'secondary-container': tone(0.33, 0.035),
+              tertiary: tone(0.82, 0.1, 60),
+              'on-surface': tone(0.93, 0.012),
+              'on-surface-variant': tone(0.8, 0.025),
+              'outline-variant': tone(0.42, 0.02),
+              'surface-container': tone(0.24, 0.016),
+              'surface-container-high': tone(0.28, 0.018),
+              'surface-container-highest': tone(0.32, 0.02),
+            }
+          : {
+              primary: tone(0.5, 0.17),
+              'on-primary': tone(0.99, 0.01),
+              'primary-container': tone(0.91, 0.06),
+              'on-primary-container': tone(0.3, 0.1),
+              'secondary-container': tone(0.91, 0.03),
+              tertiary: tone(0.52, 0.13, 60),
+              'on-surface': tone(0.22, 0.012),
+              'on-surface-variant': tone(0.44, 0.025),
+              'outline-variant': tone(0.84, 0.018),
+              'surface-container': tone(0.955, 0.012),
+              'surface-container-high': tone(0.93, 0.015),
+              'surface-container-highest': tone(0.9, 0.018),
+            };
+        const root = document.documentElement.style;
+        for (const [role, value] of Object.entries(roles)) root.setProperty(`--${role}`, value);
+      }
+
+      function isDark() {
+        if (config.theme !== 'auto') return config.theme === 'dark';
+        return previewMode ? previewMode === 'dark' : DARK_QUERY.matches;
+      }
+
+      // Rendering --------------------------------------------------------------------------
+
+      // Quiet renders (timers, returning to the tab, live preview edits) skip the entrance
+      // animation, so the widget doesn't pop in again every minute.
+      function render(quiet = false) {
+        clearTimeout(timer);
+        lastDigits = '';
+        els.w.className = config.card ? 'card' : '';
+        els.w.classList.toggle('still', !config.motion);
+        els.w.classList.toggle('quiet', quiet);
+        const draw = { clock, calendar, progress, countdown, weather: weatherWidget }[config.w];
+        draw();
+        layout();
+        if (config.w === 'weather') loadWeather();
+      }
+
+      // Re-renders on the next boundary that changes what's shown: a second, a minute or
+      // midnight. Hidden tabs skip ticks; visibilitychange re-renders on return.
+      function scheduleNext(unitMs) {
+        clearTimeout(timer);
+        if (document.hidden) return;
+        const wait = unitMs - (Date.now() % unitMs) + 20;
+        timer = setTimeout(() => {
+          update();
+          scheduleNext(unitMs);
+        }, wait);
+      }
+
+      function update() {
+        if (config.w === 'clock') updateClock();
+        else render(true);
+      }
+
+      // Scales a .fit widget to fill the frame, or lays out the dot grid.
+      function layout() {
+        const root = els.w.firstElementChild;
+        if (!root) return;
+        if (root.classList.contains('dots-wrap')) return layoutDots();
+        if (!root.classList.contains('fit')) return;
+        root.style.fontSize = '100px';
+        const cs = getComputedStyle(els.w);
+        const aw = els.w.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        const ah = els.w.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        const scale = Math.min(aw / root.offsetWidth, ah / root.offsetHeight);
+        root.style.fontSize = `${Math.max(1, 100 * scale).toFixed(2)}px`;
+        if (root.querySelector('.bar svg')) measureBar();
+        if (root.querySelector('.wave')) animateWaves();
+      }
+
+      // Clock -----------------------------------------------------------------------------
+
+      function clock() {
+        const label = config.label ? `<div class="clock-label">${esc(config.label)}</div>` : '';
+        const date = config.date ? '<div class="clock-date" id="date"></div>' : '';
+        if (config.s === 'analog') {
+          const meta = label || date ? `<div class="clock-meta">${label}${date}</div>` : '';
+          els.w.innerHTML = `
+            <div class="fit analog">
+              <svg viewBox="0 0 200 200" aria-hidden="true">
+                <path class="face" d="${cookiePath(100, 100, 100, 12, 0.08)}" />
+                ${ticks()}
+                <line class="hand hand-h" id="hand-h" x1="100" y1="100" x2="100" y2="54" />
+                <line class="hand hand-m" id="hand-m" x1="100" y1="100" x2="100" y2="32" />
+                ${config.seconds ? '<circle class="hand-s" id="hand-s" cx="100" cy="17" r="7" />' : ''}
+                <circle class="cap" cx="100" cy="100" r="6" />
+              </svg>
+              ${meta}
+            </div>`;
+        } else if (config.s === 'stack') {
+          els.w.innerHTML = `
+            <div class="fit stack">
+              ${label}
+              <div class="time num">
+                <div class="hh" id="hh"></div>
+                <div class="mm-row"><span class="mm" id="mm"></span>${config.seconds ? '<span class="ss" id="ss"></span>' : ''}${config.h24 ? '' : '<span class="ampm" id="ampm"></span>'}</div>
+              </div>
+              ${date}
+            </div>`;
+        } else {
+          els.w.innerHTML = `
+            <div class="fit digital${config.motion ? ' blink' : ''}">
+              ${label}
+              <div class="time num">
+                <span class="hh" id="hh"></span><span class="sep">:</span><span class="mm" id="mm"></span>${
+                  config.seconds || !config.h24
+                    ? `<span class="suffix">${config.seconds ? '<span class="ss" id="ss"></span>' : ''}${config.h24 ? '' : '<span class="ampm" id="ampm"></span>'}</span>`
+                    : ''
+                }
+              </div>
+              ${date}
+            </div>`;
+        }
+        updateClock();
+        scheduleNext(config.seconds && config.s !== 'analog' ? 1000 : 60000);
+      }
+
+      function updateClock() {
+        const t = zonedNow();
+        const h12 = t.h % 12 || 12;
+        const hh = config.h24 ? pad(t.h) : String(h12);
+        if (config.s === 'analog') {
+          // The hands run on CSS animations; a negative delay starts each at the right angle.
+          const s = t.s + t.ms / 1000;
+          setDelay('hand-h', ((t.h % 12) * 3600 + t.m * 60 + s) * -1);
+          setDelay('hand-m', (t.m * 60 + s) * -1);
+          setDelay('hand-s', -s);
+        } else {
+          setDigits('hh', hh);
+          setDigits('mm', pad(t.m));
+          setDigits('ss', pad(t.s));
+          setText('ampm', t.h < 12 ? 'AM' : 'PM');
+        }
+        setText('date', t.dateText);
+        els.w.setAttribute(
+          'aria-label',
+          `${hh}:${pad(t.m)}${config.h24 ? '' : t.h < 12 ? ' AM' : ' PM'}`,
+        );
+        const digits = `${hh}${config.date ? t.dateText : ''}`;
+        if (digits.length !== lastDigits.length) layout();
+        lastDigits = digits;
+      }
+
+      // The current time in the chosen time zone, or the viewer's own.
+      function zonedNow() {
+        const now = new Date();
+        const opts = { hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' };
+        if (config.tz) opts.timeZone = config.tz;
+        const parts = Object.fromEntries(
+          new Intl.DateTimeFormat('en-US', opts).formatToParts(now).map((p) => [p.type, p.value]),
+        );
+        const dateText = now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          ...(config.tz && { timeZone: config.tz }),
+        });
+        return {
+          h: Number(parts.hour) % 24,
+          m: Number(parts.minute),
+          s: Number(parts.second),
+          ms: now.getMilliseconds(),
+          dateText,
+        };
+      }
+
+      function ticks() {
+        let out = '';
+        for (let i = 0; i < 12; i++) {
+          const a = (i / 12) * Math.PI * 2;
+          const major = i % 3 === 0;
+          const r = 76;
+          out += `<circle class="tick${major ? ' major' : ''}" cx="${(100 + r * Math.sin(a)).toFixed(1)}" cy="${(100 - r * Math.cos(a)).toFixed(1)}" r="${major ? 6 : 3.5}" />`;
+        }
+        return out;
+      }
+
+      function setDelay(id, seconds) {
+        const el = document.getElementById(id);
+        if (el) el.style.animationDelay = `${seconds}s`;
+      }
+
+      // Writes digits one span each; a changed digit rolls in from below.
+      function setDigits(id, text) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const old = el.dataset.v || '';
+        if (old === text) return;
+        el.dataset.v = text;
+        if (old.length !== text.length) {
+          el.innerHTML = [...text].map((ch) => `<span class="d">${ch}</span>`).join('');
+          return;
+        }
+        [...text].forEach((ch, i) => {
+          const span = el.children[i];
+          if (span.textContent === ch) return;
+          span.textContent = ch;
+          if (config.motion && !REDUCED_MOTION.matches) {
+            span.animate(
+              [
+                { transform: 'translateY(35%)', opacity: 0 },
+                { transform: 'none', opacity: 1 },
+              ],
+              { duration: 500, easing: 'cubic-bezier(0.2, 0, 0, 1)' },
+            );
+          }
+        });
+      }
+
+      // Calendar ---------------------------------------------------------------------------
+
+      function calendar() {
+        const now = new Date();
+        const month = now.toLocaleDateString('en-US', { month: 'long' });
+        const names = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        const order = [0, 1, 2, 3, 4, 5, 6].map((i) => (i + config.weekStart) % 7);
+        if (config.s === 'today') {
+          const strip = order
+            .map((d) => `<span class="${d === now.getDay() ? 'on' : ''}">${names[d]}</span>`)
+            .join('');
+          els.w.innerHTML = `
+            <div class="fit today-card">
+              <div class="big cookie num"><span>${now.getDate()}</span></div>
+              <div class="side">
+                <div class="weekday">${now.toLocaleDateString('en-US', { weekday: 'long' })}</div>
+                <div class="monthyear">${month} ${now.getFullYear()}</div>
+                <div class="week-strip">${strip}</div>
+              </div>
+            </div>`;
+        } else {
+          const first = new Date(now.getFullYear(), now.getMonth(), 1);
+          const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+          const lead = (first.getDay() - config.weekStart + 7) % 7;
+          let cells = order.map((d) => `<span class="wd">${names[d]}</span>`).join('');
+          cells += '<span></span>'.repeat(lead);
+          for (let d = 1; d <= days; d++) {
+            const wd = (first.getDay() + d - 1) % 7;
+            const cls = [
+              'day',
+              d < now.getDate() && 'past',
+              d === now.getDate() && 'today',
+              (wd === 0 || wd === 6) && 'weekend',
+            ]
+              .filter(Boolean)
+              .join(' ');
+            cells += `<span class="${cls}">${d}</span>`;
+          }
+          els.w.innerHTML = `
+            <div class="fit month">
+              <div class="cal-head">${month}<span class="year">${now.getFullYear()}</span></div>
+              <div class="cal-grid num">${cells}</div>
+            </div>`;
+        }
+        els.w.setAttribute('aria-label', now.toDateString());
+        scheduleUntilMidnight();
+      }
+
+      // Timers don't count time the computer spent asleep, so one long timeout to midnight
+      // can fire hours late after a wake. Check the date every minute instead.
+      function scheduleUntilMidnight() {
+        clearTimeout(timer);
+        const day = new Date().toDateString();
+        const tick = () => {
+          if (new Date().toDateString() !== day) render(true);
+          else scheduleUntilMidnight();
+        };
+        timer = setTimeout(tick, 60000);
+      }
+
+      // Progress ---------------------------------------------------------------------------
+
+      // Where we are in the period: units are days (hours for a day), counting today.
+      function periodInfo() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const today = new Date(y, now.getMonth(), now.getDate());
+        if (config.period === 'day') {
+          // Local midnight to midnight, so days with a DST change (23 or 25 hours) still end at 1.
+          const end = new Date(y, now.getMonth(), now.getDate() + 1);
+          const frac = (now - today) / (end - today);
+          const leftMin = Math.ceil((end - now) / 60000) - 1;
+          return {
+            title: 'Today',
+            total: 24,
+            done: now.getHours() + 1,
+            frac,
+            left: `${Math.floor(leftMin / 60)} h ${leftMin % 60} min left`,
+            stat: `Hour ${now.getHours() + 1} of 24`,
+          };
+        }
+        let start, end, title;
+        if (config.period === 'year') {
+          start = new Date(y, 0, 1);
+          end = new Date(y + 1, 0, 1);
+          title = String(y);
+        } else if (config.period === 'month') {
+          start = new Date(y, now.getMonth(), 1);
+          end = new Date(y, now.getMonth() + 1, 1);
+          title = now.toLocaleDateString('en-US', { month: 'long' });
+        } else {
+          const back = (now.getDay() - config.weekStart + 7) % 7;
+          start = new Date(y, now.getMonth(), now.getDate() - back);
+          end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+          title = `Week ${isoWeek(now)}`;
+        }
+        const total = Math.round((end - start) / DAY_MS);
+        const done = Math.round((today - start) / DAY_MS) + 1;
+        const frac = (now - start) / (end - start);
+        const left = total - done;
+        return {
+          title,
+          total,
+          done,
+          frac,
+          left: `${left} ${left === 1 ? 'day' : 'days'} left`,
+          stat: `Day ${done} of ${total}`,
+        };
+      }
+
+      function progress() {
+        const p = periodInfo();
+        const pct = pctText(p.frac);
+        if (config.s === 'dots') {
+          const cells = [];
+          for (let i = 1; i <= p.total; i++) {
+            const cls = i < p.done ? 'past' : i === p.done ? 'now' : '';
+            const delay = (-Math.random() * 7).toFixed(2);
+            cells.push(
+              `<span class="cell ${cls}" style="--i:${i};--delay:${delay}s"><i></i></span>`,
+            );
+          }
+          const text = config.text
+            ? `<div class="dots-text"><span class="title">${esc(p.title)}</span><span class="stat num">${pct}% · ${p.left}</span></div>`
+            : '';
+          els.w.innerHTML = `<div class="dots-wrap">${text}<div class="dots" id="dots">${cells.join('')}</div></div>`;
+        } else if (config.s === 'ring') {
+          // Like M3's circular indicator: the wave from 12 o'clock to the progress point, a
+          // gap, then a flat track. animateWaves() redraws the wave with a moving phase.
+          const r = 42;
+          const f = p.frac;
+          const gap = 0.045;
+          els.w.innerHTML = `
+            <div class="fit ring-wrap">
+              <div class="inner">
+                <svg viewBox="0 0 100 100" aria-hidden="true">
+                  ${f + gap < 1 - gap ? `<path class="track" d="${wavyArc(50, 50, r, 0, 0, f + gap, 1 - gap)}" stroke-width="7" />` : ''}
+                  <path class="wave" id="ring-wave" data-frac="${f}" stroke-width="7" />
+                </svg>
+                <div class="center"><span class="pct num">${pct}<small>%</small></span></div>
+              </div>
+              ${config.text ? `<div class="ring-meta"><span class="title">${esc(p.title)}</span><span class="stat num">${p.left}</span></div>` : ''}
+            </div>`;
+        } else {
+          els.w.innerHTML = `
+            <div class="fit bar">
+              <div class="head">
+                <span class="title">${esc(p.title)}</span>
+                <span class="pct num">${pct}<small>%</small></span>
+              </div>
+              <svg aria-hidden="true" data-frac="${p.frac}">
+                <path class="wave" id="bar-wave" />
+                <path class="track" id="track" />
+              </svg>
+              ${config.text ? `<div class="stat num">${p.stat} · ${p.left}</div>` : ''}
+            </div>`;
+        }
+        els.w.setAttribute('aria-label', `${p.title}: ${pct}%, ${p.left}`);
+        scheduleNext(60000);
+      }
+
+      // Fits the dots into the free space: tries every column count and keeps the one that
+      // gives the biggest cells.
+      function layoutDots() {
+        const grid = document.getElementById('dots');
+        if (!grid) return;
+        const n = grid.children.length;
+        const W = grid.clientWidth;
+        const H = grid.clientHeight;
+        let best = { size: 0, cols: 1 };
+        for (let cols = 1; cols <= n; cols++) {
+          const size = Math.min(W / cols, H / Math.ceil(n / cols));
+          if (size > best.size) best = { size, cols };
+        }
+        const size = Math.floor(best.size * 100) / 100;
+        grid.style.gridTemplateColumns = `repeat(${best.cols}, ${size}px)`;
+        grid.style.gridAutoRows = `${size}px`;
+        // Cell centers, worked out from the grid math so hovering never reads layout per cell.
+        const rows = Math.ceil(n / best.cols);
+        const x0 = (W - best.cols * size) / 2;
+        const y0 = (H - rows * size) / 2;
+        dotCenters = [...grid.children].map((cell, i) => ({
+          cell,
+          x: x0 + ((i % best.cols) + 0.5) * size,
+          y: y0 + (Math.floor(i / best.cols) + 0.5) * size,
+        }));
+      }
+
+      // The wavy bar's geometry, in user units matching the em-sized SVG: a wave up to the
+      // progress point, a gap, then a flat track. The wave itself is drawn by drawWaves().
+      function measureBar() {
+        const svg = els.w.querySelector('.bar svg');
+        const w = svg.clientWidth;
+        const h = svg.clientHeight;
+        if (!w) return;
+        const sw = Math.max(2, h / 4);
+        const mid = h / 2;
+        const end = sw / 2 + (w - sw) * Number(svg.dataset.frac);
+        barGeom = { sw, mid, end, amp: h / 5, wl: Math.max(12, h * 1.6) };
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        document.getElementById('bar-wave').setAttribute('stroke-width', sw);
+        const track = document.getElementById('track');
+        track.setAttribute('stroke-width', sw);
+        const trackStart = end + sw * 2;
+        track.setAttribute(
+          'd',
+          trackStart < w - sw / 2 ? `M${trackStart} ${mid}H${w - sw / 2}` : '',
+        );
+      }
+
+      // Redraws the ring's and the bar's waves at a phase. Moving the phase makes the waves
+      // travel while both ends stay put, with their own round caps.
+      function drawWaves(phase) {
+        const ring = document.getElementById('ring-wave');
+        if (ring) {
+          const f = Number(ring.dataset.frac);
+          ring.setAttribute('d', f > 0.005 ? wavyArc(50, 50, 42, 2.2, 12, 0, f, phase) : '');
+        }
+        const bar = document.getElementById('bar-wave');
+        if (bar && barGeom) {
+          const { sw, mid, end, amp, wl } = barGeom;
+          let d = '';
+          for (let x = sw / 2; x <= end; x += 1) {
+            const y = mid + amp * Math.sin((x / wl) * Math.PI * 2 - phase);
+            d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(2)}`;
+          }
+          bar.setAttribute('d', d);
+        }
+      }
+
+      // About 30 frames a second while a wave is on screen. requestAnimationFrame stops by
+      // itself in hidden tabs; Motion off and reduced motion draw one still frame.
+      function animateWaves() {
+        cancelAnimationFrame(waveFrame);
+        drawWaves(0);
+        if (!config.motion || REDUCED_MOTION.matches) return;
+        let last = 0;
+        const tick = (t) => {
+          if (!document.getElementById('ring-wave') && !document.getElementById('bar-wave')) return;
+          if (t - last >= 33) {
+            last = t;
+            drawWaves((t / 1600) * Math.PI * 2);
+          }
+          waveFrame = requestAnimationFrame(tick);
+        };
+        waveFrame = requestAnimationFrame(tick);
+      }
+
+      // Countdown --------------------------------------------------------------------------
+
+      function countdown() {
+        const target = config.target || new Date(new Date().getFullYear() + 1, 0, 1);
+        const label = config.label || (config.target ? '' : 'New Year');
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const days = Math.round((target - today) / DAY_MS);
+        let n, unit, what;
+        if (days === 0) {
+          n = 'Today';
+          unit = '';
+          what = label || 'It’s the day';
+        } else {
+          n = String(Math.abs(days));
+          unit = Math.abs(days) === 1 ? 'day' : 'days';
+          if (days > 0) what = label ? `until ${label}` : 'to go';
+          else what = label ? `since ${label}` : 'ago';
+        }
+        const when = target.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        });
+        if (config.s === 'compact') {
+          // The event is the title; the badge holds the number.
+          const ago = days > 0 ? 'to go' : 'ago';
+          const tail = label ? ` · ${when}` : '';
+          const sub = days === 0 ? `Today${tail}` : `${unit} ${ago}${tail}`;
+          els.w.innerHTML = `
+            <div class="fit count-row">
+              <div class="badge cookie num${days === 0 ? ' word' : ''}"><span>${n}</span></div>
+              <div class="side">
+                <div class="what">${esc(label || when)}</div>
+                <div class="unit">${sub}</div>
+              </div>
+            </div>`;
+        } else {
+          els.w.innerHTML = `
+            <div class="fit count">
+              <div class="n num">${n}</div>
+              <div class="info">
+                ${unit ? `<div class="unit">${unit}</div>` : ''}
+                <div class="what muted">${esc(what)}</div>
+                <div class="when">${when}</div>
+              </div>
+            </div>`;
+        }
+        els.w.setAttribute('aria-label', `${n} ${unit} ${what}`.replace(/\s+/g, ' '));
+        scheduleUntilMidnight();
+      }
+
+      // Weather ----------------------------------------------------------------------------
+
+      function weatherKey() {
+        return `${config.lat},${config.lon},${config.fahrenheit}`;
+      }
+
+      function weatherWidget() {
+        if (config.lat === null || config.lon === null) {
+          els.w.innerHTML =
+            '<div class="fit"><div class="message">Choose a place for the weather</div></div>';
+          return;
+        }
+        if (!weather || weather.key !== weatherKey()) {
+          els.w.innerHTML = '<div class="fit"><div class="message">Loading weather…</div></div>';
+          return;
+        }
+        if (weather.error) {
+          els.w.innerHTML =
+            '<div class="fit"><div class="message">Weather is unavailable right now</div></div>';
+          return;
+        }
+        const { current, daily } = weather.data;
+        const [cond, dayIcon, nightIcon] = WEATHER_CODES[current.weather_code] || [
+          '',
+          'cloud',
+          'cloud',
+        ];
+        const icon = current.is_day ? dayIcon : nightIcon;
+        const temp = `${Math.round(current.temperature_2m)}°`;
+        const hiLo = `H ${Math.round(daily.temperature_2m_max[0])}° · L ${Math.round(daily.temperature_2m_min[0])}°`;
+        const place = esc(config.place || 'Weather');
+        if (config.s === 'forecast') {
+          const days = daily.time
+            .slice(1, 6)
+            .map((date, i) => {
+              const code = WEATHER_CODES[daily.weather_code[i + 1]] || ['', 'cloud'];
+              const name = new Date(`${date}T12:00`).toLocaleDateString('en-US', {
+                weekday: 'short',
+              });
+              return `<div><span class="dn">${name}</span><span class="icon wx-icon" aria-hidden="true">${code[1]}</span><span class="hi num">${Math.round(daily.temperature_2m_max[i + 1])}°</span><span class="lo num">${Math.round(daily.temperature_2m_min[i + 1])}°</span></div>`;
+            })
+            .join('');
+          els.w.innerHTML = `
+            <div class="fit forecast">
+              <div class="now-row">
+                <span class="icon wx-icon" aria-hidden="true">${icon}</span>
+                <span class="temp num">${temp}</span>
+                <div class="side"><span class="cond">${cond}</span><span class="meta">${place} · ${hiLo}</span></div>
+              </div>
+              <div class="days">${days}</div>
+            </div>`;
+        } else {
+          els.w.innerHTML = `
+            <div class="fit weather-now">
+              <span class="icon wx-icon" aria-hidden="true">${icon}</span>
+              <div class="side">
+                <span class="temp num">${temp}</span>
+                <span class="cond">${cond}</span>
+                <span class="meta">${place}</span>
+                <span class="meta num">${hiLo}</span>
+              </div>
+            </div>`;
+        }
+        els.w.setAttribute('aria-label', `${config.place || 'Weather'}: ${temp}, ${cond}`);
+      }
+
+      // Open-Meteo: free, no key, CORS-enabled. Refreshes every 30 minutes while visible. A
+      // failed fetch keeps the last forecast for the place, if any, and retries in a minute.
+      async function loadWeather() {
+        clearTimeout(weatherTimer);
+        if (config.lat === null || config.lon === null) return;
+        const key = weatherKey();
+        const fresh = weather?.key === key && Date.now() < weather.expiresAt;
+        if (!fresh) {
+          // The fetch already running for this place renders and reschedules when it lands.
+          if (weatherPending === key) return;
+          weatherPending = key;
+          const url = new URL('https://api.open-meteo.com/v1/forecast');
+          url.search = new URLSearchParams({
+            latitude: config.lat,
+            longitude: config.lon,
+            current: 'temperature_2m,weather_code,is_day',
+            daily: 'weather_code,temperature_2m_max,temperature_2m_min',
+            timezone: 'auto',
+            forecast_days: 6,
+            ...(config.fahrenheit && { temperature_unit: 'fahrenheit' }),
+          });
+          let next;
+          try {
+            // A request that never settles would block every retry, so give up after 15 s.
+            const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+            if (!res.ok) throw new Error(res.status);
+            next = { data: await res.json(), expiresAt: Date.now() + WEATHER_REFRESH_MS, key };
+          } catch (err) {
+            const kept = weather?.key === key && weather.data;
+            next = kept
+              ? { data: kept, expiresAt: Date.now() + WEATHER_RETRY_MS, key }
+              : { error: true, expiresAt: Date.now() + WEATHER_RETRY_MS, key };
+          }
+          if (weatherPending === key) weatherPending = '';
+          // The place changed while this was loading: drop the result, the newer fetch owns it.
+          if (key !== weatherKey()) return;
+          weather = next;
+          // Keep the result for later, but don't draw weather over a widget that replaced it.
+          if (config.w !== 'weather') return;
+          weatherWidget();
+          layout();
+        }
+        if (!document.hidden) {
+          weatherTimer = setTimeout(loadWeather, weather.expiresAt - Date.now());
+        }
+      }
+
+      // Interaction ------------------------------------------------------------------------
+
+      // Dots near the pointer swell, like a magnifier passing over the year. One frame at a
+      // time, with one layout read per frame.
+      function onPointerMove(e) {
+        const grid = document.getElementById('dots');
+        if (!grid || !config.motion || REDUCED_MOTION.matches || hoverFrame) return;
+        hoverFrame = requestAnimationFrame(() => {
+          hoverFrame = 0;
+          const box = grid.getBoundingClientRect();
+          const px = e.clientX - box.left;
+          const py = e.clientY - box.top;
+          const radius = Math.max(40, box.width / 6);
+          for (const dot of dotCenters) {
+            const k = Math.max(0, 1 - Math.hypot(px - dot.x, py - dot.y) / radius);
+            if (k > 0) dot.cell.style.setProperty('--hover', (1 + k * 0.7).toFixed(2));
+            else if (dot.hovered) dot.cell.style.removeProperty('--hover');
+            dot.hovered = k > 0;
+          }
+        });
+      }
+
+      function clearHover() {
+        for (const dot of dotCenters) {
+          if (dot.hovered) dot.cell.style.removeProperty('--hover');
+          dot.hovered = false;
+        }
+      }
+
+      function ignite() {
+        const grid = document.getElementById('dots');
+        if (!grid || !config.motion || REDUCED_MOTION.matches) return;
+        grid.classList.remove('ignite');
+        grid.getBoundingClientRect();
+        grid.classList.add('ignite');
+        clearTimeout(grid.igniteTimer);
+        grid.igniteTimer = setTimeout(() => grid.classList.remove('ignite'), 4000);
+      }
+
+      // --- Utilities ---
+
+      function hexToOklch(hex) {
+        const lin = (v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+        const [r, g, b] = [0, 2, 4].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255));
+        const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+        const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+        const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+        const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+        const B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+        return { c: Math.hypot(A, B), h: ((Math.atan2(B, A) * 180) / Math.PI + 360) % 360 };
+      }
+
+      // M3 Expressive "cookie" shape: a circle with n soft scallops.
+      function cookiePath(cx, cy, r, n, depth) {
+        let d = '';
+        for (let i = 0; i <= 360; i++) {
+          const a = (i / 360) * Math.PI * 2;
+          const rr = r * (1 - depth / 2 + (depth / 2) * Math.cos(n * a));
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(1)} ${(cy - rr * Math.cos(a)).toFixed(1)}`;
+        }
+        return `${d}Z`;
+      }
+
+      // A four-point sparkle, Year Left's ✦, drawn so it renders the same everywhere.
+      function sparklePath() {
+        return 'M50 0C54 36 64 46 100 50C64 54 54 64 50 100C46 64 36 54 0 50C36 46 46 36 50 0Z';
+      }
+
+      // An arc whose radius ripples `waves` times per turn. Angles are fractions of a turn,
+      // clockwise from 12 o'clock.
+      function wavyArc(cx, cy, r, amp, waves, from, to, phase = 0) {
+        const steps = Math.max(2, Math.ceil((to - from) * 240));
+        let d = '';
+        for (let i = 0; i <= steps; i++) {
+          const a = (from + ((to - from) * i) / steps) * Math.PI * 2;
+          const rr = r + amp * Math.sin(waves * a - phase);
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(2)} ${(cy - rr * Math.cos(a)).toFixed(2)}`;
+        }
+        return d;
+      }
+
+      // postMessage needs a target origin, but a page opened from a file has the origin
+      // "null", which postMessage rejects. Receivers still check the sender either way.
+      function messageTarget() {
+        return location.origin === 'null' ? '*' : location.origin;
+      }
+
+      function svgMask(path) {
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='${path}'/></svg>`;
+        return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+      }
+
+      // ISO 8601 week number.
+      function isoWeek(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil(((d - yearStart) / DAY_MS + 1) / 7);
+      }
+
+      function pctText(frac) {
+        const pct = Math.min(100, Math.max(0, frac * 100));
+        return pct < 10 ? pct.toFixed(1) : Math.floor(pct).toString();
+      }
+
+      function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el && el.textContent !== text) el.textContent = text;
+      }
+
+      function pad(n) {
+        return String(n).padStart(2, '0');
+      }
+
+      function esc(text) {
+        return String(text).replace(
+          /[&<>"']/g,
+          (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch],
+        );
+      }
+
+      init();
+    </script>
+  </body>
+</html>
