@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <style>
+    .shape { fill: #ffdf9f; }
+    .glyph { fill: #785a0b; }
+    @media (prefers-color-scheme: dark) {
+      .shape { fill: #5b4300; }
+      .glyph { fill: #ffdf9f; }
+    }
+  </style>
+  <circle class="shape" cx="256" cy="256" r="256"/>
+  <path class="glyph" transform="translate(256 256) scale(0.4) translate(-480 480)" d="M160-240q-50 0-85-35t-35-85v-240q0-50 35-85t85-35h540q50 0 85 35t35 85v240q0 50-35 85t-85 35H160Zm700-140v-200h20q17 0 28.5 11.5T920-540v120q0 17-11.5 28.5T880-380h-20Z"/>
+</svg>

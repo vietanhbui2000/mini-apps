@@ -1,1202 +1,2845 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Android battery health checker." />
+    <title>Battery Checker</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#fff8f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17130b" media="(prefers-color-scheme: dark)" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="Android battery health checker." />
-  <title>Android Battery Checker</title>
+    <!-- Fonts: Google Sans Flex, Google Sans Code, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400..500&family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=arrow_outward,battery_android_full,brightness_auto,close,code,content_copy,dark_mode,description,error,expand_more,help,info,light_mode,more_vert,person,upload_file&display=block"
+    />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #e0a800. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#785a0b, #e9c16c);
+        --on-primary: light-dark(#ffffff, #402d00);
+        --primary-container: light-dark(#ffdf9f, #5b4300);
+        --on-primary-container: light-dark(#5b4300, #ffdf9f);
+        --secondary: light-dark(#6b5d3f, #d8c4a0);
+        --on-secondary: light-dark(#ffffff, #3b2f15);
+        --secondary-container: light-dark(#f5e0bb, #52452a);
+        --on-secondary-container: light-dark(#52452a, #f5e0bb);
+        --tertiary: light-dark(#4a6546, #b0cfa9);
+        --on-tertiary: light-dark(#ffffff, #1d361c);
+        --tertiary-container: light-dark(#ccebc4, #334d30);
+        --on-tertiary-container: light-dark(#334d30, #ccebc4);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#fff8f2, #17130b);
+        --on-surface: light-dark(#1f1b13, #ebe1d4);
+        --on-surface-variant: light-dark(#4d4639, #d0c5b4);
+        --surface-dim: light-dark(#e2d9cc, #17130b);
+        --surface-bright: light-dark(#fff8f2, #3e382f);
+        --surface-container-lowest: light-dark(#ffffff, #110e07);
+        --surface-container-low: light-dark(#fcf2e5, #1f1b13);
+        --surface-container: light-dark(#f7ecdf, #231f17);
+        --surface-container-high: light-dark(#f1e7d9, #2e2921);
+        --surface-container-highest: light-dark(#ebe1d4, #39342b);
+        --outline: light-dark(#7f7667, #998f80);
+        --outline-variant: light-dark(#d0c5b4, #4d4639);
+        --inverse-surface: light-dark(#353027, #ebe1d4);
+        --inverse-on-surface: light-dark(#faefe2, #353027);
+        --inverse-primary: light-dark(#e9c16c, #785a0b);
+        --scrim: #000;
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
 
-  <!-- Fonts: Geist, Geist Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
-    rel="stylesheet" />
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
 
-  <!-- Tailwind Config -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Geist', 'sans-serif'],
-            mono: ['Geist Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-            },
-          },
-          animation: {
-            'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'fade-in': 'fadeIn 0.3s ease-out forwards',
-            'slide-in': 'slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
-            slideIn: {
-              '0%': { transform: 'translateY(10px)', opacity: '0' },
-              '100%': { transform: 'translateY(0)', opacity: '1' },
-            },
-          },
-        },
-      },
-    };
-  </script>
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
 
-  <style>
-    body {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* Custom scrollbar for desktop */
-    @media (min-width: 640px) {
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: #d4d4d8 transparent;
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --font-code: 'Google Sans Code', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
       }
 
-      ::-webkit-scrollbar {
-        width: 6px;
+      :root[data-theme='light'] {
+        color-scheme: light;
       }
 
-      ::-webkit-scrollbar-track {
-        background: transparent;
+      :root[data-theme='dark'] {
+        color-scheme: dark;
       }
 
-      ::-webkit-scrollbar-thumb {
-        background-color: #d4d4d8;
-        border-radius: 10px;
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      ::-webkit-scrollbar-thumb:hover {
-        background-color: #a1a1aa;
+      body {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
       }
-    }
-  </style>
-</head>
 
-<body class="bg-[#f5f5f5] text-zinc-800 h-[100dvh] flex justify-center overflow-hidden">
-  <!-- Main App Container -->
-  <div id="app-wrapper"
-    class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border">
-    <!-- Header -->
-    <header id="stickyHeader"
-      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0 transition-shadow duration-300">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div
-          class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
-          <i data-lucide="battery-charging" class="w-4 h-4"></i>
+      button,
+      input,
+      textarea {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
+
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      h1,
+      h2,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the 40px height, not --shape-full: a press springs them smaller,
+         and the spring's overshoot from 999px would dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
+        border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .btn:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .btn .icon {
+        font-size: 20px;
+        margin-left: -8px;
+      }
+
+      .btn-filled {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
+      }
+
+      .btn-text .icon {
+        margin-left: -4px;
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* --- App bar & page --- */
+      /* The bar stays pinned while the page scrolls. Its contents line up with the page column. */
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: var(--surface);
+        transition: box-shadow var(--spring-ms) linear;
+      }
+
+      /* A divider plus a soft shadow: content cards share the container colors, so a tint alone
+         would blend in. The divider keeps the edge visible in dark mode. */
+      .appbar.scrolled {
+        box-shadow:
+          0 1px 0 var(--outline-variant),
+          0 4px 12px rgb(0 0 0 / 0.08);
+      }
+
+      .appbar-inner,
+      .page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .appbar-inner,
+        .page {
+          padding-inline: 24px;
+        }
+      }
+
+      /* The page fills the space under the bar, so empty states can stretch to the bottom edge.
+         The bottom gap matches the side gutter. */
+      .page {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding-bottom: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .page {
+          padding-bottom: 24px;
+        }
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        margin-right: -8px;
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 840px) {
+        .top-title {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+
+      /* --- Drop zone (empty state) --- */
+      .drop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        padding: 48px 24px;
+        border: 2px dashed transparent;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-low);
+        text-align: center;
+        justify-content: center;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+        transition:
+          border-color var(--effects-ms) linear,
+          background-color var(--effects-ms) linear;
+      }
+
+      .dragging .drop {
+        border-color: var(--primary);
+        background: var(--surface-container);
+      }
+
+      .art {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 144px;
+        height: 144px;
+        margin-bottom: 32px;
+        color: var(--on-primary-container);
+        transition: scale var(--spring-ms) var(--spring);
+      }
+
+      .dragging .art {
+        scale: 1.1;
+      }
+
+      .art svg {
+        position: absolute;
+        inset: 0;
+        fill: var(--primary-container);
+        animation: spin 40s linear infinite;
+      }
+
+      .art .icon {
+        position: relative;
+        font-size: 56px;
+        font-variation-settings: 'FILL' 1;
+        rotate: -90deg;
+      }
+
+      @keyframes spin {
+        to {
+          rotate: 1turn;
+        }
+      }
+
+      .drop h2 {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .drop p {
+        max-width: 400px;
+        margin: 8px 0 24px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .drop-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      /* Error banner */
+      .banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        max-width: 480px;
+        margin: 0 0 24px;
+        padding: 16px 8px 16px 16px;
+        border-radius: var(--shape-lg);
+        background: var(--error-container);
+        color: var(--on-error-container);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        text-align: left;
+        animation: enter var(--spring-ms) var(--spring) both;
+      }
+
+      .banner > .icon {
+        margin-top: 8px;
+      }
+
+      .banner-text {
+        flex: 1;
+        padding-top: 8px;
+      }
+
+      .banner strong {
+        display: block;
+        font-weight: 500;
+      }
+
+      .banner .icon-btn {
+        color: inherit;
+      }
+
+      /* --- Loading --- */
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .loading-name {
+        max-width: 100%;
+        overflow: hidden;
+        font: 500 16px/24px var(--font);
+        letter-spacing: 0.15px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .loading-line {
+        width: min(320px, 100%);
+        height: 16px;
+        overflow: visible;
+        color: var(--primary);
+      }
+
+      .loading-pct {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .wave,
+      .track {
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .wave {
+        stroke: currentColor;
+      }
+
+      .track {
+        stroke: var(--secondary-container);
+      }
+
+      /* --- File bar --- */
+      /* The loaded file, shaped like a search bar: 40px items at an 8px inset in a 56px pill. It
+         sits in the app bar, so the file stays in view while the dashboard scrolls. */
+      .file-wrap {
+        padding-bottom: 12px;
+      }
+
+      .file {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 56px;
+        padding: 0 8px;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .file-lead {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--surface-container-lowest);
+        color: var(--primary);
+      }
+
+      .file-text {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .file-name,
+      .file-meta {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-name {
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .file-meta {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      /* --- Dashboard --- */
+      .dash {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .dash > * {
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .dash > :nth-child(2) {
+        animation-delay: 40ms;
+      }
+
+      .dash > :nth-child(3) {
+        animation-delay: 80ms;
+      }
+
+      .dash > :nth-child(4) {
+        animation-delay: 120ms;
+      }
+
+      .dash > :nth-child(n + 5) {
+        animation-delay: 160ms;
+      }
+
+      @media (min-width: 840px) {
+        .dash {
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          column-gap: 16px;
+        }
+
+        .health {
+          grid-column: span 7;
+        }
+
+        .cycles {
+          grid-column: span 5;
+        }
+
+        .sect-half {
+          grid-column: span 6;
+        }
+
+        .sect-full {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .card {
+        padding: 24px;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container);
+      }
+
+      .card-title {
+        color: var(--on-surface-variant);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 16px;
+        border-radius: var(--shape-sm);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+      }
+
+      .chip[data-tone='good'] {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .chip[data-tone='bad'] {
+        background: var(--error-container);
+        color: var(--on-error-container);
+      }
+
+      /* Health: the hero. A wavy gauge for the overall figure and the two values behind it. */
+      .health {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px 32px;
+      }
+
+      .gauge {
+        position: relative;
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 168px;
+        height: 168px;
+        margin: 0 auto;
+        color: var(--primary);
+      }
+
+      .gauge[data-tone='fair'] {
+        color: var(--secondary);
+      }
+
+      .gauge[data-tone='bad'] {
+        color: var(--error);
+      }
+
+      .gauge svg {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+      }
+
+      .gauge .wave,
+      .gauge .track {
+        stroke-width: 10;
+      }
+
+      .gauge-value {
+        display: flex;
+        align-items: baseline;
+        color: var(--on-surface);
+        font: 450 48px/1 var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+
+      .gauge-value small {
+        margin-left: 2px;
+        color: var(--on-surface-variant);
+        font-size: 22px;
+      }
+
+      .health-body {
+        display: flex;
+        flex: 1 1 220px;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .health-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .health-title {
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .measures {
+        display: grid;
+        gap: 2px;
+      }
+
+      .measure {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-bright);
+      }
+
+      .measure:first-child {
+        border-radius: var(--shape-lg) var(--shape-lg) var(--shape-xs) var(--shape-xs);
+      }
+
+      .measure:last-child {
+        border-radius: var(--shape-xs) var(--shape-xs) var(--shape-lg) var(--shape-lg);
+      }
+
+      .measure-label {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .measure-sub {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      .measure-value {
+        font: 500 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+      }
+
+      /* Cycles */
+      .cycles {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .cycles-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .cycles-value {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex: 1;
+        font: 450 57px/64px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+
+      .cycles-value small {
+        color: var(--on-surface-variant);
+        font-size: 16px;
+        line-height: 24px;
+        letter-spacing: 0.15px;
+      }
+
+      .cycles-bar {
+        margin-top: auto;
+      }
+
+      .cycles-line {
+        display: block;
+        width: 100%;
+        height: 12px;
+        overflow: visible;
+        color: var(--primary);
+      }
+
+      .cycles-line .wave,
+      .cycles-line .track {
+        stroke-width: 6;
+      }
+
+      .ticks {
+        position: relative;
+        height: 16px;
+        margin-top: 8px;
+        color: var(--on-surface-variant);
+        font-size: 11px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+      }
+
+      .ticks span {
+        position: absolute;
+        translate: -50% 0;
+      }
+
+      .ticks span:first-child {
+        translate: 0;
+      }
+
+      .ticks span:last-child {
+        right: 0;
+        translate: 0;
+      }
+
+      /* Sections: title, then an Android 16 grouped list or a grid of tiles */
+      .sect-title {
+        margin: 16px 16px 8px;
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 56px;
+        padding: 12px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+      }
+
+      /* First and last visible rows: a hidden row (a setting that only shows when another is
+         on) mustn't leave its neighbour with a square outer corner. */
+      .group > .row:not([hidden]):not(.row:not([hidden]) ~ .row) {
+        border-top-left-radius: var(--shape-lg-plus);
+        border-top-right-radius: var(--shape-lg-plus);
+      }
+
+      .group > .row:not([hidden]):not(:has(~ .row:not([hidden]))) {
+        border-bottom-left-radius: var(--shape-lg-plus);
+        border-bottom-right-radius: var(--shape-lg-plus);
+      }
+
+      .row-label {
+        display: flex;
+        flex: 0 1 auto;
+        min-width: 0;
+        flex-direction: column;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .row-sub {
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+        opacity: 0.8;
+      }
+
+      .row-value {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        font: 500 16px/24px var(--font);
+        letter-spacing: 0.15px;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .tiles {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2px;
+        overflow: hidden;
+        border-radius: var(--shape-lg-plus);
+      }
+
+      @media (min-width: 600px) {
+        .tiles {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .tile {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+      }
+
+      .tile-label {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      .tile-value {
+        overflow: hidden;
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .tile-value small {
+        margin-left: 4px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        letter-spacing: 0.25px;
+      }
+
+      .empty-value {
+        color: var(--outline);
+      }
+
+      /* Matched log lines */
+      .raw {
+        border-radius: var(--shape-lg-plus);
+        background: var(--surface-container);
+      }
+
+      .raw summary {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 8px 8px 16px;
+        border-radius: var(--shape-lg-plus);
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .raw summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .raw-title {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .raw-title small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .raw summary > .icon {
+        width: 40px;
+        color: var(--on-surface-variant);
+        text-align: center;
+        transition: rotate var(--spring-ms) var(--spring);
+      }
+
+      .raw[open] summary > .icon {
+        rotate: 180deg;
+      }
+
+      .raw-body {
+        position: relative;
+        padding: 0 8px 8px;
+      }
+
+      .raw pre {
+        margin: 0;
+        padding: 16px 56px 16px 16px;
+        overflow-x: auto;
+        border-radius: var(--shape-md);
+        background: var(--surface-container-lowest);
+        color: var(--on-surface-variant);
+        font: 400 12px/20px var(--font-code);
+        letter-spacing: 0;
+      }
+
+      .raw pre b {
+        color: var(--primary);
+        font-weight: 500;
+      }
+
+      .raw-copy {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+      }
+
+      /* Help */
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .steps li {
+        display: flex;
+        gap: 16px;
+        counter-increment: step;
+      }
+
+      .steps li::before {
+        content: counter(step);
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 28px;
+        height: 28px;
+        margin-top: -4px;
+        border-radius: 50%;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font: 500 14px/1 var(--font);
+      }
+
+      .steps strong {
+        color: var(--on-surface);
+        font-weight: 500;
+      }
+
+      code {
+        padding: 1px 6px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container-highest);
+        color: var(--on-surface);
+        font: 400 13px/20px var(--font-code);
+        letter-spacing: 0;
+      }
+
+      .help-note {
+        margin-top: 24px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-head {
+        padding: 24px 24px 16px;
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 8px 24px 0;
+        overscroll-behavior: contain;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* Menu */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu.up {
+        transform-origin: bottom right;
+      }
+
+      .menu:popover-open {
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
+      }
+
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, menus and reading dialogs (help, about) open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-right: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('battery-checker') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="appbar" id="appbar">
+      <div class="appbar-inner">
+        <div class="top">
+          <h1 class="top-title">Battery Checker</h1>
+          <button
+            class="icon-btn state"
+            id="help-btn"
+            type="button"
+            aria-label="How to get a battery log"
+            title="How to get a battery log"
+          >
+            <span class="icon" aria-hidden="true">help</span>
+          </button>
+          <button
+            class="icon-btn state"
+            id="more-btn"
+            type="button"
+            aria-label="More options"
+            title="More options"
+            aria-haspopup="menu"
+          >
+            <span class="icon" aria-hidden="true">more_vert</span>
+          </button>
         </div>
-        <div>
-          <h1 class="font-bold text-2xl tracking-tight text-zinc-900 leading-tight">
-            Android Battery Checker
-          </h1>
+        <div class="file-wrap" id="file-bar" hidden>
+          <div class="file">
+            <span class="file-lead"><span class="icon" aria-hidden="true">description</span></span>
+            <span class="file-text">
+              <span class="file-name" id="file-name"></span>
+              <span class="file-meta" id="file-meta"></span>
+            </span>
+            <button
+              class="icon-btn state"
+              type="button"
+              data-action="open"
+              aria-label="Open another log"
+              title="Open another log"
+            >
+              <span class="icon" aria-hidden="true">upload_file</span>
+            </button>
+            <button
+              class="icon-btn state"
+              type="button"
+              data-action="reset"
+              aria-label="Close this log"
+              title="Close this log"
+            >
+              <span class="icon" aria-hidden="true">close</span>
+            </button>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- Main Content Wrapper -->
-    <div class="flex-1 relative min-h-0">
-      <!-- Main Content Area -->
-      <main class="absolute inset-0 overflow-y-auto bg-zinc-50/50 scroll-smooth p-4 sm:p-6" id="mainScroll">
-        <!-- Empty State (No File Loaded) -->
-        <div id="uploaderArea"
-          class="absolute inset-0 flex flex-col items-center justify-center p-6 border-2 border-transparent transition-all duration-300">
-          <p class="text-sm text-zinc-500 text-center max-w-[280px] leading-relaxed">
-            Drop or select an Android dumpstate log file to analyze battery health details.
-          </p>
-        </div>
-
-        <!-- Results Section (Dashboard) -->
-        <div id="resultsArea" class="hidden flex flex-col gap-4 sm:gap-6 animate-slide-in">
-
-          <!-- SECTION 1: LOG INFO -->
-          <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
-            <div class="flex items-center gap-2 mb-4 sm:mb-6">
-              <div class="w-6 h-6 bg-zinc-100 rounded-md flex items-center justify-center text-zinc-600">
-                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-              </div>
-              <h3 class="font-bold text-sm text-zinc-900">Log Info</h3>
-            </div>
-            <div class="flex flex-col gap-3">
-              <!-- Log Generation Date -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Log Generation Date</p>
-                <p id="dumpstateDateVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-              <!-- Manufacturer -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Manufacturer</p>
-                <p id="manufacturerVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-              <!-- Model Name -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Model Name</p>
-                <p id="modelNameVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-              <!-- Serial Number -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Serial Number</p>
-                <p id="serialNumberVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-            </div>
+    <main class="page">
+      <!-- Empty state: drop or choose a log -->
+      <section class="drop" id="drop">
+        <div class="banner" id="error" role="alert" hidden>
+          <span class="icon" aria-hidden="true">error</span>
+          <div class="banner-text">
+            <strong>Couldn’t read battery stats</strong>
+            <span id="error-text"></span>
           </div>
-
-          <!-- SECTION 2: BATTERY INFO -->
-          <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
-            <div class="flex items-center gap-2 mb-4 sm:mb-6">
-              <div class="w-6 h-6 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-600">
-                <i data-lucide="info" class="w-3.5 h-3.5"></i>
-              </div>
-              <h3 class="font-bold text-sm text-zinc-900">Battery Info</h3>
-            </div>
-            <div class="flex flex-col gap-3">
-              <!-- Typical Capacity -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Typical Capacity</p>
-                <p id="capacityTypicalVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-              <!-- Rated Capacity -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Rated Capacity</p>
-                <p id="capacityRatedVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-              <!-- Manufacture Date -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">Manufacture Date</p>
-                <p id="llbCalVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-              <!-- First Use Date -->
-              <div class="flex items-center justify-between gap-4">
-                <p class="text-sm font-medium text-zinc-500">First Use Date</p>
-                <p id="firstUseDateVal" class="font-bold text-sm text-zinc-900 font-mono truncate text-right">--</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 3: BATTERY STATUS -->
-          <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
-            <div class="flex items-center gap-2 mb-4 sm:mb-6">
-              <div class="w-6 h-6 bg-brand-500/10 rounded-md flex items-center justify-center text-brand-600">
-                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-              </div>
-              <h3 class="font-bold text-sm text-zinc-900">Battery Status</h3>
-            </div>
-
-            <div class="flex flex-col gap-4 sm:gap-6">
-              <!-- Battery Health -->
-              <div class="bg-zinc-50/50 rounded-xl border border-zinc-100 p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-4 sm:mb-6">
-                  <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 bg-emerald-500/10 rounded-md flex items-center justify-center text-emerald-600">
-                      <i data-lucide="heart" class="w-3.5 h-3.5"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-zinc-900">Battery Health</h4>
-                  </div>
-                  <span id="healthBadge"
-                    class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">--</span>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-zinc-200">
-                  <!-- Gauge ASOC -->
-                  <div id="asocCard" class="flex flex-col items-center">
-                    <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                      <svg class="w-full h-full" viewBox="0 0 36 36">
-                        <path class="text-zinc-100" stroke-width="3" stroke="currentColor" fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                        <path id="asocCircle" class="text-brand-500 transition-all duration-1000 ease-out"
-                          stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor"
-                          fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                      </svg>
-                      <div class="absolute flex flex-col items-center">
-                        <span id="asocVal" class="text-lg font-bold font-mono text-zinc-900 leading-none">--</span>
-                      </div>
-                    </div>
-                    <span class="text-[10px] text-zinc-400 mt-3 text-center">Absolute State of Charge</span>
-                  </div>
-
-                  <!-- Gauge BSOH -->
-                  <div id="bsohCard" class="flex flex-col items-center">
-                    <div class="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                      <svg class="w-full h-full" viewBox="0 0 36 36">
-                        <path class="text-zinc-100" stroke-width="3" stroke="currentColor" fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                        <path id="bsohCircle" class="text-emerald-500 transition-all duration-1000 ease-out"
-                          stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor"
-                          fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 0 0 31.831 a 15.9155 15.9155 0 0 0 0 -31.831" />
-                      </svg>
-                      <div class="absolute flex flex-col items-center">
-                        <span id="bsohVal" class="text-lg font-bold font-mono text-zinc-900 leading-none">--</span>
-                      </div>
-                    </div>
-                    <span class="text-[10px] text-zinc-400 mt-3 text-center">Battery State of Health</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Charge Cycle -->
-              <div class="bg-zinc-50/50 rounded-xl border border-zinc-100 p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-2 sm:mb-3">
-                  <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 bg-indigo-500/10 rounded-md flex items-center justify-center text-indigo-600">
-                      <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                    </div>
-                    <h4 class="font-bold text-xs text-zinc-900">Battery Cycle Count</h4>
-                  </div>
-                  <span id="cycleLevel"
-                    class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">--</span>
-                </div>
-                <p id="usageVal" class="font-bold text-xl text-zinc-900">
-                  <span class="font-mono">--</span><span
-                    class="text-sm font-semibold text-zinc-400 font-sans ml-1">cycles</span>
-                </p>
-                <div class="mt-2 sm:mt-3">
-                  <div class="relative h-1.5 bg-zinc-200 rounded-full overflow-hidden">
-                    <div id="cycleBar"
-                      class="absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-indigo-500"
-                      style="width: 0%"></div>
-                  </div>
-                  <div class="relative w-full h-3 mt-1 text-[8px] text-zinc-400 font-mono">
-                    <span class="absolute left-0">0</span>
-                    <span class="absolute left-[10%] -translate-x-1/2">100</span>
-                    <span class="absolute left-[20%] -translate-x-1/2">200</span>
-                    <span class="absolute left-[50%] -translate-x-1/2">500</span>
-                    <span class="absolute right-0">1000+</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 4: BATTERY STATISTICS -->
-          <div class="bg-white rounded-2xl border border-zinc-100 p-4 sm:p-6 shadow-sm">
-            <div class="flex items-center gap-2 mb-4 sm:mb-6">
-              <div class="w-6 h-6 bg-orange-500/10 rounded-md flex items-center justify-center text-orange-600">
-                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
-              </div>
-              <h3 class="font-bold text-sm text-zinc-900">Battery Statistics</h3>
-            </div>
-            <div class="grid grid-cols-2 gap-4 sm:gap-6">
-              <!-- Estimated -->
-              <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Estimated Cap</p>
-                <p id="capEstimatedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
-                </p>
-              </div>
-              <!-- Last Learned -->
-              <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Last Learned Cap</p>
-                <p id="capLastLearnedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">
-                  --
-                </p>
-              </div>
-              <!-- Min Learned -->
-              <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Min Learned Cap</p>
-                <p id="capMinLearnedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
-                </p>
-              </div>
-              <!-- Max Learned -->
-              <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Max Learned Cap</p>
-                <p id="capMaxLearnedVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--
-                </p>
-              </div>
-              <!-- Max Temp -->
-              <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Max Temperature</p>
-                <p id="tempVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--</p>
-              </div>
-              <!-- Max Current -->
-              <div class="flex flex-col justify-center p-4 sm:p-6 rounded-xl bg-zinc-50/50 border border-zinc-100">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Max Current</p>
-                <p id="currentVal" class="font-bold text-sm sm:text-base text-zinc-900 font-mono mt-1 truncate">--</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- SECTION 5: RAW DATA -->
-          <div class="bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden flex flex-col">
-            <button id="toggleRawBtn"
-              class="w-full p-4 sm:px-6 sm:py-4 flex items-center justify-between font-bold text-sm text-zinc-900 hover:bg-zinc-50 transition-colors">
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 bg-zinc-100 rounded-md flex items-center justify-center text-zinc-600">
-                  <i data-lucide="code" class="w-3.5 h-3.5"></i>
-                </div>
-                <h3 class="font-bold text-sm text-zinc-900">Raw Data</h3>
-              </div>
-              <i data-lucide="chevron-down" id="rawChevron" class="w-4 h-4 transition-transform duration-300"></i>
-            </button>
-            <div id="rawContent"
-              class="hidden border-t border-zinc-100 bg-zinc-50 p-4 sm:p-6 text-[10px] font-mono overflow-x-auto select-text no-scrollbar">
-              <pre id="rawDataBlock"
-                class="bg-zinc-100 p-3 rounded-lg border border-zinc-200 text-zinc-700 whitespace-pre-wrap break-all">--</pre>
-            </div>
-          </div>
-
-      </main>
-
-      <!-- Error Area -->
-      <div id="errorArea"
-        class="hidden absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 bg-red-50 border border-red-200 shadow-lg p-4 sm:p-6 rounded-xl text-xs text-red-800 animate-slide-in flex items-start gap-2 sm:gap-3 z-30">
-        <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500"></i>
-        <div class="flex-1">
-          <h4 class="font-bold mb-0.5">Failed to parse stats</h4>
-          <p id="errorMessage">
-            Make sure this is a dumpstate or adb battery log containing Samsung battery info.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sticky Action Bar -->
-    <div id="actionBar"
-      class="bg-white border-t border-zinc-200 p-4 sm:px-6 sm:py-4 flex gap-2 sm:gap-3 items-center justify-between z-20 flex-shrink-0">
-      <input type="file" id="fileInput" class="hidden" accept=".log,.txt" />
-
-      <div class="flex items-center gap-2 sm:gap-3 w-full">
-        <button id="bottomFileSelectBtn"
-          class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white h-12 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-start gap-2 sm:gap-3 group focus:ring-2 focus:ring-brand-500 outline-none text-left border border-transparent truncate">
-          <i id="bottomFileSelectIcon" data-lucide="file-text" class="w-5 h-5 text-white/80 shrink-0"></i>
-          <span id="bottomFileNameLabel" class="truncate font-sans text-sm">Select file...</span>
-        </button>
-
-        <!-- Help Button -->
-        <button id="helpBtn"
-          class="w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 transition-colors"
-          title="How to generate log">
-          <i data-lucide="help-circle" class="w-5 h-5"></i>
-        </button>
-
-        <!-- Clear/Reset Button (hidden initially) -->
-        <button id="resetBtn"
-          class="hidden w-12 h-12 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 transition-colors"
-          title="Clear log file">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Modals Overlay -->
-    <div id="modalOverlay"
-      class="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end justify-center">
-      <!-- Help/Info Modal -->
-      <div id="helpModal"
-        class="bg-white w-full rounded-t-2xl p-4 sm:p-6 shadow-2xl transform translate-y-full transition-transform duration-300 modal-content hidden max-h-[80vh] flex flex-col"
-        role="dialog">
-        <div class="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 class="text-xl font-bold text-zinc-900">How to get an Android dumpstate log?</h2>
-          <button id="closeHelpModal" class="text-zinc-400 hover:text-zinc-600 p-2 -mr-2">
-            <i data-lucide="x" class="w-5 h-5"></i>
+          <button
+            class="icon-btn state"
+            id="error-close"
+            type="button"
+            aria-label="Dismiss"
+            title="Dismiss"
+          >
+            <span class="icon" aria-hidden="true">close</span>
           </button>
         </div>
-        <div class="space-y-4 overflow-y-auto pr-1 text-sm text-zinc-600 leading-relaxed">
-          <ol class="list-decimal list-inside space-y-3">
-            <li>
-              Open phone dialer, type
-              <code class="bg-zinc-100 px-1.5 py-0.5 rounded font-mono font-semibold text-zinc-800">*#9900#</code>
-              (Samsung devices).
-            </li>
-            <li>Tap <span class="font-bold text-zinc-800">"Run dumpstate/logcat"</span>.</li>
-            <li>
-              Select <span class="font-bold text-zinc-800">"Copy to SD card"</span> to get the output <code
-                class="font-mono text-zinc-800">.log</code> file.
-            </li>
-            <li>
-              Alternatively, run
-              <code class="bg-zinc-100 px-1.5 py-0.5 rounded font-mono font-semibold text-zinc-800">adb bugreport</code>
-              via computer terminal.
-            </li>
-          </ol>
+        <div class="art">
+          <svg viewBox="0 0 144 144" aria-hidden="true"><path id="art-shape" /></svg>
+          <span class="icon" aria-hidden="true">battery_android_full</span>
         </div>
-      </div>
+        <h2>Check your battery’s health</h2>
+        <p>
+          Drop a dumpstate log from a Samsung Galaxy phone here, or choose one. The file is read on
+          this device and never uploaded.
+        </p>
+        <div class="drop-actions">
+          <button class="btn btn-filled state" type="button" data-action="open">
+            <span class="icon" aria-hidden="true">upload_file</span>Choose log file
+          </button>
+          <button class="btn btn-text state" type="button" data-action="help">
+            How to get a log
+          </button>
+        </div>
+      </section>
+
+      <!-- Reading progress -->
+      <section class="loading" id="loading" hidden>
+        <p class="loading-name" id="loading-name"></p>
+        <svg
+          class="loading-line"
+          id="loading-line"
+          role="progressbar"
+          aria-label="Reading log file"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <path class="track" id="loading-track" stroke-width="4" />
+          <path class="wave" id="loading-wave" stroke-width="4" />
+        </svg>
+        <p class="loading-pct" id="loading-pct">0%</p>
+      </section>
+
+      <!-- Results -->
+      <section id="results" hidden>
+        <div class="dash">
+          <article class="card health">
+            <div class="gauge" id="gauge">
+              <svg viewBox="0 0 168 168" aria-hidden="true">
+                <path class="track" id="gauge-track" pathLength="100" />
+                <path class="wave" id="gauge-wave" pathLength="100" />
+              </svg>
+              <span class="gauge-value"><span id="health-val">–</span><small>%</small></span>
+            </div>
+            <div class="health-body">
+              <div class="health-head">
+                <h2 class="health-title" id="health-title" tabindex="-1">Battery health</h2>
+                <span class="chip" id="health-chip" hidden></span>
+              </div>
+              <div class="measures">
+                <div class="measure">
+                  <span class="measure-label">
+                    <span>Capacity left</span>
+                    <span class="measure-sub">Absolute state of charge (ASOC)</span>
+                  </span>
+                  <span class="measure-value" id="asoc-val">–</span>
+                </div>
+                <div class="measure">
+                  <span class="measure-label">
+                    <span>Condition</span>
+                    <span class="measure-sub">Battery state of health (BSOH)</span>
+                  </span>
+                  <span class="measure-value" id="bsoh-val">–</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card cycles">
+            <div class="cycles-head">
+              <h2 class="card-title">Charge cycles</h2>
+              <span class="chip" id="cycles-chip" hidden></span>
+            </div>
+            <p class="cycles-value"><span id="cycles-val">–</span><small>cycles</small></p>
+            <div class="cycles-bar">
+              <svg class="cycles-line" id="cycles-line" aria-hidden="true">
+                <path class="track" id="cycles-track" />
+                <path class="wave" id="cycles-wave" />
+              </svg>
+              <div class="ticks" aria-hidden="true">
+                <span>0</span>
+                <span style="left: 10%">100</span>
+                <span style="left: 20%">200</span>
+                <span style="left: 50%">500</span>
+                <span>1000+</span>
+              </div>
+            </div>
+          </article>
+
+          <section class="sect-half">
+            <h2 class="sect-title">Device</h2>
+            <div class="group" id="device-rows"></div>
+          </section>
+
+          <section class="sect-half">
+            <h2 class="sect-title">Battery</h2>
+            <div class="group" id="battery-rows"></div>
+          </section>
+
+          <section class="sect-full">
+            <h2 class="sect-title">Capacity and limits</h2>
+            <div class="tiles" id="tiles"></div>
+          </section>
+
+          <section class="sect-full">
+            <details class="raw" id="raw">
+              <summary class="state">
+                <span class="raw-title">
+                  <span>Matched log lines</span>
+                  <small id="raw-count"></small>
+                </span>
+                <span class="icon" aria-hidden="true">expand_more</span>
+              </summary>
+              <div class="raw-body">
+                <pre id="raw-lines"></pre>
+                <button
+                  class="icon-btn state raw-copy"
+                  id="raw-copy"
+                  type="button"
+                  aria-label="Copy lines"
+                  title="Copy lines"
+                >
+                  <span class="icon" aria-hidden="true">content_copy</span>
+                </button>
+              </div>
+            </details>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <!-- Menus -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
     </div>
-  </div>
 
-  <!-- Script Architecture -->
-  <script>
-    // --- Constants & Config ---
-    const CONFIG = {
-      chunkSize: 2 * 1024 * 1024, // 2MB chunk sizes
-    };
+    <!-- Help Dialog -->
+    <dialog class="dialog bottom-sheet" id="help" aria-labelledby="help-title">
+      <div class="dialog-head">
+        <h2 class="dialog-title" id="help-title">Get a battery log</h2>
+      </div>
+      <div class="dialog-body">
+        <ol class="steps">
+          <li>
+            <span
+              >On your Galaxy phone, open the Phone app and dial <code>*#9900#</code>. If nothing
+              happens, turn off Auto Blocker in Settings and try again.</span
+            >
+          </li>
+          <li>
+            <span>Tap <strong>Run dumpstate/logcat</strong> and wait for it to finish.</span>
+          </li>
+          <li>
+            <span
+              >Tap <strong>Copy to sdcard</strong>. The <code>.log</code> file appears in the
+              <strong>log</strong> folder of your phone’s storage.</span
+            >
+          </li>
+        </ol>
+        <p class="help-note">
+          On a computer, <code>adb bugreport</code> creates a zip. Unzip it and choose the
+          <code>.txt</code> bugreport inside; this app can’t read the zip itself. Health, cycle and
+          temperature figures come from Samsung’s battery service, so other brands show only device
+          and capacity details.
+        </p>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Got it</button>
+      </div>
+    </dialog>
 
-    // --- State Management ---
-    let state = {
-      results: null,
-      rawLines: null,
-      showRaw: false,
-      fileName: '',
-      fileSize: 0,
-      parseTime: 0,
-    };
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">Battery Checker</h2>
+        <p class="about-desc">Android battery health checker.</p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/battery-checker"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
 
-    // --- DOM Elements ---
-    const els = {
-      appWrapper: document.getElementById('app-wrapper'),
-      mainScroll: document.getElementById('mainScroll'),
-      stickyHeader: document.getElementById('stickyHeader'),
-      uploaderArea: document.getElementById('uploaderArea'),
-      fileInput: document.getElementById('fileInput'),
-      bottomFileSelectBtn: document.getElementById('bottomFileSelectBtn'),
-      bottomFileNameLabel: document.getElementById('bottomFileNameLabel'),
-      helpBtn: document.getElementById('helpBtn'),
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
 
-      errorArea: document.getElementById('errorArea'),
-      errorMessage: document.getElementById('errorMessage'),
-      resultsArea: document.getElementById('resultsArea'),
-      healthBadge: document.getElementById('healthBadge'),
-      bsohCircle: document.getElementById('bsohCircle'),
-      bsohVal: document.getElementById('bsohVal'),
-      asocCircle: document.getElementById('asocCircle'),
-      asocVal: document.getElementById('asocVal'),
-      bsohCard: document.getElementById('bsohCard'),
-      asocCard: document.getElementById('asocCard'),
-      cycleLevel: document.getElementById('cycleLevel'),
-      cycleBar: document.getElementById('cycleBar'),
+    <input type="file" id="file-input" accept=".log,.txt,text/plain" hidden />
+    <div id="probe" hidden></div>
 
-      // New & Old Vals
-      manufacturerVal: document.getElementById('manufacturerVal'),
-      modelNameVal: document.getElementById('modelNameVal'),
-      serialNumberVal: document.getElementById('serialNumberVal'),
-      dumpstateDateVal: document.getElementById('dumpstateDateVal'),
+    <script>
+      // --- Constants & Config ---
+      const STORE_KEY = 'battery-checker';
+      const CHUNK_SIZE = 4 * 1024 * 1024;
+      const MAX_LINE = 1024 * 1024; // a longer "line" is binary data, not a log line
+      const CYCLE_SCALE = 1000;
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
 
-      capacityTypicalVal: document.getElementById('capacityTypicalVal'),
-      capacityRatedVal: document.getElementById('capacityRatedVal'),
-      llbCalVal: document.getElementById('llbCalVal'),
-      firstUseDateVal: document.getElementById('firstUseDateVal'),
+      // What to look for in a dumpstate log. `hint` is a cheap lowercase substring test that runs
+      // before the regex; each field keeps its first match.
+      const FIELDS = [
+        {
+          key: 'logDate',
+          hint: 'dumpstate:',
+          re: /dumpstate:\s*(\d{4})-(\d{2})-(\d{2})\s+(\d{2}:\d{2}):\d{2}/i,
+          parse: (m) => {
+            const date = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}`);
+            return Number.isNaN(date.getTime()) ? undefined : { date };
+          },
+        },
+        {
+          key: 'manufacturer',
+          hint: '[ro.product.manufacturer]',
+          re: /\[ro\.product\.manufacturer\]:\s*\[(.*?)\]/i,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'model',
+          hint: '[ro.product.model]',
+          re: /\[ro\.product\.model\]:\s*\[(.*?)\]/i,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'serial',
+          hint: '[ro.serialno]',
+          re: /\[ro\.serialno\]:\s*\[(.*?)\]/i,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'capacity',
+          hint: 'typical:',
+          re: /Capacity:\s*(\d+),\s*(?:Rated:\s*(\d+),\s*)?Typical:\s*(\d+)/i,
+          parse: (m) => ({ rated: num(m[2]), typical: num(m[3]) || num(m[1]) }),
+        },
+        {
+          key: 'manufactured',
+          hint: 'llb',
+          re: /LLB\s*(?:CAL|MAN):\s*(\d{8})/i,
+          parse: (m) => ymd(m[1]),
+        },
+        {
+          key: 'firstUse',
+          hint: 'firstusedate',
+          re: /battery\s+FirstUseDate:\s+\[?(\d{8})\]?/i,
+          parse: (m) => ymd(m[1]),
+        },
+        {
+          key: 'asoc',
+          hint: 'msavedbatteryasoc',
+          re: /mSavedBatteryAsoc\s*[:=]\s*\[?(\d+)\]?/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'bsoh',
+          hint: 'msavedbatterybsoh',
+          re: /mSavedBatteryBsoh\s*[:=]\s*(\d+(?:\.\d+)?)/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'cycles',
+          hint: 'msavedbatteryusage',
+          re: /mSavedBatteryUsage\s*[:=]\s*\[?(\d+)\]?/i,
+          parse: (m) => num(m[1]) / 100,
+        },
+        {
+          key: 'maxTemp',
+          hint: 'msavedbatterymaxtemp',
+          re: /mSavedBatteryMaxTemp\s*[:=]\s*(\d+)/i,
+          parse: (m) => num(m[1]) / 10,
+        },
+        {
+          key: 'maxCurrent',
+          hint: 'msavedbatterymaxcurrent',
+          re: /mSavedBatteryMaxCurrent\s*[:=]\s*(\d+)/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'capEstimated',
+          hint: 'estimated battery capacity',
+          re: /Estimated battery capacity:\s*(\d+)\s*mAh/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'capLastLearned',
+          hint: 'last learned battery capacity',
+          re: /Last learned battery capacity:\s*(\d+)\s*mAh/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'capMinLearned',
+          hint: 'min learned battery capacity',
+          re: /Min learned battery capacity:\s*(\d+)\s*mAh/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'capMaxLearned',
+          hint: 'max learned battery capacity',
+          re: /Max learned battery capacity:\s*(\d+)\s*mAh/i,
+          parse: (m) => num(m[1]),
+        },
+      ];
 
-      usageVal: document.getElementById('usageVal'),
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let report = null; // { file, results, lines, ms }
+      let readToken = 0;
+      let gaugeFrame = 0;
+      let snackbarTimer = 0;
+      let ignorePopstate = 0;
+      let dragDepth = 0;
+      const dialogStack = [];
 
-      capEstimatedVal: document.getElementById('capEstimatedVal'),
-      capLastLearnedVal: document.getElementById('capLastLearnedVal'),
-      capMinLearnedVal: document.getElementById('capMinLearnedVal'),
-      capMaxLearnedVal: document.getElementById('capMaxLearnedVal'),
+      // --- DOM Elements ---
+      const els = {
+        appbar: document.getElementById('appbar'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        helpBtn: document.getElementById('help-btn'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        help: document.getElementById('help'),
+        about: document.getElementById('about'),
+        drop: document.getElementById('drop'),
+        artShape: document.getElementById('art-shape'),
+        error: document.getElementById('error'),
+        errorText: document.getElementById('error-text'),
+        errorClose: document.getElementById('error-close'),
+        loading: document.getElementById('loading'),
+        loadingName: document.getElementById('loading-name'),
+        loadingLine: document.getElementById('loading-line'),
+        loadingWave: document.getElementById('loading-wave'),
+        loadingTrack: document.getElementById('loading-track'),
+        loadingPct: document.getElementById('loading-pct'),
+        results: document.getElementById('results'),
+        healthTitle: document.getElementById('health-title'),
+        fileBar: document.getElementById('file-bar'),
+        fileName: document.getElementById('file-name'),
+        fileMeta: document.getElementById('file-meta'),
+        gauge: document.getElementById('gauge'),
+        gaugeWave: document.getElementById('gauge-wave'),
+        gaugeTrack: document.getElementById('gauge-track'),
+        healthVal: document.getElementById('health-val'),
+        healthChip: document.getElementById('health-chip'),
+        asocVal: document.getElementById('asoc-val'),
+        bsohVal: document.getElementById('bsoh-val'),
+        cyclesVal: document.getElementById('cycles-val'),
+        cyclesChip: document.getElementById('cycles-chip'),
+        cyclesLine: document.getElementById('cycles-line'),
+        cyclesWave: document.getElementById('cycles-wave'),
+        cyclesTrack: document.getElementById('cycles-track'),
+        deviceRows: document.getElementById('device-rows'),
+        batteryRows: document.getElementById('battery-rows'),
+        tiles: document.getElementById('tiles'),
+        raw: document.getElementById('raw'),
+        rawCount: document.getElementById('raw-count'),
+        rawLines: document.getElementById('raw-lines'),
+        rawCopy: document.getElementById('raw-copy'),
+        fileInput: document.getElementById('file-input'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
 
-      tempVal: document.getElementById('tempVal'),
-      currentVal: document.getElementById('currentVal'),
+      // --- Initialization ---
+      function init() {
+        // A reload while a dialog was open leaves its history entry behind.
+        if (history.state?.dialog) history.replaceState(null, '');
 
-      toggleRawBtn: document.getElementById('toggleRawBtn'),
-      rawChevron: document.getElementById('rawChevron'),
-      rawContent: document.getElementById('rawContent'),
-      rawDataBlock: document.getElementById('rawDataBlock'),
-      actionBar: document.getElementById('actionBar'),
-      resetBtn: document.getElementById('resetBtn'),
+        els.artShape.setAttribute('d', cookiePath(72, 72, 72, 9, 0.12));
+        els.gaugeTrack.setAttribute('d', wavyCircle(84, 84, 72, 0, 0, 0));
+        applyTheme();
+        bindEvents();
+      }
 
-      modalOverlay: document.getElementById('modalOverlay'),
-      helpModal: document.getElementById('helpModal'),
-      closeHelpModal: document.getElementById('closeHelpModal'),
-    };
-
-    // --- Initialization ---
-    function init() {
-      lucide.createIcons();
-      setupMobileHeight();
-      bindEvents();
-      updateSelectorUI(false);
-    }
-
-    // --- Event Listeners ---
-    function bindEvents() {
-      window.addEventListener('resize', setupMobileHeight);
-
-      els.mainScroll.addEventListener('scroll', () => {
-        if (els.mainScroll.scrollTop > 10) {
-          els.stickyHeader.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
-        } else {
-          els.stickyHeader.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]');
-        }
-      });
-
-      // Help Modal Events
-      let currentModal = null;
-
-      function openModal(modalId) {
-        els.modalOverlay.classList.remove('hidden');
-        setTimeout(() => {
-          els.modalOverlay.classList.remove('opacity-0');
-        }, 10);
-        document.querySelectorAll('.modal-content').forEach((el) => {
-          el.classList.add('hidden');
-          el.classList.remove('translate-y-0');
-          el.classList.add('translate-y-full');
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.help, () => closeDialog(els.help));
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        document.addEventListener('click', (e) => {
+          const action = e.target.closest('[data-action]')?.dataset.action;
+          if (action === 'open') els.fileInput.click();
+          else if (action === 'help') openDialog(els.help);
+          else if (action === 'about') openDialog(els.about);
+          else if (action === 'reset') resetApp();
         });
-        const modal = document.getElementById(modalId);
-        currentModal = modal;
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-          modal.classList.remove('translate-y-full');
-          modal.classList.add('translate-y-0');
-        }, 50);
+        DARK_QUERY.addEventListener('change', applyTheme);
+        window.addEventListener(
+          'scroll',
+          () => els.appbar.classList.toggle('scrolled', window.scrollY > 0),
+          { passive: true },
+        );
+
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.helpBtn.addEventListener('click', () => openDialog(els.help));
+        els.moreBtn.addEventListener('click', () => toggleMenu(els.moreMenu, els.moreBtn));
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          if (e.target.closest('.menu-item:not(#theme-btn)')) els.moreMenu.hidePopover();
+        });
+        els.errorClose.addEventListener('click', () => (els.error.hidden = true));
+        els.fileInput.addEventListener('change', () => {
+          const [file] = els.fileInput.files;
+          els.fileInput.value = '';
+          if (file) readFile(file);
+        });
+        els.rawCopy.addEventListener('click', copyRawLines);
+
+        // The whole window is a drop target.
+        document.addEventListener('dragenter', (e) => {
+          if (!e.dataTransfer.types.includes('Files')) return;
+          dragDepth++;
+          document.body.classList.add('dragging');
+        });
+        document.addEventListener('dragleave', () => {
+          if (--dragDepth <= 0) stopDragging();
+        });
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+          e.preventDefault();
+          stopDragging();
+          const [file] = e.dataTransfer.files;
+          if (file && !dialogStack.length) readFile(file);
+        });
+
+        // Redraw the cycle bar's wave when its width changes.
+        new ResizeObserver(() => report && drawCycles(report.results.cycles)).observe(
+          els.cyclesLine,
+        );
+
+        // Dialogs
+        for (const dialog of [els.help, els.about]) {
+          dialog.addEventListener('close', () => onDialogClosed(dialog));
+          bindBackdropClose(dialog);
+          dialog.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close]')) closeDialog(dialog);
+          });
+        }
+        window.addEventListener('popstate', () => {
+          if (ignorePopstate) return ignorePopstate--;
+          const top = dialogStack.at(-1);
+          if (top) {
+            dialogStack.pop();
+            top.close();
+          }
+        });
+
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
       }
 
-      function closeAllModals() {
-        els.modalOverlay.classList.add('opacity-0');
-        if (currentModal) {
-          currentModal.classList.add('translate-y-full');
-          currentModal.classList.remove('translate-y-0');
-        }
-        setTimeout(() => {
-          els.modalOverlay.classList.add('hidden');
-          document.querySelectorAll('.modal-content').forEach((el) => el.classList.add('hidden'));
-          currentModal = null;
-        }, 300);
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        items.at(i < 0 && step < 0 ? -1 : (i + step) % items.length)?.focus();
       }
 
-      els.helpBtn.addEventListener('click', () => {
-        openModal('helpModal');
-      });
-      els.closeHelpModal.addEventListener('click', closeAllModals);
-      els.modalOverlay.addEventListener('click', (e) => {
-        if (e.target === els.modalOverlay) {
-          closeAllModals();
-        }
-      });
+      function stopDragging() {
+        dragDepth = 0;
+        document.body.classList.remove('dragging');
+      }
 
-      // File Uploader Trigger
-      els.bottomFileSelectBtn.addEventListener('click', () => {
-        els.fileInput.click();
-      });
-      els.fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-          handleSelectedFile(e.target.files[0]);
-        }
-      });
+      // --- Core Logic ---
 
-      // Drag & Drop events
-      ['dragenter', 'dragover'].forEach((eventName) => {
-        els.uploaderArea.addEventListener(
-          eventName,
-          (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            els.uploaderArea.classList.remove('border-transparent');
-            els.uploaderArea.classList.add(
-              'border-dashed',
-              'border-brand-500',
-              'bg-brand-50/10'
-            );
-          },
-          false,
-        );
-      });
+      // Preferences -------------------------------------------------------------
 
-      ['dragleave', 'drop'].forEach((eventName) => {
-        els.uploaderArea.addEventListener(
-          eventName,
-          (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            els.uploaderArea.classList.remove(
-              'border-dashed',
-              'border-brand-500',
-              'bg-brand-50/10'
-            );
-            els.uploaderArea.classList.add('border-transparent');
-          },
-          false,
-        );
-      });
+      function loadPrefs() {
+        const saved = readJson(STORE_KEY);
+        return { theme: THEME_CYCLE.includes(saved?.theme) ? saved.theme : 'auto' };
+      }
 
-      els.uploaderArea.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        if (dt && dt.files && dt.files.length > 0) {
-          handleSelectedFile(dt.files[0]);
-        }
-      });
+      function savePrefs() {
+        writeJson(STORE_KEY, prefs);
+      }
 
-      // Collapsible Raw Log
-      els.toggleRawBtn.addEventListener('click', () => {
-        state.showRaw = !state.showRaw;
-        updateRawView();
-      });
+      // Log parsing --------------------------------------------------------------
 
-      // Reset App
-      els.resetBtn.addEventListener('click', resetApp);
-    }
-
-    // --- Core Logic ---
-    async function handleSelectedFile(file) {
-      els.bottomFileSelectBtn.blur();
-      state.fileName = file.name;
-      state.fileSize = file.size;
-
-      hideError();
-      showLoading();
-
-      const startTime = performance.now();
-
-      try {
-        const parseResult = await parseLogFileInChunks(file);
-        const endTime = performance.now();
-        state.parseTime = Math.round(endTime - startTime);
-
-        if (validateParseResults(parseResult.results)) {
-          state.results = parseResult.results;
-          state.rawLines = parseResult.rawLines;
-          showResults();
-        } else {
-          showError(
-            "We parsed the file but couldn't locate relevant device or battery stats. Make sure this is a dumpstate or adb log file containing 'battery' info."
+      async function readFile(file) {
+        const token = ++readToken;
+        els.error.hidden = true;
+        showView('loading');
+        els.loadingName.textContent = `Reading ${file.name}`;
+        renderProgress(0);
+        const start = performance.now();
+        try {
+          const parsed = await parseLog(
+            file,
+            (p) => token === readToken && renderProgress(p),
+            () => token === readToken,
           );
-        }
-      } catch (err) {
-        console.error(err);
-        showError(`Failed reading file: ${err.message || 'Unknown error'}`);
-      }
-    }
-
-    function validateParseResults(results) {
-      return (
-        results.firstUseDate ||
-        results.asoc ||
-        results.bsoh ||
-        results.maxTemp ||
-        results.maxCurrent ||
-        results.llbCal ||
-        results.usage ||
-        results.manufacturer ||
-        results.modelName ||
-        results.capEstimated ||
-        results.capLastLearned ||
-        results.capacityTypical
-      );
-    }
-
-    async function parseLogFileInChunks(file) {
-      let offset = 0;
-      let remainder = '';
-      let lineCount = 0;
-
-      let results = {
-        manufacturer: null,
-        modelName: null,
-        serialNumber: null,
-        dumpstateDate: null,
-
-        capacityTypical: null,
-        capacityRated: null,
-        llbCal: null,
-        firstUseDate: null,
-
-        asoc: null,
-        bsoh: null,
-        usage: null,
-
-        capEstimated: null,
-        capLastLearned: null,
-        capMinLearned: null,
-        capMaxLearned: null,
-        maxTemp: null,
-        maxCurrent: null,
-      };
-
-      let rawLines = {
-        manufacturer: '',
-        modelName: '',
-        serialNumber: '',
-        dumpstateDate: '',
-        capacity: '',
-        llbCal: '',
-        firstUseDate: '',
-        asoc: '',
-        bsoh: '',
-        usage: '',
-        capEstimated: '',
-        capLastLearned: '',
-        capMinLearned: '',
-        capMaxLearned: '',
-        maxTemp: '',
-        maxCurrent: '',
-      };
-
-      const totalSize = file.size;
-
-      while (offset < totalSize) {
-        // Fast exit optimization removed to ensure all metrics are checked until EOF.
-        // Log files can be large, but all properties must be collected.
-
-        const currentChunkSize = Math.min(CONFIG.chunkSize, totalSize - offset);
-        const chunkBlob = file.slice(offset, offset + currentChunkSize);
-
-        const chunkText = await readBlobAsText(chunkBlob);
-        offset += currentChunkSize;
-
-        const lines = (remainder + chunkText).split(/\r?\n/);
-        remainder = lines.pop() || '';
-
-        for (const line of lines) {
-          lineCount++;
-
-          if (!results.dumpstateDate) {
-            const match = line.match(/dumpstate:\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/i);
-            if (match) {
-              results.dumpstateDate = formatDumpstateDate(match[1]);
-              rawLines.dumpstateDate = `${lineCount} | ${line.trim()}`;
-            }
+          if (token !== readToken) return;
+          if (!Object.keys(parsed.results).length) {
+            throw new Error(
+              'No battery or device details were found. Choose a dumpstate .log or .txt file from a Samsung Galaxy phone. If you have an adb bugreport zip, unzip it first.',
+            );
           }
-          if (!results.manufacturer) {
-            const match = line.match(/\[ro\.product\.manufacturer\]:\s*\[(.*?)\]/i);
-            if (match) {
-              results.manufacturer = match[1];
-              rawLines.manufacturer = `${lineCount} | ${line.trim()}`;
-            }
+          report = { file, ...parsed, ms: performance.now() - start };
+          showView('results');
+          renderResults();
+          // The button that opened the file picker is hidden now; move focus to the results.
+          els.healthTitle.focus({ preventScroll: true });
+        } catch (err) {
+          if (token !== readToken) return;
+          const message = err.message || 'The file could not be read.';
+          if (report) {
+            // Keep the log that was already open instead of dropping to the empty state.
+            showView('results');
+            showError(message);
+            els.healthTitle.focus({ preventScroll: true });
+            return;
           }
-          if (!results.modelName) {
-            const match = line.match(/\[ro\.product\.model\]:\s*\[(.*?)\]/i);
-            if (match) {
-              results.modelName = match[1];
-              rawLines.modelName = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.serialNumber) {
-            const match = line.match(/\[ro\.serialno\]:\s*\[(.*?)\]/i);
-            if (match) {
-              results.serialNumber = match[1];
-              rawLines.serialNumber = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.capacityTypical || !results.capacityRated) {
-            if (/Capacity:\s*\d+,\s*(?:Rated:\s*\d+,\s*)?Typical:\s*\d+/i.test(line)) {
-              const capMatch = line.match(/Capacity:\s*(\d+)/i);
-              const ratedMatch = line.match(/Rated:\s*(\d+)/i);
-              const typicalMatch = line.match(/Typical:\s*(\d+)/i);
-
-              const capVal = capMatch ? capMatch[1] : null;
-              let ratedVal = ratedMatch ? ratedMatch[1] : null;
-              let typicalVal = typicalMatch ? typicalMatch[1] : null;
-
-              if (!typicalVal || typicalVal === '0') typicalVal = capVal;
-
-              results.capacityRated = ratedVal;
-              results.capacityTypical = typicalVal;
-              rawLines.capacity = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.capEstimated) {
-            const match = line.match(/Estimated battery capacity:\s*(\d+)\s*mAh/i);
-            if (match) {
-              results.capEstimated = match[1];
-              rawLines.capEstimated = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.capLastLearned) {
-            const match = line.match(/Last learned battery capacity:\s*(\d+)\s*mAh/i);
-            if (match) {
-              results.capLastLearned = match[1];
-              rawLines.capLastLearned = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.capMinLearned) {
-            const match = line.match(/Min learned battery capacity:\s*(\d+)\s*mAh/i);
-            if (match) {
-              results.capMinLearned = match[1];
-              rawLines.capMinLearned = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.capMaxLearned) {
-            const match = line.match(/Max learned battery capacity:\s*(\d+)\s*mAh/i);
-            if (match) {
-              results.capMaxLearned = match[1];
-              rawLines.capMaxLearned = `${lineCount} | ${line.trim()}`;
-            }
-          }
-
-          if (!results.firstUseDate) {
-            const match = line.match(/battery\s+FirstUseDate:\s+(?:\[)?(\d{8})(?:\])?/i);
-            if (match) {
-              results.firstUseDate = formatFirstUseDate(match[1]);
-              rawLines.firstUseDate = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.asoc) {
-            const match = line.match(/mSavedBatteryAsoc:\s+(?:\[)?(\d+)(?:\])?/i);
-            if (match) {
-              results.asoc = parseInt(match[1], 10);
-              rawLines.asoc = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.bsoh) {
-            const match = line.match(/mSavedBatteryBsoh:\s+([0-9.]+)/i);
-            if (match) {
-              results.bsoh = parseFloat(match[1]);
-              rawLines.bsoh = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.maxTemp) {
-            const match = line.match(/mSavedBatteryMaxTemp:\s+(\d+)/i);
-            if (match) {
-              results.maxTemp = parseInt(match[1], 10) / 10;
-              rawLines.maxTemp = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.maxCurrent) {
-            const match = line.match(/mSavedBatteryMaxCurrent:\s+(\d+)/i);
-            if (match) {
-              results.maxCurrent = parseInt(match[1], 10);
-              rawLines.maxCurrent = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.llbCal) {
-            const match = line.match(/LLB\s*(CAL|MAN):\s*(\d{8})/i);
-            if (match) {
-              results.llbCal = formatFirstUseDate(match[2]);
-              rawLines.llbCal = `${lineCount} | ${line.trim()}`;
-            }
-          }
-          if (!results.usage) {
-            const match = line.match(/mSavedBatteryUsage:\s+(?:\[)?(\d+)(?:\])?/i);
-            if (match) {
-              results.usage = parseFloat((parseInt(match[1], 10) / 100).toFixed(2));
-              rawLines.usage = `${lineCount} | ${line.trim()}`;
-            }
-          }
-        }
-        await sleep(1);
-      }
-
-      // Check remainder if necessary
-      if (remainder) {
-        lineCount++;
-        const line = remainder;
-        // Same logic for remainder could go here, but usually unnecessary for last truncated line.
-      }
-
-      return { results, rawLines };
-    }
-
-    // --- UI Updates ---
-    function showLoading() {
-      els.resultsArea.classList.add('hidden');
-      els.errorArea.classList.add('hidden');
-      updateSelectorUI(false, true);
-      els.bottomFileNameLabel.textContent = `Processing ${state.fileName}`;
-    }
-
-    function showResults() {
-      els.resultsArea.classList.remove('hidden');
-      els.uploaderArea.classList.add('hidden');
-
-      // Populate banners
-      els.bottomFileNameLabel.textContent = state.fileName;
-
-      updateSelectorUI(true);
-
-      const res = state.results;
-
-      // Log Info
-      els.manufacturerVal.textContent = res.manufacturer || '--';
-      els.modelNameVal.textContent = res.modelName || '--';
-      els.serialNumberVal.textContent = res.serialNumber || '--';
-      els.dumpstateDateVal.textContent = res.dumpstateDate || '--';
-
-      // Battery Info
-      els.capacityTypicalVal.textContent = res.capacityTypical ? `${res.capacityTypical} mAh` : '--';
-      els.capacityRatedVal.textContent = res.capacityRated ? `${res.capacityRated} mAh` : '--';
-      els.llbCalVal.textContent = res.llbCal || '--';
-      els.firstUseDateVal.textContent = res.firstUseDate || '--';
-
-      // Battery Status
-      let healthPct = null;
-      if (res.bsoh !== null && res.asoc !== null) {
-        healthPct = (res.asoc + res.bsoh) / 2;
-      } else if (res.bsoh !== null) {
-        healthPct = res.bsoh;
-      } else if (res.asoc !== null) {
-        healthPct = res.asoc;
-      }
-
-      if (healthPct !== null) {
-        const pct = Math.min(100, Math.max(0, healthPct));
-        if (pct >= 90) {
-          els.healthBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600';
-          els.healthBadge.textContent = 'Excellent';
-        } else if (pct >= 80) {
-          els.healthBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600';
-          els.healthBadge.textContent = 'Good';
-        } else if (pct >= 70) {
-          els.healthBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600';
-          els.healthBadge.textContent = 'Average';
-        } else {
-          els.healthBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-600';
-          els.healthBadge.textContent = 'Bad';
-        }
-        els.healthBadge.classList.remove('hidden');
-      } else {
-        els.healthBadge.classList.add('hidden');
-      }
-
-      // Gauges - BSOH
-      els.bsohVal.textContent = res.bsoh !== null ? Math.round(res.bsoh) : '--';
-      if (res.bsoh !== null) {
-        const bsohPercent = Math.min(100, Math.max(0, res.bsoh));
-        els.bsohCircle.setAttribute('stroke-dasharray', `${bsohPercent}, 100`);
-        if (bsohPercent >= 90) {
-          els.bsohCircle.setAttribute('class', 'text-emerald-500 transition-all duration-1000 ease-out');
-        } else if (bsohPercent >= 80) {
-          els.bsohCircle.setAttribute('class', 'text-blue-500 transition-all duration-1000 ease-out');
-        } else if (bsohPercent >= 70) {
-          els.bsohCircle.setAttribute('class', 'text-amber-500 transition-all duration-1000 ease-out');
-        } else {
-          els.bsohCircle.setAttribute('class', 'text-red-500 transition-all duration-1000 ease-out');
-        }
-      } else {
-        els.bsohCircle.setAttribute('stroke-dasharray', '0, 100');
-        els.bsohCircle.setAttribute('class', 'text-zinc-200 transition-all duration-1000 ease-out');
-      }
-
-      // Gauges - ASOC
-      els.asocVal.textContent = res.asoc !== null ? res.asoc : '--';
-      if (res.asoc !== null) {
-        const asocPercent = Math.min(100, Math.max(0, res.asoc));
-        els.asocCircle.setAttribute('stroke-dasharray', `${asocPercent}, 100`);
-        if (asocPercent >= 90) {
-          els.asocCircle.setAttribute('class', 'text-emerald-500 transition-all duration-1000 ease-out');
-        } else if (asocPercent >= 80) {
-          els.asocCircle.setAttribute('class', 'text-blue-500 transition-all duration-1000 ease-out');
-        } else if (asocPercent >= 70) {
-          els.asocCircle.setAttribute('class', 'text-amber-500 transition-all duration-1000 ease-out');
-        } else {
-          els.asocCircle.setAttribute('class', 'text-red-500 transition-all duration-1000 ease-out');
-        }
-      } else {
-        els.asocCircle.setAttribute('stroke-dasharray', '0, 100');
-        els.asocCircle.setAttribute('class', 'text-zinc-200 transition-all duration-1000 ease-out');
-      }
-
-      if (res.usage !== null) {
-        els.usageVal.innerHTML = `<span class="font-mono">${Math.round(res.usage)}</span><span class="text-sm font-semibold text-zinc-400 font-sans ml-1">cycles</span>`;
-
-        let usageText, badgeColor, barColor;
-        if (res.usage <= 100) {
-          usageText = 'Like New';
-          badgeColor = 'bg-emerald-500/10 text-emerald-600';
-          barColor = 'bg-emerald-500';
-        } else if (res.usage <= 200) {
-          usageText = 'Low';
-          badgeColor = 'bg-blue-500/10 text-blue-600';
-          barColor = 'bg-blue-500';
-        } else if (res.usage <= 500) {
-          usageText = 'Normal';
-          badgeColor = 'bg-indigo-500/10 text-indigo-600';
-          barColor = 'bg-indigo-500';
-        } else if (res.usage <= 1000) {
-          usageText = 'Heavy';
-          badgeColor = 'bg-amber-500/10 text-amber-600';
-          barColor = 'bg-amber-500';
-        } else {
-          usageText = 'Severe';
-          badgeColor = 'bg-red-500/10 text-red-600';
-          barColor = 'bg-red-500';
-        }
-        els.cycleLevel.textContent = usageText;
-        els.cycleLevel.className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`;
-        els.cycleLevel.classList.remove('hidden');
-
-        const barPercent = Math.min(100, (res.usage / 1000) * 100);
-        els.cycleBar.style.width = `${barPercent}%`;
-        els.cycleBar.className = `absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out ${barColor}`;
-      } else {
-        els.usageVal.innerHTML = '<span class="font-mono">--</span><span class="text-sm font-semibold text-zinc-400 font-sans ml-1">cycles</span>';
-        els.cycleLevel.classList.add('hidden');
-        els.cycleBar.style.width = '0%';
-        els.cycleBar.className = 'absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out bg-zinc-200';
-      }
-
-      // Battery Statistics
-      els.capEstimatedVal.textContent = res.capEstimated ? `${res.capEstimated} mAh` : '--';
-      els.capLastLearnedVal.textContent = res.capLastLearned ? `${res.capLastLearned} mAh` : '--';
-      els.capMinLearnedVal.textContent = res.capMinLearned ? `${res.capMinLearned} mAh` : '--';
-      els.capMaxLearnedVal.textContent = res.capMaxLearned ? `${res.capMaxLearned} mAh` : '--';
-
-      if (res.maxTemp !== null) {
-        els.tempVal.textContent = `${res.maxTemp} °C`;
-      } else {
-        els.tempVal.textContent = '--';
-      }
-
-      if (res.maxCurrent !== null) {
-        if (res.maxCurrent >= 1000) {
-          els.currentVal.textContent = `~${Math.round(res.maxCurrent / 1000)} A`;
-        } else {
-          els.currentVal.textContent = `${res.maxCurrent} mA`;
-        }
-      } else {
-        els.currentVal.textContent = '--';
-      }
-
-      // Raw Lines
-      let allRawLines = [];
-      for (const key in state.rawLines) {
-        if (state.rawLines[key]) {
-          allRawLines.push(state.rawLines[key]);
+          showView('drop');
+          els.errorText.textContent = message;
+          els.error.hidden = false;
         }
       }
-      allRawLines.sort((a, b) => {
-        const lineA = parseInt(a.split(' |')[0], 10) || 0;
-        const lineB = parseInt(b.split(' |')[0], 10) || 0;
-        return lineA - lineB;
-      });
-      els.rawDataBlock.textContent = allRawLines.join('\n') || '// No raw data found';
-    }
 
-    function updateRawView() {
-      const chevron = document.getElementById('rawChevron');
-      if (state.showRaw) {
-        els.rawContent.classList.remove('hidden');
-        if (chevron) chevron.classList.add('rotate-180');
-      } else {
-        els.rawContent.classList.add('hidden');
-        if (chevron) chevron.classList.remove('rotate-180');
-      }
-    }
+      // Reads the file in chunks so a log of a few hundred MB never sits in memory at once,
+      // and stops early once every field is found.
+      async function parseLog(file, onProgress, isCurrent) {
+        const results = {};
+        const lines = {};
+        const pending = new Set(FIELDS);
+        const decoder = new TextDecoder();
+        let remainder = '';
+        let lineNo = 0;
+        let offset = 0;
 
-    function resetApp() {
-      state.results = null;
-      state.rawLines = null;
-      state.showRaw = false;
-      state.fileName = '';
-      state.fileSize = 0;
-      state.parseTime = 0;
+        const scan = (line) => {
+          lineNo++;
+          const lower = line.toLowerCase();
+          for (const field of pending) {
+            if (!lower.includes(field.hint)) continue;
+            const match = line.match(field.re);
+            if (!match) continue;
+            const value = field.parse(match);
+            // An unusable value (empty, NaN, bad date) leaves the field open for a later line.
+            if (value === undefined || value === '' || Number.isNaN(value)) continue;
+            results[field.key] = value;
+            lines[field.key] = { n: lineNo, text: line.trim() };
+            pending.delete(field);
+          }
+        };
 
-      els.fileInput.value = '';
-      els.resultsArea.classList.add('hidden');
-      els.uploaderArea.classList.remove('hidden');
-
-      updateSelectorUI(false);
-
-      hideError();
-      updateRawView();
-    }
-
-    function showError(msg) {
-      els.resultsArea.classList.add('hidden');
-      els.uploaderArea.classList.remove('hidden');
-      els.errorMessage.textContent = msg;
-      els.errorArea.classList.remove('hidden');
-
-      updateSelectorUI(false);
-    }
-
-    function hideError() {
-      els.errorArea.classList.add('hidden');
-    }
-
-    function updateSelectorUI(isLoaded, isLoading = false) {
-      if (isLoaded) {
-        els.bottomFileSelectBtn.className =
-          'flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white h-12 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-start gap-2 group focus:ring-2 focus:ring-brand-500 outline-none text-left border border-transparent truncate';
-
-        const fileIcon = els.bottomFileSelectBtn.querySelector('#bottomFileSelectIcon');
-        if (fileIcon) {
-          fileIcon.outerHTML = '<i id="bottomFileSelectIcon" data-lucide="file-text" class="w-5 h-5 text-white/80 shrink-0"></i>';
+        while (offset < file.size && pending.size && isCurrent()) {
+          const end = Math.min(offset + CHUNK_SIZE, file.size);
+          const bytes = await file.slice(offset, end).arrayBuffer();
+          offset = end;
+          const parts = (remainder + decoder.decode(bytes, { stream: offset < file.size })).split(
+            /\r?\n/,
+          );
+          remainder = parts.pop();
+          for (const line of parts) scan(line);
+          // A binary file has no newlines; don't let it pile up in memory.
+          if (remainder.length > MAX_LINE) {
+            remainder = '';
+            lineNo++;
+          }
+          onProgress(offset / file.size);
+          await new Promise((resolve) => setTimeout(resolve));
         }
+        if (remainder && pending.size) scan(remainder);
+        onProgress(1);
+        return { results, lines };
+      }
 
-        els.bottomFileNameLabel.className = 'truncate font-mono text-sm font-semibold';
-        els.helpBtn.classList.add('hidden');
-        els.resetBtn.classList.remove('hidden');
-      } else if (isLoading) {
-        els.bottomFileSelectBtn.className =
-          'flex-1 bg-brand-500 text-white h-12 px-4 rounded-xl font-medium transition-all flex items-center justify-start gap-2 group outline-none text-left border border-transparent truncate pointer-events-none';
+      // Averages ASOC and BSOH when both are present, like Samsung's own diagnostics.
+      function healthOf(r) {
+        const values = [r.asoc, r.bsoh].filter((v) => typeof v === 'number');
+        if (!values.length) return null;
+        return clamp(values.reduce((a, b) => a + b, 0) / values.length, 0, 100);
+      }
 
-        const fileIcon = els.bottomFileSelectBtn.querySelector('#bottomFileSelectIcon');
-        if (fileIcon) {
-          fileIcon.outerHTML = '<i id="bottomFileSelectIcon" data-lucide="loader-2" class="w-5 h-5 text-white shrink-0 animate-spin"></i>';
+      function healthRating(pct) {
+        if (pct >= 90) return { label: 'Excellent', tone: 'good' };
+        if (pct >= 80) return { label: 'Good', tone: 'good' };
+        if (pct >= 70) return { label: 'Fair', tone: 'fair' };
+        return { label: 'Worn', tone: 'bad' };
+      }
+
+      function cycleRating(cycles) {
+        if (cycles <= 100) return { label: 'Like new', tone: 'good' };
+        if (cycles <= 200) return { label: 'Light use', tone: 'good' };
+        if (cycles <= 500) return { label: 'Normal', tone: '' };
+        if (cycles <= 1000) return { label: 'Heavy use', tone: 'fair' };
+        return { label: 'Very heavy use', tone: 'bad' };
+      }
+
+      function resetApp() {
+        readToken++;
+        report = null;
+        els.error.hidden = true;
+        showView('drop');
+        els.drop.querySelector('[data-action="open"]').focus();
+      }
+
+      async function copyRawLines() {
+        try {
+          await navigator.clipboard.writeText(els.rawLines.textContent);
+          showSnackbar('Lines copied');
+        } catch (err) {
+          showError('Couldn’t copy the lines');
         }
+      }
 
-        els.bottomFileNameLabel.className = 'truncate font-sans text-sm font-medium';
-        els.helpBtn.classList.add('hidden');
-        els.resetBtn.classList.add('hidden');
-      } else {
-        els.bottomFileSelectBtn.className =
-          'flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white h-12 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all flex items-center justify-start gap-2 group focus:ring-2 focus:ring-brand-500 outline-none text-left border border-transparent truncate';
+      // Theme -----------------------------------------------------------------------
 
-        const fileIcon = els.bottomFileSelectBtn.querySelector('#bottomFileSelectIcon');
-        if (fileIcon) {
-          fileIcon.outerHTML = '<i id="bottomFileSelectIcon" data-lucide="file-text" class="w-5 h-5 text-white/80 shrink-0"></i>';
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
+
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
+        );
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        savePrefs();
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
+      }
+
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
+      }
+
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
+
+      // Menus & dialogs --------------------------------------------------------------
+
+      // Opens under the button, right-aligned, or above it when there is no room below.
+      // The source link keeps a click on the open menu's button from light-dismissing and
+      // reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        const up = r.bottom + 4 + menu.offsetHeight > innerHeight - 8;
+        menu.classList.toggle('up', up);
+        menu.style.top = up ? `${r.top - 4 - menu.offsetHeight}px` : `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        history.pushState({ dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
         }
-
-        els.bottomFileNameLabel.className = 'truncate font-sans text-sm';
-        els.bottomFileNameLabel.textContent = 'Select file...';
-        els.helpBtn.classList.remove('hidden');
-        els.resetBtn.classList.add('hidden');
       }
 
-      lucide.createIcons();
-    }
-
-    // --- Utilities ---
-    function setupMobileHeight() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-      if (els.appWrapper && window.innerWidth < 640) {
-        els.appWrapper.style.height = `${window.innerHeight}px`;
-      } else if (els.appWrapper) {
-        els.appWrapper.style.height = '';
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
       }
-    }
 
-    function readBlobAsText(blob) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsText(blob);
-      });
-    }
+      // --- UI Updates ---
 
-    function formatFirstUseDate(dateStr) {
-      if (dateStr && dateStr.length === 8) {
-        return `${dateStr.substring(6, 8)}/${dateStr.substring(4, 6)}/${dateStr.substring(0, 4)}`;
+      function showView(name) {
+        els.drop.hidden = name !== 'drop';
+        els.loading.hidden = name !== 'loading';
+        els.results.hidden = name !== 'results';
+        els.fileBar.hidden = name !== 'results';
       }
-      return dateStr;
-    }
 
-    function formatDumpstateDate(dateStr) {
-      const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}:\d{2}:\d{2})$/);
-      if (match) {
-        return `${match[4]} ${match[3]}/${match[2]}/${match[1]}`;
+      function renderProgress(p) {
+        const pct = Math.round(p * 100);
+        els.loadingPct.textContent = `${pct}%`;
+        els.loadingLine.setAttribute('aria-valuenow', pct);
+        const phase = REDUCED_MOTION.matches ? 0 : performance.now() / 300;
+        drawLine(els.loadingLine, els.loadingWave, els.loadingTrack, p, 3, phase);
       }
-      return dateStr;
-    }
 
-    function formatBytes(bytes, decimals = 2) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const dm = decimals < 0 ? 0 : decimals;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-    }
+      function renderResults() {
+        const { file, results: r, lines, ms } = report;
+        els.fileName.textContent = file.name;
+        const meta = [formatBytes(file.size), `read in ${(ms / 1000).toFixed(1)}s`];
+        if (r.logDate) meta.unshift(`Logged ${formatDate(r.logDate.date, true)}`);
+        els.fileMeta.textContent = meta.join(' · ');
 
-    function sleep(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
+        // Health
+        const health = healthOf(r) === null ? null : Math.round(healthOf(r));
+        const rating = health === null ? null : healthRating(health);
+        els.gauge.dataset.tone = rating?.tone || '';
+        setChip(els.healthChip, rating);
+        els.asocVal.innerHTML = percentHtml(r.asoc);
+        els.bsohVal.innerHTML = percentHtml(r.bsoh);
+        animateGauge(health);
 
-    // Boot
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
-</body>
+        // Cycles
+        els.cyclesVal.textContent = r.cycles === undefined ? '–' : Math.round(r.cycles);
+        setChip(els.cyclesChip, r.cycles === undefined ? null : cycleRating(Math.round(r.cycles)));
+        drawCycles(r.cycles);
 
+        // Device and battery details
+        els.deviceRows.innerHTML = rowsHtml([
+          ['Manufacturer', r.manufacturer],
+          ['Model', r.model],
+          ['Serial number', r.serial],
+          ['Log created', r.logDate && formatDate(r.logDate.date, true)],
+        ]);
+        const since = r.firstUse || r.manufactured;
+        els.batteryRows.innerHTML = rowsHtml([
+          ['Typical capacity', r.capacity?.typical && `${r.capacity.typical} mAh`],
+          ['Rated capacity', r.capacity?.rated && `${r.capacity.rated} mAh`],
+          ['Manufactured', r.manufactured && formatDate(r.manufactured)],
+          ['First used', r.firstUse && formatDate(r.firstUse)],
+          [
+            'Age',
+            since && formatAge(since, r.logDate?.date || new Date()),
+            r.firstUse ? 'Since first use' : 'Since manufacture',
+          ],
+        ]);
+
+        // Tiles
+        const tile = (label, value, unit) => `
+          <div class="tile">
+            <span class="tile-label">${label}</span>
+            <span class="tile-value${value === undefined ? ' empty-value' : ''}">${
+              value === undefined ? '–' : `${esc(value)}<small>${unit}</small>`
+            }</span>
+          </div>`;
+        const current = r.maxCurrent;
+        els.tiles.innerHTML = [
+          tile('Estimated capacity', r.capEstimated, 'mAh'),
+          tile('Last learned', r.capLastLearned, 'mAh'),
+          tile('Lowest learned', r.capMinLearned, 'mAh'),
+          tile('Highest learned', r.capMaxLearned, 'mAh'),
+          tile('Highest temperature', r.maxTemp, '°C'),
+          tile(
+            'Highest current',
+            current === undefined
+              ? undefined
+              : current >= 1000
+                ? (current / 1000).toFixed(1)
+                : current,
+            current >= 1000 ? 'A' : 'mA',
+          ),
+        ].join('');
+
+        // Matched lines, in file order
+        const matched = Object.values(lines).sort((a, b) => a.n - b.n);
+        const width = String(matched.at(-1)?.n || 0).length;
+        els.rawCount.textContent = `${matched.length} of ${FIELDS.length} details found`;
+        els.rawLines.innerHTML = matched
+          .map((l) => `<b>${String(l.n).padStart(width, ' ')}</b>  ${esc(l.text)}`)
+          .join('\n');
+        els.raw.open = false;
+      }
+
+      function setChip(chip, rating) {
+        chip.hidden = !rating;
+        if (!rating) return;
+        chip.textContent = rating.label;
+        chip.dataset.tone = rating.tone;
+      }
+
+      // Signature moment: the gauge's wave sweeps up to the value while the number counts up.
+      // A zero-length dash still paints a round cap, so an empty wave or track is hidden
+      // instead. A new report cancels the previous run.
+      function animateGauge(health) {
+        cancelAnimationFrame(gaugeFrame);
+        const target = health ?? 0;
+        const duration = REDUCED_MOTION.matches ? 0 : 1100;
+        const start = performance.now();
+        const frame = (now) => {
+          const t = duration ? Math.min((now - start) / duration, 1) : 1;
+          const eased = 1 - (1 - t) ** 4;
+          const value = target * eased;
+          const gap = 4;
+          els.gaugeWave.setAttribute('d', wavyCircle(84, 84, 72, 3, 14, (1 - eased) * Math.PI * 4));
+          els.gaugeWave.style.strokeDasharray = `${value} 200`;
+          els.gaugeWave.style.visibility = value > 0 ? '' : 'hidden';
+          const track = Math.max(0, 100 - value - gap * 2);
+          els.gaugeTrack.style.strokeDasharray = value > 0 ? `${track} 200` : '100 200';
+          els.gaugeTrack.style.strokeDashoffset = value > 0 ? -(value + gap) : 0;
+          els.gaugeTrack.style.visibility = value > 0 && !track ? 'hidden' : '';
+          els.healthVal.textContent = health === null ? '–' : Math.round(value);
+          if (t < 1) gaugeFrame = requestAnimationFrame(frame);
+        };
+        gaugeFrame = requestAnimationFrame(frame);
+      }
+
+      function drawCycles(cycles) {
+        const p = cycles === undefined ? 0 : clamp(cycles / CYCLE_SCALE, 0, 1);
+        drawLine(els.cyclesLine, els.cyclesWave, els.cyclesTrack, p, 3, 0);
+      }
+
+      // M3 wavy linear indicator: a wave up to `p`, then a gap and a flat track.
+      function drawLine(svg, wave, track, p, amp, phase) {
+        const w = svg.clientWidth;
+        const h = svg.clientHeight;
+        if (!w) return;
+        const mid = h / 2;
+        const inset = 4;
+        const end = inset + (w - inset * 2) * p;
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        let d = '';
+        if (p > 0) {
+          for (let x = inset; x <= end; x += 1.5) {
+            const y = mid + amp * Math.sin((x / 24) * Math.PI * 2 - phase);
+            d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(2)}`;
+          }
+        }
+        wave.setAttribute('d', d);
+        const trackStart = p > 0 ? end + 10 : inset;
+        track.setAttribute('d', trackStart < w - inset ? `M${trackStart} ${mid}H${w - inset}` : '');
+      }
+
+      function rowsHtml(rows) {
+        return rows
+          .map(
+            ([label, value, sub]) => `
+          <div class="row">
+            <span class="row-label">${label}${value && sub ? `<span class="row-sub">${sub}</span>` : ''}</span>
+            <span class="row-value${value ? '' : ' empty-value'}">${value ? esc(value) : '–'}</span>
+          </div>`,
+          )
+          .join('');
+      }
+
+      function percentHtml(value) {
+        if (typeof value !== 'number') return '<span class="empty-value">–</span>';
+        return `${Math.round(value * 10) / 10}<small>%</small>`;
+      }
+
+      // Snackbars render inside the top dialog, since modal dialogs make everything else inert.
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        (dialogStack.at(-1) || document.body).append(els.snackbar);
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
+
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
+
+      function hideSnackbar() {
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
+
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
+
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
+
+      // --- Utilities ---
+
+      function num(str) {
+        const n = Number(str);
+        return Number.isFinite(n) ? n : undefined;
+      }
+
+      // "20240312" → Date
+      function ymd(str) {
+        const date = new Date(`${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}T00:00`);
+        return Number.isNaN(date.getTime()) ? undefined : date;
+      }
+
+      function formatDate(date, withTime = false) {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        if (withTime) Object.assign(options, { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleString('en-GB', options);
+      }
+
+      function formatAge(from, to) {
+        let months = (to.getFullYear() - from.getFullYear()) * 12 + to.getMonth() - from.getMonth();
+        if (to.getDate() < from.getDate()) months--;
+        if (months < 1) return 'Less than a month';
+        const years = Math.floor(months / 12);
+        const rest = months % 12;
+        const parts = [];
+        if (years) parts.push(`${years} year${years === 1 ? '' : 's'}`);
+        if (rest) parts.push(`${rest} month${rest === 1 ? '' : 's'}`);
+        return parts.join(', ');
+      }
+
+      function formatBytes(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        const units = ['KB', 'MB', 'GB'];
+        let value = bytes;
+        let i = -1;
+        do {
+          value /= 1024;
+          i++;
+        } while (value >= 1024 && i < units.length - 1);
+        return `${value.toFixed(value < 10 ? 1 : 0)} ${units[i]}`;
+      }
+
+      // A circle whose radius ripples `waves` times around, starting at 12 o'clock.
+      function wavyCircle(cx, cy, r, amp, waves, phase) {
+        let d = '';
+        for (let i = 0; i <= 240; i++) {
+          const a = (i / 240) * Math.PI * 2;
+          const rr = r + amp * Math.sin(waves * a + phase);
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(2)} ${(cy - rr * Math.cos(a)).toFixed(2)}`;
+        }
+        return d;
+      }
+
+      // M3 Expressive "cookie" shape: a circle with n soft scallops.
+      function cookiePath(cx, cy, r, n, depth) {
+        let d = '';
+        for (let i = 0; i <= 360; i++) {
+          const a = (i / 360) * Math.PI * 2;
+          const rr = r * (1 - depth / 2 + (depth / 2) * Math.cos(n * a));
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(1)} ${(cy - rr * Math.cos(a)).toFixed(1)}`;
+        }
+        return `${d}Z`;
+      }
+
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function esc(str) {
+        return String(str).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+      }
+
+      function clamp(n, min, max) {
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {
+          // Storage full or blocked: the theme still applies for this visit.
+        }
+      }
+
+      init();
+    </script>
+  </body>
 </html>
