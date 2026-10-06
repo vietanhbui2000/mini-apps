@@ -1,0 +1,2981 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Remove the background from any image. Runs on your device, so images never leave it."
+    />
+    <title>Background Remover</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#f6f9fe" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#101417" media="(prefers-color-scheme: dark)" />
+
+    <!-- Fonts: Google Sans Flex, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=add_photo_alternate,arrow_outward,brightness_auto,check,close,code,colorize,compare,content_copy,dark_mode,delete,deployed_code,download,info,light_mode,more_vert,open_in_full,person,swap_horiz&display=block"
+    />
+
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #008cc6. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#246488, #94cdf6);
+        --on-primary: light-dark(#ffffff, #00344d);
+        --primary-container: light-dark(#c8e6ff, #004c6d);
+        --on-primary-container: light-dark(#004c6d, #c8e6ff);
+        --secondary: light-dark(#4f606e, #b7c9d8);
+        --on-secondary: light-dark(#ffffff, #21323f);
+        --secondary-container: light-dark(#d2e5f5, #384956);
+        --on-secondary-container: light-dark(#384956, #d2e5f5);
+        --tertiary: light-dark(#63597c, #cec0e8);
+        --on-tertiary: light-dark(#ffffff, #342b4b);
+        --tertiary-container: light-dark(#e9ddff, #4b4163);
+        --on-tertiary-container: light-dark(#4b4163, #e9ddff);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#f6f9fe, #101417);
+        --on-surface: light-dark(#181c20, #dfe3e8);
+        --on-surface-variant: light-dark(#41484d, #c1c7ce);
+        --surface-dim: light-dark(#d7dadf, #101417);
+        --surface-bright: light-dark(#f6f9fe, #353a3e);
+        --surface-container-lowest: light-dark(#ffffff, #0a0f12);
+        --surface-container-low: light-dark(#f1f4f9, #181c20);
+        --surface-container: light-dark(#ebeef3, #1c2024);
+        --surface-container-high: light-dark(#e5e8ed, #262a2e);
+        --surface-container-highest: light-dark(#dfe3e8, #313539);
+        --outline: light-dark(#71787e, #8b9198);
+        --outline-variant: light-dark(#c1c7ce, #41484d);
+        --inverse-surface: light-dark(#2d3135, #dfe3e8);
+        --inverse-on-surface: light-dark(#eef1f6, #2d3135);
+        --inverse-primary: light-dark(#94cdf6, #246488);
+        --scrim: #000;
+
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
+
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+      }
+
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
+
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      h1,
+      h2,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the height (20px here, 24px in the 48px bottom bar), not
+         --shape-full: a press springs them smaller, and the spring's overshoot from 999px would
+         dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
+        border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .btn:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .btn .icon {
+        font-size: 20px;
+        margin-left: -8px;
+      }
+
+      .btn-filled {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .btn-tonal {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
+      }
+
+      .btn-text .icon {
+        margin-left: -4px;
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* --- App bar & page --- */
+      /* The bar stays pinned while the page scrolls. Its contents line up with the page column. */
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: var(--surface);
+        transition: box-shadow var(--spring-ms) linear;
+      }
+
+      /* A divider plus a soft shadow: content cards share the container colors, so a tint alone
+         would blend in. The divider keeps the edge visible in dark mode. */
+      .appbar.scrolled {
+        box-shadow:
+          0 1px 0 var(--outline-variant),
+          0 4px 12px rgb(0 0 0 / 0.08);
+      }
+
+      .appbar-inner,
+      .page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .appbar-inner,
+        .page {
+          padding-inline: 24px;
+        }
+      }
+
+      .page {
+        padding-bottom: 112px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        margin-right: -8px;
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 840px) {
+        .top-title {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+
+      /* No extra controls under the title, so the bar is just its 64px row. */
+      :root {
+        --appbar-h: 64px;
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+
+      /* --- Studio --- */
+      /* Wide screens: settings on the left, a pinned preview on the right, so each change reads
+         left to right into its result. The image is the point of this app, so the two split the
+         width evenly instead of the usual 380px preview column. Phones: the preview pins under
+         the app bar so every change stays in view. */
+      .studio {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px 32px;
+        align-items: start;
+      }
+
+      @media (min-width: 900px) {
+        .page {
+          padding-top: 16px;
+          padding-bottom: 24px;
+        }
+
+        .studio {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .stage-col {
+          position: sticky;
+          top: calc(var(--appbar-h) + 16px);
+          grid-column: 2;
+          grid-row: 1;
+        }
+
+        .settings {
+          grid-column: 1;
+        }
+      }
+
+      .stage-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      @media (max-width: 899px) {
+        .stage-col {
+          position: sticky;
+          top: var(--appbar-h);
+          z-index: 2;
+          padding-bottom: 12px;
+          background: var(--surface);
+        }
+      }
+
+      /* The preview: a drop target. The original and the cutout are two canvases stacked in
+         one grid cell, so they line up exactly for the reveal and for Compare. */
+      .stage-wrap {
+        position: relative;
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: 304px;
+        padding: 24px;
+        border: 2px dashed transparent;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container);
+        cursor: pointer;
+        transition:
+          border-color var(--effects-ms) linear,
+          border-radius var(--spring-ms) var(--spring);
+      }
+
+      .stage:active {
+        border-radius: var(--shape-lg);
+      }
+
+      .dragging .stage {
+        border-color: var(--primary);
+      }
+
+      /* A soft checkerboard behind the canvases, so transparent areas read as transparent. */
+      .stage-canvas {
+        grid-area: 1 / 1;
+        max-width: 100%;
+        /* The window less the app bar, the page's top and bottom spacing, the stage padding,
+           the file name and the actions under it. */
+        max-height: max(240px, calc(100dvh - var(--appbar-h) - 248px));
+        border-radius: var(--shape-lg);
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 16px 16px;
+      }
+
+      @media (max-width: 899px) {
+        .stage {
+          min-height: 168px;
+          padding: 12px;
+        }
+
+        .stage-canvas {
+          max-height: 200px;
+        }
+      }
+
+      .stage-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .stage-empty .icon {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--shape-lg);
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font-size: 28px;
+      }
+
+      .stage-hint {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 12px;
+        border-radius: var(--shape-full);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 12px/16px var(--font);
+        letter-spacing: 0.5px;
+        opacity: 0;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      .stage-hint .icon {
+        font-size: 16px;
+      }
+
+      @media (hover: hover) {
+        .stage:hover .stage-hint {
+          opacity: 1;
+        }
+      }
+
+      /* Toggles turn filled and square-ish while pressed. */
+      .icon-btn[aria-pressed='true'] {
+        border-radius: var(--shape-md);
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .icon-btn[aria-pressed='true'] .icon {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      /* Compare and Open larger sit over the stage's corner, outside the stage's own button, so
+         each stays its own control. Tonal, so they show over any image. */
+      .stage-tools {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .stage-tools .icon-btn:not([aria-pressed='true']) {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      @media (max-width: 899px) {
+        .stage-tools {
+          top: 8px;
+          right: 8px;
+        }
+      }
+
+      /* Processing: an M3 wavy linear indicator, always moving, with one line of status. */
+      .status {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .status-line {
+        display: block;
+        width: min(240px, 100%);
+        height: 12px;
+        overflow: visible;
+        color: var(--primary);
+      }
+
+      /* The model download fills its own line in the Model row. The row stays a centered row,
+         like its neighbours, and the line wraps under the text at full width. */
+      .model-line {
+        display: block;
+        flex: 1 1 100%;
+        width: 100%;
+        height: 12px;
+        overflow: visible;
+        color: var(--primary);
+      }
+
+      .wave,
+      .track {
+        fill: none;
+        stroke-linecap: round;
+        stroke-width: 4;
+      }
+
+      .wave {
+        stroke: currentColor;
+      }
+
+      .track {
+        stroke: var(--secondary-container);
+      }
+
+      .file-name {
+        overflow: hidden;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* The main action, 56px with lg corners, then Copy as a square tonal button. */
+      .stage-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .stage-actions .btn {
+        height: 56px;
+        border-radius: var(--shape-lg);
+        font-size: 16px;
+      }
+
+      .stage-actions .btn-filled {
+        flex: 1;
+      }
+
+      .stage-actions .btn-tonal {
+        width: 56px;
+        padding: 0;
+      }
+
+      .stage-actions .btn-tonal .icon {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .stage-actions .btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* Below 900px the bottom bar holds these actions. */
+      @media (max-width: 899px) {
+        .stage-actions {
+          display: none;
+        }
+      }
+
+      /* The transparent swatch shows a checkerboard instead of a color. */
+      .swatch.clear {
+        background: repeating-conic-gradient(
+            var(--outline-variant) 0 25%,
+            var(--surface-container-highest) 0 50%
+          )
+          0 0 / 12px 12px;
+      }
+
+      .model-note {
+        margin: 8px 16px 0;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      .model-note a {
+        color: var(--primary);
+      }
+
+      /* --- Settings --- */
+      .settings {
+        min-width: 0;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) 60ms both;
+      }
+
+      .sect-title {
+        margin: 24px 16px 8px;
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .settings > .sect-title:first-child {
+        margin-top: 8px;
+      }
+
+      /* In two columns the first label lines up with the top of the preview. */
+      @media (min-width: 900px) {
+        .settings > .sect-title:first-child {
+          margin-top: 0;
+        }
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .row {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        min-height: 72px;
+        padding: 12px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+        transition: opacity var(--effects-ms) linear;
+        --field-bg: var(--surface-container);
+      }
+
+      /* First and last visible rows: a hidden row (a setting that only shows when another is
+         on) mustn't leave its neighbour with a square outer corner. */
+      .group > .row:not([hidden]):not(.row:not([hidden]) ~ .row) {
+        border-top-left-radius: var(--shape-lg-plus);
+        border-top-right-radius: var(--shape-lg-plus);
+      }
+
+      .group > .row:not([hidden]):not(:has(~ .row:not([hidden]))) {
+        border-bottom-left-radius: var(--shape-lg-plus);
+        border-bottom-right-radius: var(--shape-lg-plus);
+      }
+
+      label.row {
+        cursor: pointer;
+      }
+
+      .row.disabled {
+        opacity: 0.38;
+        pointer-events: none;
+      }
+
+      .row-stack {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .row-text {
+        display: flex;
+        flex: 1 1 160px;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .row-stack .row-text {
+        flex: none;
+      }
+
+      .row-sub {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .switch:disabled {
+        opacity: 0.38;
+      }
+
+      /* Color swatches: a circle that squares off when picked */
+      .swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .swatch {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--c);
+        box-shadow: inset 0 0 0 1px var(--outline-variant);
+        cursor: pointer;
+        transition:
+          border-radius var(--spring-ms) var(--spring),
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .swatch:active {
+        scale: 0.9;
+      }
+
+      .swatch input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      /* The check sits on its own small circle, so it shows on any color, white included. */
+      .swatch::after {
+        content: 'check';
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--surface-container-highest);
+        color: var(--on-surface);
+        font: 18px/1 'Material Symbols Rounded';
+        opacity: 0;
+        scale: 0.4;
+        pointer-events: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .swatch.selected {
+        border-radius: var(--shape-md);
+      }
+
+      .swatch.selected::after {
+        opacity: 1;
+        scale: 1;
+      }
+
+      .swatch:has(:focus-visible) {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      .swatch.custom:not(.selected) {
+        background: var(--surface-container-highest);
+        color: var(--on-surface-variant);
+      }
+
+      .swatch.custom:not(.selected)::after {
+        content: 'colorize';
+        background: none;
+        color: inherit;
+        font-size: 22px;
+        opacity: 1;
+        scale: 1;
+      }
+
+      /* Bottom bar on phones and tablets */
+      .actionbar {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        gap: 8px;
+        padding: 12px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+          max(16px, env(safe-area-inset-left));
+        background: var(--surface-container);
+      }
+
+      @media (min-width: 640px) {
+        .actionbar {
+          padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right));
+        }
+      }
+
+      /* The main action and Copy split the width 2:1. */
+      .actionbar .btn {
+        flex: 1;
+        min-width: 0;
+        height: 48px;
+        border-radius: 24px;
+      }
+
+      .actionbar .btn-filled {
+        flex: 2;
+      }
+
+      @media (min-width: 900px) {
+        .actionbar {
+          display: none;
+        }
+      }
+
+      @media (max-width: 899px) {
+        body > .snackbar {
+          bottom: 88px;
+        }
+      }
+
+      /* On phones the pinned preview sits under the app bar, so it carries the scroll edge. */
+      @media (max-width: 899px) {
+        .stage-col {
+          margin-inline: -16px;
+          padding-inline: 16px;
+          transition: box-shadow var(--spring-ms) linear;
+        }
+
+        body.scrolled .appbar {
+          box-shadow: none;
+        }
+
+        body.scrolled .stage-col {
+          box-shadow:
+            0 1px 0 var(--outline-variant),
+            0 4px 12px rgb(0 0 0 / 0.08);
+        }
+      }
+
+      @media (min-width: 640px) and (max-width: 899px) {
+        .stage-col {
+          margin-inline: -24px;
+          padding-inline: 24px;
+        }
+      }
+
+      /* Switch */
+      .switch {
+        position: relative;
+        flex: none;
+        width: 52px;
+        height: 32px;
+        margin: 0;
+        border: 2px solid var(--outline);
+        border-radius: var(--shape-full);
+        background: var(--surface-container-highest);
+        cursor: pointer;
+        appearance: none;
+        transition:
+          background-color var(--effects-ms) linear,
+          border-color var(--effects-ms) linear;
+      }
+
+      .switch::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--outline);
+        translate: 0 -50%;
+        transition:
+          left var(--spring-fast-ms) var(--spring-fast),
+          width var(--spring-fast-ms) var(--spring-fast),
+          height var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear;
+      }
+
+      .switch::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 26px;
+        width: 16px;
+        height: 16px;
+        background: var(--on-primary-container);
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.55 15.15 18.03 6.68a1 1 0 0 1 1.41 1.41l-9.19 9.2a1 1 0 0 1-1.41 0l-4.3-4.3a1 1 0 1 1 1.41-1.41z'/%3E%3C/svg%3E")
+          center / contain no-repeat;
+        opacity: 0;
+        translate: 0 -50%;
+        scale: 0.4;
+        transition:
+          opacity var(--effects-ms) linear,
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .switch:checked {
+        border-color: var(--primary);
+        background: var(--primary);
+      }
+
+      .switch:checked::before {
+        left: 22px;
+        width: 24px;
+        height: 24px;
+        background: var(--on-primary);
+      }
+
+      .switch:checked::after {
+        opacity: 1;
+        scale: 1;
+      }
+
+      .switch:active::before {
+        left: 0;
+        width: 28px;
+        height: 28px;
+      }
+
+      .switch:checked:active::before {
+        left: 20px;
+      }
+
+      .switch:disabled {
+        cursor: default;
+      }
+
+      /* Connected button group (single choice) */
+      .seg {
+        display: flex;
+        gap: 2px;
+        width: 100%;
+      }
+
+      .seg label {
+        position: relative;
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: var(--shape-sm);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      /* Ends use half the 40px height, not --shape-full: when corners on one edge add up to
+         more than its length, the browser shrinks them all, and the 8px inner corners would
+         flatten to square. */
+      .seg label:first-child {
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+      }
+
+      .seg label:last-child {
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+      }
+
+      .seg label:has(:checked) {
+        border-radius: 20px;
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .seg label:has(:checked) .icon {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      .seg label:has(:focus-visible) {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      .seg label:active {
+        border-radius: var(--shape-md);
+      }
+
+      .seg .icon {
+        font-size: 18px;
+      }
+
+      .seg input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Viewer --- */
+      /* The output at full size, built like a page: a 64px header that matches the app bar, the
+         image fitted to the space left, and the same bottom bar as phones, at every width. */
+      .dialog.viewer {
+        width: 100%;
+        max-width: none;
+        height: 100dvh;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+        background: var(--surface);
+      }
+
+      .viewer-head {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        padding: 0 8px 0 16px;
+      }
+
+      .viewer-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .viewer-body {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+      }
+
+      /* Absolutely placed with auto margins, the canvas keeps its ratio, shrinks to fit and
+         centers. Small images stay at their own size. */
+      .viewer-canvas {
+        position: absolute;
+        inset: 0 16px 16px;
+        max-width: calc(100% - 32px);
+        max-height: calc(100% - 16px);
+        margin: auto;
+        border-radius: var(--shape-lg);
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 16px 16px;
+      }
+
+      .viewer .actionbar {
+        position: static;
+        display: flex;
+        flex: none;
+      }
+
+      @media (min-width: 640px) {
+        .viewer-head {
+          padding-left: 24px;
+        }
+
+        .viewer-canvas {
+          inset: 0 24px 24px;
+          max-width: calc(100% - 48px);
+          max-height: calc(100% - 24px);
+        }
+      }
+
+      /* Feedback sits above the viewer's own buttons instead of covering them. */
+      .viewer > .snackbar {
+        position: absolute;
+        bottom: 88px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* Menu */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu.up {
+        transform-origin: bottom right;
+      }
+
+      .menu:popover-open {
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
+      }
+
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, menus and the About dialog open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-inline: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('bg-remover') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="appbar" id="appbar">
+      <div class="appbar-inner">
+        <div class="top">
+          <h1 class="top-title">Background Remover</h1>
+          <button
+            class="icon-btn state"
+            id="more-btn"
+            type="button"
+            aria-label="More options"
+            title="More options"
+            aria-haspopup="menu"
+          >
+            <span class="icon" aria-hidden="true">more_vert</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="studio">
+        <div class="stage-col">
+          <div class="stage-wrap">
+            <div class="stage" id="stage" role="button" tabindex="0" aria-label="Choose an image">
+              <canvas class="stage-canvas" id="original" hidden></canvas>
+              <canvas class="stage-canvas" id="result" hidden></canvas>
+              <div class="stage-empty" id="stage-empty">
+                <span class="icon" aria-hidden="true">add_photo_alternate</span>
+                <span>Drop an image, paste one, or choose one</span>
+              </div>
+              <span class="stage-hint" id="stage-hint" aria-hidden="true" hidden
+                ><span class="icon">swap_horiz</span>Change image</span
+              >
+            </div>
+            <div class="stage-tools" id="stage-tools" hidden>
+              <button
+                class="icon-btn state"
+                type="button"
+                data-action="compare"
+                aria-pressed="false"
+                aria-label="Show original"
+                title="Show original"
+              >
+                <span class="icon" aria-hidden="true">compare</span>
+              </button>
+              <button
+                class="icon-btn state"
+                type="button"
+                data-action="view"
+                aria-label="Open larger preview"
+                title="Open larger preview"
+              >
+                <span class="icon" aria-hidden="true">open_in_full</span>
+              </button>
+            </div>
+          </div>
+          <div class="status" id="status" hidden>
+            <svg
+              class="status-line"
+              id="status-line"
+              role="progressbar"
+              aria-labelledby="status-text"
+            >
+              <path class="track" id="status-track" />
+              <path class="wave" id="status-wave" />
+            </svg>
+            <p id="status-text"></p>
+          </div>
+          <p class="file-name" id="file-name" hidden></p>
+          <div class="stage-actions">
+            <button class="btn btn-filled state" type="button" data-action="download" disabled>
+              <span class="icon" aria-hidden="true">download</span
+              ><span data-download-label>Download PNG</span>
+            </button>
+            <button
+              class="btn btn-tonal state"
+              type="button"
+              data-action="copy"
+              aria-label="Copy image"
+              title="Copy image"
+              disabled
+            >
+              <span class="icon" aria-hidden="true">content_copy</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings">
+          <h2 class="sect-title">Model</h2>
+          <div class="group">
+            <div class="row">
+              <span class="row-text">
+                <span>RMBG-1.4 by BRIA AI</span>
+                <span class="row-sub" id="model-sub"></span>
+              </span>
+              <svg
+                class="model-line"
+                id="model-line"
+                role="progressbar"
+                aria-labelledby="model-sub"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                hidden
+              >
+                <path class="track" id="model-track" />
+                <path class="wave" id="model-wave" />
+              </svg>
+            </div>
+          </div>
+          <p class="model-note">
+            The model and its runtime get downloaded once, then work even when you're offline. Images never leave your device.
+          </p>
+
+          <h2 class="sect-title">Background</h2>
+          <div class="group">
+            <div class="row row-stack">
+              <span class="row-text">
+                <span>Fill</span>
+                <span class="row-sub">What goes behind the subject</span>
+              </span>
+              <div class="swatches" id="swatches" role="radiogroup" aria-label="Background">
+                <label class="swatch clear" title="Transparent"
+                  ><input
+                    type="radio"
+                    name="background"
+                    value="transparent"
+                    aria-label="Transparent"
+                /></label>
+                <label class="swatch" style="--c: #ffffff" title="White"
+                  ><input type="radio" name="background" value="white" aria-label="White"
+                /></label>
+                <label class="swatch" style="--c: #000000" title="Black"
+                  ><input type="radio" name="background" value="black" aria-label="Black"
+                /></label>
+                <label class="swatch custom" id="custom-swatch" title="Custom color"
+                  ><input type="color" id="custom-color" value="#008cc6" aria-label="Custom color"
+                /></label>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="sect-title">Output</h2>
+          <div class="group">
+            <label class="row">
+              <span class="row-text">
+                <span>Crop to subject</span>
+                <span class="row-sub">Trim the empty space around it</span>
+              </span>
+              <input class="switch" type="checkbox" role="switch" id="crop" />
+            </label>
+            <div class="row row-stack">
+              <span class="row-text">
+                <span>Format</span>
+                <span class="row-sub">PNG works everywhere. WebP files are smaller.</span>
+              </span>
+              <div class="seg" role="radiogroup" aria-label="Format">
+                <label><input type="radio" name="format" value="png" checked />PNG</label>
+                <label><input type="radio" name="format" value="webp" />WebP</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="actionbar">
+      <button class="btn btn-filled state" type="button" data-action="download" disabled>
+        <span class="icon" aria-hidden="true">download</span
+        ><span data-download-label>Download PNG</span>
+      </button>
+      <button class="btn btn-tonal state" type="button" data-action="copy" disabled>
+        <span class="icon" aria-hidden="true">content_copy</span>Copy
+      </button>
+    </div>
+
+    <!-- Menus -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" id="delete-model-btn" type="button" role="menuitem">
+        <span class="icon" aria-hidden="true">delete</span>Delete downloaded model
+      </button>
+      <div class="menu-divider" role="separator"></div>
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
+    </div>
+
+    <!-- Larger preview -->
+    <dialog class="dialog viewer" id="viewer" aria-labelledby="viewer-title">
+      <div class="viewer-head">
+        <h2 class="viewer-title" id="viewer-title"></h2>
+        <button
+          class="icon-btn state"
+          type="button"
+          data-action="compare"
+          aria-pressed="false"
+          aria-label="Show original"
+          title="Show original"
+        >
+          <span class="icon" aria-hidden="true">compare</span>
+        </button>
+        <button class="icon-btn state" type="button" data-close aria-label="Close" title="Close">
+          <span class="icon" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="viewer-body">
+        <canvas class="viewer-canvas" id="viewer-canvas"></canvas>
+      </div>
+      <div class="actionbar">
+        <button class="btn btn-filled state" type="button" data-action="download" disabled>
+          <span class="icon" aria-hidden="true">download</span
+          ><span data-download-label>Download PNG</span>
+        </button>
+        <button class="btn btn-tonal state" type="button" data-action="copy" disabled>
+          <span class="icon" aria-hidden="true">content_copy</span>Copy
+        </button>
+      </div>
+    </dialog>
+
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">Background Remover</h2>
+        <p class="about-desc">
+          Remove the background from any image. Runs on your device, so images never leave it.
+        </p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://huggingface.co/briaai/RMBG-1.4"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">deployed_code</span>
+          <span class="about-text"
+            ><small>Model</small>RMBG-1.4 by BRIA AI, free for non-commercial use</span
+          >
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/bg-remover"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
+
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
+
+    <input
+      type="file"
+      id="file-input"
+      accept="image/png, image/jpeg, image/webp, image/avif"
+      hidden
+    />
+    <div id="probe" hidden></div>
+
+    <!-- Runs the model off the main thread, so the page stays responsive while it works. It's
+         started from a Blob URL to keep the app in one file. -->
+    <script type="text/js-worker" id="worker-src">
+      const LIB_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/+esm';
+      const MODEL_ID = 'briaai/RMBG-1.4';
+      const CPU = { device: 'wasm', dtype: 'q8' };
+      let ready = null;
+      let pending = null;
+      let busy = false;
+
+      // RMBG-1.4's config names a Python class instead of a model type, which the
+      // background-removal pipeline rejects, so the model and its processor load directly.
+      async function load(backend) {
+        const lib = await import(LIB_URL);
+        // Errors only: the plain-model load below always warns about its unknown model type.
+        lib.env.logLevel = lib.LogLevel.ERROR;
+        const progress_callback = (p) => {
+          if (p.status === 'progress_total') {
+            postMessage({ type: 'progress', loaded: p.loaded, total: p.total });
+          }
+        };
+        const [model, processor] = await Promise.all([
+          lib.AutoModel.from_pretrained(MODEL_ID, {
+            ...backend,
+            config: { model_type: 'custom' },
+            progress_callback,
+          }),
+          lib.AutoProcessor.from_pretrained(MODEL_ID),
+        ]);
+        return { lib, model, processor };
+      }
+
+      // A GPU that fails to start the model falls back to the CPU instead of failing the image.
+      async function loadWithFallback(backend) {
+        if (backend.device === 'wasm') return load(backend);
+        try {
+          return await load(backend);
+        } catch (err) {
+          console.warn('WebGPU failed, using the CPU', err);
+          postMessage({ type: 'backend', ...CPU });
+          return load(CPU);
+        }
+      }
+
+      // Returns the image at full size with the mask as its alpha channel.
+      async function removeBackground({ lib, model, processor }, file) {
+        const image = await lib.RawImage.fromBlob(file);
+        const { pixel_values } = await processor(image);
+        const { output } = await model({ input: pixel_values });
+        const mask = await lib.RawImage.fromTensor(output[0].mul(255).to('uint8')).resize(
+          image.width,
+          image.height,
+        );
+        return image.putAlpha(mask).rgba();
+      }
+
+      async function run({ id, file, backend }) {
+        try {
+          ready ??= loadWithFallback(backend).catch((err) => {
+            ready = null; // let the next image retry, e.g. after the connection comes back
+            throw err;
+          });
+          const parts = await ready;
+          postMessage({ type: 'running', id });
+          const out = await removeBackground(parts, file);
+          const { width, height, data } = out;
+          postMessage({ type: 'result', id, width, height, data }, [data.buffer]);
+        } catch (err) {
+          postMessage({ type: 'error', id, message: String(err?.message || err) });
+        }
+      }
+
+      // Only the newest image matters: one chosen while another runs replaces any that waited.
+      self.onmessage = async ({ data }) => {
+        pending = data;
+        if (busy) return;
+        busy = true;
+        while (pending) {
+          const job = pending;
+          pending = null;
+          await run(job);
+        }
+        busy = false;
+      };
+    </script>
+
+    <script>
+      // --- Constants & Config ---
+      const STORE_KEY = 'bg-remover';
+      const MODEL_ID = 'briaai/RMBG-1.4';
+      const MODEL_CACHE = 'transformers-cache';
+      // WebGPU runs the 16-bit model in about a second. Without it, the 8-bit model runs on the
+      // CPU: half the download, but it takes half a minute or more per image. `mb` is the first
+      // download: the model (88 or 44 MB) plus about 6 MB of library and ONNX runtime.
+      const BACKENDS = {
+        webgpu: { device: 'webgpu', dtype: 'fp16', file: 'onnx/model_fp16.onnx', mb: 94 },
+        wasm: { device: 'wasm', dtype: 'q8', file: 'onnx/model_quantized.onnx', mb: 50 },
+      };
+      const PREVIEW_MAX = 2048; // sharp on 2x screens at the stage's widest
+      const ALPHA_CUTOFF = 8; // pixels fainter than this don't count as subject when cropping
+      const FILLS = { transparent: null, white: '#ffffff', black: '#000000' };
+      const FORMATS = {
+        png: { type: 'image/png', ext: 'png', label: 'PNG' },
+        webp: { type: 'image/webp', ext: 'webp', label: 'WebP' },
+      };
+      const DEFAULT_PREFS = {
+        theme: 'auto',
+        background: 'transparent',
+        customColor: null,
+        crop: false,
+        format: 'png',
+      };
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let snackbarTimer = 0;
+      let dragDepth = 0;
+      let ignorePopstate = 0;
+      const dialogStack = [];
+      let worker = null;
+      let backendPromise = null;
+      let backend = null; // one of BACKENDS, once known
+      let modelCached = false;
+      let jobId = 0; // the newest image; results for older ones are dropped
+      let phase = 'idle'; // 'idle' | 'loading' (model download or load) | 'running'
+      let loadProgress = { loaded: 0, total: 0 };
+      let waveFrame = 0;
+      let showOriginal = false;
+      const image = {
+        name: '',
+        original: null, // ImageBitmap
+        result: null, // ImageBitmap with the background removed
+        bounds: null, // the subject's box in the result, for cropping
+      };
+
+      // --- DOM Elements ---
+      const els = {
+        appbar: document.getElementById('appbar'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        deleteModelBtn: document.getElementById('delete-model-btn'),
+        about: document.getElementById('about'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        stage: document.getElementById('stage'),
+        original: document.getElementById('original'),
+        result: document.getElementById('result'),
+        stageEmpty: document.getElementById('stage-empty'),
+        stageHint: document.getElementById('stage-hint'),
+        stageTools: document.getElementById('stage-tools'),
+        compareBtns: document.querySelectorAll('[data-action="compare"]'),
+        viewer: document.getElementById('viewer'),
+        viewerTitle: document.getElementById('viewer-title'),
+        viewerCanvas: document.getElementById('viewer-canvas'),
+        status: document.getElementById('status'),
+        statusLine: document.getElementById('status-line'),
+        statusWave: document.getElementById('status-wave'),
+        statusTrack: document.getElementById('status-track'),
+        statusText: document.getElementById('status-text'),
+        modelLine: document.getElementById('model-line'),
+        modelWave: document.getElementById('model-wave'),
+        modelTrack: document.getElementById('model-track'),
+        fileName: document.getElementById('file-name'),
+        fileInput: document.getElementById('file-input'),
+        downloadBtns: document.querySelectorAll('[data-action="download"]'),
+        downloadLabels: document.querySelectorAll('[data-download-label]'),
+        copyBtns: document.querySelectorAll('[data-action="copy"]'),
+        swatches: document.getElementById('swatches'),
+        customSwatch: document.getElementById('custom-swatch'),
+        customColor: document.getElementById('custom-color'),
+        crop: document.getElementById('crop'),
+        modelSub: document.getElementById('model-sub'),
+        workerSrc: document.getElementById('worker-src'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
+
+      // --- Initialization ---
+      function init() {
+        applyTheme();
+        renderSettings();
+        renderAll();
+        bindEvents();
+        detectBackend().then(refreshModelCached);
+      }
+
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        DARK_QUERY.addEventListener('change', applyTheme);
+        window.addEventListener(
+          'scroll',
+          () => {
+            const scrolled = window.scrollY > 0;
+            els.appbar.classList.toggle('scrolled', scrolled);
+            document.body.classList.toggle('scrolled', scrolled);
+          },
+          { passive: true },
+        );
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.moreBtn.addEventListener('click', () => toggleMenu(els.moreMenu, els.moreBtn));
+        els.deleteModelBtn.addEventListener('click', deleteModel);
+
+        // Image input: click, keyboard, drop anywhere on the page, or paste.
+        els.stage.addEventListener('click', () => els.fileInput.click());
+        els.stage.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            els.fileInput.click();
+          }
+        });
+        els.fileInput.addEventListener('change', () => {
+          const [file] = els.fileInput.files;
+          els.fileInput.value = '';
+          if (file) handleFile(file);
+        });
+        document.addEventListener('dragenter', (e) => {
+          if (!e.dataTransfer.types.includes('Files') || dialogStack.length) return;
+          dragDepth++;
+          document.body.classList.add('dragging');
+        });
+        document.addEventListener('dragleave', () => {
+          if (--dragDepth <= 0) stopDragging();
+        });
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+          e.preventDefault();
+          stopDragging();
+          const [file] = e.dataTransfer.files;
+          if (file && !dialogStack.length) handleFile(file);
+        });
+        document.addEventListener('paste', (e) => {
+          const file = [...e.clipboardData.files].find((f) => f.type.startsWith('image/'));
+          if (file && !dialogStack.length) handleFile(file);
+        });
+
+        document.addEventListener('click', (e) => {
+          if (e.target.closest('[data-action="compare"]')) toggleCompare();
+          else if (e.target.closest('[data-action="view"]')) openViewer();
+          else if (e.target.closest('[data-action="download"]')) download();
+          else if (e.target.closest('[data-action="copy"]')) copyImage();
+          else if (e.target.closest('[data-action="about"]')) openDialog(els.about);
+        });
+
+        // Menu
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          if (e.target.closest('.menu-item:not(#theme-btn)')) els.moreMenu.hidePopover();
+        });
+
+        // Dialogs
+        bindBackdropClose(els.about);
+        for (const dialog of [els.about, els.viewer]) {
+          dialog.addEventListener('close', () => onDialogClosed(dialog));
+          dialog.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close]')) closeDialog(dialog);
+          });
+        }
+        window.addEventListener('popstate', () => {
+          if (ignorePopstate) return ignorePopstate--;
+          const top = dialogStack.at(-1);
+          if (top) {
+            dialogStack.pop();
+            top.close();
+          }
+        });
+
+        // Settings apply at once and are saved.
+        document.addEventListener('change', handleChange);
+        els.customColor.addEventListener('input', () => {
+          setPrefs({ background: 'custom', customColor: els.customColor.value });
+        });
+
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
+      }
+
+      function handleChange(e) {
+        const t = e.target;
+        if (t.name === 'background') setPrefs({ background: t.value });
+        else if (t === els.crop) setPrefs({ crop: t.checked });
+        else if (t.name === 'format') setPrefs({ format: t.value });
+      }
+
+      function stopDragging() {
+        dragDepth = 0;
+        document.body.classList.remove('dragging');
+      }
+
+      // --- Core Logic ---
+
+      function loadPrefs() {
+        return sanitizePrefs(readJson(STORE_KEY));
+      }
+
+      // Merges defaults and type-checks each field; unknown keys are dropped.
+      function sanitizePrefs(saved) {
+        const p = { ...DEFAULT_PREFS };
+        if (!saved || typeof saved !== 'object') return p;
+        if (THEME_CYCLE.includes(saved.theme)) p.theme = saved.theme;
+        if (/^#[0-9a-f]{6}$/i.test(saved.customColor)) p.customColor = saved.customColor;
+        if (saved.background in FILLS || (saved.background === 'custom' && p.customColor)) {
+          p.background = saved.background;
+        }
+        if (typeof saved.crop === 'boolean') p.crop = saved.crop;
+        if (saved.format in FORMATS) p.format = saved.format;
+        return p;
+      }
+
+      function setPrefs(changes) {
+        prefs = { ...prefs, ...changes };
+        writeJson(STORE_KEY, prefs);
+        renderSettings();
+        renderStage();
+      }
+
+      function fillColor() {
+        return prefs.background === 'custom' ? prefs.customColor : FILLS[prefs.background];
+      }
+
+      // Model ---------------------------------------------------------------------------
+
+      // The fast path needs WebGPU with 16-bit shaders; anything else runs on the CPU.
+      function detectBackend() {
+        backendPromise ??= (async () => {
+          try {
+            const adapter = await navigator.gpu?.requestAdapter();
+            backend = adapter?.features.has('shader-f16') ? BACKENDS.webgpu : BACKENDS.wasm;
+          } catch (err) {
+            backend = BACKENDS.wasm;
+          }
+          renderModel();
+          return backend;
+        })();
+        return backendPromise;
+      }
+
+      function modelUrl(b = backend) {
+        return `https://huggingface.co/${MODEL_ID}/resolve/main/${b.file}`;
+      }
+
+      // Whether this device's model file is already in the library's cache.
+      async function refreshModelCached() {
+        try {
+          const cache = await caches.open(MODEL_CACHE);
+          modelCached = Boolean(await cache.match(modelUrl()));
+        } catch (err) {
+          modelCached = false; // no Cache API (blocked storage): it downloads each visit
+        }
+        renderModel();
+      }
+
+      function getWorker() {
+        if (worker) return worker;
+        const url = URL.createObjectURL(
+          new Blob([els.workerSrc.textContent], { type: 'text/javascript' }),
+        );
+        worker = new Worker(url, { type: 'module' });
+        URL.revokeObjectURL(url);
+        worker.addEventListener('message', onWorkerMessage);
+        worker.addEventListener('error', (e) => {
+          console.error(e);
+          failJob('Couldn’t start the model in this browser');
+        });
+        return worker;
+      }
+
+      function onWorkerMessage({ data }) {
+        if (data.type === 'backend') {
+          backend = BACKENDS[data.device];
+          refreshModelCached();
+        } else if (data.type === 'progress') {
+          if (phase === 'idle') return;
+          phase = 'loading';
+          loadProgress = { loaded: data.loaded, total: data.total };
+          renderModel();
+          renderWaves();
+        } else if (data.id !== jobId) {
+          // A newer image replaced this one.
+        } else if (data.type === 'running') {
+          phase = 'running';
+          if (!modelCached) refreshModelCached();
+          renderStatus();
+          renderModel();
+        } else if (data.type === 'result') {
+          showResult(data);
+        } else if (data.type === 'error') {
+          console.error(data.message);
+          failJob(
+            modelCached || phase === 'running'
+              ? 'Couldn’t remove the background from this image'
+              : 'Couldn’t download the model. Check your connection and try again.',
+          );
+        }
+      }
+
+      async function deleteModel() {
+        if (phase !== 'idle') return showError('Wait for the current image to finish');
+        try {
+          const cache = await caches.open(MODEL_CACHE);
+          const keys = await cache.keys();
+          await Promise.all(
+            keys.filter((r) => r.url.includes(`/${MODEL_ID}/`)).map((r) => cache.delete(r)),
+          );
+        } catch (err) {
+          return showError('Couldn’t delete the model');
+        }
+        // The worker still holds the model in memory; a new one starts clean.
+        worker?.terminate();
+        worker = null;
+        modelCached = false;
+        renderModel();
+        showSnackbar('Deleted the model. It will download again next time.');
+      }
+
+      // Images --------------------------------------------------------------------------
+
+      async function handleFile(file) {
+        if (!isValidImageFile(file)) return showError('Choose a PNG, JPG, WebP or AVIF image');
+        let bitmap;
+        try {
+          bitmap = await createImageBitmap(file);
+        } catch (err) {
+          return showError('That image couldn’t be opened');
+        }
+        const id = ++jobId;
+        image.original?.close();
+        image.result?.close();
+        Object.assign(image, { name: file.name, original: bitmap, result: null, bounds: null });
+        showOriginal = false;
+        phase = modelCached ? 'running' : 'loading';
+        loadProgress = { loaded: 0, total: 0 };
+        renderAll();
+        popStage();
+        getWorker().postMessage({ id, file, backend: await backendFor() });
+      }
+
+      async function backendFor() {
+        const { device, dtype } = await detectBackend();
+        return { device, dtype };
+      }
+
+      async function showResult({ width, height, data }) {
+        const pixels = new Uint8ClampedArray(data.buffer);
+        image.bounds = subjectBounds(pixels, width, height);
+        image.result = await createImageBitmap(new ImageData(pixels, width, height));
+        phase = 'idle';
+        renderAll();
+        playReveal();
+        if (!image.bounds) showSnackbar('No subject found in this image');
+      }
+
+      function failJob(message) {
+        phase = 'idle';
+        renderAll();
+        showError(message);
+      }
+
+      // The smallest box holding every pixel that's at least faintly visible.
+      function subjectBounds(pixels, width, height) {
+        let top = height;
+        let left = width;
+        let right = -1;
+        let bottom = -1;
+        for (let y = 0; y < height; y++) {
+          const row = y * width * 4;
+          for (let x = 0; x < width; x++) {
+            if (pixels[row + x * 4 + 3] <= ALPHA_CUTOFF) continue;
+            if (x < left) left = x;
+            if (x > right) right = x;
+            if (y < top) top = y;
+            bottom = y;
+          }
+        }
+        if (right < 0) return null;
+        return { x: left, y: top, w: right - left + 1, h: bottom - top + 1 };
+      }
+
+      // The part of the image the output covers: the subject's box when cropping.
+      function region() {
+        const { original, result, bounds } = image;
+        if (result && prefs.crop && bounds) return bounds;
+        return { x: 0, y: 0, w: original.width, h: original.height };
+      }
+
+      // Draws the same region of the original, for the reveal and for Compare.
+      function drawOriginal(canvas, scale = 1) {
+        const r = region();
+        canvas.width = Math.max(1, Math.round(r.w * scale));
+        canvas.height = Math.max(1, Math.round(r.h * scale));
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(image.original, r.x, r.y, r.w, r.h, 0, 0, canvas.width, canvas.height);
+        return canvas;
+      }
+
+      // A reveal still sweeping finishes first, so the toggle never lands on a half-wiped image.
+      function toggleCompare() {
+        for (const canvas of [els.original, els.result]) {
+          canvas.getAnimations().forEach((a) => a.finish());
+        }
+        showOriginal = !showOriginal;
+        renderStage();
+      }
+
+      function openViewer() {
+        if (!image.result) return;
+        renderViewer();
+        openDialog(els.viewer);
+      }
+
+      // Draws the cutout over the chosen fill. The preview, the viewer and the export share it.
+      function drawOutput(canvas, scale = 1) {
+        const r = region();
+        canvas.width = Math.max(1, Math.round(r.w * scale));
+        canvas.height = Math.max(1, Math.round(r.h * scale));
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        const fill = fillColor();
+        if (fill) {
+          ctx.fillStyle = fill;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        ctx.drawImage(image.result, r.x, r.y, r.w, r.h, 0, 0, canvas.width, canvas.height);
+        return canvas;
+      }
+
+      function outputBlob(type) {
+        const canvas = drawOutput(document.createElement('canvas'));
+        return new Promise((resolve, reject) =>
+          canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('toBlob'))), type),
+        );
+      }
+
+      async function download() {
+        if (!image.result) return;
+        const format = FORMATS[prefs.format];
+        try {
+          const name = `${baseName(image.name)}-no-bg.${format.ext}`;
+          downloadBlob(await outputBlob(format.type), name);
+          showSnackbar(`Saved ${name}`);
+        } catch (err) {
+          console.error(err);
+          showError('Couldn’t save the image');
+        }
+      }
+
+      // The clipboard only takes PNG everywhere, whatever the download format.
+      async function copyImage() {
+        if (!image.result) return;
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': outputBlob('image/png') }),
+          ]);
+          showSnackbar('Copied the image');
+        } catch (err) {
+          console.error(err);
+          showError('Couldn’t copy the image in this browser');
+        }
+      }
+
+      // Theme ---------------------------------------------------------------------------
+
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
+
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
+        );
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        writeJson(STORE_KEY, prefs);
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
+      }
+
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
+      }
+
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
+
+      // Menus & dialogs ----------------------------------------------------------------
+
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        items.at(i < 0 && step < 0 ? -1 : (i + step) % items.length)?.focus();
+      }
+
+      // Opens under the button, right-aligned, or above it when there is no room below.
+      // The source link keeps a click on the open menu's button from light-dismissing and
+      // reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        renderModel();
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        const up = r.bottom + 4 + menu.offsetHeight > innerHeight - 8;
+        menu.classList.toggle('up', up);
+        menu.style.top = up ? `${r.top - 4 - menu.offsetHeight}px` : `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        history.pushState({ dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
+        }
+      }
+
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
+      }
+
+      // --- UI Updates ---
+
+      function renderAll() {
+        renderStage();
+        renderStatus();
+        renderActions();
+        renderModel();
+      }
+
+      // Pushes prefs into every settings control.
+      function renderSettings() {
+        for (const input of els.swatches.querySelectorAll('input[type="radio"]')) {
+          input.checked = input.value === prefs.background;
+          input.closest('.swatch').classList.toggle('selected', input.checked);
+        }
+        const custom = prefs.background === 'custom';
+        els.customSwatch.classList.toggle('selected', custom);
+        if (prefs.customColor) {
+          els.customColor.value = prefs.customColor;
+          els.customSwatch.style.setProperty('--c', prefs.customColor);
+        }
+        els.crop.checked = prefs.crop;
+        document.querySelector(`input[name="format"][value="${prefs.format}"]`).checked = true;
+        const label = `Download ${FORMATS[prefs.format].label}`;
+        els.downloadLabels.forEach((l) => (l.textContent = label));
+      }
+
+      // The original shows while the model works and while Compare is on; otherwise the
+      // cutout over its fill. Both are drawn at preview size, the same region of the image.
+      function renderStage() {
+        const { original, result } = image;
+        els.stageEmpty.hidden = Boolean(original);
+        els.stageHint.hidden = !original;
+        els.stage.setAttribute('aria-label', original ? 'Change image' : 'Choose an image');
+        els.stageTools.hidden = !result;
+        els.compareBtns.forEach((b) => b.setAttribute('aria-pressed', String(showOriginal)));
+        els.original.hidden = !original || (result && !showOriginal);
+        els.result.hidden = !result || showOriginal;
+        if (!original) return;
+        const r = region();
+        const scale = Math.min(1, PREVIEW_MAX / Math.max(r.w, r.h));
+        drawOriginal(els.original, scale);
+        if (result) drawOutput(els.result, scale);
+        els.fileName.hidden = !result;
+        els.fileName.textContent = result ? `${image.name} · ${r.w} × ${r.h}` : '';
+        if (els.viewer.open) renderViewer();
+      }
+
+      // The viewer draws at full size, the original too while Compare is on.
+      function renderViewer() {
+        els.viewerTitle.textContent = image.name;
+        if (showOriginal) drawOriginal(els.viewerCanvas);
+        else drawOutput(els.viewerCanvas);
+      }
+
+      // Signature moment: the cutout sweeps across the original, left to right, as if the
+      // background were wiped away.
+      function playReveal() {
+        if (REDUCED_MOTION.matches || showOriginal) return;
+        els.original.hidden = false;
+        const options = { duration: 700, easing: 'cubic-bezier(0.2, 0, 0, 1)' };
+        els.result.animate(
+          [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }],
+          options,
+        );
+        els.original
+          .animate([{ clipPath: 'inset(0 0 0 0)' }, { clipPath: 'inset(0 0 0 100%)' }], options)
+          .finished.then(renderStage, () => {});
+      }
+
+      // A new image springs in. Web Animations, not a CSS class: a hidden canvas restarts its
+      // CSS animations when shown again, so Compare would replay the pop on every toggle.
+      function popStage() {
+        if (REDUCED_MOTION.matches) return;
+        els.original.animate([{ scale: 0.92 }, { scale: 1 }], {
+          duration: parseFloat(cssVar('--spring-ms')),
+          easing: cssVar('--spring'),
+        });
+      }
+
+      // The preview only tells what's happening to the image; the download shows in the Model row.
+      function renderStatus() {
+        els.status.hidden = phase === 'idle';
+        if (phase === 'loading') {
+          els.statusText.textContent = modelCached
+            ? 'Getting ready…'
+            : 'Waiting for the model to download…';
+        } else if (phase === 'running') {
+          els.statusText.textContent =
+            backend === BACKENDS.wasm
+              ? 'Removing the background. On the CPU this can take a minute…'
+              : 'Removing the background…';
+        }
+        renderWaves();
+      }
+
+      // Share of the model downloaded, or null when nothing is downloading.
+      function downloadShare() {
+        if (phase !== 'loading' || modelCached) return null;
+        const { loaded, total } = loadProgress;
+        return total ? loaded / total : 0;
+      }
+
+      // One frame loop moves both waves while anything is in progress: the preview's keeps
+      // moving at full width, and the Model row's fills up with the download.
+      function renderWaves() {
+        cancelAnimationFrame(waveFrame);
+        if (phase === 'idle') return;
+        const frame = (now) => {
+          const shift = REDUCED_MOTION.matches ? 0 : now / 300;
+          drawLine(els.statusLine, els.statusWave, els.statusTrack, 1, 3, shift);
+          const share = downloadShare();
+          if (share !== null)
+            drawLine(els.modelLine, els.modelWave, els.modelTrack, share, 3, shift);
+          if (!REDUCED_MOTION.matches) waveFrame = requestAnimationFrame(frame);
+        };
+        frame(performance.now());
+      }
+
+      function renderActions() {
+        const ready = Boolean(image.result);
+        els.downloadBtns.forEach((b) => (b.disabled = !ready));
+        els.copyBtns.forEach((b) => (b.disabled = !ready));
+      }
+
+      function renderModel() {
+        if (!backend) {
+          els.modelSub.textContent = 'Checking this device…';
+          return;
+        }
+        const where = backend === BACKENDS.webgpu ? 'your GPU' : 'your CPU';
+        const share = downloadShare();
+        const { loaded, total } = loadProgress;
+        // SVG elements have no `hidden` property, only the attribute.
+        els.modelLine.toggleAttribute('hidden', share === null);
+        if (share === null) {
+          els.modelSub.textContent = modelCached
+            ? `Downloaded. Runs offline on ${where}.`
+            : `About ${backend.mb} MB, downloads on first use. Runs on ${where}.`;
+        } else {
+          els.modelSub.textContent = total
+            ? `Downloading · ${formatMb(loaded)} of ${formatMb(total)} MB`
+            : 'Starting the download…';
+          els.modelLine.setAttribute('aria-valuenow', Math.round(share * 100));
+        }
+        els.deleteModelBtn.disabled = !modelCached || phase !== 'idle';
+      }
+
+      // M3 wavy linear indicator: a wave up to `p`, then a gap and a flat track.
+      function drawLine(svg, wave, track, p, amp, shift) {
+        const w = svg.clientWidth;
+        const h = svg.clientHeight;
+        if (!w) return;
+        const mid = h / 2;
+        const inset = 4;
+        const end = inset + (w - inset * 2) * p;
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        let d = '';
+        if (p > 0) {
+          for (let x = inset; x <= end; x += 1.5) {
+            const y = mid + amp * Math.sin((x / 24) * Math.PI * 2 - shift);
+            d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(2)}`;
+          }
+        }
+        wave.setAttribute('d', d);
+        const trackStart = p > 0 ? end + 10 : inset;
+        track.setAttribute('d', trackStart < w - inset ? `M${trackStart} ${mid}H${w - inset}` : '');
+      }
+
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      // It goes in the top open dialog, since a modal dialog makes the rest of the page inert.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        const host = dialogStack.at(-1) || document.body;
+        if (els.snackbar.parentElement !== host) host.append(els.snackbar);
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
+
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
+
+      function hideSnackbar() {
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
+
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
+
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
+
+      // --- Utilities ---
+
+      // SVGs are left out: the model needs pixels, and browsers can't decode SVG in a worker.
+      function isValidImageFile(file) {
+        if (!file) return false;
+        if (file.type) return /^image\/(png|jpeg|webp|avif)$/.test(file.type);
+        return /\.(png|jpe?g|webp|avif)$/i.test(file.name);
+      }
+
+      function baseName(name) {
+        return name.replace(/\.[^.]+$/, '') || 'image';
+      }
+
+      function formatMb(bytes) {
+        return (bytes / 1e6).toFixed(bytes < 10e6 ? 1 : 0);
+      }
+
+      function downloadBlob(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {
+          // Storage full or blocked: settings still apply for this visit.
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
