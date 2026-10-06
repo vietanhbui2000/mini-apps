@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <style>
+    .shape { fill: #dbe1ff; }
+    .glyph { fill: #4b5c92; }
+    @media (prefers-color-scheme: dark) {
+      .shape { fill: #324478; }
+      .glyph { fill: #dbe1ff; }
+    }
+  </style>
+  <circle class="shape" cx="256" cy="256" r="256"/>
+  <g class="glyph">
+    <rect x="146" y="146" width="56" height="56" rx="18"/>
+    <rect x="228" y="146" width="56" height="56" rx="18"/>
+    <rect x="310" y="146" width="56" height="56" rx="18"/>
+    <rect x="146" y="228" width="56" height="56" rx="18"/>
+    <rect x="228" y="228" width="56" height="56" rx="18"/>
+    <rect x="310" y="228" width="56" height="56" rx="18"/>
+    <rect x="146" y="310" width="56" height="56" rx="18"/>
+    <rect x="228" y="310" width="56" height="56" rx="18"/>
+    <rect x="310" y="310" width="56" height="56" rx="18"/>
+  </g>
+</svg>
