@@ -1,7 +1,4 @@
 .DS_Store
---
-AGENTS.md
-package.json
 .prettierrc
 .prettierignore
-eslint.config.mjs
+.claude/launch.json
