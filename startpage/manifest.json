@@ -4,8 +4,8 @@
   "description": "Your new day starts here.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f5f5f5",
-  "theme_color": "#f5f5f5",
+  "background_color": "#faf8ff",
+  "theme_color": "#faf8ff",
   "icons": [
     {
       "src": "startpage_icon_any_x192.png",

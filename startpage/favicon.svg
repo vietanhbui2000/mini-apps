@@ -1,19 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="default_x5F_light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: none;
-        stroke: #18181b;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        stroke-width: 21.33px;
-      }
-    </style>
-  </defs>
-  <g id="rainbow">
-    <path class="cls-1" d="M234.67,181.33c0-58.91-47.76-106.67-106.67-106.67S21.33,122.42,21.33,181.33"/>
-    <path class="cls-1" d="M64,181.33c0-35.35,28.65-64,64-64s64,28.65,64,64"/>
-    <path class="cls-1" d="M106.67,181.33c0-11.78,9.55-21.33,21.33-21.33s21.33,9.55,21.33,21.33"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <style>
+    .shape { fill: #dbe1ff; }
+    .arcs { stroke: #4b5c92; }
+    @media (prefers-color-scheme: dark) {
+      .shape { fill: #324478; }
+      .arcs { stroke: #dbe1ff; }
+    }
+  </style>
+  <circle class="shape" cx="256" cy="256" r="256"/>
+  <g class="arcs" transform="translate(256 256) scale(1.6) translate(-128 -128)" fill="none" stroke-linecap="round" stroke-width="28">
+    <path d="M234.67,181.33c0-58.91-47.76-106.67-106.67-106.67S21.33,122.42,21.33,181.33"/>
+    <path d="M64,181.33c0-35.35,28.65-64,64-64s64,28.65,64,64"/>
+    <path d="M106.67,181.33c0-11.78,9.55-21.33,21.33-21.33s21.33,9.55,21.33,21.33"/>
   </g>
 </svg>
