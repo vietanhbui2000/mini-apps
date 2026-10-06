@@ -1,1641 +1,3229 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Convert any image into a compliant macOS icon pack, or create custom folder icons."
+    />
+    <title>macOS Icon Generator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#fff8f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#191113" media="(prefers-color-scheme: dark)" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description"
-    content="Convert any image into a compliant macOS icon pack, or create custom folder icons." />
-  <title>macOS Icon Generator</title>
+    <!-- Fonts: Google Sans Flex, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=add_photo_alternate,apps,arrow_outward,brightness_auto,check,code,colorize,dark_mode,download,folder,image,info,light_mode,more_vert,person,swap_horiz,title&display=block"
+    />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #c2185b. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#8d4a5a, #ffb1c2);
+        --on-primary: light-dark(#ffffff, #551d2d);
+        --primary-container: light-dark(#ffd9df, #713343);
+        --on-primary-container: light-dark(#713343, #ffd9df);
+        --secondary: light-dark(#75565c, #e4bdc3);
+        --on-secondary: light-dark(#ffffff, #43292f);
+        --secondary-container: light-dark(#ffd9df, #5b3f45);
+        --on-secondary-container: light-dark(#5b3f45, #ffd9df);
+        --tertiary: light-dark(#7a5733, #ecbe91);
+        --on-tertiary: light-dark(#ffffff, #462a09);
+        --tertiary-container: light-dark(#ffdcbd, #60401d);
+        --on-tertiary-container: light-dark(#60401d, #ffdcbd);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#fff8f7, #191113);
+        --on-surface: light-dark(#22191b, #efdee0);
+        --on-surface-variant: light-dark(#524346, #d6c2c4);
+        --surface-dim: light-dark(#e7d6d8, #191113);
+        --surface-bright: light-dark(#fff8f7, #413738);
+        --surface-container-lowest: light-dark(#ffffff, #140c0e);
+        --surface-container-low: light-dark(#fff0f1, #22191b);
+        --surface-container: light-dark(#fbeaec, #261d1f);
+        --surface-container-high: light-dark(#f5e4e6, #312829);
+        --surface-container-highest: light-dark(#efdee0, #3c3234);
+        --outline: light-dark(#847375, #9e8c8f);
+        --outline-variant: light-dark(#d6c2c4, #524346);
+        --inverse-surface: light-dark(#382e30, #efdee0);
+        --inverse-on-surface: light-dark(#feedee, #382e30);
+        --inverse-primary: light-dark(#ffb1c2, #8d4a5a);
+        --scrim: #000;
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
 
-  <!-- Fonts: Geist, Geist Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
-    rel="stylesheet" />
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
 
-  <!-- Tailwind Config -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Geist', 'sans-serif'],
-            mono: ['Geist Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-            },
-          },
-        },
-      },
-    };
-  </script>
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
 
-  <style>
-    body {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* Custom scrollbar for desktop */
-    @media (min-width: 640px) {
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: #d4d4d8 transparent;
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
       }
 
-      ::-webkit-scrollbar {
-        width: 6px;
+      :root[data-theme='light'] {
+        color-scheme: light;
       }
 
-      ::-webkit-scrollbar-track {
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+      }
+
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
+
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      h1,
+      h2,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the height (20px here, 24px in the 48px bottom bar), not
+         --shape-full: a press springs them smaller, and the spring's overshoot from 999px would
+         dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
+        border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .btn:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .btn .icon {
+        font-size: 20px;
+        margin-left: -8px;
+      }
+
+      .btn-filled {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .btn-tonal {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
+      }
+
+      .btn-text .icon {
+        margin-left: -4px;
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* --- App bar & page --- */
+      /* The bar stays pinned while the page scrolls. Its contents line up with the page column. */
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: var(--surface);
+        transition: box-shadow var(--spring-ms) linear;
+      }
+
+      /* A divider plus a soft shadow: content cards share the container colors, so a tint alone
+         would blend in. The divider keeps the edge visible in dark mode. */
+      .appbar.scrolled {
+        box-shadow:
+          0 1px 0 var(--outline-variant),
+          0 4px 12px rgb(0 0 0 / 0.08);
+      }
+
+      .appbar-inner,
+      .page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .appbar-inner,
+        .page {
+          padding-inline: 24px;
+        }
+      }
+
+      .page {
+        padding-bottom: 112px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        margin-right: -8px;
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 840px) {
+        .top-title {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+
+      /* App or folder: the first choice, so it stays in the bar. Bar height: 64 + 40 + 12. */
+      :root {
+        --appbar-h: 116px;
+      }
+
+      .mode {
+        padding-bottom: 12px;
+      }
+
+      @media (min-width: 900px) {
+        .mode .seg {
+          width: 380px;
+        }
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+
+      /* --- Studio --- */
+      /* Wide screens: settings on the left, a pinned preview column on the right, so each change
+         reads left to right into its result. Phones: the preview pins under the app bar so every
+         change stays in view. */
+      .studio {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px 32px;
+        align-items: start;
+      }
+
+      @media (min-width: 900px) {
+        .page {
+          padding-top: 16px;
+          padding-bottom: 24px;
+        }
+
+        .studio {
+          grid-template-columns: minmax(0, 1fr) 380px;
+        }
+
+        .stage-col {
+          position: sticky;
+          top: calc(var(--appbar-h) + 16px);
+          grid-column: 2;
+          grid-row: 1;
+        }
+
+        .settings {
+          grid-column: 1;
+        }
+      }
+
+      .stage-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      @media (max-width: 899px) {
+        .stage-col {
+          position: sticky;
+          top: var(--appbar-h);
+          z-index: 2;
+          padding-bottom: 12px;
+          background: var(--surface);
+        }
+
+        .stage-col .btn-filled {
+          display: none;
+        }
+      }
+
+      /* The preview: a drop target with a soft checkerboard so transparency shows. */
+      .stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        border: 2px dashed transparent;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container);
+        cursor: pointer;
+        transition:
+          border-color var(--effects-ms) linear,
+          border-radius var(--spring-ms) var(--spring);
+      }
+
+      .stage:active {
+        border-radius: var(--shape-lg);
+      }
+
+      .dragging .stage {
+        border-color: var(--primary);
+      }
+
+      .stage.text-mode {
+        cursor: default;
+      }
+
+      .stage-canvas {
+        width: 256px;
+        height: 256px;
+        border-radius: var(--shape-lg);
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 16px 16px;
+        transition: scale var(--spring-ms) var(--spring);
+      }
+
+      @media (max-width: 899px) {
+        .stage {
+          padding: 12px;
+        }
+
+        .stage-canvas {
+          width: 144px;
+          height: 144px;
+        }
+      }
+
+      .stage-canvas.pop {
+        animation: pop var(--spring-ms) var(--spring);
+      }
+
+      @keyframes pop {
+        from {
+          scale: 0.92;
+        }
+      }
+
+      .stage-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .stage-empty .icon {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--shape-lg);
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font-size: 28px;
+      }
+
+      .stage-hint {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 12px;
+        border-radius: var(--shape-full);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 12px/16px var(--font);
+        letter-spacing: 0.5px;
+        opacity: 0;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      .stage-hint .icon {
+        font-size: 16px;
+      }
+
+      @media (hover: hover) {
+        .stage:not(.text-mode):hover .stage-hint {
+          opacity: 1;
+        }
+      }
+
+      .stage-col .btn-filled {
+        height: 56px;
+        border-radius: var(--shape-lg);
+        font-size: 16px;
+      }
+
+      .stage-col .btn-filled:active {
+        border-radius: var(--shape-md);
+      }
+
+      .file-name {
+        overflow: hidden;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* --- Settings --- */
+      .settings {
+        min-width: 0;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) 60ms both;
+      }
+
+      .sect-title {
+        margin: 24px 16px 8px;
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .settings > .panel > .sect-title:first-child {
+        margin-top: 8px;
+      }
+
+      /* In two columns the first label lines up with the top of the preview. */
+      @media (min-width: 900px) {
+        .settings > .panel > .sect-title:first-child {
+          margin-top: 0;
+        }
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .row {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        min-height: 72px;
+        padding: 12px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+        transition: opacity var(--effects-ms) linear;
+        --field-bg: var(--surface-container);
+      }
+
+      /* First and last visible rows: a hidden row (a setting that only shows when another is
+         on) mustn't leave its neighbour with a square outer corner. */
+      .group > .row:not([hidden]):not(.row:not([hidden]) ~ .row) {
+        border-top-left-radius: var(--shape-lg-plus);
+        border-top-right-radius: var(--shape-lg-plus);
+      }
+
+      .group > .row:not([hidden]):not(:has(~ .row:not([hidden]))) {
+        border-bottom-left-radius: var(--shape-lg-plus);
+        border-bottom-right-radius: var(--shape-lg-plus);
+      }
+
+      label.row {
+        cursor: pointer;
+      }
+
+      .row.disabled {
+        opacity: 0.38;
+        pointer-events: none;
+      }
+
+      .row-stack {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .row-text {
+        display: flex;
+        flex: 1 1 160px;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .row-stack .row-text {
+        flex: none;
+      }
+
+      .row-sub {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .row .field {
+        flex: 1 1 100%;
+        --field-bg: var(--surface-container);
+      }
+
+      .switch:disabled {
+        opacity: 0.38;
+      }
+
+      .chips label:has(:disabled) {
+        opacity: 0.38;
+        cursor: not-allowed;
+      }
+
+      /* Color swatches: a circle that squares off when picked */
+      .swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .swatch {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--c);
+        box-shadow: inset 0 0 0 1px var(--outline-variant);
+        cursor: pointer;
+        transition:
+          border-radius var(--spring-ms) var(--spring),
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .swatch:active {
+        scale: 0.9;
+      }
+
+      .swatch input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      /* The check sits on its own small circle, so it shows on any color, white included. */
+      .swatch::after {
+        content: 'check';
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--surface-container-highest);
+        color: var(--on-surface);
+        font: 18px/1 'Material Symbols Rounded';
+        opacity: 0;
+        scale: 0.4;
+        pointer-events: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .swatch.selected {
+        border-radius: var(--shape-md);
+      }
+
+      .swatch.selected::after {
+        opacity: 1;
+        scale: 1;
+      }
+
+      .swatch:has(:focus-visible) {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      .swatch.custom:not(.selected) {
+        background: var(--surface-container-highest);
+        color: var(--on-surface-variant);
+      }
+
+      .swatch.custom:not(.selected)::after {
+        content: 'colorize';
+        background: none;
+        color: inherit;
+        font-size: 22px;
+        opacity: 1;
+        scale: 1;
+      }
+
+      /* M3 Expressive slider: a thick track with a slim handle and gaps around it */
+      .slider-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .slider-value {
+        min-width: 4ch;
+        color: var(--on-surface-variant);
+        font: 500 14px/20px var(--font);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+
+      .slider {
+        flex: 1;
+        height: 44px;
+        margin: 0;
+        background: none;
+        cursor: pointer;
+        appearance: none;
+        --p: 50%;
+      }
+
+      .slider::-webkit-slider-runnable-track {
+        height: 16px;
+        border-radius: var(--shape-full);
+        background: linear-gradient(
+          to right,
+          var(--primary) calc(var(--p) - 6px),
+          transparent calc(var(--p) - 6px) calc(var(--p) + 6px),
+          var(--secondary-container) calc(var(--p) + 6px)
+        );
+      }
+
+      .slider::-webkit-slider-thumb {
+        width: 4px;
+        height: 44px;
+        margin-top: -14px;
+        border-radius: 2px;
+        background: var(--primary);
+        appearance: none;
+        transition: width var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .slider:active::-webkit-slider-thumb {
+        width: 2px;
+      }
+
+      .slider::-moz-range-track {
+        height: 16px;
+        border-radius: var(--shape-full);
+        background: var(--secondary-container);
+      }
+
+      .slider::-moz-range-progress {
+        height: 16px;
+        border-radius: var(--shape-full);
+        background: var(--primary);
+      }
+
+      .slider::-moz-range-thumb {
+        width: 4px;
+        height: 44px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--primary);
+      }
+
+      .slider:focus-visible {
+        outline: none;
+      }
+
+      .slider:focus-visible::-webkit-slider-thumb {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      /* Bottom bar on phones and tablets */
+      .actionbar {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        padding: 12px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+          max(16px, env(safe-area-inset-left));
+        background: var(--surface-container);
+      }
+
+      @media (min-width: 640px) {
+        .actionbar {
+          padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right));
+        }
+      }
+
+      .actionbar .btn {
+        flex: 1;
+        height: 48px;
+        border-radius: 24px;
+      }
+
+      @media (min-width: 900px) {
+        .actionbar {
+          display: none;
+        }
+      }
+
+      @media (max-width: 899px) {
+        body > .snackbar {
+          bottom: 88px;
+        }
+      }
+
+      /* On phones the pinned preview sits under the app bar, so it carries the scroll edge. */
+      @media (max-width: 899px) {
+        .stage-col {
+          margin-inline: -16px;
+          padding-inline: 16px;
+          transition: box-shadow var(--spring-ms) linear;
+        }
+
+        body.scrolled .appbar {
+          box-shadow: none;
+        }
+
+        body.scrolled .stage-col {
+          box-shadow:
+            0 1px 0 var(--outline-variant),
+            0 4px 12px rgb(0 0 0 / 0.08);
+        }
+      }
+
+      @media (min-width: 640px) and (max-width: 899px) {
+        .stage-col {
+          margin-inline: -24px;
+          padding-inline: 24px;
+        }
+      }
+
+      /* Outlined text field with floating label */
+      .field {
+        position: relative;
+        display: block;
+        --field-bg: var(--surface-container-high);
+      }
+
+      .field input {
+        display: block;
+        width: 100%;
+        height: 56px;
+        padding: 0 16px;
+        border: 1px solid var(--outline);
+        border-radius: var(--shape-md);
+        outline: none;
         background: transparent;
+        color: var(--on-surface);
+        font-size: 16px;
+        transition:
+          border-color var(--effects-ms) linear,
+          box-shadow var(--effects-ms) linear;
       }
 
-      ::-webkit-scrollbar-thumb {
-        background: #d4d4d8;
-        border-radius: 10px;
+      @media (hover: hover) {
+        .field input:hover {
+          border-color: var(--on-surface);
+        }
       }
 
-      ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1aa;
+      .field input:focus {
+        border-color: var(--primary);
+        box-shadow: inset 0 0 0 1px var(--primary);
       }
-    }
 
-    /* Additional specific styles */
-    input[type="color"]::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
+      .field-label {
+        position: absolute;
+        top: 28px;
+        left: 12px;
+        padding: 0 4px;
+        border-radius: var(--shape-xs);
+        background: var(--field-bg);
+        color: var(--on-surface-variant);
+        font-size: 16px;
+        line-height: 16px;
+        pointer-events: none;
+        translate: 0 -50%;
+        transition:
+          top var(--spring-fast-ms) var(--spring-fast),
+          font-size var(--spring-fast-ms) var(--spring-fast),
+          color var(--effects-ms) linear;
+      }
 
-    input[type="color"]::-webkit-color-swatch {
-      border: 1px solid #e4e4e7;
-      border-radius: 50%;
-    }
+      .field input:focus + .field-label,
+      .field input:not(:placeholder-shown) + .field-label {
+        top: 0;
+        font-size: 12px;
+      }
 
-    .color-swatch {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: all 0.15s ease;
-      position: relative;
-      flex-shrink: 0;
-    }
+      .field input:focus + .field-label {
+        color: var(--primary);
+      }
 
-    .color-swatch.active {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
-    }
+      /* Switch */
+      .switch {
+        position: relative;
+        flex: none;
+        width: 52px;
+        height: 32px;
+        margin: 0;
+        border: 2px solid var(--outline);
+        border-radius: var(--shape-full);
+        background: var(--surface-container-highest);
+        cursor: pointer;
+        appearance: none;
+        transition:
+          background-color var(--effects-ms) linear,
+          border-color var(--effects-ms) linear;
+      }
 
-    .color-swatch.active::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 2px solid white;
-    }
+      .switch::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--outline);
+        translate: 0 -50%;
+        transition:
+          left var(--spring-fast-ms) var(--spring-fast),
+          width var(--spring-fast-ms) var(--spring-fast),
+          height var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear;
+      }
 
-    .seg-btn {
-      transition: all 0.15s ease;
-    }
+      .switch::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 26px;
+        width: 16px;
+        height: 16px;
+        background: var(--on-primary-container);
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.55 15.15 18.03 6.68a1 1 0 0 1 1.41 1.41l-9.19 9.2a1 1 0 0 1-1.41 0l-4.3-4.3a1 1 0 1 1 1.41-1.41z'/%3E%3C/svg%3E")
+          center / contain no-repeat;
+        opacity: 0;
+        translate: 0 -50%;
+        scale: 0.4;
+        transition:
+          opacity var(--effects-ms) linear,
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
 
-    .seg-btn.active {
-      background: white;
-      color: #18181b;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
+      .switch:checked {
+        border-color: var(--primary);
+        background: var(--primary);
+      }
 
-    .seg-btn:not(.active) {
-      background: transparent;
-      color: #71717a;
-    }
+      .switch:checked::before {
+        left: 22px;
+        width: 24px;
+        height: 24px;
+        background: var(--on-primary);
+      }
 
-    .seg-btn:not(.active):hover {
-      color: #52525b;
-    }
-  </style>
-</head>
+      .switch:checked::after {
+        opacity: 1;
+        scale: 1;
+      }
 
-<body class="bg-[#f5f5f5] text-zinc-800 h-[100dvh] flex justify-center overflow-hidden">
-  <!-- Main App Container -->
-  <div id="app-wrapper"
-    class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border">
+      .switch:active::before {
+        left: 0;
+        width: 28px;
+        height: 28px;
+      }
 
-    <!-- Header -->
-    <header id="appHeader"
-      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex items-center flex-shrink-0 transition-shadow duration-200">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div
-          class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
-          <i data-lucide="monitor" class="w-4 h-4"></i>
+      .switch:checked:active::before {
+        left: 20px;
+      }
+
+      .switch:disabled {
+        cursor: default;
+      }
+
+      /* Connected button group (single choice) */
+      .seg {
+        display: flex;
+        gap: 2px;
+        width: 100%;
+      }
+
+      .seg label {
+        position: relative;
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: var(--shape-sm);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      /* Ends use half the 40px height, not --shape-full: when corners on one edge add up to
+         more than its length, the browser shrinks them all, and the 8px inner corners would
+         flatten to square. */
+      .seg label:first-child {
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+      }
+
+      .seg label:last-child {
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+      }
+
+      .seg label:has(:checked) {
+        border-radius: 20px;
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .seg label:has(:checked) .icon {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      .seg label:has(:focus-visible) {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      .seg label:active {
+        border-radius: var(--shape-md);
+      }
+
+      .seg .icon {
+        font-size: 18px;
+      }
+
+      .seg input,
+      .chips input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Filter chips (single choice) */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .chips label {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 32px;
+        padding: 0 16px;
+        border: 1px solid var(--outline-variant);
+        border-radius: var(--shape-sm);
+        color: var(--on-surface-variant);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        cursor: pointer;
+        transition:
+          background-color var(--effects-ms) linear,
+          border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .chips label:has(:checked) {
+        padding-left: 8px;
+        border-color: transparent;
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .chips label:has(:checked)::before {
+        content: 'check';
+        font: 18px/1 'Material Symbols Rounded';
+      }
+
+      .chips label:has(:focus-visible) {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      .chips label:active {
+        border-radius: var(--shape-lg);
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* Menu */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu.up {
+        transform-origin: bottom right;
+      }
+
+      .menu:popover-open {
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
+      }
+
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, menus and the About dialog open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-inline: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('icon-gen') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="appbar" id="appbar">
+      <div class="appbar-inner">
+        <div class="top">
+          <h1 class="top-title">macOS Icon Generator</h1>
+          <button
+            class="icon-btn state"
+            id="more-btn"
+            type="button"
+            aria-label="More options"
+            title="More options"
+            aria-haspopup="menu"
+          >
+            <span class="icon" aria-hidden="true">more_vert</span>
+          </button>
         </div>
-        <div>
-          <h1 class="font-bold text-2xl tracking-tight text-zinc-900 leading-tight">macOS Icon Generator</h1>
+        <div class="mode">
+          <div class="seg" role="radiogroup" aria-label="Icon type">
+            <label
+              ><input type="radio" name="mode" value="app" checked /><span
+                class="icon"
+                aria-hidden="true"
+                >apps</span
+              >App icon</label
+            >
+            <label
+              ><input type="radio" name="mode" value="folder" /><span
+                class="icon"
+                aria-hidden="true"
+                >folder</span
+              >Folder icon</label
+            >
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- Dynamic Sticky Header (Tabs) -->
-    <div id="stickyHeader"
-      class="z-30 bg-white border-b border-zinc-200 p-4 sm:px-6 sm:py-4 flex-shrink-0 transition-shadow duration-300">
-      <div class="flex gap-1 bg-zinc-100 border border-zinc-200/50 rounded-full p-1 shadow-inner w-full">
-        <button id="tabApp"
-          class="seg-btn active flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full text-sm font-medium">
-          <i data-lucide="image" class="w-3.5 h-3.5"></i><span>App Icon</span>
-        </button>
-        <button id="tabFolder"
-          class="seg-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full text-sm font-medium">
-          <i data-lucide="folder" class="w-3.5 h-3.5"></i><span>Folder Icon</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto relative bg-zinc-50/50 scroll-smooth" id="mainScroll">
-
-      <!-- Sticky Preview Box -->
-      <div id="stickyPreview"
-        class="sticky top-0 z-20 bg-[#fdfdfd] px-4 sm:px-6 py-4 sm:py-6 border-b border-transparent transition-all duration-300">
-        <div id="dropZone"
-          class="bg-[#f5f5f5] border border-zinc-200 hover:border-brand-500 cursor-pointer rounded-2xl p-4 shadow-sm flex flex-col items-center relative w-fit mx-auto transition-all duration-200 group overflow-hidden">
-          <div class="relative flex items-center justify-center w-[200px] h-[200px]">
-            <canvas id="previewCanvas" class="w-full h-full object-contain relative z-10 pointer-events-none"></canvas>
-          </div>
-
-          <!-- Hover overlay to indicate it's clickable to change image -->
-          <div id="hoverOverlay"
-            class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center flex-col text-brand-600 hidden pointer-events-none">
-            <div id="hoverOverlayIconWrapper">
-              <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
+    <main class="page">
+      <div class="studio">
+        <div class="stage-col">
+          <div class="stage" id="stage" role="button" tabindex="0" aria-label="Choose an image">
+            <canvas class="stage-canvas" id="canvas" width="512" height="512"></canvas>
+            <div class="stage-empty" id="stage-empty">
+              <span class="icon" aria-hidden="true">add_photo_alternate</span>
+              <span>Drop an image, or choose one</span>
             </div>
-            <span id="hoverOverlayText" class="text-[10px] uppercase font-bold tracking-wider">Change Image</span>
+            <span class="stage-hint" id="stage-hint" aria-hidden="true"
+              ><span class="icon">swap_horiz</span>Change image</span
+            >
           </div>
-
-          <!-- Placeholder for when no image is loaded -->
-          <div id="previewPlaceholder"
-            class="absolute inset-0 flex items-center justify-center flex-col text-zinc-400 group-hover:text-brand-600 transition-all pointer-events-none">
-            <i data-lucide="upload-cloud" class="w-8 h-8 mb-2"></i>
-            <span id="previewPlaceholderText" class="text-[10px] uppercase font-bold tracking-wider">Upload Image</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-4 sm:p-6">
-        <input type="file" id="fileInput" class="hidden"
-          accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg">
-
-        <!-- App Icon Panel -->
-        <div id="panelApp">
-          <div class="space-y-6 sm:space-y-8">
-            <!-- Configuration Section -->
-            <div>
-              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
-                  <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
-                </div>
-                <h2 class="font-bold text-zinc-900 tracking-tight">Icon Settings</h2>
-              </div>
-
-              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm divide-y divide-zinc-100">
-                <!-- Image Fitting -->
-                <div class="flex justify-between items-center p-4 sm:p-6">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium text-zinc-900">Image Fitting</span>
-                    <span class="text-xs text-zinc-500">Adjusts how the image is adapted</span>
-                  </div>
-                  <select id="fittingSelect"
-                    class="bg-zinc-50 border border-zinc-200 text-zinc-900 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 block px-3 py-2 outline-none cursor-pointer transition-all">
-                    <option value="cover" selected>Fill</option>
-                    <option value="contain">Fit</option>
-                    <option value="center">Center</option>
-                  </select>
-                </div>
-
-                <!-- Enable Squircle -->
-                <div class="flex justify-between items-center p-4 sm:p-6">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium text-zinc-900">Enable Squircle</span>
-                    <span class="text-xs text-zinc-500">Applies shape styling to the generated icon</span>
-                  </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="squircleToggle" checked class="sr-only peer">
-                    <div
-                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500">
-                    </div>
-                  </label>
-                </div>
-
-                <!-- Background Toggle -->
-                <div class="flex justify-between items-center p-4 sm:p-6">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium text-zinc-900">Enable Background</span>
-                    <span class="text-xs text-zinc-500">Adds background color to the generated icon</span>
-                  </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="bgToggle" class="sr-only peer">
-                    <div
-                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
-                    </div>
-                  </label>
-                </div>
-
-                <!-- Custom Background Color -->
-                <div class="flex justify-between items-center p-4 sm:p-6" id="colorRow" style="display: none;">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium text-zinc-900">Background Color</span>
-                    <span class="text-xs text-zinc-500">Select the color for the background</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <input type="color" id="tileColorInput" value="#ffffff"
-                      class="w-7 h-7 bg-transparent border-none cursor-pointer appearance-none disabled:opacity-50">
-                  </div>
-                </div>
-
-                <!-- Padding Toggle -->
-                <div class="flex justify-between items-center p-4 sm:p-6">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium text-zinc-900">Enable Padding</span>
-                    <span class="text-xs text-zinc-500">Adds extra margins (following Apple guidelines)</span>
-                  </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="paddingToggle" class="sr-only peer" checked>
-                    <div
-                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
-                    </div>
-                  </label>
-                </div>
-
-                <!-- Shadow Toggle -->
-                <div class="flex justify-between items-center p-4 sm:p-6">
-                  <div class="flex flex-col gap-1">
-                    <span class="text-sm font-medium text-zinc-900">Enable Shadow</span>
-                    <span class="text-xs text-zinc-500">Adds subtle shadow (following Apple guidelines)</span>
-                  </div>
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="shadowToggle" class="sr-only peer" checked>
-                    <div
-                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 transition-colors">
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Export Sizes Section -->
-            <div>
-              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white">
-                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                </div>
-                <h2 class="font-bold text-zinc-900 tracking-tight">Export Sizes</h2>
-              </div>
-
-              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 sm:p-6">
-                <p class="text-xs text-zinc-500 mb-4 sm:mb-6">Select the icon sizes to include in the generated .icns
-                  file
-                  Sizes larger than your original image are automatically disabled.</p>
-                <div class="flex flex-wrap gap-2 sm:gap-3" id="sizeCheckboxes">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="selectAllSizes" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 transition-all">
-                    <span class="text-sm font-medium text-zinc-700">All</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="16" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">16px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="32" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">32px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="64" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">64px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="128" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">128px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="256" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">256px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="512" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">512px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="1024" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb size-cb-app">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">1024px</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
+          <p class="file-name" id="file-name" hidden></p>
+          <button class="btn btn-filled state" type="button" data-action="download" disabled>
+            <span class="icon" aria-hidden="true">download</span>Download .icns
+          </button>
         </div>
 
-        <!-- Folder Icon Panel -->
-        <div id="panelFolder" class="hidden">
-          <div class="space-y-6 sm:space-y-8">
-            <!-- Icon Settings -->
-            <div>
-              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white"><i
-                    data-lucide="settings-2" class="w-3.5 h-3.5"></i></div>
-                <h2 class="font-bold text-zinc-900 tracking-tight">Icon Settings</h2>
+        <div class="settings">
+          <!-- App icon settings -->
+          <section class="panel" id="panel-app">
+            <h2 class="sect-title">Shape</h2>
+            <div class="group">
+              <div class="row row-stack">
+                <span class="row-text">
+                  <span>Image fitting</span>
+                  <span class="row-sub">How the image fills the icon</span>
+                </span>
+                <div class="seg" role="radiogroup" aria-label="Image fitting">
+                  <label><input type="radio" name="fitting" value="cover" checked />Fill</label>
+                  <label><input type="radio" name="fitting" value="contain" />Fit</label>
+                  <label><input type="radio" name="fitting" value="center" />Center</label>
+                </div>
               </div>
-              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm divide-y divide-zinc-100">
-                <div class="p-4 sm:p-6">
-                  <div class="flex flex-col gap-3">
-                    <span class="text-sm font-medium text-zinc-900">Folder Variant</span>
-                    <div class="flex gap-2">
-                      <button id="folderVariantEmptyBtn"
-                        class="folder-variant-btn active flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-brand-500 bg-brand-50 text-brand-700 transition-all"
-                        data-value="empty">Empty</button>
-                      <button id="folderVariantFilledBtn"
-                        class="folder-variant-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
-                        data-value="filled">Filled</button>
-                      <button id="folderVariantCutoutBtn"
-                        class="folder-variant-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
-                        data-value="cutout">Cutout</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-4 sm:p-6 transition-opacity" id="folderColorRow">
-                  <div class="flex flex-col gap-3">
-                    <span class="text-sm font-medium text-zinc-900">Folder Color</span>
-                    <div class="relative flex items-center justify-between w-full" id="folderColorControls">
-                      <div class="contents" id="folderColorSwatches"></div>
-                      <div class="h-6 w-px bg-zinc-200"></div>
-                      <input type="color" id="folderColorCustom" value="#339DE0"
-                        class="w-7 h-7 bg-transparent border-none p-0 cursor-pointer appearance-none shrink-0"
-                        title="Custom Color">
-                    </div>
-                  </div>
-                </div>
+              <label class="row">
+                <span class="row-text">
+                  <span>Squircle</span>
+                  <span class="row-sub">The rounded macOS icon shape</span>
+                </span>
+                <input class="switch" type="checkbox" role="switch" id="squircle" checked />
+              </label>
+              <label class="row">
+                <span class="row-text">
+                  <span>Padding</span>
+                  <span class="row-sub">The margin from Apple’s icon grid</span>
+                </span>
+                <input class="switch" type="checkbox" role="switch" id="padding" checked />
+              </label>
+              <label class="row">
+                <span class="row-text">
+                  <span>Shadow</span>
+                  <span class="row-sub">The soft drop shadow macOS icons use</span>
+                </span>
+                <input class="switch" type="checkbox" role="switch" id="shadow" checked />
+              </label>
+            </div>
 
-                <div class="p-4 sm:p-6 transition-opacity" id="folderArtworkTypeRow">
-                  <div class="flex flex-col gap-3">
-                    <span class="text-sm font-medium text-zinc-900">Artwork Type</span>
-                    <div class="relative flex gap-2" id="folderArtworkTypeControls">
-                      <button id="folderArtworkTypeImageBtn"
-                        class="folder-artwork-type-btn active flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-brand-500 bg-brand-50 text-brand-700 transition-all"
-                        data-value="image">Image</button>
-                      <button id="folderArtworkTypeTextBtn"
-                        class="folder-artwork-type-btn flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 transition-all"
-                        data-value="text">Text</button>
-                    </div>
-                  </div>
-                </div>
+            <h2 class="sect-title">Background</h2>
+            <div class="group">
+              <label class="row">
+                <span class="row-text">
+                  <span>Background color</span>
+                  <span class="row-sub" id="bg-sub">Fill the shape behind the image</span>
+                </span>
+                <input class="switch" type="checkbox" role="switch" id="bg" />
+              </label>
+              <div class="row" id="bg-color-row" hidden>
+                <span class="row-text">Color</span>
+                <label class="swatch selected" id="bg-swatch" style="--c: #ffffff">
+                  <input type="color" id="bg-color" value="#ffffff" aria-label="Background color" />
+                </label>
+              </div>
+            </div>
+          </section>
 
-                <div id="folderArtworkTextContainer" class="p-4 sm:p-6 hidden transition-opacity">
-                  <div class="flex flex-col gap-3">
-                    <span class="text-sm font-medium text-zinc-900">Artwork Content</span>
-                    <input type="text" id="folderArtworkTextInput" maxlength="20" placeholder="Enter text..."
-                      class="w-full px-4 py-2 border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all">
-                  </div>
+          <!-- Folder icon settings -->
+          <section class="panel" id="panel-folder" hidden>
+            <h2 class="sect-title">Folder</h2>
+            <div class="group">
+              <div class="row row-stack">
+                <span class="row-text">Style</span>
+                <div class="seg" role="radiogroup" aria-label="Folder style">
+                  <label><input type="radio" name="variant" value="empty" checked />Empty</label>
+                  <label><input type="radio" name="variant" value="filled" />Filled</label>
+                  <label><input type="radio" name="variant" value="cutout" />Cutout</label>
                 </div>
-
-                <div class="flex justify-between items-center p-4 sm:p-6 transition-opacity" id="folderArtworkSizeRow">
-                  <div class="flex flex-col gap-1"><span class="text-sm font-medium text-zinc-900">Artwork
-                      Size</span><span class="text-xs text-zinc-500">Adjust artwork size on the folder</span></div>
-                  <div class="relative flex items-center gap-3" id="folderArtworkSizeControls">
-                    <span id="zoomValueText" class="text-sm text-zinc-500 w-10 text-right">60%</span>
-                    <input type="range" id="iconZoomSlider" min="0.1" max="1.0" value="0.6" step="0.05"
-                      class="w-24 accent-brand-600">
-                  </div>
-                </div>
-
-                <div class="flex justify-between items-center p-4 sm:p-6 transition-opacity"
-                  id="folderAdaptiveColorRow">
-                  <div class="flex flex-col gap-1"><span class="text-sm font-medium text-zinc-900">Enable Adaptive
-                      Coloring</span><span class="text-xs text-zinc-500">Tints the artwork to match the folder
-                      color</span>
-                  </div>
-                  <label class="relative inline-flex items-center cursor-pointer" id="adaptColorToggleLabel"><input
-                      type="checkbox" id="adaptColorToggle" checked class="sr-only peer">
-                    <div
-                      class="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
-                    </div>
-                  </label>
-                </div>
+              </div>
+              <div class="row row-stack" id="color-row">
+                <span class="row-text">Color</span>
+                <div
+                  class="swatches"
+                  id="swatches"
+                  role="radiogroup"
+                  aria-label="Folder color"
+                ></div>
               </div>
             </div>
 
-            <!-- Folder Sizes -->
-            <div>
-              <div class="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div class="w-6 h-6 bg-brand-600 rounded-md flex items-center justify-center text-white"><i
-                    data-lucide="layers" class="w-3.5 h-3.5"></i></div>
-                <h2 class="font-bold text-zinc-900 tracking-tight">Export Sizes</h2>
+            <h2 class="sect-title">Artwork</h2>
+            <div class="group">
+              <div class="row row-stack" id="artwork-type-row">
+                <div class="seg" role="radiogroup" aria-label="Artwork type">
+                  <label
+                    ><input type="radio" name="artwork" value="image" checked /><span
+                      class="icon"
+                      aria-hidden="true"
+                      >image</span
+                    >Image</label
+                  >
+                  <label
+                    ><input type="radio" name="artwork" value="text" /><span
+                      class="icon"
+                      aria-hidden="true"
+                      >title</span
+                    >Text</label
+                  >
+                </div>
+                <label class="field" id="text-field" hidden>
+                  <input
+                    id="artwork-text"
+                    type="text"
+                    maxlength="20"
+                    placeholder=" "
+                    autocomplete="off"
+                  />
+                  <span class="field-label">Text on the folder</span>
+                </label>
               </div>
-              <div class="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 sm:p-6">
-                <p class="text-xs text-zinc-500 mb-4 sm:mb-6">Select the icon sizes to include in the generated .icns
-                  file</p>
-                <div class="flex flex-wrap gap-2 sm:gap-3" id="folderSizeCheckboxes">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="selectAllFolderSizes" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 transition-all">
-                    <span class="text-sm font-medium text-zinc-700">All</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="16" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">16px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="32" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">32px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="64" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">64px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="128" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">128px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="256" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">256px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="512" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">512px</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" value="1024" checked
-                      class="peer w-4 h-4 text-brand-600 border-zinc-300 rounded focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all size-cb-folder">
-                    <span
-                      class="text-sm font-medium text-zinc-700 peer-disabled:text-zinc-400 peer-disabled:cursor-not-allowed">1024px</span>
-                  </label>
+              <div class="row row-stack" id="size-row">
+                <span class="row-text">Size</span>
+                <div class="slider-wrap">
+                  <input
+                    class="slider"
+                    id="zoom"
+                    type="range"
+                    min="0.1"
+                    max="1"
+                    step="0.05"
+                    value="0.6"
+                    aria-label="Artwork size"
+                  />
+                  <span class="slider-value" id="zoom-value">60%</span>
                 </div>
               </div>
+              <label class="row" id="adapt-row">
+                <span class="row-text">
+                  <span>Match folder color</span>
+                  <span class="row-sub">Tints the artwork like Finder does</span>
+                </span>
+                <input class="switch" type="checkbox" role="switch" id="adapt" checked />
+              </label>
+            </div>
+          </section>
+
+          <h2 class="sect-title">Sizes</h2>
+          <div class="group">
+            <div class="row row-stack">
+              <span class="row-sub" id="sizes-note">Sizes to include in the .icns file</span>
+              <div class="chips" id="sizes" role="group" aria-label="Sizes"></div>
             </div>
           </div>
         </div>
       </div>
-
     </main>
 
-    <!-- Action Bar -->
-    <div
-      class="bg-white border-t border-zinc-200 p-4 sm:px-6 sm:py-4 flex gap-2 sm:gap-3 items-center justify-between flex-shrink-0 z-20">
-      <button id="convertBtn" disabled
-        class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 disabled:bg-zinc-100 disabled:text-zinc-400 disabled:cursor-not-allowed disabled:shadow-none text-white py-3 px-4 rounded-xl font-medium shadow-brand-500/20 shadow-lg transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 group">
-        <i data-lucide="download" class="w-4 h-4"></i>
-        <span>Generate & Download</span>
+    <div class="actionbar">
+      <button class="btn btn-filled state" type="button" data-action="download" disabled>
+        <span class="icon" aria-hidden="true">download</span>Download .icns
       </button>
     </div>
 
-  </div>
+    <!-- Menus -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
+    </div>
 
-  <!-- Script Architecture -->
-  <script>
-    // --- Constants & Config ---
-    const CONFIG = {
-      iconTypes: [
-        { typeId: 'ic04', size: 16 },    // 16x16
-        { typeId: 'ic11', size: 32 },    // 16x16@2x
-        { typeId: 'ic05', size: 32 },    // 32x32
-        { typeId: 'ic12', size: 64 },    // 32x32@2x
-        { typeId: 'ic07', size: 128 },   // 128x128
-        { typeId: 'ic13', size: 256 },   // 128x128@2x
-        { typeId: 'ic08', size: 256 },   // 256x256
-        { typeId: 'ic14', size: 512 },   // 256x256@2x
-        { typeId: 'ic09', size: 512 },   // 512x512
-        { typeId: 'ic10', size: 1024 }   // 512x512@2x
-      ],
-      squircleN: 2.4,
-      squircleCornerRatio: 0.261,
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">macOS Icon Generator</h2>
+        <p class="about-desc">
+          Convert any image into a compliant macOS icon pack, or create custom folder icons.
+        </p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/icon-gen"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
 
-      folderColors: [
-        { id: 'default', label: 'Default', hex: '#339DE0' },
-        { id: 'green', label: 'Green', hex: '#18AB68' },
-        { id: 'lime', label: 'Lime', hex: '#3AAD4B' },
-        { id: 'yellow', label: 'Yellow', hex: '#CAA41B' },
-        { id: 'orange', label: 'Orange', hex: '#CD6F04' },
-        { id: 'red', label: 'Red', hex: '#CE2D24' },
-        { id: 'purple', label: 'Purple', hex: '#833F9D' },
-        { id: 'gray', label: 'Gray', hex: '#666666' },
-        { id: 'black', label: 'Black', hex: '#111111' },
-      ],
-      folderVariants: { empty: 'assets/empty.png', filled: 'assets/filled.png', cutout: 'assets/vector.svg' }
-    };
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
 
-    const imageCache = {};
+    <input
+      type="file"
+      id="file-input"
+      accept="image/png, image/jpeg, image/webp, image/svg+xml, .png, .jpg, .jpeg, .webp, .svg"
+      hidden
+    />
+    <div id="probe" hidden></div>
 
-    // --- Helper ---
-    function applyFolderTint(ctx, fImg, width, height, colorHex) {
-      if (!colorHex || colorHex.toUpperCase() === '#339DE0') return; // Default blue, no tint needed
-      ctx.globalCompositeOperation = 'color';
-      ctx.fillStyle = colorHex;
-      ctx.fillRect(0, 0, width, height);
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(fImg, 0, 0, width, height);
-      ctx.globalCompositeOperation = 'source-over';
-    }
+    <script>
+      // --- Constants & Config ---
+      const STORE_KEY = 'icon-gen';
+      const PREVIEW_SIZE = 512;
+      const SIZES = [16, 32, 64, 128, 256, 512, 1024];
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+      const CONFIG = {
+        iconTypes: [
+          { typeId: 'ic04', size: 16 }, // 16x16
+          { typeId: 'ic11', size: 32 }, // 16x16@2x
+          { typeId: 'ic05', size: 32 }, // 32x32
+          { typeId: 'ic12', size: 64 }, // 32x32@2x
+          { typeId: 'ic07', size: 128 }, // 128x128
+          { typeId: 'ic13', size: 256 }, // 128x128@2x
+          { typeId: 'ic08', size: 256 }, // 256x256
+          { typeId: 'ic14', size: 512 }, // 256x256@2x
+          { typeId: 'ic09', size: 512 }, // 512x512
+          { typeId: 'ic10', size: 1024 }, // 512x512@2x
+        ],
+        squircleN: 2.4,
+        squircleCornerRatio: 0.261,
+        folderColors: [
+          { id: 'default', label: 'Default', hex: '#339DE0' },
+          { id: 'green', label: 'Green', hex: '#18AB68' },
+          { id: 'lime', label: 'Lime', hex: '#3AAD4B' },
+          { id: 'yellow', label: 'Yellow', hex: '#CAA41B' },
+          { id: 'orange', label: 'Orange', hex: '#CD6F04' },
+          { id: 'red', label: 'Red', hex: '#CE2D24' },
+          { id: 'purple', label: 'Purple', hex: '#833F9D' },
+          { id: 'gray', label: 'Gray', hex: '#666666' },
+          { id: 'black', label: 'Black', hex: '#111111' },
+        ],
+        folderVariants: {
+          empty: 'assets/empty.png',
+          filled: 'assets/filled.png',
+          cutout: 'assets/vector.svg',
+        },
+      };
 
-    // --- State Management ---
-    let state = {
-      mode: 'app', // 'app' | 'folder'
-      app: {
-        sourceImage: null,
-        currentObjectUrl: null,
-        originalFilename: 'icon.png',
-        maxSourceSize: Infinity,
-        manualBgEnabled: false,
-        paddingEnabled: true,
-        shadowEnabled: true,
-        fittingMode: 'cover',
-        squircleEnabled: true,
-        bgEnabled: false,
-        bgColor: '#ffffff'
-      },
-      folder: {
-        sourceImage: null,
-        currentObjectUrl: null,
-        originalFilename: 'icon.png',
-        maxSourceSize: Infinity,
-        variant: 'empty',
-        colorId: 'default',
-        customColor: null,
-        artworkType: 'image',
-        artworkText: '',
-        artworkTextCanvas: null,
-        adaptColorEnabled: true,
-        zoom: 0.6
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let snackbarTimer = 0;
+      let dragDepth = 0;
+      let ignorePopstate = 0;
+      const dialogStack = [];
+      let renderToken = 0;
+      let fileToken = 0; // latest chosen file, so a slow decode can't overwrite a newer one
+      let exporting = false; // true while an .icns is being built; keeps Download disabled
+      const imageCache = {};
+      const state = {
+        mode: 'app', // 'app' | 'folder'
+        app: {
+          sourceImage: null,
+          currentObjectUrl: null,
+          originalFilename: '',
+          maxSourceSize: Infinity,
+          manualBgEnabled: false,
+          paddingEnabled: true,
+          shadowEnabled: true,
+          fittingMode: 'cover',
+          squircleEnabled: true,
+          bgEnabled: false,
+          bgColor: '#ffffff',
+          sizes: new Set(SIZES),
+        },
+        folder: {
+          sourceImage: null,
+          currentObjectUrl: null,
+          originalFilename: '',
+          maxSourceSize: Infinity,
+          variant: 'empty',
+          colorId: 'default',
+          customColor: null,
+          artworkType: 'image',
+          artworkText: '',
+          artworkTextCanvas: null,
+          adaptColorEnabled: true,
+          zoom: 0.6,
+          sizes: new Set(SIZES),
+        },
+      };
+
+      // --- DOM Elements ---
+      const els = {
+        appbar: document.getElementById('appbar'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        about: document.getElementById('about'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        stage: document.getElementById('stage'),
+        canvas: document.getElementById('canvas'),
+        stageEmpty: document.getElementById('stage-empty'),
+        stageHint: document.getElementById('stage-hint'),
+        fileName: document.getElementById('file-name'),
+        fileInput: document.getElementById('file-input'),
+        downloadBtns: document.querySelectorAll('[data-action="download"]'),
+        panelApp: document.getElementById('panel-app'),
+        panelFolder: document.getElementById('panel-folder'),
+        squircle: document.getElementById('squircle'),
+        padding: document.getElementById('padding'),
+        shadow: document.getElementById('shadow'),
+        bg: document.getElementById('bg'),
+        bgSub: document.getElementById('bg-sub'),
+        bgColorRow: document.getElementById('bg-color-row'),
+        bgColor: document.getElementById('bg-color'),
+        bgSwatch: document.getElementById('bg-swatch'),
+        swatches: document.getElementById('swatches'),
+        colorRow: document.getElementById('color-row'),
+        artworkTypeRow: document.getElementById('artwork-type-row'),
+        textField: document.getElementById('text-field'),
+        artworkText: document.getElementById('artwork-text'),
+        sizeRow: document.getElementById('size-row'),
+        zoom: document.getElementById('zoom'),
+        zoomValue: document.getElementById('zoom-value'),
+        adaptRow: document.getElementById('adapt-row'),
+        adapt: document.getElementById('adapt'),
+        sizes: document.getElementById('sizes'),
+        sizesNote: document.getElementById('sizes-note'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
+
+      // --- Initialization ---
+      function init() {
+        els.swatches.innerHTML =
+          CONFIG.folderColors
+            .map(
+              (c) =>
+                `<label class="swatch" style="--c: ${c.hex}" title="${c.label}"><input type="radio" name="folder-color" value="${c.id}" aria-label="${c.label}" /></label>`,
+            )
+            .join('') +
+          `<label class="swatch custom" title="Custom color"><input type="color" id="folder-custom" value="#339DE0" aria-label="Custom color" /></label>`;
+        els.sizes.innerHTML =
+          `<label><input type="checkbox" data-size="all" />All</label>` +
+          SIZES.map((s) => `<label><input type="checkbox" data-size="${s}" />${s}</label>`).join(
+            '',
+          );
+        applyTheme();
+        renderControls();
+        updateLivePreview();
+        bindEvents();
       }
-    };
 
-    // --- DOM Elements ---
-    const els = {
-      appWrapper: document.getElementById('app-wrapper'),
-      mainScroll: document.getElementById('mainScroll'),
-      appHeader: document.getElementById('appHeader'),
-      stickyHeader: document.getElementById('stickyHeader'),
-      stickyPreview: document.getElementById('stickyPreview'),
-      tabApp: document.getElementById('tabApp'),
-      tabFolder: document.getElementById('tabFolder'),
-      panelApp: document.getElementById('panelApp'),
-      panelFolder: document.getElementById('panelFolder'),
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        DARK_QUERY.addEventListener('change', applyTheme);
+        window.addEventListener(
+          'scroll',
+          () => {
+            const scrolled = window.scrollY > 0;
+            els.appbar.classList.toggle('scrolled', scrolled);
+            document.body.classList.toggle('scrolled', scrolled);
+          },
+          { passive: true },
+        );
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.moreBtn.addEventListener('click', () => toggleMenu(els.moreMenu, els.moreBtn));
 
-      fileInput: document.getElementById('fileInput'),
-      dropZone: document.getElementById('dropZone'),
-      convertBtn: document.getElementById('convertBtn'),
-
-      paddingToggle: document.getElementById('paddingToggle'),
-      shadowToggle: document.getElementById('shadowToggle'),
-      fittingSelect: document.getElementById('fittingSelect'),
-      squircleToggle: document.getElementById('squircleToggle'),
-      bgToggle: document.getElementById('bgToggle'),
-      colorRow: document.getElementById('colorRow'),
-      tileColorInput: document.getElementById('tileColorInput'),
-      iconZoomSlider: document.getElementById('iconZoomSlider'),
-      zoomValueText: document.getElementById('zoomValueText'),
-      adaptColorToggle: document.getElementById('adaptColorToggle'),
-      adaptColorToggleLabel: document.getElementById('adaptColorToggleLabel'),
-
-      folderVariantBtns: document.querySelectorAll('.folder-variant-btn'),
-      folderColorSwatches: document.getElementById('folderColorSwatches'),
-      folderColorCustom: document.getElementById('folderColorCustom'),
-      folderArtworkTypeBtns: document.querySelectorAll('.folder-artwork-type-btn'),
-      folderArtworkTextContainer: document.getElementById('folderArtworkTextContainer'),
-      folderArtworkTextInput: document.getElementById('folderArtworkTextInput'),
-
-      previewCanvas: document.getElementById('previewCanvas'),
-      previewPlaceholder: document.getElementById('previewPlaceholder'),
-      previewPlaceholderText: document.getElementById('previewPlaceholderText'),
-      hoverOverlay: document.getElementById('hoverOverlay'),
-      hoverOverlayText: document.getElementById('hoverOverlayText'),
-      hoverOverlayIconWrapper: document.getElementById('hoverOverlayIconWrapper'),
-
-      selectAllSizes: document.getElementById('selectAllSizes'),
-      selectAllFolderSizes: document.getElementById('selectAllFolderSizes')
-    };
-
-    // --- Initialization ---
-    function init() {
-      lucide.createIcons();
-      setupMobileHeight();
-      buildColorSwatches();
-      bindEvents();
-    }
-
-    // --- UI Setup ---
-    function buildColorSwatches() {
-      els.folderColorSwatches.innerHTML = '';
-      CONFIG.folderColors.forEach(c => {
-        const d = document.createElement('div');
-        d.className = 'color-swatch' + (c.id === state.folder.colorId ? ' active' : '');
-        d.style.backgroundColor = c.hex;
-        d.dataset.id = c.id;
-        d.title = c.label;
-        d.addEventListener('click', () => setFolderColor(c.id));
-        els.folderColorSwatches.appendChild(d);
-      });
-    }
-
-    // --- Event Listeners ---
-    function bindEvents() {
-      window.addEventListener('resize', setupMobileHeight);
-
-      // Header shadow on scroll
-      els.mainScroll.addEventListener('scroll', () => {
-        if (els.mainScroll.scrollTop > 10) {
-          els.stickyPreview.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]', 'border-zinc-200/50');
-          els.stickyPreview.classList.remove('border-transparent');
-        } else {
-          els.stickyPreview.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]', 'border-zinc-200/50');
-          els.stickyPreview.classList.add('border-transparent');
-        }
-      });
-
-      // Tabs
-      els.tabApp.addEventListener('click', () => setMode('app'));
-      els.tabFolder.addEventListener('click', () => setMode('folder'));
-
-      // Trigger file dialog
-      els.dropZone.addEventListener('click', () => els.fileInput.click());
-
-      // Prevent defaults on drag/drop events globally to avoid page navigation
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        els.dropZone.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-      });
-
-      // Border highlights on drag hover
-      ['dragenter', 'dragover'].forEach(eventName => {
-        els.dropZone.addEventListener(eventName, () => {
-          if (state.mode === 'folder' && state.folder.artworkType === 'text') return;
-          els.dropZone.classList.add('border-brand-500', 'bg-brand-50');
-          els.dropZone.classList.remove('border-zinc-200');
-        }, false);
-      });
-      ['dragleave', 'drop'].forEach(eventName => {
-        els.dropZone.addEventListener(eventName, () => {
-          if (state.mode === 'folder' && state.folder.artworkType === 'text') return;
-          els.dropZone.classList.remove('border-brand-500', 'bg-brand-50');
-          els.dropZone.classList.add('border-zinc-200');
-        }, false);
-      });
-
-      // Handle drops
-      els.dropZone.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        if (dt && dt.files && dt.files.length > 0) {
-          handleFile(dt.files[0]);
-        }
-      });
-
-      // Handle file input changes
-      els.fileInput.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-          handleFile(e.target.files[0]);
+        // Image input: click, keyboard, drop anywhere on the page, or paste.
+        els.stage.addEventListener('click', () => !isTextMode() && els.fileInput.click());
+        els.stage.addEventListener('keydown', (e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !isTextMode()) {
+            e.preventDefault();
+            els.fileInput.click();
+          }
+        });
+        els.fileInput.addEventListener('change', () => {
+          const [file] = els.fileInput.files;
           els.fileInput.value = '';
-        }
-      });
-
-      // Listeners for live preview updates (App)
-      els.paddingToggle.addEventListener('change', () => { state.app.paddingEnabled = els.paddingToggle.checked; updateLivePreview(); });
-      els.shadowToggle.addEventListener('change', () => { state.app.shadowEnabled = els.shadowToggle.checked; updateLivePreview(); });
-      els.squircleToggle.addEventListener('change', () => { state.app.squircleEnabled = els.squircleToggle.checked; updateLivePreview(); });
-
-      els.fittingSelect.addEventListener('change', () => {
-        state.app.fittingMode = els.fittingSelect.value;
-        if (els.fittingSelect.value === 'contain' || els.fittingSelect.value === 'center') {
-          els.bgToggle.checked = true;
-          els.bgToggle.disabled = true;
-          state.app.bgEnabled = true;
-          els.colorRow.style.display = 'flex';
-        } else {
-          els.bgToggle.disabled = false;
-          els.bgToggle.checked = state.app.manualBgEnabled;
-          state.app.bgEnabled = state.app.manualBgEnabled;
-          els.colorRow.style.display = els.bgToggle.checked ? 'flex' : 'none';
-        }
-        updateLivePreview();
-      });
-
-      // Background toggle shows color row
-      els.bgToggle.addEventListener('change', () => {
-        state.app.manualBgEnabled = els.bgToggle.checked;
-        state.app.bgEnabled = els.bgToggle.checked;
-        els.colorRow.style.display = els.bgToggle.checked ? 'flex' : 'none';
-        updateLivePreview();
-      });
-
-      els.tileColorInput.addEventListener('input', () => {
-        state.app.bgColor = els.tileColorInput.value;
-        updateLivePreview();
-      });
-
-      // Listeners for Folder mode settings
-      els.folderVariantBtns.forEach(b => b.addEventListener('click', () => setFolderVariant(b.dataset.value)));
-      els.folderArtworkTypeBtns.forEach(b => b.addEventListener('click', () => setFolderArtworkType(b.dataset.value)));
-      els.folderArtworkTextInput.addEventListener('input', (e) => {
-        state.folder.artworkText = e.target.value;
-        state.folder.artworkTextCanvas = createTextIcon(state.folder.artworkText.trim());
-        updateLivePreview();
-        updateUIState();
-      });
-
-      els.folderColorCustom.addEventListener('input', (e) => {
-        state.folder.customColor = e.target.value;
-        state.folder.colorId = 'custom';
-        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-        updateLivePreview();
-      });
-
-      els.adaptColorToggle.addEventListener('change', () => {
-        state.folder.adaptColorEnabled = els.adaptColorToggle.checked;
-        updateLivePreview();
-      });
-      els.iconZoomSlider.addEventListener('input', () => {
-        state.folder.zoom = parseFloat(els.iconZoomSlider.value) || 1;
-        els.zoomValueText.textContent = Math.round(state.folder.zoom * 100) + '%';
-        updateLivePreview();
-      });
-
-      // All Sizes Toggle
-      els.selectAllSizes.addEventListener('change', () => updateCheckboxes('app'));
-      els.selectAllFolderSizes.addEventListener('change', () => updateCheckboxes('folder'));
-
-      // Convert Action
-      els.convertBtn.addEventListener('click', generateAndDownload);
-    }
-
-    // --- Mode Handlers ---
-    function setMode(m) {
-      state.mode = m;
-
-      const isApp = m === 'app';
-      els.tabApp.classList.toggle('active', isApp);
-      els.tabFolder.classList.toggle('active', !isApp);
-
-      els.panelApp.classList.toggle('hidden', !isApp);
-      els.panelFolder.classList.toggle('hidden', isApp);
-
-      updateUIState();
-      updateCheckboxes(m);
-      updateLivePreview();
-    }
-
-    function setFolderVariant(val) {
-      state.folder.variant = val;
-      els.folderVariantBtns.forEach(b => {
-        const on = b.dataset.value === val;
-        b.classList.toggle('active', on);
-        b.style.borderColor = on ? '#3b82f6' : '#e4e4e7';
-        b.style.backgroundColor = on ? '#eff6ff' : 'white';
-        b.style.color = on ? '#1d4ed8' : '#3f3f46';
-      });
-
-      if (val === 'cutout' && state.folder.artworkType === 'text') {
-        setFolderArtworkType('image');
-      } else {
-        updateUIState();
-        updateLivePreview();
-      }
-    }
-
-    function setFolderArtworkType(val) {
-      state.folder.artworkType = val;
-      els.folderArtworkTypeBtns.forEach(b => {
-        const on = b.dataset.value === val;
-        b.classList.toggle('active', on);
-        b.style.borderColor = on ? '#3b82f6' : '#e4e4e7';
-        b.style.backgroundColor = on ? '#eff6ff' : 'white';
-        b.style.color = on ? '#1d4ed8' : '#3f3f46';
-      });
-      els.folderArtworkTextContainer.classList.toggle('hidden', val !== 'text');
-      updateUIState();
-      updateCheckboxes('folder');
-      updateLivePreview();
-    }
-
-    function setFolderColor(id) {
-      state.folder.colorId = id;
-      state.folder.customColor = null;
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('active', s.dataset.id === id));
-      updateLivePreview();
-    }
-
-    function updateUIState() {
-      const isApp = state.mode === 'app';
-      const curState = isApp ? state.app : state.folder;
-      const hasImage = !!curState.sourceImage;
-      const isTextMode = !isApp && state.folder.artworkType === 'text';
-      const isCutout = !isApp && state.folder.variant === 'cutout';
-
-      ['folderColorRow', 'folderArtworkTypeRow', 'folderArtworkTextContainer', 'folderArtworkSizeRow', 'folderAdaptiveColorRow'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          if (isCutout) {
-            el.classList.add('opacity-50');
-          } else {
-            el.classList.remove('opacity-50');
+          if (file) handleFile(file);
+        });
+        document.addEventListener('dragenter', (e) => {
+          if (!e.dataTransfer.types.includes('Files') || isTextMode() || dialogStack.length) return;
+          dragDepth++;
+          document.body.classList.add('dragging');
+        });
+        document.addEventListener('dragleave', () => {
+          if (--dragDepth <= 0) stopDragging();
+        });
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+          e.preventDefault();
+          stopDragging();
+          const [file] = e.dataTransfer.files;
+          if (file && !isTextMode() && !dialogStack.length) handleFile(file);
+        });
+        document.addEventListener('paste', (e) => {
+          const file = [...e.clipboardData.files].find((f) => f.type.startsWith('image/'));
+          if (file && !isTextMode() && !dialogStack.length && !e.target.closest('input')) {
+            handleFile(file);
           }
-        }
-      });
+        });
 
-      ['folderColorControls', 'folderArtworkTypeControls', 'folderArtworkSizeControls', 'adaptColorToggleLabel'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          if (isCutout) {
-            if (!el.querySelector('.cutout-overlay')) {
-              const overlay = document.createElement('div');
-              overlay.className = 'cutout-overlay absolute inset-0 z-10 cursor-not-allowed';
-              el.appendChild(overlay);
-            }
-          } else {
-            const overlay = el.querySelector('.cutout-overlay');
-            if (overlay) overlay.remove();
+        document.addEventListener('click', (e) => {
+          if (e.target.closest('[data-action="download"]')) generateAndDownload();
+          else if (e.target.closest('[data-action="about"]')) openDialog(els.about);
+        });
+
+        // Menu
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          if (e.target.closest('.menu-item:not(#theme-btn)')) els.moreMenu.hidePopover();
+        });
+
+        // Dialogs
+        els.about.addEventListener('close', () => onDialogClosed(els.about));
+        bindBackdropClose(els.about);
+        els.about.addEventListener('click', (e) => {
+          if (e.target.closest('[data-close]')) closeDialog(els.about);
+        });
+        window.addEventListener('popstate', () => {
+          if (ignorePopstate) return ignorePopstate--;
+          const top = dialogStack.at(-1);
+          if (top) {
+            dialogStack.pop();
+            top.close();
           }
-        }
-      });
+        });
 
-      // Dropzone pointer events and styling
-      if (isTextMode) {
-        els.dropZone.classList.remove('cursor-pointer', 'hover:border-brand-500');
-        els.dropZone.style.pointerEvents = 'none';
-        els.convertBtn.disabled = !state.folder.artworkText.trim();
-      } else {
-        els.dropZone.classList.add('cursor-pointer', 'hover:border-brand-500');
-        els.dropZone.style.pointerEvents = 'auto';
-        if (isApp) {
-          els.convertBtn.disabled = !hasImage;
-        } else {
-          if (isCutout) {
-            els.convertBtn.disabled = !hasImage;
-          } else {
-            els.convertBtn.disabled = false;
-          }
-        }
+        // Settings write to state, then re-render.
+        document.addEventListener('change', handleChange);
+        document.addEventListener('input', handleInput);
+
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
       }
 
-      // Adaptive Coloring enforcement for Text Mode
-      if (isTextMode) {
-        els.adaptColorToggle.checked = true;
-        els.adaptColorToggle.disabled = true;
-        state.folder.adaptColorEnabled = true;
-        if (els.adaptColorToggleLabel) {
-          els.adaptColorToggleLabel.classList.remove('cursor-pointer');
-          els.adaptColorToggleLabel.classList.add('cursor-not-allowed');
-        }
-      } else {
-        els.adaptColorToggle.disabled = false;
-        if (els.adaptColorToggleLabel) {
-          els.adaptColorToggleLabel.classList.add('cursor-pointer');
-          els.adaptColorToggleLabel.classList.remove('cursor-not-allowed');
-        }
-      }
-
-      if (isTextMode) {
-        els.previewPlaceholder.classList.add('hidden');
-        els.previewPlaceholder.classList.remove('flex');
-        els.hoverOverlay.classList.remove('flex');
-        els.hoverOverlay.classList.add('hidden');
-      } else {
-        els.hoverOverlay.classList.remove('hidden');
-        els.hoverOverlay.classList.add('flex');
-
-        if (hasImage) {
-          els.previewPlaceholder.classList.add('hidden');
-          els.previewPlaceholder.classList.remove('flex');
-
-          els.hoverOverlayText.textContent = 'Change Image';
-          els.hoverOverlayIconWrapper.innerHTML = '<i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>';
-        } else {
-          els.previewPlaceholder.classList.remove('hidden');
-          els.previewPlaceholder.classList.add('flex');
-
-          els.hoverOverlayText.textContent = 'Upload Image';
-          els.hoverOverlayIconWrapper.innerHTML = '<i data-lucide="upload-cloud" class="w-8 h-8 mb-2"></i>';
-        }
-        lucide.createIcons({ root: els.hoverOverlayIconWrapper });
-      }
-    }
-
-    // --- Core Logic ---
-    function updateCheckboxes(type) {
-      const isFolder = type === 'folder';
-      const allCb = isFolder ? els.selectAllFolderSizes : els.selectAllSizes;
-      const selector = isFolder ? '.size-cb-folder' : '.size-cb-app';
-
-      const isAllChecked = allCb.checked;
-      const curState = state[isFolder ? 'folder' : 'app'];
-
-      let maxSourceSize = curState.maxSourceSize === undefined ? Infinity : curState.maxSourceSize;
-      if (isFolder && curState.artworkType === 'text') {
-        maxSourceSize = Infinity;
-      }
-
-      document.querySelectorAll(selector).forEach(cb => {
-        const size = parseInt(cb.value);
-        const isValid = size <= maxSourceSize;
-
-        if (!isValid) {
-          cb.checked = false;
-          cb.disabled = true;
-        } else {
-          if (isAllChecked) {
-            cb.checked = true;
-            cb.disabled = true;
-          } else {
-            cb.disabled = false;
-          }
-        }
-      });
-    }
-
-    function handleFile(file) {
-      if (!isValidImageFile(file)) {
-        alert('Error: Please select a valid image file (PNG, JPG, WebP, SVG).');
-        return;
-      }
-
-      const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
-
-      const curState = state[state.mode];
-      if (curState.currentObjectUrl) {
-        URL.revokeObjectURL(curState.currentObjectUrl);
-      }
-      curState.currentObjectUrl = URL.createObjectURL(file);
-
-      const img = new Image();
-      img.onload = () => {
-        curState.sourceImage = img;
-        curState.originalFilename = file.name;
-        curState.maxSourceSize = isSvg ? Infinity : Math.max(img.width, img.height);
-
-        updateCheckboxes(state.mode);
-
-        updateUIState();
+      function handleChange(e) {
+        const t = e.target;
+        const app = state.app;
+        const folder = state.folder;
+        if (t.name === 'mode') {
+          state.mode = t.value;
+        } else if (t.name === 'fitting') {
+          app.fittingMode = t.value;
+        } else if (t === els.squircle) app.squircleEnabled = t.checked;
+        else if (t === els.padding) app.paddingEnabled = t.checked;
+        else if (t === els.shadow) app.shadowEnabled = t.checked;
+        else if (t === els.bg) app.manualBgEnabled = t.checked;
+        else if (t.name === 'variant') {
+          folder.variant = t.value;
+          if (t.value === 'cutout') folder.artworkType = 'image';
+        } else if (t.name === 'folder-color') {
+          folder.colorId = t.value;
+          folder.customColor = null;
+        } else if (t.name === 'artwork') {
+          folder.artworkType = t.value;
+          if (t.value === 'text') setTimeout(() => els.artworkText.focus());
+        } else if (t === els.adapt) folder.adaptColorEnabled = t.checked;
+        else if (t.dataset.size) toggleSize(t.dataset.size, t.checked);
+        else return;
+        renderControls();
         updateLivePreview();
-      };
-      img.onerror = () => {
-        alert('Error loading image file.');
-      };
-      img.src = curState.currentObjectUrl;
-    }
-
-    function updateLivePreview() {
-      if (state.mode === 'app') {
-        drawAppPreview();
-      } else {
-        drawFolderPreview();
-      }
-    }
-
-    function drawAppPreview() {
-      els.previewCanvas.width = 256;
-      els.previewCanvas.height = 256;
-      const ctx = els.previewCanvas.getContext('2d');
-      ctx.clearRect(0, 0, 256, 256);
-
-      if (!state.app.sourceImage) return;
-
-      const usePadding = state.app.paddingEnabled;
-      const useShadow = state.app.shadowEnabled;
-      const fittingMode = state.app.fittingMode;
-      const enableSquircle = state.app.squircleEnabled;
-      const enableBg = state.app.bgEnabled;
-      const squircleBgColor = state.app.bgColor;
-
-      const previewCanvasResult = processImageToCanvas(state.app.sourceImage, 256, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor);
-      ctx.drawImage(previewCanvasResult, 0, 0);
-    }
-
-    async function drawFolderPreview() {
-      try {
-        els.previewCanvas.width = 256;
-        els.previewCanvas.height = 256;
-        const ctx = els.previewCanvas.getContext('2d');
-        ctx.clearRect(0, 0, 256, 256);
-
-        const fPath = CONFIG.folderVariants[state.folder.variant];
-        const fImg = await loadImageCached(fPath);
-
-        const colorHex = state.folder.colorId === 'custom'
-          ? state.folder.customColor
-          : (CONFIG.folderColors.find(c => c.id === state.folder.colorId)?.hex || '#339DE0');
-
-        const uImg = getFolderArtwork();
-
-        const previewCanvasResult = renderFolderToCanvas(fImg, uImg, 256, colorHex);
-        ctx.drawImage(previewCanvasResult, 0, 0);
-      } catch (e) {
-        console.error("drawFolderPreview error:", e);
-      }
-    }
-
-    let btnTimeout = null;
-    function setButtonFeedback(btn, success, overrideText) {
-      if (btnTimeout) clearTimeout(btnTimeout);
-
-      const successClasses = ['bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20'];
-      const errorClasses = ['bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20'];
-      const originalClasses = ['bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20'];
-      const targetClasses = success ? successClasses : errorClasses;
-
-      btn.classList.remove(...originalClasses, ...errorClasses, ...successClasses);
-      btn.classList.add(...targetClasses);
-
-      const iconName = success ? 'check' : 'alert-triangle';
-      if (overrideText) {
-        btn.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i><span>${overrideText}</span>`;
-      } else {
-        btn.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
-      }
-      lucide.createIcons({ root: btn });
-
-      btnTimeout = setTimeout(() => {
-        btn.classList.remove(...targetClasses);
-        btn.classList.add(...originalClasses);
-        btn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i><span>Generate & Download</span>`;
-        lucide.createIcons({ root: btn });
-        btnTimeout = null;
-      }, 2000);
-    }
-
-    async function generateAndDownload() {
-      const curState = state[state.mode];
-      if (!curState || !curState.sourceImage && state.mode === 'app') return;
-      if (state.mode === 'folder' && state.folder.artworkType === 'text' && !state.folder.artworkText.trim()) return;
-
-      if (btnTimeout) {
-        clearTimeout(btnTimeout);
-        btnTimeout = null;
       }
 
-      const btn = els.convertBtn;
-      btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'shadow-emerald-500/20', 'bg-red-500', 'hover:bg-red-600', 'shadow-red-500/20');
-      btn.classList.add('bg-brand-600', 'hover:bg-brand-700', 'active:bg-brand-800', 'shadow-brand-500/20');
+      // Continuous inputs (colors, slider, text) update the preview as they move.
+      function handleInput(e) {
+        const t = e.target;
+        if (t === els.bgColor) state.app.bgColor = t.value;
+        else if (t.id === 'folder-custom') {
+          state.folder.customColor = t.value;
+          state.folder.colorId = 'custom';
+        } else if (t === els.zoom) state.folder.zoom = parseFloat(t.value) || 1;
+        else if (t === els.artworkText) {
+          state.folder.artworkText = t.value;
+          state.folder.artworkTextCanvas = createTextIcon(t.value.trim());
+        } else return;
+        renderControls();
+        updateLivePreview();
+      }
 
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Generating...</span>`;
-      lucide.createIcons({ root: btn });
-      btn.disabled = true;
+      function stopDragging() {
+        dragDepth = 0;
+        document.body.classList.remove('dragging');
+      }
 
-      try {
-        await new Promise(r => setTimeout(r, 50)); // UI delay
+      // --- Core Logic ---
 
-        if (state.mode === 'app') {
-          await generateAppIcons(curState);
-        } else {
-          await generateFolderIcons(curState);
+      function loadPrefs() {
+        const saved = readJson(STORE_KEY);
+        return { theme: THEME_CYCLE.includes(saved?.theme) ? saved.theme : 'auto' };
+      }
+
+      function savePrefs() {
+        writeJson(STORE_KEY, prefs);
+      }
+
+      function current() {
+        return state[state.mode];
+      }
+
+      function isTextMode() {
+        return state.mode === 'folder' && state.folder.artworkType === 'text';
+      }
+
+      // Sizes larger than the source image can't be made sharp, so they're left out.
+      function maxSize() {
+        return isTextMode() ? Infinity : current().maxSourceSize;
+      }
+
+      function selectedSizes() {
+        return SIZES.filter((s) => current().sizes.has(s) && s <= maxSize());
+      }
+
+      // "All" selects or clears every size the image can make.
+      function toggleSize(value, on) {
+        const sizes = current().sizes;
+        if (value === 'all') {
+          SIZES.forEach((s) => (on ? sizes.add(s) : sizes.delete(s)));
+        } else if (on) sizes.add(Number(value));
+        else sizes.delete(Number(value));
+      }
+
+      function canDownload() {
+        if (exporting || !selectedSizes().length) return false;
+        if (state.mode === 'app') return Boolean(state.app.sourceImage);
+        if (isTextMode()) return Boolean(state.folder.artworkText.trim());
+        return state.folder.variant !== 'cutout' || Boolean(state.folder.sourceImage);
+      }
+
+      function handleFile(file) {
+        if (!isValidImageFile(file)) {
+          return showError('Choose a PNG, JPG, WebP or SVG image');
         }
-
-        btn.disabled = false;
-        setButtonFeedback(btn, true, 'Downloaded!');
-      } catch (err) {
-        console.error(err);
-        btn.disabled = false;
-        setButtonFeedback(btn, false, 'Failed');
-      }
-    }
-
-    async function generateAppIcons(curState) {
-      const iconEntries = [];
-      const usePadding = state.app.paddingEnabled;
-      const useShadow = state.app.shadowEnabled;
-      const fittingMode = state.app.fittingMode;
-      const enableSquircle = state.app.squircleEnabled;
-      const enableBg = state.app.bgEnabled;
-      const squircleBgColor = state.app.bgColor;
-
-      const selectedSizes = Array.from(document.querySelectorAll('.size-cb-app:checked')).map(cb => parseInt(cb.value));
-      if (selectedSizes.length === 0) {
-        throw new Error('Please select at least one size to export.');
-      }
-
-      const targetsToBuild = CONFIG.iconTypes.filter(t => selectedSizes.includes(t.size));
-
-      for (const target of targetsToBuild) {
-        const sizeCanvas = processImageToCanvas(curState.sourceImage, target.size, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor);
-        const pngBlob = await new Promise(res => sizeCanvas.toBlob(res, 'image/png'));
-        const arrayBuffer = await pngBlob.arrayBuffer();
-        iconEntries.push({ typeId: target.typeId, bytes: arrayBuffer });
-      }
-
-      const icnsBlob = await buildIcnsBinary(iconEntries);
-      const maxSize = Math.max(...selectedSizes);
-      downloadBlob(icnsBlob, `app_${maxSize}x`);
-    }
-
-    async function generateFolderIcons(curState) {
-      const fPath = CONFIG.folderVariants[state.folder.variant];
-      const colorHex = state.folder.colorId === 'custom'
-        ? state.folder.customColor
-        : (CONFIG.folderColors.find(c => c.id === state.folder.colorId)?.hex || '#339DE0');
-
-      const fImg = await loadImageCached(fPath);
-
-      const finalImg = getFolderArtwork();
-
-      const selectedSizes = Array.from(document.querySelectorAll('.size-cb-folder:checked')).map(cb => parseInt(cb.value));
-      if (selectedSizes.length === 0) {
-        throw new Error('Please select at least one size to export.');
-      }
-
-      const iconEntries = [];
-      const targetsToBuild = CONFIG.iconTypes.filter(t => selectedSizes.includes(t.size));
-
-      for (const target of targetsToBuild) {
-        const sizeCanvas = renderFolderToCanvas(fImg, finalImg, target.size, colorHex);
-        const pngBlob = await new Promise(res => sizeCanvas.toBlob(res, 'image/png'));
-        const arrayBuffer = await pngBlob.arrayBuffer();
-        iconEntries.push({ typeId: target.typeId, bytes: arrayBuffer });
-      }
-
-      const icnsBlob = await buildIcnsBinary(iconEntries);
-      const maxSize = Math.max(...selectedSizes);
-      downloadBlob(icnsBlob, `folder_${maxSize}x`);
-    }
-
-    // --- Utilities ---
-    function getFolderArtwork() {
-      if (state.folder.artworkType === 'text') {
-        return getFolderTextArtwork();
-      }
-      return getFolderImageArtwork();
-    }
-
-    function getFolderTextArtwork() {
-      if (state.folder.artworkText.trim()) {
-        return state.folder.artworkTextCanvas || createTextIcon(state.folder.artworkText.trim());
-      }
-      return null;
-    }
-
-    function getFolderImageArtwork() {
-      return state.folder.sourceImage || null;
-    }
-
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    function isValidImageFile(file) {
-      if (!file) return false;
-      if (file.type && file.type.startsWith('image/')) return true;
-
-      const fileName = file.name.toLowerCase();
-      return fileName.endsWith('.png') ||
-        fileName.endsWith('.jpg') ||
-        fileName.endsWith('.jpeg') ||
-        fileName.endsWith('.webp') ||
-        fileName.endsWith('.svg');
-    }
-
-    function loadImageCached(src) {
-      if (imageCache[src]) return Promise.resolve(imageCache[src]);
-      return new Promise((resolve, reject) => {
+        const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+        const curState = current();
+        const url = URL.createObjectURL(file);
         const img = new Image();
-        img.onload = () => { imageCache[src] = img; resolve(img); };
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    function pathSquircle(ctx, x, y, width, height) {
-      const n = CONFIG.squircleN;
-      const fp = Math.round(Math.min(width, height) * CONFIG.squircleCornerRatio);
-      const steps = 64;
-
-      function cornerInset(d) {
-        if (d >= fp) return 0;
-        if (d <= 0) return fp;
-        return fp - fp * Math.pow(1 - Math.pow((fp - d) / fp, n), 1 / n);
+        const token = ++fileToken;
+        // The previous image stays in place until the new one loads, so its URL is revoked then.
+        const fail = () => {
+          URL.revokeObjectURL(url);
+          showError('That image couldn’t be opened');
+        };
+        img.onload = () => {
+          // SVGs without width/height can report 0 in some browsers, which breaks the drawing math.
+          if (!img.naturalWidth || !img.naturalHeight) return fail();
+          // A newer file was chosen while this one was decoding; keep the newer one.
+          if (token !== fileToken) return URL.revokeObjectURL(url);
+          if (curState.currentObjectUrl) URL.revokeObjectURL(curState.currentObjectUrl);
+          curState.currentObjectUrl = url;
+          curState.sourceImage = img;
+          curState.originalFilename = file.name;
+          curState.maxSourceSize = isSvg ? Infinity : Math.max(img.width, img.height);
+          renderControls();
+          updateLivePreview(true);
+        };
+        img.onerror = fail;
+        img.src = url;
       }
 
-      ctx.beginPath();
-      ctx.moveTo(x + fp, y);
-      ctx.lineTo(x + width - fp, y);
-
-      for (let i = 1; i <= steps; i++) {
-        const dy = (i / steps) * fp;
-        const dx = cornerInset(dy);
-        ctx.lineTo(x + width - dx, y + dy);
+      function folderColor(f = state.folder) {
+        return f.colorId === 'custom'
+          ? f.customColor
+          : CONFIG.folderColors.find((c) => c.id === f.colorId)?.hex || '#339DE0';
       }
 
-      ctx.lineTo(x + width, y + height - fp);
-
-      for (let i = 1; i <= steps; i++) {
-        const db = fp - (i / steps) * fp;
-        const dx = cornerInset(db);
-        ctx.lineTo(x + width - dx, y + height - db);
-      }
-
-      ctx.lineTo(x + fp, y + height);
-
-      for (let i = 1; i <= steps; i++) {
-        const db = (i / steps) * fp;
-        const dx = cornerInset(db);
-        ctx.lineTo(x + dx, y + height - db);
-      }
-
-      ctx.lineTo(x, y + fp);
-
-      for (let i = 1; i <= steps; i++) {
-        const dy = fp - (i / steps) * fp;
-        const dx = cornerInset(dy);
-        ctx.lineTo(x + dx, y + dy);
-      }
-
-      ctx.closePath();
-    }
-
-    function drawImageFormatted(ctx, img, dx, dy, dWidth, dHeight, fittingMode) {
-      if (fittingMode === 'cover') {
-        const imgRatio = img.width / img.height;
-        const destRatio = dWidth / dHeight;
-        let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
-
-        if (imgRatio > destRatio) {
-          sWidth = img.height * destRatio;
-          sx = (img.width - sWidth) / 2;
-        } else if (imgRatio < destRatio) {
-          sHeight = img.width / destRatio;
-          sy = (img.height - sHeight) / 2;
-        }
-        ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-      } else {
-        let drawWidth = dWidth, drawHeight = dHeight, posX = dx, posY = dy;
-        if (img.width > img.height) {
-          drawHeight = dHeight * (img.height / img.width);
-          posY = dy + (dHeight - drawHeight) / 2;
-        } else if (img.height > img.width) {
-          drawWidth = dWidth * (img.width / img.height);
-          posX = dx + (dWidth - drawWidth) / 2;
-        }
-        ctx.drawImage(img, posX, posY, drawWidth, drawHeight);
-      }
-    }
-
-    function getLayoutDimensions(targetSize, usePadding) {
-      let scaledSize = targetSize;
-      if (usePadding) {
-        switch (targetSize) {
-          case 1024: scaledSize = 824; break;
-          case 512: scaledSize = 412; break;
-          case 256: scaledSize = 206; break;
-          case 128: scaledSize = 103; break;
-          case 64: scaledSize = 52; break;
-          case 32: scaledSize = 28; break;
-          case 16: scaledSize = 14; break;
-          default: scaledSize = Math.round(targetSize * 0.8047); break;
+      async function generateAndDownload() {
+        if (!canDownload()) return;
+        // Settings can change while the awaits below run, so the mode and the settings of
+        // that mode are copied once up front and every size is drawn from the copy.
+        const mode = state.mode;
+        const snapshot = { ...state[mode] };
+        exporting = true;
+        renderControls();
+        try {
+          const sizes = selectedSizes();
+          const targets = CONFIG.iconTypes.filter((t) => sizes.includes(t.size));
+          const draw =
+            mode === 'app'
+              ? (size) => appCanvas(size, snapshot)
+              : await folderCanvasMaker(snapshot);
+          // Several icns types share a pixel size (e.g. 16x16@2x and 32x32), so each size is
+          // rendered and encoded once.
+          const pngBySize = new Map();
+          const entries = [];
+          for (const target of targets) {
+            if (!pngBySize.has(target.size)) {
+              const canvas = draw(target.size);
+              const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+              pngBySize.set(target.size, await blob.arrayBuffer());
+            }
+            entries.push({ typeId: target.typeId, bytes: pngBySize.get(target.size) });
+          }
+          const name = `${mode}_${Math.max(...sizes)}x.icns`;
+          downloadBlob(await buildIcnsBinary(entries), name);
+          showSnackbar(`Saved ${name}`);
+        } catch (err) {
+          console.error(err);
+          showError('Couldn’t create the icon. Try another image.');
+        } finally {
+          exporting = false;
+          renderControls();
         }
       }
-      const padding = (targetSize - scaledSize) / 2;
-      return { scaledSize, padding };
-    }
 
-    function processImageToCanvas(img, targetSize, usePadding, useShadow, enableSquircle, fittingMode, enableBg, squircleBgColor) {
-      const canvas = document.createElement('canvas');
-      canvas.width = targetSize;
-      canvas.height = targetSize;
-      const ctx = canvas.getContext('2d');
+      function appCanvas(size, a = state.app) {
+        return processImageToCanvas(
+          a.sourceImage,
+          size,
+          a.paddingEnabled,
+          a.shadowEnabled,
+          a.squircleEnabled,
+          a.fittingMode,
+          a.bgEnabled,
+          a.bgColor,
+        );
+      }
 
-      const { scaledSize, padding } = getLayoutDimensions(targetSize, usePadding);
-      const drawWidth = scaledSize, drawHeight = scaledSize, dx = padding, dy = padding;
+      async function folderCanvasMaker(f = state.folder) {
+        const fImg = await loadImageCached(CONFIG.folderVariants[f.variant]);
+        const artwork = getFolderArtwork(f);
+        const color = folderColor(f);
+        return (size) => renderFolderToCanvas(fImg, artwork, size, color, f);
+      }
 
-      ctx.save();
+      // Theme ---------------------------------------------------------------------------
 
-      if (enableSquircle) {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = targetSize;
-        tempCanvas.height = targetSize;
-        const tempCtx = tempCanvas.getContext('2d');
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
 
-        if (enableBg) {
-          tempCtx.fillStyle = squircleBgColor;
-          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-          tempCtx.fill();
-        }
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
+        );
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        savePrefs();
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
+      }
 
-        pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-        tempCtx.clip();
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
+      }
 
-        if (fittingMode === 'cover' || fittingMode === 'contain') {
-          drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
-        } else if (fittingMode === 'center') {
-          const innerPadding = drawWidth * 0.10;
-          const innerWidth = drawWidth - (innerPadding * 2);
-          const innerHeight = drawHeight - (innerPadding * 2);
-          drawImageFormatted(tempCtx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
-        }
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
 
-        if (useShadow) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
-          ctx.shadowBlur = targetSize * 0.031;
-          ctx.shadowOffsetY = targetSize * 0.009;
-          ctx.shadowOffsetX = 0;
-        }
-        ctx.drawImage(tempCanvas, 0, 0);
-      } else {
-        if (useShadow) {
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
-          ctx.shadowBlur = targetSize * 0.031;
-          ctx.shadowOffsetY = targetSize * 0.009;
-          ctx.shadowOffsetX = 0;
-        }
-        if (enableBg) {
-          ctx.fillStyle = squircleBgColor;
-          ctx.fillRect(dx, dy, drawWidth, drawHeight);
-          ctx.shadowColor = 'transparent';
-        }
+      // Menus & dialogs ----------------------------------------------------------------
 
-        if (fittingMode === 'cover' || fittingMode === 'contain') {
-          drawImageFormatted(ctx, img, dx, dy, drawWidth, drawHeight, fittingMode);
-        } else if (fittingMode === 'center') {
-          const innerPadding = drawWidth * 0.10;
-          const innerWidth = drawWidth - (innerPadding * 2);
-          const innerHeight = drawHeight - (innerPadding * 2);
-          drawImageFormatted(ctx, img, dx + innerPadding, dy + innerPadding, innerWidth, innerHeight, 'contain');
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        items.at(i < 0 && step < 0 ? -1 : (i + step) % items.length)?.focus();
+      }
+
+      // Opens under the button, right-aligned, or above it when there is no room below.
+      // The source link keeps a click on the open menu's button from light-dismissing and
+      // reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        const up = r.bottom + 4 + menu.offsetHeight > innerHeight - 8;
+        menu.classList.toggle('up', up);
+        menu.style.top = up ? `${r.top - 4 - menu.offsetHeight}px` : `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        history.pushState({ dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
         }
       }
-      ctx.restore();
-      return canvas;
-    }
 
-    // Folder Rendering utilities
-    function calcIconDim(iw, ih, maxW, maxH, pref) {
-      const ar = iw / ih;
-      let w, h;
-      if (ar === 1) {
-        w = h = pref;
-      } else if (ar > 1) {
-        w = maxW;
-        h = w / ar;
-        if (h > maxH) { h = maxH; w = h * ar; }
-      } else {
-        h = maxH;
-        w = h * ar;
-        if (w > maxW) { w = maxW; h = w / ar; }
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
       }
-      return { w: Math.min(w, maxW), h: Math.min(h, maxH) };
-    }
 
-    const colorShiftCache = {};
-    function shiftColor(hex, factor) {
-      const key = hex + '_' + factor;
-      if (colorShiftCache[key]) return colorShiftCache[key];
+      // --- UI Updates ---
 
-      let c = (hex || '#339DE0').replace('#', '');
-      if (c.length === 3) c = c.split('').map(char => char + char).join('');
-      const num = parseInt(c, 16);
-      let r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
-      if (factor > 0) {
-        r = Math.round(r + (255 - r) * factor);
-        g = Math.round(g + (255 - g) * factor);
-        b = Math.round(b + (255 - b) * factor);
-      } else {
-        r = Math.round(r * (1 + factor));
-        g = Math.round(g * (1 + factor));
-        b = Math.round(b * (1 + factor));
+      // Pushes state into every control and works out what's available.
+      function renderControls() {
+        const app = state.app;
+        const folder = state.folder;
+        const isApp = state.mode === 'app';
+        const cutout = folder.variant === 'cutout';
+
+        els.panelApp.hidden = !isApp;
+        els.panelFolder.hidden = isApp;
+        document.querySelector(`input[name="mode"][value="${state.mode}"]`).checked = true;
+
+        // App: Fit and Center leave gaps, so they always need a background.
+        const forcedBg = app.fittingMode !== 'cover';
+        app.bgEnabled = forcedBg || app.manualBgEnabled;
+        els.bg.checked = app.bgEnabled;
+        els.bg.disabled = forcedBg;
+        els.bgSub.textContent = forcedBg
+          ? 'Needed with Fit and Center'
+          : 'Fill the shape behind the image';
+        els.bgColorRow.hidden = !app.bgEnabled;
+        els.bgSwatch.style.setProperty('--c', app.bgColor);
+
+        // Folder: the cutout style uses the image itself as the folder.
+        document.querySelector(`input[name="variant"][value="${folder.variant}"]`).checked = true;
+        document.querySelector(`input[name="artwork"][value="${folder.artworkType}"]`).checked =
+          true;
+        for (const row of [els.colorRow, els.artworkTypeRow, els.sizeRow, els.adaptRow]) {
+          row.classList.toggle('disabled', cutout);
+          row.inert = cutout;
+        }
+        els.swatches.querySelectorAll('.swatch').forEach((sw) => {
+          const input = sw.querySelector('input');
+          const on =
+            input.type === 'color' ? folder.colorId === 'custom' : input.value === folder.colorId;
+          sw.classList.toggle('selected', on);
+          if (input.type === 'radio') input.checked = on;
+          if (input.type === 'color' && folder.customColor)
+            sw.style.setProperty('--c', folder.customColor);
+        });
+        els.textField.hidden = folder.artworkType !== 'text';
+        if (isTextMode()) folder.adaptColorEnabled = true;
+        els.adapt.checked = folder.adaptColorEnabled;
+        els.adapt.disabled = isTextMode();
+        els.zoom.value = folder.zoom;
+        els.zoom.style.setProperty('--p', `${((folder.zoom - 0.1) / 0.9) * 100}%`);
+        els.zoomValue.textContent = `${Math.round(folder.zoom * 100)}%`;
+        els.zoom.setAttribute('aria-valuetext', els.zoomValue.textContent);
+
+        // Stage
+        const cur = current();
+        const hasImage = Boolean(cur.sourceImage);
+        const needsImage = isApp || cutout;
+        els.stage.classList.toggle('text-mode', isTextMode());
+        els.stage.tabIndex = isTextMode() ? -1 : 0;
+        els.stageEmpty.hidden = hasImage || !needsImage || isTextMode();
+        els.stageHint.hidden = !hasImage || isTextMode();
+        els.fileName.hidden = !hasImage || isTextMode();
+        els.fileName.textContent = cur.originalFilename;
+
+        // Sizes
+        const max = maxSize();
+        const valid = SIZES.filter((s) => s <= max);
+        const allOn = valid.length > 0 && valid.every((s) => cur.sizes.has(s));
+        // The chips are built once in init(); updating them in place keeps keyboard focus.
+        for (const input of els.sizes.querySelectorAll('input')) {
+          const size = Number(input.dataset.size);
+          if (input.dataset.size === 'all') {
+            input.checked = allOn;
+          } else {
+            input.checked = cur.sizes.has(size) && size <= max;
+            input.disabled = size > max;
+          }
+        }
+        els.sizesNote.textContent =
+          max < 1024
+            ? `Sizes in pixels. Larger than ${max}px isn’t possible with this image.`
+            : 'Sizes in pixels, all inside one .icns file';
+
+        els.downloadBtns.forEach((b) => (b.disabled = !canDownload()));
       }
-      const result = `rgb(${r}, ${g}, ${b})`;
-      colorShiftCache[key] = result;
-      return result;
-    }
 
-    function createTextIcon(text) {
-      if (!text) return null;
-      const fontSize = 2048;
-      const temp = document.createElement('canvas');
-      const tCtx = temp.getContext('2d');
-      tCtx.font = `bold ${fontSize}px system-ui, sans-serif`;
-      const m = tCtx.measureText(text);
-      const w = Math.max(10, Math.ceil(m.width));
+      async function updateLivePreview(pop = false) {
+        const token = ++renderToken;
+        const ctx = els.canvas.getContext('2d');
+        let result = null;
+        try {
+          if (state.mode === 'app') {
+            if (state.app.sourceImage) result = appCanvas(PREVIEW_SIZE);
+          } else {
+            const make = await folderCanvasMaker();
+            result = make(PREVIEW_SIZE);
+          }
+        } catch (err) {
+          console.error('Preview failed', err);
+        }
+        if (token !== renderToken) return;
+        ctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
+        if (result) ctx.drawImage(result, 0, 0);
+        if (pop && !REDUCED_MOTION.matches) {
+          els.canvas.classList.remove('pop');
+          void els.canvas.offsetWidth;
+          els.canvas.classList.add('pop');
+        }
+      }
 
-      const c = document.createElement('canvas');
-      c.width = w; c.height = fontSize * 2;
-      const ctx = c.getContext('2d');
-      ctx.font = `bold ${fontSize}px system-ui, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(text, c.width / 2, c.height / 2);
-      return c;
-    }
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
 
-    const sharedTintCanvas = document.createElement('canvas');
-    const sharedTintCtx = sharedTintCanvas.getContext('2d');
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
 
-    function createTintedIcon(img, colorHex, outW, outH) {
-      if (!outW) outW = img.width;
-      if (!outH) outH = img.height;
+      function hideSnackbar() {
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
 
-      sharedTintCanvas.width = outW;
-      sharedTintCanvas.height = outH;
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
 
-      sharedTintCtx.globalCompositeOperation = 'source-over';
-      sharedTintCtx.drawImage(img, 0, 0, outW, outH);
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
 
-      sharedTintCtx.globalCompositeOperation = 'source-in';
-      sharedTintCtx.fillStyle = shiftColor(colorHex, -0.10);
-      sharedTintCtx.fillRect(0, 0, outW, outH);
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
 
-      return sharedTintCanvas;
-    }
+      // --- Utilities ---
 
-    function renderFolderToCanvas(fImg, finalImg, sz, colorHex) {
-      const cv = document.createElement('canvas');
-      cv.width = cv.height = sz;
-      const ctx = cv.getContext('2d');
+      function getFolderArtwork(f = state.folder) {
+        if (f.artworkType === 'text') {
+          const text = f.artworkText.trim();
+          return text ? f.artworkTextCanvas || createTextIcon(text) : null;
+        }
+        return f.sourceImage || null;
+      }
 
-      if (state.folder.variant === 'cutout') {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = sz;
-        tempCanvas.height = sz;
-        const tempCtx = tempCanvas.getContext('2d');
+      function isValidImageFile(file) {
+        if (!file) return false;
+        if (file.type && file.type.startsWith('image/')) return true;
+        return /\.(png|jpe?g|webp|svg)$/i.test(file.name);
+      }
 
-        if (finalImg) {
-          drawImageFormatted(tempCtx, finalImg, 0, 0, sz, sz, 'cover');
-          tempCtx.globalCompositeOperation = 'destination-in';
-          tempCtx.drawImage(fImg, 0, 0, sz, sz);
+      function loadImageCached(src) {
+        if (imageCache[src]) return Promise.resolve(imageCache[src]);
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            imageCache[src] = img;
+            resolve(img);
+          };
+          img.onerror = reject;
+          img.src = src;
+        });
+      }
+
+      function downloadBlob(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+
+      // Recolors the stock blue folder art; the default blue needs no tint.
+      function applyFolderTint(ctx, fImg, width, height, colorHex) {
+        if (!colorHex || colorHex.toUpperCase() === '#339DE0') return;
+        ctx.globalCompositeOperation = 'color';
+        ctx.fillStyle = colorHex;
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(fImg, 0, 0, width, height);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+
+      // Icon rendering ------------------------------------------------------------------
+
+      function pathSquircle(ctx, x, y, width, height) {
+        const n = CONFIG.squircleN;
+        const fp = Math.round(Math.min(width, height) * CONFIG.squircleCornerRatio);
+        const steps = 64;
+
+        function cornerInset(d) {
+          if (d >= fp) return 0;
+          if (d <= 0) return fp;
+          return fp - fp * Math.pow(1 - Math.pow((fp - d) / fp, n), 1 / n);
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(x + fp, y);
+        ctx.lineTo(x + width - fp, y);
+
+        for (let i = 1; i <= steps; i++) {
+          const dy = (i / steps) * fp;
+          const dx = cornerInset(dy);
+          ctx.lineTo(x + width - dx, y + dy);
+        }
+
+        ctx.lineTo(x + width, y + height - fp);
+
+        for (let i = 1; i <= steps; i++) {
+          const db = fp - (i / steps) * fp;
+          const dx = cornerInset(db);
+          ctx.lineTo(x + width - dx, y + height - db);
+        }
+
+        ctx.lineTo(x + fp, y + height);
+
+        for (let i = 1; i <= steps; i++) {
+          const db = (i / steps) * fp;
+          const dx = cornerInset(db);
+          ctx.lineTo(x + dx, y + height - db);
+        }
+
+        ctx.lineTo(x, y + fp);
+
+        for (let i = 1; i <= steps; i++) {
+          const dy = fp - (i / steps) * fp;
+          const dx = cornerInset(dy);
+          ctx.lineTo(x + dx, y + dy);
+        }
+
+        ctx.closePath();
+      }
+
+      function drawImageFormatted(ctx, img, dx, dy, dWidth, dHeight, fittingMode) {
+        // Big photos shrunk to 16px alias badly with the default quality.
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        if (fittingMode === 'cover') {
+          const imgRatio = img.width / img.height;
+          const destRatio = dWidth / dHeight;
+          let sx = 0,
+            sy = 0,
+            sWidth = img.width,
+            sHeight = img.height;
+
+          if (imgRatio > destRatio) {
+            sWidth = img.height * destRatio;
+            sx = (img.width - sWidth) / 2;
+          } else if (imgRatio < destRatio) {
+            sHeight = img.width / destRatio;
+            sy = (img.height - sHeight) / 2;
+          }
+          ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
         } else {
-          tempCtx.drawImage(fImg, 0, 0, sz, sz);
+          let drawWidth = dWidth,
+            drawHeight = dHeight,
+            posX = dx,
+            posY = dy;
+          if (img.width > img.height) {
+            drawHeight = dHeight * (img.height / img.width);
+            posY = dy + (dHeight - drawHeight) / 2;
+          } else if (img.height > img.width) {
+            drawWidth = dWidth * (img.width / img.height);
+            posX = dx + (dWidth - drawWidth) / 2;
+          }
+          ctx.drawImage(img, posX, posY, drawWidth, drawHeight);
         }
+      }
+
+      function getLayoutDimensions(targetSize, usePadding) {
+        let scaledSize = targetSize;
+        if (usePadding) {
+          switch (targetSize) {
+            case 1024:
+              scaledSize = 824;
+              break;
+            case 512:
+              scaledSize = 412;
+              break;
+            case 256:
+              scaledSize = 206;
+              break;
+            case 128:
+              scaledSize = 103;
+              break;
+            case 64:
+              scaledSize = 52;
+              break;
+            case 32:
+              scaledSize = 28;
+              break;
+            case 16:
+              scaledSize = 14;
+              break;
+            default:
+              scaledSize = Math.round(targetSize * 0.8047);
+              break;
+          }
+        }
+        const padding = (targetSize - scaledSize) / 2;
+        return { scaledSize, padding };
+      }
+
+      function processImageToCanvas(
+        img,
+        targetSize,
+        usePadding,
+        useShadow,
+        enableSquircle,
+        fittingMode,
+        enableBg,
+        squircleBgColor,
+      ) {
+        const canvas = document.createElement('canvas');
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+        const ctx = canvas.getContext('2d');
+
+        const { scaledSize, padding } = getLayoutDimensions(targetSize, usePadding);
+        const drawWidth = scaledSize,
+          drawHeight = scaledSize,
+          dx = padding,
+          dy = padding;
 
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.50)';
-        ctx.shadowBlur = sz * (22 / 1024);
-        ctx.shadowOffsetY = sz * (8 / 1024);
-        ctx.shadowOffsetX = 0;
-        ctx.drawImage(tempCanvas, 0, 0);
-        ctx.restore();
 
+        if (enableSquircle) {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = targetSize;
+          tempCanvas.height = targetSize;
+          const tempCtx = tempCanvas.getContext('2d');
+
+          if (enableBg) {
+            tempCtx.fillStyle = squircleBgColor;
+            pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+            tempCtx.fill();
+          }
+
+          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+          tempCtx.clip();
+
+          if (fittingMode === 'cover' || fittingMode === 'contain') {
+            drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
+          } else if (fittingMode === 'center') {
+            const innerPadding = drawWidth * 0.1;
+            const innerWidth = drawWidth - innerPadding * 2;
+            const innerHeight = drawHeight - innerPadding * 2;
+            drawImageFormatted(
+              tempCtx,
+              img,
+              dx + innerPadding,
+              dy + innerPadding,
+              innerWidth,
+              innerHeight,
+              'contain',
+            );
+          }
+
+          if (useShadow) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
+            ctx.shadowBlur = targetSize * 0.031;
+            ctx.shadowOffsetY = targetSize * 0.009;
+            ctx.shadowOffsetX = 0;
+          }
+          ctx.drawImage(tempCanvas, 0, 0);
+        } else {
+          if (useShadow) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
+            ctx.shadowBlur = targetSize * 0.031;
+            ctx.shadowOffsetY = targetSize * 0.009;
+            ctx.shadowOffsetX = 0;
+          }
+          if (enableBg) {
+            ctx.fillStyle = squircleBgColor;
+            ctx.fillRect(dx, dy, drawWidth, drawHeight);
+            ctx.shadowColor = 'transparent';
+          }
+
+          if (fittingMode === 'cover' || fittingMode === 'contain') {
+            drawImageFormatted(ctx, img, dx, dy, drawWidth, drawHeight, fittingMode);
+          } else if (fittingMode === 'center') {
+            const innerPadding = drawWidth * 0.1;
+            const innerWidth = drawWidth - innerPadding * 2;
+            const innerHeight = drawHeight - innerPadding * 2;
+            drawImageFormatted(
+              ctx,
+              img,
+              dx + innerPadding,
+              dy + innerPadding,
+              innerWidth,
+              innerHeight,
+              'contain',
+            );
+          }
+        }
+        ctx.restore();
+        return canvas;
+      }
+
+      // Folder rendering ----------------------------------------------------------------
+      function calcIconDim(iw, ih, maxW, maxH, pref) {
+        const ar = iw / ih;
+        let w, h;
+        if (ar === 1) {
+          w = h = pref;
+        } else if (ar > 1) {
+          w = maxW;
+          h = w / ar;
+          if (h > maxH) {
+            h = maxH;
+            w = h * ar;
+          }
+        } else {
+          h = maxH;
+          w = h * ar;
+          if (w > maxW) {
+            w = maxW;
+            h = w / ar;
+          }
+        }
+        return { w: Math.min(w, maxW), h: Math.min(h, maxH) };
+      }
+
+      const colorShiftCache = {};
+      function shiftColor(hex, factor) {
+        const key = hex + '_' + factor;
+        if (colorShiftCache[key]) return colorShiftCache[key];
+
+        let c = (hex || '#339DE0').replace('#', '');
+        if (c.length === 3)
+          c = c
+            .split('')
+            .map((char) => char + char)
+            .join('');
+        const num = parseInt(c, 16);
+        let r = (num >> 16) & 255,
+          g = (num >> 8) & 255,
+          b = num & 255;
+        if (factor > 0) {
+          r = Math.round(r + (255 - r) * factor);
+          g = Math.round(g + (255 - g) * factor);
+          b = Math.round(b + (255 - b) * factor);
+        } else {
+          r = Math.round(r * (1 + factor));
+          g = Math.round(g * (1 + factor));
+          b = Math.round(b * (1 + factor));
+        }
+        const result = `rgb(${r}, ${g}, ${b})`;
+        colorShiftCache[key] = result;
+        return result;
+      }
+
+      // Text artwork on a canvas twice the font size tall. 512px is still larger than the
+      // artwork's share of a 1024px icon, and keeps long text under browser canvas limits.
+      function createTextIcon(text) {
+        if (!text) return null;
+        const fontSize = 512;
+        const temp = document.createElement('canvas');
+        const tCtx = temp.getContext('2d');
+        tCtx.font = `bold ${fontSize}px system-ui, sans-serif`;
+        const m = tCtx.measureText(text);
+        const w = Math.max(10, Math.ceil(m.width));
+
+        const c = document.createElement('canvas');
+        c.width = w;
+        c.height = fontSize * 2;
+        const ctx = c.getContext('2d');
+        ctx.font = `bold ${fontSize}px system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(text, c.width / 2, c.height / 2);
+        return c;
+      }
+
+      const sharedTintCanvas = document.createElement('canvas');
+      const sharedTintCtx = sharedTintCanvas.getContext('2d');
+
+      function createTintedIcon(img, colorHex, outW, outH) {
+        if (!outW) outW = img.width;
+        if (!outH) outH = img.height;
+
+        sharedTintCanvas.width = outW;
+        sharedTintCanvas.height = outH;
+
+        sharedTintCtx.globalCompositeOperation = 'source-over';
+        sharedTintCtx.drawImage(img, 0, 0, outW, outH);
+
+        sharedTintCtx.globalCompositeOperation = 'source-in';
+        sharedTintCtx.fillStyle = shiftColor(colorHex, -0.1);
+        sharedTintCtx.fillRect(0, 0, outW, outH);
+
+        return sharedTintCanvas;
+      }
+
+      function renderFolderToCanvas(fImg, finalImg, sz, colorHex, f) {
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = sz;
+        const ctx = cv.getContext('2d');
+
+        if (f.variant === 'cutout') {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = sz;
+          tempCanvas.height = sz;
+          const tempCtx = tempCanvas.getContext('2d');
+
+          if (finalImg) {
+            drawImageFormatted(tempCtx, finalImg, 0, 0, sz, sz, 'cover');
+            tempCtx.globalCompositeOperation = 'destination-in';
+            tempCtx.drawImage(fImg, 0, 0, sz, sz);
+          } else {
+            tempCtx.drawImage(fImg, 0, 0, sz, sz);
+          }
+
+          ctx.save();
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.50)';
+          ctx.shadowBlur = sz * (22 / 1024);
+          ctx.shadowOffsetY = sz * (8 / 1024);
+          ctx.shadowOffsetX = 0;
+          ctx.drawImage(tempCanvas, 0, 0);
+          ctx.restore();
+
+          return cv;
+        }
+
+        ctx.drawImage(fImg, 0, 0, sz, sz);
+        applyFolderTint(ctx, fImg, sz, sz, colorHex);
+
+        if (finalImg) {
+          const scale = sz / 1024;
+          const zoom = f.zoom;
+
+          // True physical dimensions based on user measurement 940x756 in 1024 canvas
+          const folderW = 940 * scale;
+          const folderH = 756 * scale;
+          const notchHeight = 135 * scale;
+
+          // Assuming vertical centering of the 756px folder inside the 1024px canvas
+          const offsetY = (1024 * scale - folderH) / 2;
+
+          const frontFaceHeight = folderH - notchHeight;
+
+          const startY = offsetY + notchHeight;
+          const areaH = frontFaceHeight;
+
+          // Physical bounds of the folder front face
+          const boundW = folderW;
+          const boundH = frontFaceHeight;
+
+          let maxW = boundW * zoom;
+          let maxH = boundH * zoom;
+          let pref = Math.min(boundW, boundH) * zoom;
+
+          const dim = calcIconDim(finalImg.width, finalImg.height, maxW, maxH, pref);
+          const ix = sz / 2 - dim.w / 2;
+          const iy = startY + areaH / 2 - dim.h / 2;
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          if (f.adaptColorEnabled) {
+            const outW = Math.max(1, Math.ceil(dim.w * 4));
+            const outH = Math.max(1, Math.ceil(dim.h * 4));
+
+            // 1. Draw highlight drop shadow
+            // Use a temp canvas to prevent shadow from bleeding inside the glyph
+            const shadowCv = document.createElement('canvas');
+            shadowCv.width = sz;
+            shadowCv.height = sz;
+            const sCtx = shadowCv.getContext('2d');
+
+            sCtx.shadowColor = shiftColor(colorHex, 0.5);
+            sCtx.shadowOffsetY = sz + 3 * scale;
+            sCtx.shadowBlur = 3 * scale;
+            sCtx.shadowOffsetX = 0;
+            // Draw out of bounds to cast shadow into bounds
+            sCtx.drawImage(finalImg, ix, iy - sz, dim.w, dim.h);
+
+            // Cut out the glyph interior so the highlight only shows on the outside bottom edge
+            sCtx.globalCompositeOperation = 'destination-out';
+            sCtx.drawImage(finalImg, ix, iy, dim.w, dim.h);
+
+            ctx.drawImage(shadowCv, 0, 0);
+
+            // 2. Draw the darkened glyph with multiply blending
+            ctx.save();
+            ctx.globalCompositeOperation = 'multiply';
+            const tinted = createTintedIcon(finalImg, '#000000', outW, outH);
+            ctx.globalAlpha = 0.15; // Match Apple's ~0.85x darkening ratio
+            ctx.drawImage(tinted, ix, iy, dim.w, dim.h);
+            ctx.restore();
+          } else {
+            ctx.drawImage(finalImg, ix, iy, dim.w, dim.h);
+          }
+        }
         return cv;
       }
 
-      ctx.drawImage(fImg, 0, 0, sz, sz);
-      applyFolderTint(ctx, fImg, sz, sz, colorHex);
+      async function buildIcnsBinary(iconEntries) {
+        let totalBytes = 8;
+        for (const entry of iconEntries) {
+          totalBytes += 8 + entry.bytes.byteLength;
+        }
+        const buffer = new ArrayBuffer(totalBytes);
+        const view = new DataView(buffer);
 
-      if (finalImg) {
-        const scale = sz / 1024;
-        const zoom = state.folder.zoom;
+        view.setUint32(0, 0x69636e73); // 'icns'
+        view.setUint32(4, totalBytes);
 
-        // True physical dimensions based on user measurement 940x756 in 1024 canvas
-        const folderW = 940 * scale;
-        const folderH = 756 * scale;
-        const notchHeight = 135 * scale;
+        let offset = 8;
+        for (const entry of iconEntries) {
+          const idUint32 =
+            (entry.typeId.charCodeAt(0) << 24) |
+            (entry.typeId.charCodeAt(1) << 16) |
+            (entry.typeId.charCodeAt(2) << 8) |
+            entry.typeId.charCodeAt(3);
 
-        // Assuming vertical centering of the 756px folder inside the 1024px canvas
-        const offsetY = ((1024 * scale) - folderH) / 2;
+          view.setUint32(offset, idUint32);
+          view.setUint32(offset + 4, entry.bytes.byteLength + 8);
+          new Uint8Array(buffer, offset + 8, entry.bytes.byteLength).set(
+            new Uint8Array(entry.bytes),
+          );
+          offset += 8 + entry.bytes.byteLength;
+        }
+        return new Blob([buffer], { type: 'image/x-icns' });
+      }
 
-        const frontFaceHeight = folderH - notchHeight;
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
 
-        const startY = offsetY + notchHeight;
-        const areaH = frontFaceHeight;
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
 
-        // Physical bounds of the folder front face
-        const boundW = folderW;
-        const boundH = frontFaceHeight;
-
-        let maxW = boundW * zoom;
-        let maxH = boundH * zoom;
-        let pref = Math.min(boundW, boundH) * zoom;
-
-        const dim = calcIconDim(finalImg.width, finalImg.height, maxW, maxH, pref);
-        const ix = sz / 2 - dim.w / 2;
-        const iy = startY + areaH / 2 - dim.h / 2;
-
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        if (state.folder.adaptColorEnabled) {
-          const outW = Math.max(1, Math.ceil(dim.w * 4));
-          const outH = Math.max(1, Math.ceil(dim.h * 4));
-
-          // 1. Draw highlight drop shadow
-          // Use a temp canvas to prevent shadow from bleeding inside the glyph
-          const shadowCv = document.createElement('canvas');
-          shadowCv.width = sz;
-          shadowCv.height = sz;
-          const sCtx = shadowCv.getContext('2d');
-
-          sCtx.shadowColor = shiftColor(colorHex, 0.5);
-          sCtx.shadowOffsetY = sz + (3 * scale);
-          sCtx.shadowBlur = 3 * scale;
-          sCtx.shadowOffsetX = 0;
-          // Draw out of bounds to cast shadow into bounds
-          sCtx.drawImage(finalImg, ix, iy - sz, dim.w, dim.h);
-
-          // Cut out the glyph interior so the highlight only shows on the outside bottom edge
-          sCtx.globalCompositeOperation = 'destination-out';
-          sCtx.drawImage(finalImg, ix, iy, dim.w, dim.h);
-
-          ctx.drawImage(shadowCv, 0, 0);
-
-          // 2. Draw the darkened glyph with multiply blending
-          ctx.save();
-          ctx.globalCompositeOperation = 'multiply';
-          const tinted = createTintedIcon(finalImg, '#000000', outW, outH);
-          ctx.globalAlpha = 0.15; // Match Apple's ~0.85x darkening ratio
-          ctx.drawImage(tinted, ix, iy, dim.w, dim.h);
-          ctx.restore();
-        } else {
-          ctx.drawImage(finalImg, ix, iy, dim.w, dim.h);
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
         }
       }
-      return cv;
-    }
 
-    async function buildIcnsBinary(iconEntries) {
-      let totalBytes = 8;
-      for (const entry of iconEntries) {
-        totalBytes += 8 + entry.bytes.byteLength;
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {
+          // Storage full or blocked: the theme still applies for this visit.
+        }
       }
-      const buffer = new ArrayBuffer(totalBytes);
-      const view = new DataView(buffer);
 
-      view.setUint32(0, 0x69636E73); // 'icns'
-      view.setUint32(4, totalBytes);
-
-      let offset = 8;
-      for (const entry of iconEntries) {
-        const idUint32 = (entry.typeId.charCodeAt(0) << 24) |
-          (entry.typeId.charCodeAt(1) << 16) |
-          (entry.typeId.charCodeAt(2) << 8) |
-          (entry.typeId.charCodeAt(3));
-
-        view.setUint32(offset, idUint32);
-        view.setUint32(offset + 4, entry.bytes.byteLength + 8);
-        new Uint8Array(buffer, offset + 8, entry.bytes.byteLength).set(new Uint8Array(entry.bytes));
-        offset += 8 + entry.bytes.byteLength;
-      }
-      return new Blob([buffer], { type: 'image/x-icns' });
-    }
-
-    function downloadBlob(blob, name) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${name}.icns`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    }
-
-    function setupMobileHeight() {
-      if (els.appWrapper && window.innerWidth < 640) {
-        els.appWrapper.style.height = `${window.innerHeight}px`;
-      } else if (els.appWrapper) {
-        els.appWrapper.style.height = '';
-      }
-    }
-
-    // Boot
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
-</body>
-
+      init();
+    </script>
+  </body>
 </html>
