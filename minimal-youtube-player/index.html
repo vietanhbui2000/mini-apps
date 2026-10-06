@@ -1,1280 +1,2678 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Play any YouTube video or livestream without distraction." />
+    <title>YouTube Player</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#fff8f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1110" media="(prefers-color-scheme: dark)" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="description" content="Play any YouTube video or livestream without distraction." />
-  <title>Minimal YouTube Player</title>
+    <!-- Fonts: Google Sans Flex, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=arrow_outward,brightness_auto,close,code,dark_mode,fullscreen,fullscreen_exit,headphones,info,light_mode,link,more_vert,pause,person,play_arrow,smart_display&display=block"
+    />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #d93025. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#904a41, #ffb4a9);
+        --on-primary: light-dark(#ffffff, #561e17);
+        --primary-container: light-dark(#ffdad5, #73342c);
+        --on-primary-container: light-dark(#73342c, #ffdad5);
+        --secondary: light-dark(#775652, #e7bdb7);
+        --on-secondary: light-dark(#ffffff, #442926);
+        --secondary-container: light-dark(#ffdad5, #5d3f3b);
+        --on-secondary-container: light-dark(#5d3f3b, #ffdad5);
+        --tertiary: light-dark(#705c2e, #dfc38c);
+        --on-tertiary: light-dark(#ffffff, #3e2e04);
+        --tertiary-container: light-dark(#fcdfa6, #574419);
+        --on-tertiary-container: light-dark(#574419, #fcdfa6);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#fff8f7, #1a1110);
+        --on-surface: light-dark(#231918, #f1dedc);
+        --on-surface-variant: light-dark(#534341, #d8c2be);
+        --surface-dim: light-dark(#e8d6d3, #1a1110);
+        --surface-bright: light-dark(#fff8f7, #423735);
+        --surface-container-lowest: light-dark(#ffffff, #140c0b);
+        --surface-container-low: light-dark(#fff0ee, #231918);
+        --surface-container: light-dark(#fceae7, #271d1c);
+        --surface-container-high: light-dark(#f7e4e1, #322826);
+        --surface-container-highest: light-dark(#f1dedc, #3d3231);
+        --outline: light-dark(#857370, #a08c89);
+        --outline-variant: light-dark(#d8c2be, #534341);
+        --inverse-surface: light-dark(#392e2c, #f1dedc);
+        --inverse-on-surface: light-dark(#ffedea, #392e2c);
+        --inverse-primary: light-dark(#ffb4a9, #904a41);
+        --scrim: #000;
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
 
-  <!-- Fonts: Geist, Geist Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
-    rel="stylesheet" />
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
 
-  <!-- Tailwind Config -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Geist', 'sans-serif'],
-            mono: ['Geist Mono', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-            },
-          },
-        },
-      },
-    };
-  </script>
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
 
-  <style>
-    body {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Waveform Animation */
-    .waveform-bar {
-      width: 4px;
-      height: 18px;
-      background-color: currentColor;
-      border-radius: 2px;
-      animation: waveform 1s ease-in-out infinite;
-    }
-
-    .waveform-bar:nth-child(1) {
-      animation-delay: -1s;
-    }
-
-    .waveform-bar:nth-child(2) {
-      animation-delay: -0.8s;
-    }
-
-    .waveform-bar:nth-child(3) {
-      animation-delay: -0.6s;
-    }
-
-    .waveform-bar:nth-child(4) {
-      animation-delay: -0.4s;
-    }
-
-    @keyframes waveform {
-
-      0%,
-      100% {
-        transform: scaleY(0.3);
-        opacity: 0.6;
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
       }
 
-      50% {
-        transform: scaleY(1);
-        opacity: 1;
-      }
-    }
-
-    /* Zen Controls bottom pill - Morphing Container */
-    .zen-pill-morph {
-      width: 48px;
-      height: 4px;
-      border-radius: 24px;
-      background-color: rgba(255, 255, 255, 0.4);
-      border: 1px solid transparent;
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-sizing: border-box;
-      backdrop-filter: blur(0px);
-      -webkit-backdrop-filter: blur(0px);
-    }
-
-    #zen-controls:hover .zen-pill-morph,
-    #zen-controls:focus-within .zen-pill-morph {
-      width: 140px;
-      height: 48px;
-      background-color: rgba(0, 0, 0, 0.4);
-      border-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-
-    .zen-pill-inner {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      opacity: 0;
-      transform: scale(0.8);
-      transition:
-        opacity 0.2s ease,
-        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-      white-space: nowrap;
-    }
-
-    #zen-controls:hover .zen-pill-inner,
-    #zen-controls:focus-within .zen-pill-inner {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-      transition-delay: 0.05s;
-    }
-
-    /* On touch devices (no hover), keep the pill permanently expanded */
-    @media (hover: none) {
-      .zen-pill-morph {
-        width: 140px;
-        height: 48px;
-        background-color: rgba(0, 0, 0, 0.4);
-        border-color: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      :root[data-theme='light'] {
+        color-scheme: light;
       }
 
-      .zen-pill-inner {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
+      :root[data-theme='dark'] {
+        color-scheme: dark;
       }
-    }
 
-    /* View Transitions Architecture */
-    .morph-active {
-      view-transition-name: player-morph;
-    }
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
 
-    /* Smooth linear easing for the layout shifts & crossfades */
-    ::view-transition-group(root),
-    ::view-transition-group(player-morph) {
-      animation-duration: 0.35s;
-      animation-timing-function: linear;
-    }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
 
-    ::view-transition-old(*),
-    ::view-transition-new(*) {
-      animation-duration: 0.35s;
-      animation-timing-function: linear;
-      height: 100%;
-      width: 100%;
-    }
+      button,
+      input {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
 
-    /* Video Player Resize Handles */
-    .resize-handle {
-      display: none !important;
-    }
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
 
-    .zen-video-active .resize-handle {
-      display: flex !important;
-    }
+      h1,
+      h2,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
 
-    /* Small phones: no room to resize, hide handles */
-    @media (max-width: 639px) {
-      .zen-video-active .resize-handle {
+      [hidden] {
         display: none !important;
       }
-    }
-  </style>
-</head>
 
-<body class="bg-[#f5f5f5] text-zinc-800 h-[100dvh] flex justify-center overflow-hidden">
-  <!-- Main App Container -->
-  <div id="app-wrapper"
-    class="w-full max-w-[480px] bg-white h-full sm:h-[95vh] sm:my-auto sm:rounded-2xl sm:shadow-2xl flex flex-col relative overflow-hidden border-zinc-200 sm:border">
-    <!-- Header -->
-    <header id="app-header"
-      class="bg-white/90 backdrop-blur-md z-20 border-b border-zinc-100 p-4 sm:p-6 flex justify-between items-center flex-shrink-0">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div id="header-icon-bg"
-          class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
-          <i data-lucide="play" class="w-4 h-4"></i>
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the 40px height, not --shape-full: a press springs them smaller,
+         and the spring's overshoot from 999px would dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
+        border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .btn:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .btn .icon {
+        font-size: 20px;
+        margin-left: -8px;
+      }
+
+      .btn-tonal {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      .icon-btn[aria-pressed='true'] {
+        background: var(--primary);
+        color: var(--on-primary);
+        border-radius: var(--shape-md);
+      }
+
+      .icon-btn[aria-pressed='true'] .icon {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      /* --- App bar & page --- */
+      /* The bar stays pinned while the page scrolls. Its contents line up with the page column. */
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: var(--surface);
+        transition: box-shadow var(--spring-ms) linear;
+      }
+
+      /* A divider plus a soft shadow: content cards share the container colors, so a tint alone
+         would blend in. The divider keeps the edge visible in dark mode. */
+      .appbar.scrolled {
+        box-shadow:
+          0 1px 0 var(--outline-variant),
+          0 4px 12px rgb(0 0 0 / 0.08);
+      }
+
+      .appbar-inner,
+      .page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .appbar-inner,
+        .page {
+          padding-inline: 24px;
+        }
+      }
+
+      .page {
+        padding-bottom: 32px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        margin-right: -8px;
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 840px) {
+        .top-title {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+
+      /* --- Start --- */
+      .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8dvh 0 32px;
+        text-align: center;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .art {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 128px;
+        height: 128px;
+        margin-bottom: 24px;
+        color: var(--on-primary-container);
+      }
+
+      .art svg {
+        position: absolute;
+        inset: 0;
+        fill: var(--primary-container);
+        animation: spin 40s linear infinite;
+      }
+
+      .art .icon {
+        position: relative;
+        font-size: 52px;
+        font-variation-settings: 'FILL' 1;
+      }
+
+      @keyframes spin {
+        to {
+          rotate: 1turn;
+        }
+      }
+
+      .hero h2 {
+        font: 400 28px/36px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 420px;
+        margin-top: 8px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Link bar --- */
+      /* Search-bar shape: 40px items at an 8px inset. The action pill follows playback. */
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        width: 100%;
+        max-width: 640px;
+        height: 56px;
+        margin: 0 auto;
+        padding: 0 8px;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        animation: enter var(--spring-slow-ms) var(--spring-slow) 60ms both;
+        transition: box-shadow var(--spring-ms) var(--spring);
+      }
+
+      .search:focus-within {
+        box-shadow: var(--elevation-2);
+      }
+
+      .search-lead {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 40px;
+        height: 40px;
+        margin-right: 8px;
+        border-radius: 50%;
+        background: var(--surface-container-lowest);
+        color: var(--primary);
+      }
+
+      .search-input {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        outline: none;
+        background: none;
+        color: var(--on-surface);
+        font-size: 16px;
+      }
+
+      .search-input::placeholder {
+        color: var(--on-surface-variant);
+      }
+
+      .play-chip {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 96px;
+        height: 40px;
+        padding: 0 20px 0 14px;
+        border-radius: 20px;
+        background: var(--primary);
+        color: var(--on-primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        transition:
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear,
+          border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .play-chip:active {
+        border-radius: var(--shape-md);
+      }
+
+      .play-chip .icon {
+        font-size: 20px;
+        font-variation-settings: 'FILL' 1;
+      }
+
+      .play-chip[data-state='playing'],
+      .play-chip[data-state='paused'] {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .play-chip[data-state='playing'] {
+        padding: 0 20px;
+      }
+
+      .play-chip[data-state='playing'] > :not(.bars),
+      .play-chip:not([data-state='playing']) .bars {
+        display: none;
+      }
+
+      /* Playing: four bars that bounce like a level meter. */
+      .bars {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        height: 18px;
+      }
+
+      .bars i {
+        width: 3px;
+        height: 100%;
+        border-radius: 2px;
+        background: currentColor;
+        animation: bars 1s ease-in-out infinite;
+      }
+
+      .bars i:nth-child(2) {
+        animation-delay: -0.8s;
+      }
+
+      .bars i:nth-child(3) {
+        animation-delay: -0.6s;
+      }
+
+      .bars i:nth-child(4) {
+        animation-delay: -0.4s;
+      }
+
+      @keyframes bars {
+        0%,
+        100% {
+          transform: scaleY(0.3);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+      }
+
+      /* --- Recently played --- */
+      .recent {
+        max-width: 640px;
+        margin: 40px auto 0;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) 120ms both;
+      }
+
+      .recent-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 0 8px 16px;
+      }
+
+      .recent-head h2 {
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .recent-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+        gap: 12px;
+        list-style: none;
+      }
+
+      .recent-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        padding: 8px 8px 12px;
+        border-radius: var(--shape-lg-plus);
+        background: var(--surface-container);
+        text-align: left;
+        transition: border-radius var(--spring-ms) var(--spring);
+      }
+
+      .recent-item:active {
+        border-radius: var(--shape-md);
+      }
+
+      .recent-item img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: var(--shape-md);
+        background: var(--surface-container-high);
+        object-fit: cover;
+      }
+
+      .recent-title,
+      .recent-author {
+        display: block;
+        overflow: hidden;
+        padding: 0 4px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .recent-title {
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .recent-author {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      /* --- Player --- */
+      .player {
+        max-width: 960px;
+        margin: 16px auto 0;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .video {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        view-transition-name: player-morph;
+      }
+
+      .video-inner {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border-radius: var(--shape-xl);
+        background: var(--scrim);
+      }
+
+      @media (max-width: 599px) {
+        .video-inner {
+          border-radius: var(--shape-lg);
+        }
+      }
+
+      .video iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        opacity: 0;
+        transition: opacity var(--spring-ms) linear;
+      }
+
+      .loaded .video iframe {
+        opacity: 1;
+      }
+
+      .skeleton {
+        position: absolute;
+        inset: 0;
+        background: var(--surface-container-high);
+        animation: pulse 1.6s ease-in-out infinite;
+        transition: opacity var(--spring-ms) linear;
+        pointer-events: none;
+      }
+
+      .loaded .skeleton {
+        opacity: 0;
+        animation: none;
+      }
+
+      @keyframes pulse {
+        50% {
+          opacity: 0.55;
+        }
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        padding: 16px 4px 0;
+      }
+
+      .meta-text {
+        flex: 1 1 280px;
+        min-width: 0;
+      }
+
+      .meta-title {
+        display: -webkit-box;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .meta-author {
+        margin-top: 4px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .meta-text .line {
+        height: 20px;
+        margin: 4px 0;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container-high);
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+
+      .meta-text .line + .line {
+        width: 40%;
+        height: 14px;
+      }
+
+      .loaded .meta-text .line,
+      :not(.loaded) > .meta .meta-title,
+      :not(.loaded) > .meta .meta-author {
+        display: none;
+      }
+
+      .meta-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* --- Focus mode --- */
+      /* Always dark, whatever the theme: the page switches color scheme, so every token follows. */
+      body[data-zen] {
+        color-scheme: dark;
+        background: var(--scrim);
+      }
+
+      body[data-zen] .appbar,
+      body[data-zen] .search,
+      body[data-zen] .meta,
+      body[data-zen] .hero,
+      body[data-zen] .recent {
+        display: none;
+      }
+
+      body[data-zen] .player {
+        animation: none;
+      }
+
+      body[data-zen] .video {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        z-index: 5;
+        width: min(90vw, (100dvh - 160px) * 16 / 9);
+        translate: -50% -50%;
+      }
+
+      @media (min-width: 640px) {
+        body[data-zen] .video {
+          width: min(60vw, (100dvh - 160px) * 16 / 9);
+        }
+      }
+
+      body[data-zen='audio'] .video {
+        opacity: 0;
+        pointer-events: none;
+        view-transition-name: none;
+      }
+
+      .audio-card {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        z-index: 6;
+        display: none;
+        align-items: center;
+        gap: 20px;
+        width: min(600px, 100vw - 32px);
+        padding: 16px;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container);
+        color: var(--on-surface);
+        translate: -50% -50%;
+      }
+
+      body[data-zen='audio'] .audio-card {
+        display: flex;
+      }
+
+      .audio-thumb {
+        flex: none;
+        width: clamp(96px, 26vw, 140px);
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border-radius: var(--shape-md);
+        background: var(--surface-container-high);
+      }
+
+      body[data-zen='audio'] .audio-thumb {
+        view-transition-name: player-morph;
+      }
+
+      .audio-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .audio-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .audio-title-wrap {
+        overflow: hidden;
+      }
+
+      .audio-title {
+        display: inline-block;
+        font: 500 18px/24px var(--font);
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .audio-author {
+        overflow: hidden;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .audio-toggle {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--shape-lg);
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .audio-toggle:active {
+        border-radius: var(--shape-md);
+      }
+
+      .audio-toggle .icon {
+        font-size: 28px;
+        font-variation-settings: 'FILL' 1;
+      }
+
+      .audio-toggle .bars {
+        height: 22px;
+      }
+
+      .audio-toggle .bars i {
+        width: 4px;
+      }
+
+      .audio-toggle[data-playing='true'] .icon,
+      .audio-toggle:not([data-playing='true']) .bars {
+        display: none;
+      }
+
+      @media (hover: hover) {
+        .audio-toggle[data-playing='true']:hover .bars {
+          display: none;
+        }
+
+        .audio-toggle[data-playing='true']:hover .icon {
+          display: block;
+        }
+      }
+
+      /* Focus controls: a slim handle that grows into a toolbar on hover (always open on touch). */
+      .zen-bar {
+        position: fixed;
+        bottom: max(24px, env(safe-area-inset-bottom));
+        left: 50%;
+        z-index: 7;
+        display: none;
+        padding-top: 32px;
+        translate: -50% 0;
+      }
+
+      body[data-zen] .zen-bar {
+        display: block;
+      }
+
+      .zen-pill {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 48px;
+        height: 4px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: var(--shape-full);
+        background: color-mix(in srgb, var(--on-surface-variant) 40%, transparent);
+        transition:
+          width var(--spring-ms) var(--spring),
+          height var(--spring-ms) var(--spring),
+          padding var(--spring-ms) var(--spring),
+          background-color var(--effects-ms) linear;
+      }
+
+      .zen-pill > * {
+        opacity: 0;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      .zen-bar:hover .zen-pill,
+      .zen-bar:focus-within .zen-pill {
+        width: 172px;
+        height: 56px;
+        padding: 8px;
+        background: var(--surface-container-high);
+      }
+
+      .zen-bar:hover .zen-pill > *,
+      .zen-bar:focus-within .zen-pill > * {
+        opacity: 1;
+        transition-delay: 80ms;
+      }
+
+      @media (hover: none) {
+        .zen-pill {
+          width: 172px;
+          height: 56px;
+          padding: 8px;
+          background: var(--surface-container-high);
+        }
+
+        .zen-pill > * {
+          opacity: 1;
+        }
+      }
+
+      .zen-divider {
+        width: 1px;
+        height: 24px;
+        margin: 0 4px;
+        background: var(--outline-variant);
+      }
+
+      /* Corner handles resize the video in focus mode on larger screens. */
+      .handle {
+        position: absolute;
+        z-index: 2;
+        display: none;
+        width: 48px;
+        height: 48px;
+        opacity: 0;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      .handle::before {
+        content: '';
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border: 0 solid var(--on-surface);
+      }
+
+      .handle[data-corner='tl'] {
+        top: -12px;
+        left: -12px;
+        cursor: nwse-resize;
+      }
+
+      .handle[data-corner='tl']::before {
+        top: 6px;
+        left: 6px;
+        border-width: 3px 0 0 3px;
+        border-top-left-radius: 20px;
+      }
+
+      .handle[data-corner='tr'] {
+        top: -12px;
+        right: -12px;
+        cursor: nesw-resize;
+      }
+
+      .handle[data-corner='tr']::before {
+        top: 6px;
+        right: 6px;
+        border-width: 3px 3px 0 0;
+        border-top-right-radius: 20px;
+      }
+
+      .handle[data-corner='bl'] {
+        bottom: -12px;
+        left: -12px;
+        cursor: nesw-resize;
+      }
+
+      .handle[data-corner='bl']::before {
+        bottom: 6px;
+        left: 6px;
+        border-width: 0 0 3px 3px;
+        border-bottom-left-radius: 20px;
+      }
+
+      .handle[data-corner='br'] {
+        right: -12px;
+        bottom: -12px;
+        cursor: nwse-resize;
+      }
+
+      .handle[data-corner='br']::before {
+        right: 6px;
+        bottom: 6px;
+        border-width: 0 3px 3px 0;
+        border-bottom-right-radius: 20px;
+      }
+
+      @media (min-width: 640px) and (hover: hover) {
+        body[data-zen='video'] .handle {
+          display: block;
+        }
+
+        .handle:hover,
+        .resizing .handle {
+          opacity: 1;
+        }
+      }
+
+      /* Stops the iframe swallowing pointer events mid-drag. */
+      .resize-shield {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: none;
+      }
+
+      .resizing .resize-shield {
+        display: block;
+      }
+
+      ::view-transition-group(player-morph) {
+        animation-duration: var(--spring-slow-ms);
+        animation-timing-function: var(--spring-slow);
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* Menu */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu.up {
+        transform-origin: bottom right;
+      }
+
+      .menu:popover-open {
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
+      }
+
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, menus and the About dialog open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-inline: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('minimal-youtube-player') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="appbar" id="appbar">
+      <div class="appbar-inner">
+        <div class="top">
+          <h1 class="top-title">YouTube Player</h1>
+          <button
+            class="icon-btn state"
+            id="more-btn"
+            type="button"
+            aria-label="More options"
+            title="More options"
+            aria-haspopup="menu"
+          >
+            <span class="icon" aria-hidden="true">more_vert</span>
+          </button>
         </div>
-        <h1 id="header-title" class="font-bold text-2xl tracking-tight text-zinc-900">
-          Minimal YouTube Player
-        </h1>
       </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main id="main-content" class="flex-1 overflow-hidden relative bg-zinc-50/50 flex flex-col">
-      <!-- Empty State (Placeholder) -->
-      <div id="empty-state"
-        class="absolute inset-0 flex flex-col items-center justify-center p-6 transition-all duration-300 z-10 opacity-100 blur-none pointer-events-auto">
-        <p class="text-sm text-zinc-500 text-center max-w-[280px] leading-relaxed">
-          Play any YouTube video or livestream without distraction.
-        </p>
-      </div>
+    <main class="page">
+      <section class="hero" id="hero">
+        <div class="art">
+          <svg viewBox="0 0 128 128" aria-hidden="true"><path id="art-shape" /></svg>
+          <span class="icon" aria-hidden="true">smart_display</span>
+        </div>
+        <h2>Just the video</h2>
+        <p>Paste a YouTube link to watch it here, without comments, recommendations or autoplay.</p>
+      </section>
 
-      <!-- Playing State (Video UI) -->
-      <div id="playing-state"
-        class="flex-1 overflow-y-auto flex flex-col opacity-0 blur-[2px] pointer-events-none transition-all duration-300 z-20 hidden">
-        <!-- Outer Video Wrapper (For Morphing & Positioning outside handles) -->
-        <div id="video-wrapper" class="morph-active w-full aspect-video sticky top-0 z-10 flex-shrink-0 relative">
-          <!-- Resize Overlay (Prevents iframe from swallowing mouse events during drag) -->
-          <div id="resize-overlay" class="absolute inset-0 bg-transparent z-40 hidden"></div>
+      <form class="search" id="form" role="search">
+        <span class="search-lead"><span class="icon" aria-hidden="true">link</span></span>
+        <input
+          class="search-input"
+          id="url"
+          type="text"
+          inputmode="url"
+          placeholder="Paste a YouTube link"
+          aria-label="YouTube link or video ID"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          enterkeyhint="go"
+        />
+        <button class="play-chip state" id="play-btn" type="submit" data-state="play">
+          <span class="icon" aria-hidden="true">play_arrow</span>
+          <span id="play-label">Play</span>
+          <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        </button>
+      </form>
 
-          <!-- Interactive Corner Resize Handles (Outside of the video border) -->
-          <div
-            class="resize-handle absolute -top-2 -left-2 w-12 h-12 z-50 cursor-nwse-resize opacity-0 hover:opacity-100 transition-opacity duration-200 items-start justify-start p-1.5"
-            data-x-dir="-1">
-            <div
-              class="w-7 h-7 border-t-[3px] border-l-[3px] border-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] pointer-events-none rounded-tl-2xl">
-            </div>
-          </div>
-          <div
-            class="resize-handle absolute -top-2 -right-2 w-12 h-12 z-50 cursor-nesw-resize opacity-0 hover:opacity-100 transition-opacity duration-200 items-start justify-end p-1.5"
-            data-x-dir="1">
-            <div
-              class="w-7 h-7 border-t-[3px] border-r-[3px] border-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] pointer-events-none rounded-tr-2xl">
-            </div>
-          </div>
-          <div
-            class="resize-handle absolute -bottom-2 -left-2 w-12 h-12 z-50 cursor-nesw-resize opacity-0 hover:opacity-100 transition-opacity duration-200 items-end justify-start p-1.5"
-            data-x-dir="-1">
-            <div
-              class="w-7 h-7 border-b-[3px] border-l-[3px] border-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] pointer-events-none rounded-bl-2xl">
-            </div>
-          </div>
-          <div
-            class="resize-handle absolute -bottom-2 -right-2 w-12 h-12 z-50 cursor-nwse-resize opacity-0 hover:opacity-100 transition-opacity duration-200 items-end justify-end p-1.5"
-            data-x-dir="1">
-            <div
-              class="w-7 h-7 border-b-[3px] border-r-[3px] border-white/90 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] pointer-events-none rounded-br-2xl">
-            </div>
-          </div>
+      <section class="recent" id="recent" hidden>
+        <div class="recent-head">
+          <h2>Recently played</h2>
+          <button class="btn btn-text state" id="clear-recent" type="button">Clear</button>
+        </div>
+        <ul class="recent-list" id="recent-list"></ul>
+      </section>
 
-          <!-- Inner Video Container (For clipping, border radius, and shadows) -->
-          <div id="video-inner"
-            class="w-full h-full relative overflow-hidden bg-zinc-100 shadow-sm transition-all duration-300">
-            <!-- Video Skeleton Loader -->
-            <div id="video-skeleton"
-              class="absolute inset-0 transition-all duration-300 z-20 opacity-100 pointer-events-auto">
-              <div class="w-full h-full bg-zinc-200 animate-pulse"></div>
-            </div>
-
-            <!-- Actual Video Player -->
-            <div id="video-container"
-              class="absolute inset-0 bg-black transition-all duration-300 opacity-0 blur-[2px] pointer-events-none z-10 flex">
-              <iframe id="yt-iframe" class="w-full h-full border-0" referrerpolicy="strict-origin-when-cross-origin"
-                allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen>
-              </iframe>
-            </div>
+      <section class="player" id="player" hidden>
+        <div class="video" id="video">
+          <div class="video-inner">
+            <div class="skeleton"></div>
+            <iframe
+              id="yt-iframe"
+              title="YouTube video"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div class="resize-shield"></div>
+          <span class="handle" data-corner="tl" data-dir="-1"></span>
+          <span class="handle" data-corner="tr" data-dir="1"></span>
+          <span class="handle" data-corner="bl" data-dir="-1"></span>
+          <span class="handle" data-corner="br" data-dir="1"></span>
+        </div>
+        <div class="meta">
+          <div class="meta-text">
+            <div class="line"></div>
+            <div class="line"></div>
+            <h2 class="meta-title" id="meta-title"></h2>
+            <p class="meta-author" id="meta-author"></p>
+          </div>
+          <div class="meta-actions">
+            <button class="btn btn-tonal state" type="button" data-zen="video">
+              <span class="icon" aria-hidden="true">fullscreen</span>Focus
+            </button>
+            <button class="btn btn-tonal state" type="button" data-zen="audio">
+              <span class="icon" aria-hidden="true">headphones</span>Listen
+            </button>
+            <button
+              class="icon-btn btn-tonal state"
+              id="close-btn"
+              type="button"
+              aria-label="Close video"
+              title="Close video"
+            >
+              <span class="icon" aria-hidden="true">close</span>
+            </button>
           </div>
         </div>
-
-        <!-- Audio Card (Zen Mode) -->
-        <div id="audio-card"
-          class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[600px] bg-[#121212] border border-white/10 rounded-3xl p-4 sm:p-6 shadow-2xl z-50 flex items-center gap-5 pointer-events-auto">
-          <!-- Thumbnail 16:9 -->
-          <div id="audio-thumbnail-wrapper"
-            class="w-[120px] sm:w-[140px] aspect-video rounded-xl overflow-hidden shrink-0 shadow-lg relative bg-zinc-800">
-            <img id="audio-thumbnail" src="" class="w-full h-full object-cover" alt="Thumbnail" />
-          </div>
-
-          <!-- Info -->
-          <div class="flex-1 min-w-0 pr-2 overflow-hidden flex flex-col justify-center">
-            <div id="audio-title-container" class="w-full overflow-hidden">
-              <h3 id="audio-title"
-                class="text-lg font-bold text-white leading-tight whitespace-nowrap inline-block will-change-transform">
-              </h3>
-            </div>
-            <p id="audio-author" class="text-zinc-400 text-sm font-medium mt-1 truncate"></p>
-          </div>
-
-          <!-- Right Side: Waveform / Play / Pause -->
-          <button type="button" id="audio-play-pause-btn"
-            class="w-14 h-14 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center shrink-0 transition-colors group relative border border-white/10 mr-2">
-            <!-- Playing State (Waveform) -->
-            <div id="audio-waveform"
-              class="flex items-center gap-[3px] text-white transition-opacity group-hover:opacity-0">
-              <div class="waveform-bar bg-white h-4 w-[3px]"></div>
-              <div class="waveform-bar bg-white h-4 w-[3px]"></div>
-              <div class="waveform-bar bg-white h-4 w-[3px]"></div>
-              <div class="waveform-bar bg-white h-4 w-[3px]"></div>
-            </div>
-
-            <!-- Hover Pause -->
-            <i data-lucide="pause" id="audio-pause-icon"
-              class="w-6 h-6 text-white absolute opacity-0 group-hover:opacity-100 transition-opacity"></i>
-
-            <!-- Paused State -->
-            <i data-lucide="play" id="audio-play-icon" class="w-6 h-6 text-white absolute hidden"></i>
-          </button>
-        </div>
-
-        <!-- YouTube App Mobile Simulation Metadata -->
-        <div id="video-metadata" class="flex-1 relative bg-transparent">
-          <!-- Meta Skeleton Loader Layer -->
-          <div id="meta-skeleton"
-            class="absolute inset-0 p-4 sm:p-6 bg-transparent transition-all duration-300 z-20 opacity-100 pointer-events-auto">
-            <div class="animate-pulse flex flex-col">
-              <div class="h-[22px] bg-zinc-200 rounded-md w-3/4"></div>
-              <div class="h-4 bg-zinc-200 rounded-md w-1/3 mt-2 sm:mt-3"></div>
-            </div>
-          </div>
-
-          <!-- Meta Content Area Layer -->
-          <div id="meta-content"
-            class="p-4 sm:p-6 transition-all duration-300 opacity-0 blur-[2px] pointer-events-none relative z-10 min-h-[80px]">
-            <h2 id="meta-title" class="text-lg font-bold text-zinc-900 leading-tight"></h2>
-
-            <!-- Stats Row -->
-            <div class="flex items-center flex-wrap gap-x-1.5 gap-y-1 text-xs text-zinc-500 mt-2 sm:mt-3 font-medium">
-              <span id="meta-author" class="text-zinc-800 font-bold"></span>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
     </main>
 
-    <!-- Bottom Section Wrapper -->
-    <div class="relative flex-shrink-0 z-20">
-      <!-- Toast Notification Container -->
-      <div id="toastContainer"
-        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 sm:mb-6 z-[60] flex flex-col items-center gap-2 w-max max-w-[90%] pointer-events-none">
+    <!-- Focus mode: audio only -->
+    <div class="audio-card" id="audio-card">
+      <div class="audio-thumb"><img id="audio-thumb" alt="" /></div>
+      <div class="audio-text">
+        <div class="audio-title-wrap" id="audio-title-wrap">
+          <h2 class="audio-title" id="audio-title"></h2>
+        </div>
+        <p class="audio-author" id="audio-author"></p>
       </div>
+      <button class="audio-toggle state" id="audio-toggle" type="button" aria-label="Play or pause">
+        <span class="icon" id="audio-icon" aria-hidden="true">play_arrow</span>
+        <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </button>
+    </div>
 
-      <!-- Bottom Action Bar -->
-      <div id="action-bar"
-        class="bg-white border-t border-zinc-200 p-4 sm:px-6 sm:py-4 flex flex-col gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0">
-        <div>
-          <input type="text" id="yt-url"
-            class="block w-full p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all placeholder-zinc-400 font-medium"
-            placeholder="Paste YouTube link or Video ID..." autocomplete="off" />
-        </div>
-
-        <!-- Dynamic Buttons Row -->
-        <div class="flex h-[52px]">
-          <button type="button" id="zen-btn"
-            class="hidden bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center overflow-hidden shrink-0 max-w-0 opacity-0 px-0 h-full mr-0">
-            <div class="flex items-center justify-center min-w-[52px]">
-              <i data-lucide="maximize" class="w-5 h-5 shrink-0"></i>
-            </div>
-          </button>
-
-          <button type="button" id="play-btn"
-            class="flex-1 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl font-medium shadow-brand-500/30 shadow-lg transition-all duration-300 flex items-center justify-center group h-full overflow-hidden shrink-0 relative">
-            <!-- Default Content -->
-            <div id="play-content-default"
-              class="absolute flex items-center gap-2 transition-all duration-300 opacity-100 blur-none">
-              <i data-lucide="play" class="w-5 h-5 fill-current shrink-0"></i>
-              <span class="whitespace-nowrap">Play</span>
-            </div>
-            <!-- Playing Waveform Content -->
-            <div id="play-content-playing"
-              class="absolute flex items-center gap-[4px] text-brand-600 transition-all duration-300 opacity-0 blur-[2px] pointer-events-none">
-              <div class="waveform-bar"></div>
-              <div class="waveform-bar"></div>
-              <div class="waveform-bar"></div>
-              <div class="waveform-bar"></div>
-            </div>
-          </button>
-
-          <button type="button" id="close-btn"
-            class="hidden bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center overflow-hidden shrink-0 max-w-0 opacity-0 px-0 h-full ml-0">
-            <div class="flex items-center justify-center min-w-[52px]">
-              <i data-lucide="x" class="w-5 h-5 shrink-0"></i>
-            </div>
-          </button>
-        </div>
+    <!-- Focus mode controls -->
+    <div class="zen-bar" id="zen-bar">
+      <div class="zen-pill" role="toolbar" aria-label="Focus mode">
+        <button
+          class="icon-btn state"
+          type="button"
+          data-switch="video"
+          aria-label="Video"
+          title="Video"
+        >
+          <span class="icon" aria-hidden="true">smart_display</span>
+        </button>
+        <button
+          class="icon-btn state"
+          type="button"
+          data-switch="audio"
+          aria-label="Audio only"
+          title="Audio only"
+        >
+          <span class="icon" aria-hidden="true">headphones</span>
+        </button>
+        <span class="zen-divider"></span>
+        <button
+          class="icon-btn state"
+          id="exit-zen"
+          type="button"
+          aria-label="Exit focus mode"
+          title="Exit focus mode (Esc)"
+        >
+          <span class="icon" aria-hidden="true">fullscreen_exit</span>
+        </button>
       </div>
     </div>
 
-    <!-- Zen Mode Controls -->
-    <div id="zen-controls"
-      class="hidden absolute bottom-6 left-0 right-0 z-[60] flex flex-col items-center pointer-events-none">
-      <!-- The morphing pill container -->
-      <div class="zen-pill-morph pointer-events-auto">
-        <div class="zen-pill-inner p-1.5">
-          <!-- Video/Audio Toggle Group -->
-          <div class="bg-white/10 rounded-full p-0.5 flex gap-0.5">
-            <button type="button" id="zen-video-btn"
-              class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-white/20 text-white shadow-sm"
-              title="Video">
-              <i data-lucide="monitor" class="w-4 h-4"></i>
-            </button>
-            <button type="button" id="zen-audio-btn"
-              class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/60 hover:text-white hover:bg-white/10"
-              title="Audio">
-              <i data-lucide="headphones" class="w-4 h-4"></i>
-            </button>
-          </div>
-
-          <!-- Divider -->
-          <div class="w-px h-5 bg-white/15 mx-0.5 shrink-0"></div>
-
-          <!-- Exit -->
-          <button type="button" id="exit-zen-btn"
-            class="w-9 h-9 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
-            title="Exit Zen Mode">
-            <i data-lucide="minimize" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
+    <!-- Menu -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
     </div>
-  </div>
 
-  <!-- Application Logic -->
-  <script>
-    // --- Constants & Config ---
-    // (None)
+    <!-- About -->
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">YouTube Player</h2>
+        <p class="about-desc">Play any YouTube video or livestream without distraction.</p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/minimal-youtube-player"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
 
-    // --- State Management ---
-    let currentVideoId = null;
-    let currentVideoUrl = '';
-    let isPlaying = false;
-    let currentZenMode = 'video';
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
 
-    let isYTAPIReady = false;
-    let ytPlayer = null;
+    <div id="probe" hidden></div>
 
-    // --- DOM Elements ---
-    const els = {
-      mainContent: document.getElementById('main-content'),
-      emptyState: document.getElementById('empty-state'),
-      playingState: document.getElementById('playing-state'),
-      actionBar: document.getElementById('action-bar'),
-      urlInput: document.getElementById('yt-url'),
-      playBtn: document.getElementById('play-btn'),
-      playContentDefault: document.getElementById('play-content-default'),
-      playContentPlaying: document.getElementById('play-content-playing'),
-      closeBtn: document.getElementById('close-btn'),
-      zenBtn: document.getElementById('zen-btn'),
-      exitZenBtn: document.getElementById('exit-zen-btn'),
-      zenControls: document.getElementById('zen-controls'),
-      zenVideoBtn: document.getElementById('zen-video-btn'),
-      zenAudioBtn: document.getElementById('zen-audio-btn'),
-      audioCard: document.getElementById('audio-card'),
-      audioThumbnail: document.getElementById('audio-thumbnail'),
-      audioThumbnailWrapper: document.getElementById('audio-thumbnail-wrapper'),
-      audioTitle: document.getElementById('audio-title'),
-      audioTitleContainer: document.getElementById('audio-title-container'),
-      audioAuthor: document.getElementById('audio-author'),
-      audioPlayPauseBtn: document.getElementById('audio-play-pause-btn'),
-      audioWaveform: document.getElementById('audio-waveform'),
-      audioPauseIcon: document.getElementById('audio-pause-icon'),
-      audioPlayIcon: document.getElementById('audio-play-icon'),
-      iframe: document.getElementById('yt-iframe'),
-      appHeader: document.getElementById('app-header'),
-      headerTitle: document.getElementById('header-title'),
-      headerIconBg: document.getElementById('header-icon-bg'),
-      toastContainer: document.getElementById('toastContainer'),
-      appWrapper: document.getElementById('app-wrapper'),
+    <script>
+      // --- Constants & Config ---
+      const STORE_KEY = 'minimal-youtube-player';
+      const APP_TITLE = 'YouTube Player';
+      const RECENT_LIMIT = 8;
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
 
-      // Layout specific elements
-      videoWrapper: document.getElementById('video-wrapper'),
-      videoInner: document.getElementById('video-inner'),
-      videoSkeleton: document.getElementById('video-skeleton'),
-      videoContainer: document.getElementById('video-container'),
-      videoMetadata: document.getElementById('video-metadata'),
-      metaSkeleton: document.getElementById('meta-skeleton'),
-      metaContent: document.getElementById('meta-content'),
-      metaTitle: document.getElementById('meta-title'),
-      metaAuthor: document.getElementById('meta-author'),
-    };
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let currentId = null;
+      let currentUrl = '';
+      let isPlaying = false;
+      let zenMode = 'video';
+      let ytPlayer = null;
+      let ytApiState = 'idle'; // idle | loading | ready
+      let loadToken = 0;
+      let failedId = null; // the video the player last rejected
+      let snackbarTimer = 0;
+      let ignorePopstate = 0;
+      const dialogStack = [];
 
-    // --- Initialization ---
-    // Boot
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
+      // --- DOM Elements ---
+      const els = {
+        appbar: document.getElementById('appbar'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        about: document.getElementById('about'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        artShape: document.getElementById('art-shape'),
+        hero: document.getElementById('hero'),
+        form: document.getElementById('form'),
+        url: document.getElementById('url'),
+        playBtn: document.getElementById('play-btn'),
+        playLabel: document.getElementById('play-label'),
+        recent: document.getElementById('recent'),
+        recentList: document.getElementById('recent-list'),
+        clearRecent: document.getElementById('clear-recent'),
+        player: document.getElementById('player'),
+        video: document.getElementById('video'),
+        iframe: document.getElementById('yt-iframe'),
+        metaTitle: document.getElementById('meta-title'),
+        metaAuthor: document.getElementById('meta-author'),
+        closeBtn: document.getElementById('close-btn'),
+        audioThumb: document.getElementById('audio-thumb'),
+        audioTitle: document.getElementById('audio-title'),
+        audioTitleWrap: document.getElementById('audio-title-wrap'),
+        audioAuthor: document.getElementById('audio-author'),
+        audioToggle: document.getElementById('audio-toggle'),
+        audioIcon: document.getElementById('audio-icon'),
+        zenBar: document.getElementById('zen-bar'),
+        exitZen: document.getElementById('exit-zen'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
 
-      // Lucide replaces <i> with <svg>, so re-capture refs after icons are rendered
-      els.audioPauseIcon = document.getElementById('audio-pause-icon');
-      els.audioPlayIcon = document.getElementById('audio-play-icon');
+      // --- Initialization ---
+      function init() {
+        els.artShape.setAttribute('d', cookiePath(64, 64, 64, 9, 0.12));
+        applyTheme();
+        renderRecent();
+        renderChip();
+        bindEvents();
+        setupResize();
 
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-      setupEventListeners();
-      setupMobileHeight();
-      setupResizeLogic();
-
-      const videoToPlay = checkUrlForVideo();
-      setHistoryState('replace', { view: 'index' }, window.location.pathname); // Clears any query parameters
-
-      if (videoToPlay) {
-        els.urlInput.value = videoToPlay;
-        setTimeout(() => handlePlay(true), 150);
+        // A shared ?p= link opens straight into the player; the start page sits behind it.
+        const linked = linkedVideo();
+        // A reload on the player keeps its entry, so Back still takes one step to the start page.
+        if (linked && ['player', 'zen'].includes(history.state?.view)) {
+          setHistoryState('replace', { view: 'player' }, '');
+          els.url.value = linked;
+          return play({ fromHistory: true });
+        }
+        setHistoryState('replace', { view: 'start' }, location.pathname);
+        if (linked) {
+          els.url.value = linked;
+          play();
+        }
       }
-    });
 
-    function checkUrlForVideo() {
-      const params = new URLSearchParams(window.location.search);
-      const potentialInput = params.get('p');
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        DARK_QUERY.addEventListener('change', applyTheme);
+        window.addEventListener(
+          'scroll',
+          () => els.appbar.classList.toggle('scrolled', window.scrollY > 0),
+          { passive: true },
+        );
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.moreBtn.addEventListener('click', () => toggleMenu(els.moreMenu, els.moreBtn));
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          const item = e.target.closest('.menu-item:not(#theme-btn)');
+          if (!item) return;
+          els.moreMenu.hidePopover();
+          if (item.dataset.action === 'about') openDialog(els.about);
+        });
 
-      if (potentialInput) {
-        const decoded = decodeURIComponent(potentialInput);
-        if (extractVideoID(decoded)) return decoded;
-      }
-      return null;
-    }
+        els.about.addEventListener('close', () => onDialogClosed(els.about));
+        bindBackdropClose(els.about);
+        els.about.addEventListener('click', (e) => {
+          if (e.target.closest('[data-close]')) closeDialog(els.about);
+        });
 
-    // --- Event Listeners ---
-    function setupEventListeners() {
-      els.playBtn.addEventListener('click', () => handlePlay(false));
-      els.closeBtn.addEventListener('click', () => handleClose(false));
-
-      els.zenBtn.addEventListener('click', () => enterZenMode('video'));
-
-      els.zenControls.addEventListener('mouseleave', () => {
-        if (document.activeElement && els.zenControls.contains(document.activeElement)) {
-          document.activeElement.blur();
-        }
-      });
-
-      els.zenVideoBtn.addEventListener('click', (e) => {
-        if (currentZenMode !== 'video') {
-          if (document.startViewTransition)
-            document.startViewTransition(() => switchZenMode('video'));
-          else switchZenMode('video');
-        }
-      });
-      els.zenAudioBtn.addEventListener('click', (e) => {
-        if (currentZenMode !== 'audio') {
-          if (document.startViewTransition)
-            document.startViewTransition(() => switchZenMode('audio'));
-          else switchZenMode('audio');
-        }
-      });
-
-      els.audioPlayPauseBtn.addEventListener('click', togglePlayPause);
-      els.exitZenBtn.addEventListener('click', () => history.back());
-      els.urlInput.addEventListener('input', handleInputDetect);
-
-      window.addEventListener('popstate', (e) => {
-        const view = e.state && e.state.view;
-        if (view === 'playing-zen') {
-          if (!currentVideoId) {
-            const videoToPlay = checkUrlForVideo();
-            if (videoToPlay) {
-              els.urlInput.value = videoToPlay;
-              handlePlay(false, true);
+        els.form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          play({ toggle: true });
+        });
+        els.url.addEventListener('input', renderChip);
+        // Esc steps back out: with nothing playing it clears the text first, then leaves.
+        els.url.addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape' || e.isComposing) return;
+          e.preventDefault();
+          if (!currentId && els.url.value) {
+            els.url.value = '';
+            renderChip();
+          } else els.url.blur();
+        });
+        // Leaving the field with an unused link puts the playing one back.
+        els.url.addEventListener('blur', () => {
+          setTimeout(() => {
+            if (document.activeElement === els.url) return;
+            if (currentId && extractVideoID(els.url.value) !== currentId) {
+              els.url.value = currentUrl;
+              renderChip();
             }
-          }
-          enterZenMode(currentZenMode, true);
-        } else if (view === 'playing') {
-          if (currentVideoId) {
-            if (!els.zenControls.classList.contains('hidden')) {
-              exitZenMode();
-            }
-          } else {
-            const videoToPlay = checkUrlForVideo();
-            if (videoToPlay) {
-              els.urlInput.value = videoToPlay;
-              handlePlay(false, true);
-            }
-          }
-        } else {
-          if (currentVideoId) {
-            handleClose(true);
-          }
-        }
-      });
+          }, 250);
+        });
 
-      els.urlInput.addEventListener('blur', () => {
-        setTimeout(() => {
-          if (currentVideoId && currentVideoUrl) {
-            const currentInputUrl = els.urlInput.value.trim();
-            if (currentInputUrl !== currentVideoUrl) {
-              els.urlInput.value = currentVideoUrl;
-              updatePlayButtonState(isPlaying ? 'playing' : 'paused');
-            }
-          }
-        }, 250);
-      });
+        els.recentList.addEventListener('click', (e) => {
+          const item = e.target.closest('[data-id]');
+          if (!item) return;
+          els.url.value = item.dataset.id;
+          play();
+        });
+        els.clearRecent.addEventListener('click', clearRecent);
 
-      els.urlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          els.urlInput.blur();
-          handlePlay(true);
-        }
-      });
+        els.closeBtn.addEventListener('click', () => history.back());
+        document
+          .querySelectorAll('[data-zen]')
+          .forEach((btn) => btn.addEventListener('click', () => enterZen(btn.dataset.zen)));
+        els.zenBar.addEventListener('click', (e) => {
+          const target = e.target.closest('[data-switch]');
+          if (target && target.dataset.switch !== zenMode) setZen(target.dataset.switch);
+        });
+        els.zenBar.addEventListener('mouseleave', () => {
+          if (els.zenBar.contains(document.activeElement)) document.activeElement.blur();
+        });
+        els.exitZen.addEventListener('click', () => history.back());
+        els.audioToggle.addEventListener('click', togglePlayPause);
 
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !els.zenControls.classList.contains('hidden')) {
-          history.back();
-        }
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener(
+          'resize',
+          () => isZen() && zenMode === 'audio' && scrollAudioTitle(),
+        );
 
-        if (e.key === ' ' || e.code === 'Space') {
-          if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+        document.addEventListener('keydown', (e) => {
+          if (dialogStack.length) return;
+          if (e.key === 'Escape' && isZen() && !e.repeat) history.back();
+          const typing = e.target.closest?.('input, textarea, select');
+          // Slash jumps to the link field, as in every app with a main input.
+          if (e.key === '/' && !typing && !isZen() && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            e.preventDefault();
+            els.url.focus();
+            els.url.select();
             return;
           }
-          if (currentVideoId) {
+          // Space plays and pauses, unless it belongs to a field or a focused button.
+          const own = e.target.closest?.('input, textarea, select, button, a');
+          if (e.key === ' ' && !own && !e.repeat && currentId) {
             e.preventDefault();
             togglePlayPause();
           }
-        }
-      });
-    }
-
-
-    // --- Core Logic ---
-    window.onYouTubeIframeAPIReady = function () {
-      isYTAPIReady = true;
-      // Prevent race condition if user hits play before the API downloaded
-      if (currentVideoId && !ytPlayer && els.iframe) {
-        initYouTubePlayer();
-      }
-    };
-
-    function initYouTubePlayer() {
-      ytPlayer = new YT.Player('yt-iframe', {
-        events: {
-          onStateChange: onPlayerStateChange,
-          onError: onPlayerError,
-        },
-      });
-    }
-
-    function replaceIframe(url) {
-      if (ytPlayer) {
-        if (typeof ytPlayer.destroy === 'function') {
-          try {
-            ytPlayer.destroy();
-          } catch (e) { }
-        }
-        ytPlayer = null;
-      }
-
-      const newIframe = document.createElement('iframe');
-      newIframe.id = 'yt-iframe';
-      newIframe.className = 'w-full h-full border-0';
-      newIframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-      newIframe.setAttribute(
-        'allow',
-        'autoplay; encrypted-media; fullscreen; picture-in-picture',
-      );
-      newIframe.setAttribute('allowfullscreen', '');
-      if (url) {
-        newIframe.src = url;
-      }
-
-      els.videoContainer.innerHTML = '';
-      els.videoContainer.appendChild(newIframe);
-
-      els.iframe = newIframe;
-
-      if (url && isYTAPIReady) {
-        initYouTubePlayer();
-      }
-    }
-
-    function extractVideoID(input) {
-      if (!input) return null;
-      const cleanInput = input.trim();
-
-      // 1. Check if it's already an exact 11-character raw Video ID
-      if (/^[a-zA-Z0-9_-]{11}$/.test(cleanInput)) {
-        return cleanInput;
-      }
-
-      // 2. Check various YouTube URL formats (including music.youtube.com)
-      const regex =
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/|music\.youtube\.com\/watch\?v=)([^"&?\/\s]{11})/i;
-      const match = cleanInput.match(regex);
-      return match ? match[1] : null;
-    }
-
-    function updatePlayButtonState(state) {
-      const playText = els.playContentDefault.querySelector('span');
-
-      const baseBtnClasses =
-        'flex-1 rounded-xl font-medium transition-all duration-300 flex items-center justify-center group h-full overflow-hidden shrink-0 relative';
-      const baseDefaultContentClasses =
-        'absolute flex items-center gap-2 transition-all duration-300';
-      const basePlayingContentClasses =
-        'absolute flex items-center gap-[4px] text-brand-600 transition-all duration-300';
-
-      if (state === 'default') {
-        if (playText) playText.textContent = 'Play';
-        els.playBtn.className = `${baseBtnClasses} bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white shadow-brand-500/30 shadow-lg`;
-        els.playContentDefault.className = `${baseDefaultContentClasses} opacity-100 blur-none`;
-        els.playContentPlaying.className = `${basePlayingContentClasses} opacity-0 blur-[2px] pointer-events-none`;
-      } else if (state === 'playing') {
-        els.playBtn.className = `${baseBtnClasses} bg-zinc-100 hover:bg-zinc-200 text-brand-600`;
-        els.playContentDefault.className = `${baseDefaultContentClasses} opacity-0 blur-[2px] pointer-events-none`;
-        els.playContentPlaying.className = `${basePlayingContentClasses} opacity-100 blur-none`;
-      } else if (state === 'paused') {
-        if (playText) playText.textContent = 'Play';
-        els.playBtn.className = `${baseBtnClasses} bg-zinc-100 hover:bg-zinc-200 text-zinc-700`;
-        els.playContentDefault.className = `${baseDefaultContentClasses} opacity-100 blur-none`;
-        els.playContentPlaying.className = `${basePlayingContentClasses} opacity-0 blur-[2px] pointer-events-none`;
-      }
-    }
-
-    function setPlayingStateUI(playing, isLoading = false) {
-      isPlaying = playing;
-      if (playing) {
-        els.audioPlayPauseBtn.classList.add('group');
-        els.audioWaveform.classList.remove('hidden');
-        els.audioPauseIcon.classList.remove('hidden');
-        els.audioPlayIcon.classList.add('hidden');
-        updatePlayButtonState('playing');
-      } else {
-        els.audioPlayPauseBtn.classList.remove('group');
-        els.audioWaveform.classList.add('hidden');
-        els.audioPauseIcon.classList.add('hidden');
-        els.audioPlayIcon.classList.remove('hidden');
-        updatePlayButtonState(isLoading ? 'default' : 'paused');
-      }
-    }
-
-    function onPlayerStateChange(event) {
-      if (!currentVideoId) return;
-      if (event.data === 1) {
-        setPlayingStateUI(true);
-      } else if (event.data === 2 || event.data === 0) {
-        setPlayingStateUI(false, false);
-      } else if (event.data === -1) {
-        setPlayingStateUI(false, true);
-      }
-    }
-
-    function onPlayerError(event) {
-      if (!currentVideoId) return;
-      setPlayingStateUI(false, true);
-      showToast('Video is restricted or unavailable', 'error');
-    }
-
-    function handleInputDetect() {
-      if (!currentVideoId) return;
-
-      const url = els.urlInput.value.trim();
-      const videoId = extractVideoID(url);
-
-      if (videoId !== currentVideoId) {
-        updatePlayButtonState('default');
-      } else {
-        updatePlayButtonState(isPlaying ? 'playing' : 'paused');
-      }
-    }
-
-    function handlePlay(fromInput = false, fromPopState = false) {
-      const url = els.urlInput.value.trim();
-      if (!url) {
-        showToast('Please enter a YouTube link or ID', 'warning');
-        els.urlInput.focus();
-        return;
-      }
-
-      const videoId = extractVideoID(url);
-
-      if (videoId) {
-        if (videoId === currentVideoId) {
-          if (!fromInput) togglePlayPause();
-          return;
-        }
-
-        const isChangingMedia = currentVideoId !== null;
-        currentVideoId = videoId;
-        currentVideoUrl = url;
-
-        const loadMedia = async () => {
-          replaceIframe(
-            `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`,
-          );
-
-          let videoTitle = '';
-          let authorName = '';
-          try {
-            const res = await fetch(
-              `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
-            );
-            const data = await res.json();
-            videoTitle = data.title || '';
-            authorName = data.author_name || '';
-          } catch (err) {
-            // Metadata unavailable — leave title/author empty
-          }
-
-          document.title = videoTitle
-            ? `${videoTitle} | Minimal YouTube Player`
-            : 'Minimal YouTube Player';
-          els.metaTitle.textContent = videoTitle;
-          els.metaAuthor.textContent = authorName;
-          els.audioTitle.textContent = videoTitle;
-          els.audioAuthor.textContent = authorName;
-          els.audioThumbnail.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-
-          setPlayingStateUI(false, true);
-
-          setTimeout(() => {
-            hideSkeletons();
-            if (currentZenMode === 'audio') {
-              checkAudioTitleScroll();
-            }
-          }, 400);
-        };
-
-        if (!fromPopState) {
-          if (isChangingMedia) {
-            setHistoryState('replace', { view: 'playing' }, '?p=' + videoId);
-          } else {
-            setHistoryState('push', { view: 'playing' }, '?p=' + videoId);
-          }
-        }
-
-        if (isChangingMedia) {
-          showSkeletons();
-          setTimeout(() => loadMedia(), 300);
-        } else {
-          els.emptyState.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
-          els.emptyState.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
-
-          showSkeletons();
-
-          setTimeout(() => {
-            els.emptyState.classList.add('hidden');
-            els.playingState.classList.remove('hidden');
-
-            requestAnimationFrame(() => {
-              els.playingState.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
-            });
-
-            els.zenBtn.classList.remove('hidden');
-            els.closeBtn.classList.remove('hidden');
-            void els.zenBtn.offsetWidth;
-
-            els.zenBtn.classList.remove('max-w-0', 'opacity-0', 'px-0', 'mr-0');
-            els.zenBtn.classList.add('max-w-[52px]', 'opacity-100', 'mr-3');
-
-            els.closeBtn.classList.remove('max-w-0', 'opacity-0', 'px-0', 'ml-0');
-            els.closeBtn.classList.add('max-w-[52px]', 'opacity-100', 'ml-3');
-
-            loadMedia();
-          }, 300);
-        }
-      } else {
-        showToast('Invalid YouTube URL or ID', 'error');
-      }
-    }
-
-    function handleClose(fromPopState = false) {
-      if (fromPopState !== true) {
-        history.back();
-        return;
-      }
-
-      currentVideoUrl = '';
-      document.title = 'Minimal YouTube Player'; // Reset tab title
-
-      if (!els.zenControls.classList.contains('hidden')) {
-        _syncExitZenMode();
-      }
-
-      els.playingState.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
-      els.urlInput.value = '';
-
-      els.zenBtn.classList.remove('max-w-[52px]', 'opacity-100', 'mr-3');
-      els.zenBtn.classList.add('max-w-0', 'opacity-0', 'px-0', 'mr-0');
-
-      els.closeBtn.classList.remove('max-w-[52px]', 'opacity-100', 'ml-3');
-      els.closeBtn.classList.add('max-w-0', 'opacity-0', 'px-0', 'ml-0');
-
-      updatePlayButtonState('default');
-
-      setTimeout(() => {
-        replaceIframe('');
-        currentVideoId = null;
-
-        els.playingState.classList.add('hidden');
-
-        els.emptyState.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          els.emptyState.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
-          els.emptyState.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
         });
 
-        els.zenBtn.classList.add('hidden');
-        els.closeBtn.classList.add('hidden');
-
-        showSkeletons();
-        els.playingState.scrollTop = 0;
-      }, 300);
-    }
-
-    function switchZenMode(mode) {
-      currentZenMode = mode;
-      if (mode === 'video') {
-        els.videoWrapper.style.width = '';
-        els.audioThumbnailWrapper.classList.remove('morph-active');
-
-        els.zenVideoBtn.className =
-          'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-white/20 text-white shadow-sm';
-        els.zenAudioBtn.className =
-          'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/60 hover:text-white hover:bg-white/10';
-
-        els.audioCard.classList.add('hidden');
-
-        els.videoWrapper.className =
-          'zen-video-active morph-active absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[50vw] max-w-[90vw] aspect-video z-50 pointer-events-auto';
-        els.videoInner.className =
-          'w-full h-full relative overflow-hidden rounded-2xl bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-300';
-      } else {
-        els.videoWrapper.style.width = '';
-        els.audioThumbnailWrapper.classList.add('morph-active');
-
-        els.zenAudioBtn.className =
-          'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 bg-white/20 text-white shadow-sm';
-        els.zenVideoBtn.className =
-          'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 text-white/60 hover:text-white hover:bg-white/10';
-
-        els.audioCard.classList.remove('hidden');
-
-        // className replacement implicitly removes zen-video-active and morph-active
-        els.videoWrapper.className =
-          'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] sm:w-[50vw] max-w-[90vw] aspect-video z-50 opacity-0 pointer-events-none';
-        els.videoInner.className =
-          'w-full h-full relative overflow-hidden rounded-2xl bg-black shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-300';
-
-        requestAnimationFrame(() => checkAudioTitleScroll());
-      }
-    }
-
-    function _syncEnterZenMode(mode) {
-      els.appHeader.classList.add('hidden');
-      els.actionBar.classList.add('hidden');
-      els.videoMetadata.classList.add('hidden');
-      els.zenControls.classList.remove('hidden');
-
-      document.body.classList.remove('bg-[#f5f5f5]');
-      document.body.classList.add('bg-[#0f0f0f]');
-
-      els.appWrapper.classList.remove(
-        'bg-white',
-        'sm:border',
-        'sm:shadow-2xl',
-        'max-w-[480px]',
-        'sm:h-[95vh]',
-      );
-      els.appWrapper.classList.add('bg-transparent', 'w-full', 'max-w-none');
-
-      els.mainContent.classList.remove('bg-zinc-50/50');
-      els.mainContent.classList.add('bg-transparent');
-
-      switchZenMode(mode);
-    }
-
-    function _syncExitZenMode() {
-      els.videoWrapper.style.width = '';
-      els.audioThumbnailWrapper.classList.remove('morph-active');
-
-      els.appHeader.classList.remove('hidden');
-      els.actionBar.classList.remove('hidden');
-      els.videoMetadata.classList.remove('hidden');
-      els.zenControls.classList.add('hidden');
-      els.audioCard.classList.add('hidden');
-
-      document.body.classList.add('bg-[#f5f5f5]');
-      document.body.classList.remove('bg-[#0f0f0f]');
-
-      els.appWrapper.classList.add(
-        'bg-white',
-        'sm:border',
-        'sm:shadow-2xl',
-        'max-w-[480px]',
-        'sm:h-[95vh]',
-      );
-      els.appWrapper.classList.remove('bg-transparent', 'max-w-none');
-
-      els.mainContent.classList.add('bg-zinc-50/50');
-      els.mainContent.classList.remove('bg-transparent');
-
-      // className replacement also restores morph-active and clears zen-video-active
-      els.videoWrapper.className =
-        'morph-active w-full aspect-video sticky top-0 z-10 flex-shrink-0 relative';
-      els.videoInner.className =
-        'w-full h-full relative overflow-hidden bg-zinc-100 shadow-sm transition-all duration-300';
-    }
-
-    function enterZenMode(mode = 'video', fromPopState = false) {
-      if (!fromPopState) {
-        setHistoryState('push', { view: 'playing-zen' }, '');
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
       }
 
-      if (document.startViewTransition) {
-        document.startViewTransition(() => _syncEnterZenMode(mode));
-      } else {
-        _syncEnterZenMode(mode);
-      }
-    }
-
-    function exitZenMode() {
-      if (document.startViewTransition) {
-        document.startViewTransition(() => _syncExitZenMode());
-      } else {
-        _syncExitZenMode();
-      }
-    }
-
-    function togglePlayPause() {
-      if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
-
-      const state = ytPlayer.getPlayerState();
-      if (state === 1) {
-        ytPlayer.pauseVideo();
-      } else {
-        ytPlayer.playVideo();
-      }
-    }
-
-
-    // --- UI Updates ---
-    function showSkeletons() {
-      els.videoSkeleton.classList.remove('opacity-0', 'pointer-events-none');
-      els.videoSkeleton.classList.add('opacity-100', 'pointer-events-auto');
-
-      els.metaSkeleton.classList.remove('opacity-0', 'pointer-events-none');
-      els.metaSkeleton.classList.add('opacity-100', 'pointer-events-auto');
-
-      els.videoContainer.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
-      els.videoContainer.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
-
-      els.metaContent.classList.add('opacity-0', 'blur-[2px]', 'pointer-events-none');
-      els.metaContent.classList.remove('opacity-100', 'blur-none', 'pointer-events-auto');
-    }
-
-    function hideSkeletons() {
-      els.videoSkeleton.classList.remove('opacity-100', 'pointer-events-auto');
-      els.videoSkeleton.classList.add('opacity-0', 'pointer-events-none');
-
-      els.metaSkeleton.classList.remove('opacity-100', 'pointer-events-auto');
-      els.metaSkeleton.classList.add('opacity-0', 'pointer-events-none');
-
-      els.videoContainer.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
-      els.videoContainer.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
-
-      els.metaContent.classList.remove('opacity-0', 'blur-[2px]', 'pointer-events-none');
-      els.metaContent.classList.add('opacity-100', 'blur-none', 'pointer-events-auto');
-    }
-
-
-    function showToast(message, type = 'success') {
-      const el = document.createElement('div');
-      const colorClass =
-        type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-amber-500' : 'bg-zinc-800';
-      const icon =
-        type === 'error' ? 'circle-alert' : type === 'warning' ? 'triangle-alert' : 'info';
-
-      el.className = `${colorClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto min-w-[200px] justify-center`;
-      el.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span>${message}</span>`;
-
-      while (els.toastContainer.children.length >= 3) {
-        els.toastContainer.firstChild.remove();
-      }
-
-      els.toastContainer.appendChild(el);
-      lucide.createIcons({ root: el });
-
-      requestAnimationFrame(() => {
-        el.classList.remove('translate-y-4', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        el.classList.add('translate-y-4', 'opacity-0');
-        setTimeout(() => {
-          if (el.parentNode) el.remove();
-        }, 300);
-      }, 3000);
-    }
-
-    // --- Utilities ---
-    function setHistoryState(action, state, url) {
-      try {
-        if (action === 'push') {
-          history.pushState(state, '', url);
-        } else {
-          history.replaceState(state, '', url);
+      // Back and Forward walk through start → player → focus mode. An open dialog takes Back first.
+      function handlePopState(e) {
+        if (ignorePopstate) return ignorePopstate--;
+        const top = dialogStack.at(-1);
+        if (top) {
+          dialogStack.pop();
+          return top.close();
         }
-      } catch (e) {
-        try {
-          if (action === 'push') {
-            history.pushState(state, '');
-          } else {
-            history.replaceState(state, '');
-          }
-        } catch (err) {
-          console.warn('History API is blocked in this environment.');
+        const view = e.state?.view;
+        if (view === 'zen') {
+          if (!currentId) playFromUrl();
+          if (currentId) enterZen(zenMode, true);
+        } else if (view === 'player') {
+          if (isZen()) exitZen();
+          else if (!currentId) playFromUrl();
+        } else if (currentId) {
+          closePlayer();
         }
       }
-    }
 
+      // --- Core Logic ---
 
-    function setupResizeLogic() {
-      if (window.innerWidth < 640) return;
+      // Preferences --------------------------------------------------------------------
 
-      let isResizing = false;
-      let resizeStartX = 0;
-      let resizeStartWidth = 0;
-      let resizeBaseWidth = 0;
-      let resizeDir = 1;
+      function loadPrefs() {
+        const saved = readJson(STORE_KEY);
+        const recent = Array.isArray(saved?.recent)
+          ? saved.recent
+              .filter((r) => r && /^[\w-]{11}$/.test(r.id))
+              .map((r) => ({
+                id: r.id,
+                title: String(r.title || ''),
+                author: String(r.author || ''),
+              }))
+              .slice(0, RECENT_LIMIT)
+          : [];
+        return { theme: THEME_CYCLE.includes(saved?.theme) ? saved.theme : 'auto', recent };
+      }
 
-      const resizeOverlay = document.getElementById('resize-overlay');
-      const getClientX = (e) =>
-        e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+      function savePrefs() {
+        writeJson(STORE_KEY, prefs);
+      }
 
-      document.querySelectorAll('.resize-handle').forEach((handle) => {
-        const startDrag = (e) => {
-          if (currentZenMode !== 'video') return;
-          isResizing = true;
-          resizeStartX = getClientX(e);
-
-          const currentStyleWidth = els.videoWrapper.style.width;
-          els.videoWrapper.style.width = '';
-          resizeBaseWidth = els.videoWrapper.offsetWidth;
-          els.videoWrapper.style.width = currentStyleWidth || `${resizeBaseWidth}px`;
-          resizeStartWidth = els.videoWrapper.offsetWidth;
-
-          resizeDir = parseInt(handle.getAttribute('data-x-dir'));
-
-          resizeOverlay.classList.remove('hidden');
-
-          window.addEventListener('mousemove', handleResizeMove);
-          window.addEventListener('mouseup', handleResizeUp);
-          window.addEventListener('touchmove', handleResizeMove, { passive: false });
-          window.addEventListener('touchend', handleResizeUp);
-        };
-
-        handle.addEventListener('mousedown', startDrag);
-        handle.addEventListener('touchstart', startDrag, { passive: true });
-      });
-
-      function handleResizeMove(e) {
-        if (!isResizing) return;
-        if (e.cancelable) e.preventDefault();
-
-        const deltaX = getClientX(e) - resizeStartX;
-        const widthChange = deltaX * resizeDir * 2;
-        let newWidth = Math.max(
-          300,
-          Math.min(resizeStartWidth + widthChange, window.innerWidth * 0.9),
+      function remember(entry) {
+        prefs.recent = [entry, ...prefs.recent.filter((r) => r.id !== entry.id)].slice(
+          0,
+          RECENT_LIMIT,
         );
-
-        if (Math.abs(newWidth - resizeBaseWidth) < 50) {
-          els.videoWrapper.style.width = '';
-        } else {
-          els.videoWrapper.style.width = `${newWidth}px`;
-        }
+        savePrefs();
+        renderRecent();
       }
 
-      function handleResizeUp() {
-        if (!isResizing) return;
-        isResizing = false;
-        resizeOverlay.classList.add('hidden');
-
-        window.removeEventListener('mousemove', handleResizeMove);
-        window.removeEventListener('mouseup', handleResizeUp);
-        window.removeEventListener('touchmove', handleResizeMove);
-        window.removeEventListener('touchend', handleResizeUp);
-      }
-    }
-
-
-    function setupMobileHeight() {
-      let resizeTimer;
-      function setHeight() {
-        if (window.innerWidth >= 640) {
-          els.appWrapper.style.height = '';
-        } else if (!(document.activeElement && document.activeElement.tagName === 'INPUT')) {
-          els.appWrapper.style.height = `${window.innerHeight}px`;
-        }
-
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          if (currentZenMode === 'audio') checkAudioTitleScroll();
-        }, 150);
+      function forget(id) {
+        if (!prefs.recent.some((r) => r.id === id)) return;
+        prefs.recent = prefs.recent.filter((r) => r.id !== id);
+        savePrefs();
+        renderRecent();
       }
 
-      window.addEventListener('resize', setHeight);
-      setHeight();
-    }
-
-    function checkAudioTitleScroll() {
-      if (
-        els.audioCard.classList.contains('hidden') ||
-        els.audioCard.classList.contains('opacity-0')
-      )
-        return;
-
-      if (els.audioTitle.scrollAnim) {
-        els.audioTitle.scrollAnim.cancel();
-      }
-
-      els.audioTitle.style.transform = 'none';
-      els.audioTitleContainer.style.maskImage = 'none';
-      els.audioTitleContainer.style.webkitMaskImage = 'none';
-
-      const originalText =
-        els.audioTitle.getAttribute('data-original-text') ?? els.audioTitle.textContent;
-      els.audioTitle.textContent = originalText;
-      els.audioTitle.setAttribute('data-original-text', originalText);
-
-      requestAnimationFrame(() => {
-        const parent = els.audioTitleContainer;
-        const textWidth = els.audioTitle.scrollWidth;
-        const containerWidth = parent.clientWidth;
-
-        if (textWidth > containerWidth && containerWidth > 0) {
-          const gap = 48; // Space between loops
-
-          els.audioTitle.textContent = ''; // clear initial contents
-
-          const span1 = document.createElement('span');
-          span1.textContent = originalText;
-
-          const span2 = document.createElement('span');
-          span2.style.paddingLeft = `${gap}px`;
-          span2.textContent = originalText;
-
-          els.audioTitle.appendChild(span1);
-          els.audioTitle.appendChild(span2);
-
-          const scrollDist = textWidth + gap;
-
-          // Web Animations API: Allows exact 3s pause natively without hacky CSS workarounds
-          const scrollDuration = scrollDist / 35; // purely the time it takes to scroll
-          const pauseDuration = 3;
-          const totalDuration = scrollDuration + pauseDuration;
-          const pausePercent = pauseDuration / totalDuration; // Dynamic percentage for holding at 0px
-
-          els.audioTitle.scrollAnim = els.audioTitle.animate(
-            [
-              { transform: 'translateX(0)', offset: 0 },
-              { transform: 'translateX(0)', offset: pausePercent },
-              { transform: `translateX(-${scrollDist}px)`, offset: 1 },
-            ],
-            {
-              duration: totalDuration * 1000,
-              iterations: Infinity,
-              easing: 'linear',
-            },
+      function clearRecent() {
+        const snapshot = prefs.recent;
+        prefs.recent = [];
+        savePrefs();
+        renderRecent();
+        showSnackbar('History cleared', 'Undo', () => {
+          // Keep anything played since, then put the cleared items back behind it.
+          const ids = new Set(prefs.recent.map((r) => r.id));
+          prefs.recent = [...prefs.recent, ...snapshot.filter((r) => !ids.has(r.id))].slice(
+            0,
+            RECENT_LIMIT,
           );
+          savePrefs();
+          renderRecent();
+        });
+      }
 
-          // Add fade mask to both edges so text blends in perfectly
-          parent.style.maskImage =
-            'linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%)';
-          parent.style.webkitMaskImage =
-            'linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%)';
+      // Playback ---------------------------------------------------------------------------
+
+      function linkedVideo() {
+        const p = new URLSearchParams(location.search).get('p');
+        return p && extractVideoID(p) ? p : null;
+      }
+
+      function playFromUrl() {
+        const linked = linkedVideo();
+        if (!linked) return;
+        els.url.value = linked;
+        play({ fromHistory: true });
+      }
+
+      // Plays what's in the link field. With `toggle`, the same video pauses or resumes.
+      function play({ toggle = false, fromHistory = false } = {}) {
+        const input = els.url.value.trim();
+        if (!input) {
+          showError('Paste a YouTube link or video ID');
+          return els.url.focus();
         }
-      });
-    }
+        const id = extractVideoID(input);
+        if (!id) {
+          return showError(
+            /[?&]list=/.test(input)
+              ? 'Playlist links aren’t supported. Paste a link to one video'
+              : 'That isn’t a YouTube link or video ID',
+          );
+        }
+        const start = startTime(input);
+        if (id === currentId) {
+          // The same video with a timestamp jumps there instead of toggling.
+          if (start && typeof ytPlayer?.seekTo === 'function') {
+            ytPlayer.seekTo(start, true);
+            ytPlayer.playVideo();
+            els.url.blur();
+          } else if (toggle) togglePlayPause();
+          return;
+        }
+        const first = currentId === null;
+        currentId = id;
+        failedId = null;
+        currentUrl = input;
+        setPlaying(false);
+        els.url.blur();
+        if (!fromHistory)
+          setHistoryState(first ? 'push' : 'replace', { view: 'player' }, `?p=${id}`);
+        withViewTransition(() => {
+          document.body.dataset.view = 'player';
+          els.hero.hidden = true;
+          els.recent.hidden = true;
+          els.player.hidden = false;
+        }, first);
+        loadVideo(id, start);
+        renderChip();
+      }
 
-  </script>
-</body>
+      async function loadVideo(id, start = 0) {
+        const token = ++loadToken;
+        els.player.classList.remove('loaded');
+        replaceIframe(
+          `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1${start ? `&start=${start}` : ''}`,
+        );
+        let title = '';
+        let author = '';
+        let missing = false;
+        try {
+          const res = await fetch(
+            `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}&format=json`,
+            { signal: AbortSignal.timeout(5000) },
+          );
+          if (res.ok) ({ title = '', author_name: author = '' } = await res.json());
+          else missing = [400, 401, 403, 404].includes(res.status);
+        } catch (err) {
+          // No metadata (offline or blocked): the video still plays.
+        }
+        if (token !== loadToken) return;
+        document.title = title ? `${title} · ${APP_TITLE}` : APP_TITLE;
+        els.metaTitle.textContent = title || 'YouTube video';
+        els.metaAuthor.textContent = author;
+        els.audioTitle.textContent = title || 'YouTube video';
+        els.audioTitle.removeAttribute('data-text');
+        els.audioAuthor.textContent = author;
+        els.audioThumb.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+        // Private, removed or unknown videos stay out of Recently played. A failed lookup keeps
+        // the title already saved, and a video the player rejected is not added back.
+        if (missing || failedId === id) forget(id);
+        else {
+          const saved = prefs.recent.find((r) => r.id === id);
+          remember({
+            id,
+            title: title || saved?.title || '',
+            author: author || saved?.author || '',
+          });
+        }
+        setTimeout(() => {
+          if (token !== loadToken) return;
+          els.player.classList.add('loaded');
+          if (isZen() && zenMode === 'audio') scrollAudioTitle();
+        }, 300);
+      }
 
+      // A fresh iframe per video keeps the YouTube player state clean.
+      function replaceIframe(src) {
+        // destroy() removes the old iframe from the page, so keep its container first.
+        const holder = els.iframe.parentNode;
+        try {
+          ytPlayer?.destroy();
+        } catch (err) {
+          // The old player may already be gone.
+        }
+        ytPlayer = null;
+        const iframe = document.createElement('iframe');
+        iframe.id = 'yt-iframe';
+        iframe.title = 'YouTube video';
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+        iframe.allowFullscreen = true;
+        if (src) iframe.src = src;
+        els.iframe.remove();
+        holder.append(iframe);
+        els.iframe = iframe;
+        if (src) connectPlayer();
+      }
+
+      // The IFrame API reports play/pause so the controls can follow; it loads on first use.
+      function connectPlayer() {
+        if (ytApiState === 'ready') {
+          ytPlayer = new YT.Player(els.iframe, {
+            events: { onStateChange: onPlayerStateChange, onError: onPlayerError },
+          });
+        } else if (ytApiState === 'idle') {
+          ytApiState = 'loading';
+          window.onYouTubeIframeAPIReady = () => {
+            ytApiState = 'ready';
+            if (currentId) connectPlayer();
+          };
+          const script = document.createElement('script');
+          script.src = 'https://www.youtube.com/iframe_api';
+          // Allow a retry on the next play, and tell the person why Resume does nothing.
+          script.onerror = () => {
+            ytApiState = 'idle';
+            script.remove();
+            showError('Couldn’t load the YouTube player');
+          };
+          document.head.append(script);
+        }
+      }
+
+      function onPlayerStateChange(e) {
+        if (!currentId) return;
+        if (e.data === 1) setPlaying(true);
+        else if (e.data === 2 || e.data === 0 || e.data === -1) setPlaying(false);
+      }
+
+      // Codes 100, 101 and 150 mean private, removed or embedding off. Others (2, 5) can be
+      // temporary, so the video stays in history.
+      function onPlayerError(e) {
+        if (!currentId) return;
+        setPlaying(false);
+        if ([100, 101, 150].includes(e.data)) {
+          failedId = currentId;
+          forget(currentId);
+          showError('This video is private, removed or can’t be embedded');
+        } else {
+          showError('The player hit an error. Try again in a moment');
+        }
+      }
+
+      function togglePlayPause() {
+        if (typeof ytPlayer?.getPlayerState !== 'function') return;
+        if (ytPlayer.getPlayerState() === 1) ytPlayer.pauseVideo();
+        else ytPlayer.playVideo();
+      }
+
+      function closePlayer() {
+        loadToken++;
+        if (isZen()) delete document.body.dataset.zen;
+        currentId = null;
+        currentUrl = '';
+        setPlaying(false);
+        els.url.value = '';
+        document.title = APP_TITLE;
+        replaceIframe('');
+        withViewTransition(() => {
+          document.body.dataset.view = 'start';
+          els.player.hidden = true;
+          els.player.classList.remove('loaded');
+          els.hero.hidden = false;
+          renderRecent();
+        });
+        renderChip();
+      }
+
+      // Focus mode ---------------------------------------------------------------------------
+
+      function isZen() {
+        return Boolean(document.body.dataset.zen);
+      }
+
+      function enterZen(mode, fromHistory = false) {
+        // Keyboard focus on the hidden Focus or Listen button moves to Exit instead of dropping to the page.
+        const active = document.activeElement;
+        const keepFocus = active?.matches(':focus-visible') && !els.zenBar.contains(active);
+        if (!fromHistory) setHistoryState('push', { view: 'zen' }, '');
+        setZen(mode, keepFocus);
+      }
+
+      // The video and the audio thumbnail share a view-transition name, so one morphs into the other.
+      function setZen(mode, focusExit = false) {
+        zenMode = mode;
+        els.video.style.width = '';
+        withViewTransition(() => {
+          document.body.dataset.zen = mode;
+          renderZenBar();
+          if (focusExit) els.exitZen.focus({ preventScroll: true });
+        });
+        if (mode === 'audio') requestAnimationFrame(scrollAudioTitle);
+      }
+
+      // Focus returns to the button that matches the mode, unless it already sits somewhere real.
+      function exitZen() {
+        const active = document.activeElement;
+        const refocus = !active || active === document.body || els.zenBar.contains(active);
+        els.video.style.width = '';
+        withViewTransition(() => {
+          delete document.body.dataset.zen;
+          if (refocus) {
+            document.querySelector(`[data-zen="${zenMode}"]`)?.focus({ preventScroll: true });
+          }
+        });
+      }
+
+      // Theme --------------------------------------------------------------------------------
+
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
+
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
+        );
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        savePrefs();
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
+      }
+
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
+      }
+
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
+
+      // Menus & dialogs ----------------------------------------------------------------
+
+      // Opens under the button, right-aligned, or above it when there is no room below.
+      // The source link keeps a click on the open menu's button from light-dismissing and
+      // reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        const up = r.bottom + 4 + menu.offsetHeight > innerHeight - 8;
+        menu.classList.toggle('up', up);
+        menu.style.top = up ? `${r.top - 4 - menu.offsetHeight}px` : `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        items.at(i < 0 && step < 0 ? -1 : (i + step) % items.length)?.focus();
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        setHistoryState('push', { dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
+        }
+      }
+
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
+      }
+
+      // --- UI Updates ---
+
+      function setPlaying(playing) {
+        isPlaying = playing;
+        renderChip();
+        els.audioToggle.dataset.playing = playing;
+        els.audioIcon.textContent = playing ? 'pause' : 'play_arrow';
+        els.audioToggle.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      }
+
+      // Play for a new link; for the current video, bars while playing and Resume when paused.
+      function renderChip() {
+        const same = currentId && extractVideoID(els.url.value) === currentId;
+        const state = !same ? 'play' : isPlaying ? 'playing' : 'paused';
+        els.playBtn.dataset.state = state;
+        els.playLabel.textContent = state === 'paused' ? 'Resume' : 'Play';
+        els.playBtn.setAttribute(
+          'aria-label',
+          state === 'playing' ? 'Pause' : els.playLabel.textContent,
+        );
+      }
+
+      function renderZenBar() {
+        els.zenBar.querySelectorAll('[data-switch]').forEach((btn) => {
+          btn.setAttribute('aria-pressed', btn.dataset.switch === zenMode);
+        });
+      }
+
+      function renderRecent() {
+        els.recent.hidden = !prefs.recent.length || Boolean(currentId);
+        els.recentList.innerHTML = prefs.recent
+          .map(
+            (r) => `
+            <li>
+              <button class="recent-item state" type="button" data-id="${r.id}">
+                <img src="https://i.ytimg.com/vi/${r.id}/mqdefault.jpg" alt="" />
+                <span class="recent-title">${esc(r.title || 'YouTube video')}</span>
+                ${r.author ? `<span class="recent-author">${esc(r.author)}</span>` : ''}
+              </button>
+            </li>`,
+          )
+          .join('');
+      }
+
+      // Long titles in the audio card scroll like a marquee, pausing at the start.
+      function scrollAudioTitle() {
+        const title = els.audioTitle;
+        title.getAnimations().forEach((a) => a.cancel());
+        const text = title.dataset.text ?? title.textContent;
+        title.dataset.text = text;
+        title.textContent = text;
+        els.audioTitleWrap.style.maskImage = '';
+        requestAnimationFrame(() => {
+          const overflow = title.scrollWidth - els.audioTitleWrap.clientWidth;
+          if (overflow <= 0 || REDUCED_MOTION.matches) return;
+          const gap = 48;
+          title.innerHTML = `<span>${esc(text)}</span><span style="padding-left:${gap}px">${esc(text)}</span>`;
+          const distance = title.firstChild.offsetWidth + gap;
+          const scroll = distance / 35;
+          const pause = 3;
+          title.animate(
+            [
+              { transform: 'none', offset: 0 },
+              { transform: 'none', offset: pause / (scroll + pause) },
+              { transform: `translateX(-${distance}px)`, offset: 1 },
+            ],
+            { duration: (scroll + pause) * 1000, iterations: Infinity },
+          );
+          els.audioTitleWrap.style.maskImage =
+            'linear-gradient(to right, transparent, #000 5%, #000 95%, transparent)';
+        });
+      }
+
+      // Corner handles in focus mode: drag to resize the video, symmetric around its center.
+      function setupResize() {
+        let startX = 0;
+        let startWidth = 0;
+        let baseWidth = 0;
+        let dir = 1;
+        const move = (e) => {
+          const width = Math.max(
+            300,
+            Math.min(startWidth + (e.clientX - startX) * dir * 2, innerWidth * 0.95),
+          );
+          // Snap back to the default size when close to it.
+          els.video.style.width = Math.abs(width - baseWidth) < 40 ? '' : `${width}px`;
+        };
+        const up = () => document.body.classList.remove('resizing');
+        els.video.querySelectorAll('.handle').forEach((handle) => {
+          handle.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            const current = els.video.style.width;
+            els.video.style.width = '';
+            baseWidth = els.video.offsetWidth;
+            els.video.style.width = current;
+            startWidth = els.video.offsetWidth;
+            startX = e.clientX;
+            dir = Number(handle.dataset.dir);
+            document.body.classList.add('resizing');
+            // Capture keeps the drag on this handle even when released outside the window.
+            handle.setPointerCapture(e.pointerId);
+          });
+          handle.addEventListener('pointermove', (e) => {
+            if (handle.hasPointerCapture(e.pointerId)) move(e);
+          });
+          // Fires however the drag ends: release, cancel, or the handle hiding mid-drag (Esc).
+          handle.addEventListener('lostpointercapture', up);
+        });
+      }
+
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
+
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
+
+      function hideSnackbar() {
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
+
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
+
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
+
+      // --- Utilities ---
+
+      // Accepts a bare 11-character ID or any youtube.com / youtube-nocookie.com / youtu.be / music.youtube.com link.
+      function extractVideoID(input) {
+        const clean = (input || '').trim();
+        if (/^[\w-]{11}$/.test(clean)) return clean;
+        const match = clean.match(
+          /(?:youtube(?:-nocookie)?\.com\/(?:(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=|[^/]+\/.+\/)|youtu\.be\/)([\w-]{11})(?![\w-])/i,
+        );
+        return match ? match[1] : null;
+      }
+
+      // Seconds from a link's t= or start= (in the query or after #): 90, 90s, 1m30s or 1h2m3s.
+      function startTime(input) {
+        const value = /[?&#](?:t|start)=([\dhms]+)/i.exec(input)?.[1] || '';
+        const parts = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/i.exec(value);
+        if (!parts) return 0;
+        const [, h = 0, m = 0, sec = 0] = parts;
+        return Number(h) * 3600 + Number(m) * 60 + Number(sec);
+      }
+
+      function setHistoryState(action, state, url) {
+        try {
+          history[action === 'push' ? 'pushState' : 'replaceState'](state, '', url);
+        } catch (err) {
+          // Some sandboxed frames block URL changes; keep the state without the URL.
+          try {
+            history[action === 'push' ? 'pushState' : 'replaceState'](state, '');
+          } catch (e) {
+            // History is unavailable; Back simply leaves the page.
+          }
+        }
+      }
+
+      // M3 Expressive "cookie" shape: a circle with n soft scallops.
+      function cookiePath(cx, cy, r, n, depth) {
+        let d = '';
+        for (let i = 0; i <= 360; i++) {
+          const a = (i / 360) * Math.PI * 2;
+          const rr = r * (1 - depth / 2 + (depth / 2) * Math.cos(n * a));
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(1)} ${(cy - rr * Math.cos(a)).toFixed(1)}`;
+        }
+        return `${d}Z`;
+      }
+
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function esc(str) {
+        return String(str).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+      }
+
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {
+          // Storage full or blocked: history and theme last for this visit only.
+        }
+      }
+
+      init();
+    </script>
+  </body>
 </html>
