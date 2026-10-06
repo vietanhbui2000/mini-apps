@@ -562,16 +562,18 @@
 
       .cell i {
         display: block;
-        width: 26%;
-        height: 26%;
+        width: 20%;
+        height: 20%;
         border-radius: 50%;
         background: var(--outline-variant);
       }
 
+      /* Year Left's proportions: a sparkle about a third of its cell, so neighbors keep
+         clear space until the hover swell (up to 1.7x) brings them close. */
       .cell.past i,
       .cell.now i {
-        width: 78%;
-        height: 78%;
+        width: 36%;
+        height: 36%;
         border-radius: 0;
         background: var(--primary);
         mask: var(--sparkle) center / contain no-repeat;
@@ -582,8 +584,8 @@
       }
 
       .cell.now i {
-        width: 115%;
-        height: 115%;
+        width: 64%;
+        height: 64%;
         background: var(--tertiary);
         opacity: 1;
         filter: drop-shadow(0 0 0.4em var(--tertiary));

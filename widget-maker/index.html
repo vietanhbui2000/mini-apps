@@ -2700,7 +2700,9 @@
         // The preview frame says when it can take settings; then it gets the current draft,
         // whichever widget was picked while it loaded. Gallery tiles send the same message,
         // so only the preview's counts. The load event is the fallback, for a widget.html
-        // cached from before the ready message existed.
+        // cached from before the ready message existed. A frame with no src yet can fire
+        // load for its empty about:blank page; that one must not count, or the real src
+        // would never be set and the preview would stay blank.
         const onPreviewReady = () => {
           previewReady = true;
           if (draft) postPreview();
@@ -2709,7 +2711,9 @@
           if (e.origin !== location.origin || e.source !== els.preview.contentWindow) return;
           if (e.data?.type === 'widget-ready') onPreviewReady();
         });
-        els.preview.addEventListener('load', onPreviewReady);
+        els.preview.addEventListener('load', () => {
+          if (els.preview.getAttribute('src')) onPreviewReady();
+        });
         new ResizeObserver(layoutPreview).observe(els.stage);
 
         for (const dialog of [els.editor, els.help, els.openLink, els.about]) {
