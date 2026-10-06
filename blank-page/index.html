@@ -1,584 +1,1733 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="An infinite blank page to write down what's on your mind." />
+    <title>Blank Page</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#fdf7ff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141218" media="(prefers-color-scheme: dark)" />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
-  <meta name="description" content="An infinite blank page to write down what's on your mind." />
-  <title>Blank Page</title>
+    <!-- Fonts: Google Sans Flex, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=arrow_outward,brightness_auto,check,check_circle,code,content_copy,dark_mode,delete,download,error,info,light_mode,more_vert,notes,person,restore_page,spellcheck,width_full,width_normal,width_wide&display=block"
+    />
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #6750a4. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#65558f, #cfbdfe);
+        --on-primary: light-dark(#ffffff, #36275d);
+        --primary-container: light-dark(#e9ddff, #4d3d75);
+        --on-primary-container: light-dark(#4d3d75, #e9ddff);
+        --secondary: light-dark(#625b71, #cbc2db);
+        --on-secondary: light-dark(#ffffff, #332d41);
+        --secondary-container: light-dark(#e8def8, #4a4458);
+        --on-secondary-container: light-dark(#4a4458, #e8def8);
+        --tertiary: light-dark(#7e5260, #efb8c8);
+        --on-tertiary: light-dark(#ffffff, #4a2532);
+        --tertiary-container: light-dark(#ffd9e3, #633b48);
+        --on-tertiary-container: light-dark(#633b48, #ffd9e3);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#fdf7ff, #141218);
+        --on-surface: light-dark(#1d1b20, #e6e0e9);
+        --on-surface-variant: light-dark(#49454e, #cac4cf);
+        --surface-dim: light-dark(#ded8e0, #141218);
+        --surface-bright: light-dark(#fdf7ff, #3b383e);
+        --surface-container-lowest: light-dark(#ffffff, #0f0d13);
+        --surface-container-low: light-dark(#f8f2fa, #1d1b20);
+        --surface-container: light-dark(#f2ecf4, #211f24);
+        --surface-container-high: light-dark(#ece6ee, #2b292f);
+        --surface-container-highest: light-dark(#e6e0e9, #36343a);
+        --outline: light-dark(#7a757f, #948f99);
+        --outline-variant: light-dark(#cac4cf, #49454e);
+        --inverse-surface: light-dark(#322f35, #e6e0e9);
+        --inverse-on-surface: light-dark(#f5eff7, #322f35);
+        --inverse-primary: light-dark(#cfbdfe, #65558f);
+        --scrim: #000;
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
 
-  <!-- Fonts: Geist -->
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
 
-  <!-- Prevent Theme Flicker (Anti-FOUC) -->
-  <script>
-    try {
-      const state = JSON.parse(localStorage.getItem('blank-page-single-v1') || '{}');
-      const isDark =
-        state.theme === 'dark' ||
-        (!state.theme && window.matchMedia('(prefers-color-scheme: dark)').matches) ||
-        (state.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      if (isDark) document.documentElement.classList.add('dark');
-    } catch (e) { }
-  </script>
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
 
-  <!-- Tailwind Config -->
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Geist', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-            },
-          },
-          transitionTimingFunction: {
-            spring: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          },
-        },
-      },
-    };
-  </script>
-
-  <style>
-    body {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Custom Scrollbar */
-    /* Custom Webkit Scrollbar */
-    @media (min-width: 640px) {
-      html {
-        scrollbar-width: thin;
-        scrollbar-color: #d4d4d8 transparent;
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
       }
 
-      html.dark {
-        scrollbar-color: #52525b transparent;
+      :root[data-theme='light'] {
+        color-scheme: light;
       }
 
-      ::-webkit-scrollbar {
-        width: 6px;
+      :root[data-theme='dark'] {
+        color-scheme: dark;
       }
 
-      ::-webkit-scrollbar-track {
-        background: transparent;
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
 
-      ::-webkit-scrollbar-thumb {
-        background-color: #d4d4d8;
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
+
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      h1,
+      h2,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the 40px height, not --shape-full: a press springs them smaller,
+         and the spring's overshoot from 999px would dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
         border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
       }
 
-      html.dark ::-webkit-scrollbar-thumb {
-        background-color: #52525b;
+      .btn:active {
+        border-radius: var(--shape-sm);
       }
 
-      ::-webkit-scrollbar-thumb:hover {
-        background-color: #a1a1aa;
-      }
-    }
-
-    /* Typing Dots Animation */
-    .typing-dots {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      height: 12px;
-      padding: 0 4px;
-    }
-
-    .typing-dots span {
-      width: 5px;
-      height: 5px;
-      background-color: currentColor;
-      border-radius: 50%;
-      animation: typing-bounce 1s infinite ease-in-out;
-    }
-
-    .typing-dots span:nth-child(1) {
-      animation-delay: 0s;
-    }
-
-    .typing-dots span:nth-child(2) {
-      animation-delay: 0.15s;
-    }
-
-    .typing-dots span:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    @keyframes typing-bounce {
-
-      0%,
-      60%,
-      100% {
-        transform: translateY(0);
-        opacity: 0.6;
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
       }
 
-      30% {
-        transform: translateY(-3px);
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* --- Page --- */
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+      }
+
+      .top {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        padding: 0 8px 0 16px;
+        transition: opacity var(--spring-ms) linear;
+      }
+
+      @media (min-width: 640px) {
+        .top {
+          padding: 0 16px 0 24px;
+        }
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      /* The top bar steps back while you write, and returns when you pause, move the mouse,
+         or tab to it. The status pill stays visible so the count and save state read live. */
+      .writing .top:not(:focus-within) {
+        opacity: 0.25;
+      }
+
+      @media (max-width: 599px) {
+        .width-btn {
+          display: none;
+        }
+      }
+
+      /* --- Sheet --- */
+      /* Phones write edge to edge. Wider screens get a sheet in one of three widths. */
+      .sheet {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        margin: 0 auto;
+        transition:
+          max-width var(--spring-slow-ms) var(--spring-slow),
+          margin var(--spring-slow-ms) var(--spring-slow),
+          border-radius var(--spring-slow-ms) var(--spring-slow),
+          background-color var(--spring-ms) linear;
+      }
+
+      @media (min-width: 600px) {
+        [data-width='narrow'] .sheet,
+        [data-width='page'] .sheet {
+          margin-bottom: 24px;
+          border-radius: var(--shape-xl);
+          background: var(--surface-container-lowest);
+        }
+
+        [data-width='narrow'] .sheet {
+          max-width: 560px;
+        }
+
+        [data-width='page'] .sheet {
+          max-width: 840px;
+        }
+
+        [data-width='full'] .sheet {
+          max-width: 100%;
+        }
+      }
+
+      .editor {
+        flex: 1;
+        width: 100%;
+        min-height: 0;
+        padding: 8px 16px 96px;
+        border: 0;
+        outline: none;
+        background: none;
+        color: var(--on-surface);
+        font: 400 17px/28px var(--font);
+        letter-spacing: 0.2px;
+        resize: none;
+        caret-color: var(--primary);
+      }
+
+      @media (min-width: 600px) {
+        .editor {
+          padding: 32px 40px 96px;
+          font-size: 18px;
+          line-height: 30px;
+        }
+
+        [data-width='full'] .editor {
+          padding: 16px 24px 96px;
+        }
+      }
+
+      .editor::placeholder {
+        color: var(--outline);
+      }
+
+      /* --- Status pill --- */
+      /* Word count and save state. Click to switch between words and characters. */
+      .status {
+        position: fixed;
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(16px, env(safe-area-inset-bottom));
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 16px 0 12px;
+        border-radius: 20px;
+        background: var(--surface-container-high);
+        color: var(--on-surface-variant);
+        font: 500 14px/20px var(--font);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.1px;
+        transition:
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear,
+          border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      @media (min-width: 640px) {
+        .status {
+          right: 24px;
+          bottom: 24px;
+        }
+      }
+
+      .status:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .status .icon {
+        font-size: 18px;
+        transition:
+          color var(--effects-ms) linear,
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .status[data-state='saved'] .icon {
+        color: var(--primary);
+        font-variation-settings: 'FILL' 1;
+      }
+
+      .status[data-state='error'] {
+        background: var(--error-container);
+        color: var(--on-error-container);
+      }
+
+      .status.selecting {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      /* Saving: three dots that bounce, like someone typing. */
+      .dots {
+        display: none;
+        gap: 3px;
+        width: 18px;
+        justify-content: center;
+      }
+
+      .dots i {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: dot 1s var(--ease-effects) infinite;
+      }
+
+      .dots i:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      .dots i:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes dot {
+        30% {
+          transform: translateY(-3px);
+          opacity: 1;
+        }
+        0%,
+        60%,
+        100% {
+          opacity: 0.5;
+        }
+      }
+
+      .status[data-state='typing'] .dots {
+        display: inline-flex;
+      }
+
+      .status[data-state='typing'] .icon {
+        display: none;
+      }
+
+      /* --- Menu --- */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu:popover-open {
         opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
       }
-    }
 
-    @media (min-width: 640px) {
-      .wrapper-windowed {
-        border-radius: 1rem;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
       }
 
-      html.dark .wrapper-windowed {
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
       }
-    }
 
-    .wrapper-fullscreen {
-      height: 100vh;
-      border-radius: 0;
-      border: none !important;
-      box-shadow: none !important;
-    }
-  </style>
-</head>
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
 
-<body
-  class="bg-[#f5f5f5] dark:bg-[#09090b] text-zinc-800 dark:text-zinc-200 h-[100dvh] w-full flex justify-center overflow-hidden transition-colors duration-300">
-  <!-- Main App Container -->
-  <div id="app-wrapper"
-    class="w-full bg-white dark:bg-zinc-900 h-full flex flex-col relative overflow-hidden border-zinc-200 dark:border-zinc-800 transition-all duration-500 ease-spring mx-auto">
-    <!-- Header -->
-    <header id="stickyHeader"
-      class="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md z-20 border-b border-zinc-100 dark:border-zinc-800/80 p-4 sm:p-6 flex justify-between items-center flex-shrink-0 transition-all duration-300">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <div
-          class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-brand-500/30 shadow-lg">
-          <i data-lucide="pen-line" class="w-4 h-4"></i>
-        </div>
-        <h1 class="font-bold text-2xl tracking-tight text-zinc-900 dark:text-white">
-          Blank Page
-        </h1>
-      </div>
+      .menu-item.danger,
+      .menu-item.danger .icon {
+        color: var(--error);
+      }
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Size Toggle -->
-        <button id="toggleSize"
-          class="p-2 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl transition-all"
-          title="Change window size">
-          <i data-lucide="sticky-note" id="icon-size-sticky-note" class="w-5 h-5 hidden"></i>
-          <i data-lucide="file" id="icon-size-page" class="w-5 h-5 hidden"></i>
-          <i data-lucide="maximize" id="icon-size-full-window" class="w-5 h-5 hidden"></i>
-        </button>
+      .menu-item .check {
+        margin-left: auto;
+        color: var(--primary);
+        visibility: hidden;
+      }
 
-        <!-- Theme Toggle -->
-        <button id="toggleTheme"
-          class="p-2 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl transition-all"
-          title="Toggle theme">
-          <i data-lucide="moon" id="icon-moon" class="w-5 h-5 hidden"></i>
-          <i data-lucide="sun" id="icon-sun" class="w-5 h-5 hidden"></i>
-          <i data-lucide="sun-moon" id="icon-sun-moon" class="w-5 h-5 hidden"></i>
-        </button>
-      </div>
+      .menu-item[aria-checked='true'] .check {
+        visibility: visible;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, the menu and the About dialog open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      /* Keep the status pill clear on phones, where both share the bottom edge. */
+      @media (max-width: 599px) {
+        .snackbar {
+          bottom: 72px;
+        }
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-inline: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('blank-page') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="top">
+      <h1 class="top-title">Blank Page</h1>
+      <button class="icon-btn state width-btn" id="width-btn" type="button">
+        <span class="icon" id="width-icon" aria-hidden="true">width_wide</span>
+      </button>
+      <button
+        class="icon-btn state"
+        id="more-btn"
+        type="button"
+        aria-label="More options"
+        title="More options"
+        aria-haspopup="menu"
+      >
+        <span class="icon" aria-hidden="true">more_vert</span>
+      </button>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 relative flex flex-col bg-zinc-50/30 dark:bg-zinc-900/50">
-      <textarea id="editor" autofocus
-        class="block flex-1 w-full h-full p-4 sm:p-6 bg-transparent border-none outline-none resize-none text-base leading-relaxed text-zinc-800 dark:text-zinc-200 placeholder-zinc-300 dark:placeholder-zinc-600 transition-colors"
-        placeholder="Start typing your thoughts..."></textarea>
+    <main class="sheet">
+      <textarea
+        class="editor"
+        id="editor"
+        placeholder="Start writing…"
+        aria-label="Your page"
+        autofocus
+      ></textarea>
     </main>
 
-    <!-- Footer -->
-    <footer
-      class="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md z-20 border-t border-zinc-100 dark:border-zinc-800/80 p-4 sm:px-6 sm:py-4 flex justify-between items-center flex-shrink-0 transition-colors">
-      <button id="toggleSpellcheck"
-        class="p-2 text-zinc-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-all flex items-center justify-center group"
-        title="Toggle spell-check">
-        <i data-lucide="spell-check-2" id="spellcheckIcon"
-          class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+    <button class="status state" id="status" type="button">
+      <span class="icon" id="status-icon" aria-hidden="true">notes</span>
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span id="status-text">0 words</span>
+    </button>
+
+    <!-- More Menu -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" type="button" role="menuitem" data-action="copy">
+        <span class="icon" aria-hidden="true">content_copy</span>Copy all
       </button>
-
-      <!-- Count Display Button -->
-      <button id="toggleCountMode"
-        class="flex items-center justify-center h-8 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors px-3 rounded-lg select-none w-auto min-w-0"
-        title="Toggle words/characters count">
-        <span id="countDisplay" class="leading-none mt-[1px] whitespace-nowrap transition-colors">0 WORDS</span>
+      <button class="menu-item state" type="button" role="menuitem" data-action="download">
+        <span class="icon" aria-hidden="true">download</span>Download as text
       </button>
-    </footer>
-  </div>
+      <button
+        class="menu-item state"
+        id="spellcheck-item"
+        type="button"
+        role="menuitemcheckbox"
+        data-action="spellcheck"
+      >
+        <span class="icon" aria-hidden="true">spellcheck</span>Spell check
+        <span class="icon check" aria-hidden="true">check</span>
+      </button>
+      <div class="menu-divider" role="separator"></div>
+      <button class="menu-item state danger" type="button" role="menuitem" data-action="clear">
+        <span class="icon" aria-hidden="true">delete</span>Clear page
+      </button>
+      <button
+        class="menu-item state"
+        type="button"
+        role="menuitem"
+        data-action="restore"
+        hidden
+        disabled
+      >
+        <span class="icon" aria-hidden="true">restore_page</span>Restore cleared page
+      </button>
+      <div class="menu-divider" role="separator"></div>
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
+    </div>
 
-  <!-- Application Logic -->
-  <script>
-    // --- Constants & Config ---
-    const STORAGE_KEY = 'blank-page-single-v1';
-    const SIZES = ['sticky-note', 'page', 'full-window'];
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">Blank Page</h2>
+        <p class="about-desc">An infinite blank page to write down what's on your mind.</p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/blank-page"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
 
-    // --- State Management ---
-    let state = {
-      content: '',
-      countMode: 'words', // 'words' | 'characters'
-      sizeMode: 'page', // 'sticky-note' | 'page' | 'full-window'
-      theme: 'system', // 'light' | 'dark' | 'system'
-      spellcheck: true,
-    };
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
 
-    let typingTimer = null;
-    let periodicSaveTimer = null;
-    let statusState = 'idle'; // 'idle' | 'typing' | 'saved' | 'error'
+    <div id="probe" hidden></div>
 
-    // --- DOM Elements ---
-    const els = {
-      wrapper: document.getElementById('app-wrapper'),
-      editor: document.getElementById('editor'),
-      countDisplay: document.getElementById('countDisplay'),
-      toggleSize: document.getElementById('toggleSize'),
-      toggleTheme: document.getElementById('toggleTheme'),
-      toggleSpellcheck: document.getElementById('toggleSpellcheck'),
-      toggleCountMode: document.getElementById('toggleCountMode'),
-      stickyHeader: document.getElementById('stickyHeader'),
-    };
-
-    // --- Initialization ---
-    // Boot
-    document.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      applyTheme();
-      applySize();
-
-      els.editor.value = state.content;
-      applySpellcheck();
-
-      setStatus('idle');
-      setupEventListeners();
-      setupMobileHeight();
-      lucide.createIcons();
-
-      setTimeout(() => {
-        if (state.spellcheck && els.editor.value.length > 0) {
-          const currentVal = els.editor.value;
-          els.editor.value = currentVal + ' ';
-          els.editor.value = currentVal;
-        }
-      }, 100);
-    });
-
-    // --- Event Listeners ---
-    function setupEventListeners() {
-      els.editor.addEventListener('scroll', () => {
-        if (els.editor.scrollTop > 10) {
-          els.stickyHeader.classList.add('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]', 'dark:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2)]');
-        } else {
-          els.stickyHeader.classList.remove('shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]', 'dark:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2)]');
-        }
-      });
-
-      els.editor.addEventListener('input', () => {
-        if (statusState !== 'typing') setStatus('typing');
-
-        if (typingTimer) clearTimeout(typingTimer);
-
-        typingTimer = setTimeout(() => {
-          saveContent();
-          stopPeriodicSave();
-        }, 1000);
-
-        startPeriodicSave();
-      });
-
-      const handleSelection = () => {
-        if (statusState === 'idle') {
-          updateCountDisplay();
-        }
+    <script>
+      // --- Constants & Config ---
+      const STORE_KEY = 'blank-page';
+      const LEGACY_KEY = 'blank-page-single-v1';
+      const CLEARED_KEY = 'blank-page:cleared';
+      const RESTORE_MS = 24 * 60 * 60 * 1000;
+      const SAVE_DELAY = 600;
+      const WIDTHS = ['narrow', 'page', 'full'];
+      const WIDTH_ICONS = { narrow: 'width_normal', page: 'width_wide', full: 'width_full' };
+      const WIDTH_NAMES = { narrow: 'Narrow', page: 'Page', full: 'Full window' };
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+      const GRAPHEMES = new Intl.Segmenter();
+      const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu;
+      const DEFAULTS = {
+        content: '',
+        countMode: 'words',
+        width: 'page',
+        theme: 'auto',
+        spellcheck: true,
       };
-      document.addEventListener('selectionchange', handleSelection);
 
-      // Toggles
-      els.toggleCountMode.addEventListener('click', () => {
-        state.countMode = state.countMode === 'words' ? 'characters' : 'words';
-        if (statusState === 'idle') {
-          updateCountDisplay();
-        }
-        saveState();
-      });
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let saveTimer = 0;
+      let writingTimer = 0;
+      let savedTimer = 0;
+      let snackbarTimer = 0;
+      let saveState = 'idle'; // idle | typing | saved | error
+      let countCache = { mode: '', text: '', value: 0 };
+      let ignorePopstate = 0;
+      const dialogStack = [];
 
-      els.toggleSize.addEventListener('click', () => {
-        const currentIndex = SIZES.indexOf(state.sizeMode);
-        state.sizeMode = SIZES[(currentIndex + 1) % SIZES.length];
-        applySize();
-        saveState();
-      });
+      // --- DOM Elements ---
+      const els = {
+        editor: document.getElementById('editor'),
+        status: document.getElementById('status'),
+        statusIcon: document.getElementById('status-icon'),
+        statusText: document.getElementById('status-text'),
+        widthBtn: document.getElementById('width-btn'),
+        widthIcon: document.getElementById('width-icon'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        spellcheckItem: document.getElementById('spellcheck-item'),
+        about: document.getElementById('about'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
 
-      els.toggleTheme.addEventListener('click', () => {
-        if (state.theme === 'system') state.theme = 'light';
-        else if (state.theme === 'light') state.theme = 'dark';
-        else state.theme = 'system';
-
+      // --- Initialization ---
+      function init() {
+        els.editor.value = prefs.content;
         applyTheme();
-        saveState();
-      });
-
-      els.toggleSpellcheck.addEventListener('click', () => {
-        state.spellcheck = !state.spellcheck;
+        applyWidth();
         applySpellcheck();
-        saveState();
-      });
+        renderStatus();
+        bindEvents();
+        // Start at the end of the text, ready to continue.
+        els.editor.setSelectionRange(els.editor.value.length, els.editor.value.length);
+      }
 
-      // Keyboard Shortcuts
-      document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-          e.preventDefault();
-          if (typingTimer) clearTimeout(typingTimer);
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        DARK_QUERY.addEventListener('change', applyTheme);
+
+        els.editor.addEventListener('input', () => {
+          document.body.classList.add('writing');
+          clearTimeout(writingTimer);
+          writingTimer = setTimeout(() => document.body.classList.remove('writing'), 2500);
+          setSaveState('typing');
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(saveContent, SAVE_DELAY);
+        });
+        document.addEventListener('selectionchange', () => {
+          if (document.activeElement === els.editor) renderStatus();
+        });
+        // The selection count only shows while the editor has focus, so refresh it as focus moves.
+        els.editor.addEventListener('blur', renderStatus);
+        els.editor.addEventListener('focus', renderStatus);
+        document.addEventListener('pointermove', (e) => {
+          if (e.pointerType === 'mouse') document.body.classList.remove('writing');
+        });
+        // Never lose the last keystrokes when the tab closes or goes to the background.
+        document.addEventListener('visibilitychange', () => document.hidden && flushSave());
+        window.addEventListener('pagehide', () => flushSave());
+        document.addEventListener('keydown', (e) => {
+          if (dialogStack.length) return;
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            flushSave(true);
+          }
+        });
+
+        els.status.addEventListener('click', () => {
+          prefs.countMode = prefs.countMode === 'words' ? 'characters' : 'words';
+          savePrefs();
+          renderStatus();
+        });
+        els.widthBtn.addEventListener('click', () => {
+          prefs.width = WIDTHS[(WIDTHS.indexOf(prefs.width) + 1) % WIDTHS.length];
+          savePrefs();
+          applyWidth();
+        });
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.moreBtn.addEventListener('click', () => toggleMenu(els.moreMenu, els.moreBtn));
+
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          const action = e.target.closest('[data-action]')?.dataset.action;
+          if (!action) return;
+          if (action !== 'spellcheck') els.moreMenu.hidePopover();
+          if (action === 'copy') copyAll();
+          else if (action === 'download') download();
+          else if (action === 'spellcheck') toggleSpellcheck();
+          else if (action === 'clear') clearPage();
+          else if (action === 'restore') restorePage();
+          else if (action === 'about') openDialog(els.about);
+        });
+
+        els.about.addEventListener('close', () => onDialogClosed(els.about));
+        bindBackdropClose(els.about);
+        els.about.addEventListener('click', (e) => {
+          if (e.target.closest('[data-close]')) closeDialog(els.about);
+        });
+        window.addEventListener('popstate', () => {
+          if (ignorePopstate) return ignorePopstate--;
+          const top = dialogStack.at(-1);
+          if (top) {
+            dialogStack.pop();
+            top.close();
+          }
+        });
+
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
+      }
+
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        items.at((i + (e.key === 'ArrowDown' ? 1 : -1)) % items.length)?.focus();
+      }
+
+      // --- Core Logic ---
+
+      // Storage ----------------------------------------------------------------------
+
+      function loadPrefs() {
+        const saved = readJson(STORE_KEY);
+        if (saved) return sanitizePrefs(saved);
+        // Written text can't be typed again, so the pre-redesign page is moved over once.
+        const legacy = readJson(LEGACY_KEY);
+        if (!legacy) return sanitizePrefs({});
+        const sizes = { 'sticky-note': 'narrow', page: 'page', 'full-window': 'full' };
+        const migrated = sanitizePrefs({
+          ...legacy,
+          width: sizes[legacy.sizeMode],
+          theme: legacy.theme === 'system' ? 'auto' : legacy.theme,
+        });
+        if (writeJson(STORE_KEY, migrated)) storageRemove(LEGACY_KEY);
+        return migrated;
+      }
+
+      function sanitizePrefs(input) {
+        const src = input && typeof input === 'object' ? input : {};
+        return {
+          content: typeof src.content === 'string' ? src.content : DEFAULTS.content,
+          countMode: src.countMode === 'characters' ? 'characters' : 'words',
+          width: WIDTHS.includes(src.width) ? src.width : DEFAULTS.width,
+          theme: THEME_CYCLE.includes(src.theme) ? src.theme : DEFAULTS.theme,
+          spellcheck: typeof src.spellcheck === 'boolean' ? src.spellcheck : DEFAULTS.spellcheck,
+        };
+      }
+
+      // Another tab may have saved newer text since this one loaded, so a preference change
+      // keeps the stored note instead of writing back this tab's older copy.
+      function savePrefs(content) {
+        const stored = readJson(STORE_KEY);
+        const kept = typeof stored?.content === 'string' ? stored.content : prefs.content;
+        return writeJson(STORE_KEY, { ...prefs, content: content ?? kept });
+      }
+
+      function saveContent() {
+        clearTimeout(saveTimer);
+        saveTimer = 0;
+        prefs.content = els.editor.value;
+        setSaveState(savePrefs(prefs.content) ? 'saved' : 'error');
+        // New text overwrites the page, so a cleared page can no longer come back.
+        if (prefs.content) storageRemove(CLEARED_KEY);
+      }
+
+      function flushSave(announce = false) {
+        if (saveTimer || announce) saveContent();
+      }
+
+      // Page actions -------------------------------------------------------------------
+
+      async function copyAll() {
+        try {
+          await navigator.clipboard.writeText(els.editor.value);
+          showSnackbar('Copied to the clipboard');
+        } catch (err) {
+          showError('Couldn’t copy. Select the text and copy it yourself.');
+        }
+      }
+
+      function download() {
+        const text = els.editor.value;
+        const firstLine = text.trim().split('\n')[0].slice(0, 40).trim();
+        const name = firstLine.replace(/[\\/:*?"<>|]+/g, '').trim() || 'Blank page';
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+        a.download = `${name}.txt`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+
+      function clearPage() {
+        const snapshot = els.editor.value;
+        if (!snapshot) return;
+        writeJson(CLEARED_KEY, { content: snapshot, at: Date.now() });
+        replaceText('');
+        saveContent();
+        renderStatus();
+        const undo = () => {
+          replaceText(snapshot);
           saveContent();
-          stopPeriodicSave();
-        }
-      });
-    }
-
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (state.theme === 'system') {
-        applyTheme();
-      }
-    });
-
-    // --- Core Logic ---
-    function loadState() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          state = { ...state, ...parsed };
-        }
-      } catch (e) {
-        console.error('Failed to load state', e);
-      }
-    }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        console.error('Failed to save state', e);
-      }
-    }
-
-    function startPeriodicSave() {
-      if (!periodicSaveTimer) {
-        periodicSaveTimer = setInterval(() => {
-          saveContent(true);
-        }, 5000);
-      }
-    }
-
-    function stopPeriodicSave() {
-      if (periodicSaveTimer) {
-        clearInterval(periodicSaveTimer);
-        periodicSaveTimer = null;
-      }
-    }
-
-    function setStatus(newStatus) {
-      statusState = newStatus;
-
-      // Clean up old classes (including the selection highlight classes)
-      els.countDisplay.classList.remove(
-        'text-brand-600',
-        'dark:text-brand-400',
-        'text-zinc-400',
-        'dark:text-zinc-500',
-        'text-emerald-500',
-        'text-red-500',
-      );
-
-      if (newStatus === 'typing') {
-        els.countDisplay.innerHTML = `<span class="typing-dots"><span></span><span></span><span></span></span>`;
-        els.countDisplay.classList.add('text-brand-600', 'dark:text-brand-400');
-        els.toggleCountMode.title = 'Saving...';
-      } else if (newStatus === 'saved') {
-        els.countDisplay.textContent = 'SAVED';
-        els.countDisplay.classList.add('text-brand-600', 'dark:text-brand-400');
-        els.toggleCountMode.title = 'Content saved safely';
-
-        setTimeout(() => {
-          if (statusState === 'saved') setStatus('idle');
-        }, 2000);
-      } else if (newStatus === 'error') {
-        els.countDisplay.textContent = 'ERROR SAVING';
-        els.countDisplay.classList.add('text-red-500');
-        els.toggleCountMode.title = "Can't save content";
-      } else {
-        // Idle
-        els.toggleCountMode.title = 'Toggle words/characters count';
-        updateCountDisplay();
-      }
-    }
-
-    function saveContent(isPeriodic = false) {
-      try {
-        state.content = els.editor.value;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-        if (!isPeriodic) {
-          setStatus('saved');
-        }
-      } catch (e) {
-        setStatus('error');
-      }
-    }
-
-    function updateCountDisplay() {
-      const text = els.editor.value;
-      const selectionStart = els.editor.selectionStart;
-      const selectionEnd = els.editor.selectionEnd;
-      const hasSelection = selectionStart !== selectionEnd;
-
-      const textToCount = hasSelection ? text.substring(selectionStart, selectionEnd) : text;
-
-      let countText;
-      if (state.countMode === 'characters') {
-        countText = `${textToCount.length} CHARACTERS`;
-      } else {
-        const wordCount = textToCount.trim() === '' ? 0 : textToCount.trim().split(/\s+/).length;
-        countText = `${wordCount} WORDS`;
-      }
-
-      if (hasSelection) {
-        els.countDisplay.textContent = countText;
-        els.countDisplay.classList.add('text-brand-600', 'dark:text-brand-400');
-      } else {
-        els.countDisplay.classList.remove('text-brand-600', 'dark:text-brand-400');
-        els.countDisplay.textContent = countText;
-      }
-    }
-
-    // --- UI Updates ---
-    function applyTheme() {
-      const root = document.documentElement;
-      let isDark = false;
-
-      if (
-        state.theme === 'dark' ||
-        (state.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-      ) {
-        isDark = true;
-        root.classList.add('dark');
-        root.classList.remove('light');
-      } else {
-        root.classList.remove('dark');
-        root.classList.add('light');
-      }
-
-      const iconMoon = document.getElementById('icon-moon');
-      const iconSun = document.getElementById('icon-sun');
-      const iconSystem = document.getElementById('icon-sun-moon');
-
-      iconMoon?.classList.add('hidden');
-      iconSun?.classList.add('hidden');
-      iconSystem?.classList.add('hidden');
-
-      if (state.theme === 'dark') {
-        iconMoon?.classList.remove('hidden');
-      } else if (state.theme === 'light') {
-        iconSun?.classList.remove('hidden');
-      } else {
-        iconSystem?.classList.remove('hidden');
-      }
-    }
-
-    function applySize() {
-      els.wrapper.classList.remove(
-        'max-w-[500px]',
-        'sm:h-[500px]',
-        'max-w-[800px]',
-        'sm:h-[95vh]',
-        'max-w-full',
-        'sm:my-auto',
-        'sm:rounded-2xl',
-        'sm:border',
-        'sm:shadow-2xl',
-        'wrapper-windowed',
-        'wrapper-fullscreen',
-      );
-
-      document.getElementById('icon-size-sticky-note')?.classList.add('hidden');
-      document.getElementById('icon-size-page')?.classList.add('hidden');
-      document.getElementById('icon-size-full-window')?.classList.add('hidden');
-
-      if (state.sizeMode === 'sticky-note') {
-        els.wrapper.classList.add(
-          'max-w-[500px]',
-          'sm:h-[500px]',
-          'sm:my-auto',
-          'sm:rounded-2xl',
-          'sm:border',
-          'sm:shadow-2xl',
-          'wrapper-windowed',
+          renderStatus();
+        };
+        showSnackbar('Page cleared', 'Undo', undo);
+        // Typing on the cleared page withdraws the Undo, so it can't wipe the new text.
+        els.editor.addEventListener(
+          'input',
+          () => els.snackbarAction.onAction === undo && hideSnackbar(),
+          { once: true },
         );
-        document.getElementById('icon-size-sticky-note')?.classList.remove('hidden');
-      } else if (state.sizeMode === 'page') {
-        els.wrapper.classList.add(
-          'max-w-[800px]',
-          'sm:h-[95vh]',
-          'sm:my-auto',
-          'sm:rounded-2xl',
-          'sm:border',
-          'sm:shadow-2xl',
-          'wrapper-windowed',
+      }
+
+      // The page cleared in the last 24 hours, while nothing new has been written since.
+      function clearedPage() {
+        const saved = readJson(CLEARED_KEY);
+        const fresh = typeof saved?.content === 'string' && Date.now() - saved.at < RESTORE_MS;
+        if (!fresh && saved) storageRemove(CLEARED_KEY);
+        return fresh && !els.editor.value ? saved.content : null;
+      }
+
+      function restorePage() {
+        const content = clearedPage();
+        if (content === null) return;
+        hideSnackbar();
+        replaceText(content);
+        saveContent();
+        renderStatus();
+      }
+
+      // Swaps the whole text through execCommand so Cmd+Z still reverses it; assigning .value
+      // wipes the browser's undo history. No standard API replaces it. Falls back to .value.
+      function replaceText(text) {
+        els.editor.focus();
+        els.editor.select();
+        const done = text
+          ? document.execCommand('insertText', false, text)
+          : document.execCommand('delete');
+        if (!done) els.editor.value = text;
+      }
+
+      function toggleSpellcheck() {
+        prefs.spellcheck = !prefs.spellcheck;
+        savePrefs();
+        applySpellcheck();
+      }
+
+      // Theme ----------------------------------------------------------------------------
+
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
+
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
         );
-        document.getElementById('icon-size-page')?.classList.remove('hidden');
-      } else {
-        els.wrapper.classList.add('max-w-full', 'wrapper-fullscreen');
-        document.getElementById('icon-size-full-window')?.classList.remove('hidden');
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        savePrefs();
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
       }
-    }
 
-    function applySpellcheck() {
-      // Using setAttribute is more reliable for dynamic changes on textareas
-      els.editor.setAttribute('spellcheck', state.spellcheck ? 'true' : 'false');
-
-      const icon = document.getElementById('spellcheckIcon');
-
-      if (state.spellcheck) {
-        icon?.classList.remove('text-zinc-400');
-        icon?.classList.add('text-brand-600', 'dark:text-brand-400');
-      } else {
-        icon?.classList.add('text-zinc-400');
-        icon?.classList.remove('text-brand-600', 'dark:text-brand-400');
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
       }
-    }
 
-    // --- Utilities ---
-    function setupMobileHeight() {
-      function setHeight() {
-        if (window.innerWidth >= 640 || state.sizeMode === 'full') {
-          document.body.style.height = '100dvh';
-          return;
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
+
+      // Opens under the button, right-aligned. The source link keeps a click on the open
+      // menu's button from light-dismissing and reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        menu.querySelector('[data-action="clear"]').disabled = !els.editor.value;
+        const restore = menu.querySelector('[data-action="restore"]');
+        restore.hidden = restore.disabled = clearedPage() === null;
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        menu.style.top = `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        history.pushState({ dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
         }
-        if (document.activeElement === els.editor) return;
-        document.body.style.height = `${window.innerHeight}px`;
       }
 
-      window.addEventListener('resize', setHeight);
-      setHeight();
-    }
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
+      }
 
+      // --- UI Updates ---
 
-  </script>
-</body>
+      function applyWidth() {
+        document.body.dataset.width = prefs.width;
+        els.widthIcon.textContent = WIDTH_ICONS[prefs.width];
+        const label = `Width: ${WIDTH_NAMES[prefs.width]}`;
+        els.widthBtn.title = label;
+        els.widthBtn.setAttribute('aria-label', label);
+      }
 
+      function applySpellcheck() {
+        els.editor.spellcheck = prefs.spellcheck;
+        els.spellcheckItem.setAttribute('aria-checked', prefs.spellcheck);
+      }
+
+      function setSaveState(state) {
+        saveState = state;
+        clearTimeout(savedTimer);
+        // "Saved" shows briefly, then the count comes back.
+        if (state === 'saved') savedTimer = setTimeout(() => setSaveState('idle'), 1600);
+        renderStatus();
+      }
+
+      // Counts the selection when there is one: "12 of 340 words".
+      function renderStatus() {
+        const { value, selectionStart, selectionEnd } = els.editor;
+        const selected =
+          document.activeElement === els.editor && selectionEnd > selectionStart
+            ? value.slice(selectionStart, selectionEnd)
+            : '';
+        const unit = prefs.countMode === 'words' ? 'word' : 'character';
+        const total = countTotal(value);
+        let text = selected ? `${count(selected)} of ${total}` : `${total}`;
+        text += ` ${unit}${total === 1 && !selected ? '' : 's'}`;
+        if (saveState === 'saved') text = 'Saved';
+        if (saveState === 'error') text = 'Not saved. Storage is full or blocked.';
+        els.status.dataset.state = saveState;
+        els.status.classList.toggle('selecting', Boolean(selected) && saveState !== 'error');
+        els.statusIcon.textContent =
+          saveState === 'error' ? 'error' : saveState === 'saved' ? 'check_circle' : 'notes';
+        els.statusText.textContent = text;
+        els.status.title = `Show ${prefs.countMode === 'words' ? 'characters' : 'words'}`;
+      }
+
+      // Characters are what a reader sees: an emoji family or a decomposed "ế" counts once.
+      // Words split on spaces, but CJK text has none, so each CJK character counts as a word.
+      function count(text) {
+        if (prefs.countMode === 'words')
+          return text.replace(CJK, ' $& ').match(/\S+/g)?.length ?? 0;
+        let n = 0;
+        for (const _ of GRAPHEMES.segment(text)) n++;
+        return n;
+      }
+
+      // Caret moves re-render the status, so the total is recounted only when the text or mode changes.
+      function countTotal(text) {
+        const { mode, text: last } = countCache;
+        if (mode !== prefs.countMode || last !== text) {
+          countCache = { mode: prefs.countMode, text, value: count(text) };
+        }
+        return countCache.value;
+      }
+
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
+
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
+
+      function hideSnackbar() {
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
+
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
+
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
+
+      // --- Utilities ---
+
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      // Returns whether the value was written.
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          return true;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      function storageRemove(key) {
+        try {
+          localStorage.removeItem(key);
+        } catch (err) {
+          // Ignore: nothing to clean up if storage is unavailable.
+        }
+      }
+
+      init();
+    </script>
+  </body>
 </html>
