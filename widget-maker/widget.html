@@ -145,10 +145,29 @@
         color: var(--primary);
       }
 
-      /* M3 Expressive cookie and sparkle shapes, set as masks from script. */
+      /* The M3 Expressive cookie behind today and the badges (mask set from script). It sits
+         on its own layer so it can turn slowly while the widget is live without turning the
+         text; at rest it holds still. */
       .cookie {
+        position: relative;
+        isolation: isolate;
+      }
+
+      .cookie::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: var(--cookie-fill, var(--primary-container));
         mask: var(--cookie) center / contain no-repeat;
         -webkit-mask: var(--cookie) center / contain no-repeat;
+        animation: turn 24s linear infinite;
+      }
+
+      @keyframes turn {
+        to {
+          rotate: 360deg;
+        }
       }
 
       .message {
@@ -343,6 +362,7 @@
         opacity: 0.8;
       }
 
+      /* The hands sweep on CSS animations; updateClock() sets where each is in its turn. */
       .hand {
         stroke-linecap: round;
         transform-box: view-box;
@@ -426,25 +446,13 @@
       }
 
       .cal-grid .today {
+        --cookie-fill: var(--primary);
         color: var(--on-primary);
         font-weight: 700;
       }
 
       .cal-grid .today::before {
-        content: '';
-        position: absolute;
         inset: -0.12em;
-        z-index: -1;
-        background: var(--primary);
-        mask: var(--cookie) center / contain no-repeat;
-        -webkit-mask: var(--cookie) center / contain no-repeat;
-        animation: turn 24s linear infinite;
-      }
-
-      @keyframes turn {
-        to {
-          rotate: 360deg;
-        }
       }
 
       .today-card {
@@ -459,7 +467,6 @@
         place-items: center;
         width: 2.6em;
         height: 2.6em;
-        background: var(--primary-container);
         color: var(--on-primary-container);
         font-size: 1em;
         font-weight: 600;
@@ -505,8 +512,9 @@
         font-weight: 600;
       }
 
+      /* Today wears the same cookie as in the month grid. */
       .week-strip .on {
-        background: var(--primary);
+        --cookie-fill: var(--primary);
         color: var(--on-primary);
       }
 
@@ -590,11 +598,6 @@
 
       .cell.now i {
         background: var(--tertiary);
-      }
-
-      /* Motion off stops the decoration. Clock hands keep running: they are the time. */
-      .still .today::before {
-        animation-play-state: paused;
       }
 
       .bar .pct,
@@ -745,7 +748,6 @@
         place-items: center;
         width: 2em;
         height: 2em;
-        background: var(--primary-container);
         color: var(--on-primary-container);
       }
 
@@ -901,13 +903,29 @@
         color: var(--on-surface-variant);
       }
 
-      /* Reduced motion keeps the clock hands, which show the time, and stills the rest. */
-      @media (prefers-reduced-motion: reduce) {
-        :not(.hand, .hand-s),
-        ::before {
-          animation-duration: 1ms !important;
-          animation-iteration-count: 1 !important;
-        }
+      /* A gallery tile rests (.rest) once loaded and its motion pauses, so the widget maker's
+         page of live tiles sits idle until one is hovered. The entrance still finishes. */
+      #w.rest :not(.fit, .dots-wrap),
+      #w.rest ::before {
+        animation-play-state: paused;
+      }
+
+      /* A paused blink could hold the colon dimmed. */
+      #w.rest .sep {
+        animation: none;
+      }
+
+      /* Motion levels (motionLevel()): Reduced keeps only a quick fade-in and steps the
+         analog hands instead of sweeping them; Off shows every change at once. */
+      #w.motion-reduced:not(.quiet) :is(.fit, .dots-wrap) {
+        animation: fade 200ms ease-out both;
+      }
+
+      #w.motion-reduced :is(.hand, .hand-s),
+      #w.motion-reduced .cookie::before,
+      #w.motion-off *,
+      #w.motion-off ::before {
+        animation: none;
       }
     </style>
   </head>
@@ -936,6 +954,7 @@
       const WEATHER_RETRY_MS = 60 * 1000;
       const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
       const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+      const IN_GALLERY = location.hash === '#tile';
 
       // WMO weather codes from Open-Meteo, as [label, day icon, night icon].
       const WEATHER_CODES = {
@@ -978,6 +997,9 @@
       let weatherPending = ''; // Key of the fetch in flight, so rapid updates don't start a second
       let lastDigits = '';
       let waveFrame = 0;
+      let wavePhase = 0; // Kept across rests, so a wave picks up where it stopped
+      let hovered = false; // A gallery tile under the pointer, reported by the builder
+      let tickMs = 60000; // The current widget's update interval, kept for waking from rest
       let barGeom = null; // { sw, mid, end, amp, wl } for the bar's wave
 
       // --- DOM Elements ---
@@ -1000,6 +1022,7 @@
       // --- Event Listeners ---
       function bindEvents() {
         DARK_QUERY.addEventListener('change', applyColors);
+        REDUCED_MOTION.addEventListener('change', () => render(true));
         new ResizeObserver(() => layout()).observe(els.w);
         // Fonts change text widths, so fit again whenever one arrives, including the icon
         // font, which only starts loading once the weather icons are on the page.
@@ -1015,6 +1038,12 @@
         // The builder's live preview sends new settings here instead of reloading the frame.
         window.addEventListener('message', (e) => {
           if (e.origin !== location.origin || e.source !== parent) return;
+          // Gallery tiles don't take the pointer, so the builder reports their hover.
+          if (e.data?.type === 'widget-hover') {
+            hovered = e.data.hover === true;
+            updateRest();
+            return;
+          }
           if (e.data?.type !== 'widget-config') return;
           previewMode = e.data.mode === 'light' || e.data.mode === 'dark' ? e.data.mode : null;
           config = readConfig(e.data.search);
@@ -1039,7 +1068,7 @@
           seed: seed === 'mono' || /^[0-9a-f]{6}$/i.test(seed || '') ? seed : DEFAULT_SEED,
           theme: ['light', 'dark'].includes(q.get('t')) ? q.get('t') : 'auto',
           card: q.get('bg') === '1',
-          motion: q.get('m') !== '0',
+          motion: { 0: 'off', r: 'reduced' }[q.get('m')] || 'joyful',
           // Clock
           h24: q.get('h') === '24',
           seconds: q.get('sec') === '1',
@@ -1139,8 +1168,9 @@
         clearTimeout(timer);
         lastDigits = '';
         els.w.className = config.card ? 'card' : '';
-        els.w.classList.toggle('still', !config.motion);
         els.w.classList.toggle('quiet', quiet);
+        els.w.classList.add(`motion-${motionLevel()}`);
+        els.w.classList.toggle('rest', resting());
         const draw = { clock, calendar, progress, countdown, weather: weatherWidget }[config.w];
         draw();
         layout();
@@ -1148,10 +1178,12 @@
       }
 
       // Re-renders on the next boundary that changes what's shown: a second, a minute or
-      // midnight. Hidden tabs skip ticks; visibilitychange re-renders on return.
+      // midnight. Hidden tabs and resting tiles skip ticks; visibilitychange and
+      // updateRest() catch up.
       function scheduleNext(unitMs) {
         clearTimeout(timer);
-        if (document.hidden) return;
+        tickMs = unitMs;
+        if (document.hidden || resting()) return;
         const wait = unitMs - (Date.now() % unitMs) + 20;
         timer = setTimeout(() => {
           update();
@@ -1183,6 +1215,8 @@
       // Clock -----------------------------------------------------------------------------
 
       function clock() {
+        // Motion off stills the analog face completely: no second hand, a tick a minute.
+        const seconds = config.seconds && !(config.s === 'analog' && motionLevel() === 'off');
         const label = config.label ? `<div class="clock-label">${esc(config.label)}</div>` : '';
         const date = config.date ? '<div class="clock-date" id="date"></div>' : '';
         if (config.s === 'analog') {
@@ -1194,7 +1228,7 @@
                 ${ticks()}
                 <line class="hand hand-h" id="hand-h" x1="100" y1="100" x2="100" y2="54" />
                 <line class="hand hand-m" id="hand-m" x1="100" y1="100" x2="100" y2="32" />
-                ${config.seconds ? '<circle class="hand-s" id="hand-s" cx="100" cy="17" r="7" />' : ''}
+                ${seconds ? '<circle class="hand-s" id="hand-s" cx="100" cy="17" r="7" />' : ''}
                 <circle class="cap" cx="100" cy="100" r="6" />
               </svg>
               ${meta}
@@ -1211,7 +1245,7 @@
             </div>`;
         } else {
           els.w.innerHTML = `
-            <div class="fit digital${config.motion ? ' blink' : ''}">
+            <div class="fit digital${motionLevel() === 'joyful' ? ' blink' : ''}">
               ${label}
               <div class="time num">
                 <span class="hh" id="hh"></span><span class="sep">:</span><span class="mm" id="mm"></span>${
@@ -1224,7 +1258,7 @@
             </div>`;
         }
         updateClock();
-        scheduleNext(config.seconds && config.s !== 'analog' ? 1000 : 60000);
+        scheduleNext(seconds ? 1000 : 60000);
       }
 
       function updateClock() {
@@ -1232,11 +1266,11 @@
         const h12 = t.h % 12 || 12;
         const hh = config.h24 ? pad(t.h) : String(h12);
         if (config.s === 'analog') {
-          // The hands run on CSS animations; a negative delay starts each at the right angle.
-          const s = t.s + t.ms / 1000;
-          setDelay('hand-h', ((t.h % 12) * 3600 + t.m * 60 + s) * -1);
-          setDelay('hand-m', (t.m * 60 + s) * -1);
-          setDelay('hand-s', -s);
+          // A stepping hand lands on the whole second; a sweeping one carries the fraction.
+          const s = t.s + (motionLevel() === 'joyful' ? t.ms / 1000 : 0);
+          setHand('hand-h', (t.h % 12) * 3600 + t.m * 60 + s, 43200);
+          setHand('hand-m', t.m * 60 + s, 3600);
+          setHand('hand-s', s, 60);
         } else {
           setDigits('hh', hh);
           setDigits('mm', pad(t.m));
@@ -1287,9 +1321,15 @@
         return out;
       }
 
-      function setDelay(id, seconds) {
+      // Puts a hand `seconds` into its `period`-long turn. A sweeping hand (Joyful) gets its
+      // animation's own time, which stays right while it runs and after a pause at rest;
+      // Reduced and Off have no animation, so the hand jumps to the angle.
+      function setHand(id, seconds, period) {
         const el = document.getElementById(id);
-        if (el) el.style.animationDelay = `${seconds}s`;
+        if (!el) return;
+        const anim = el.getAnimations()[0];
+        if (anim) anim.currentTime = seconds * 1000;
+        else el.style.rotate = `${((seconds % period) / period) * 360}deg`;
       }
 
       // Writes digits one span each; a changed digit rolls in from below.
@@ -1307,7 +1347,9 @@
           const span = el.children[i];
           if (span.textContent === ch) return;
           span.textContent = ch;
-          if (config.motion && !REDUCED_MOTION.matches) {
+          // Joyful rolls a changed digit in from below; Reduced fades it; Off swaps it.
+          const level = motionLevel();
+          if (level === 'joyful') {
             span.animate(
               [
                 { transform: 'translateY(35%)', opacity: 0 },
@@ -1315,6 +1357,8 @@
               ],
               { duration: 500, easing: 'cubic-bezier(0.2, 0, 0, 1)' },
             );
+          } else if (level === 'reduced') {
+            span.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' });
           }
         });
       }
@@ -1328,7 +1372,7 @@
         const order = [0, 1, 2, 3, 4, 5, 6].map((i) => (i + config.weekStart) % 7);
         if (config.s === 'today') {
           const strip = order
-            .map((d) => `<span class="${d === now.getDay() ? 'on' : ''}">${names[d]}</span>`)
+            .map((d) => `<span class="${d === now.getDay() ? 'on cookie' : ''}">${names[d]}</span>`)
             .join('');
           els.w.innerHTML = `
             <div class="fit today-card">
@@ -1350,7 +1394,7 @@
             const cls = [
               'day',
               d < now.getDate() && 'past',
-              d === now.getDate() && 'today',
+              d === now.getDate() && 'today cookie',
               (wd === 0 || wd === 6) && 'weekend',
             ]
               .filter(Boolean)
@@ -1552,18 +1596,48 @@
         }
       }
 
-      // About 30 frames a second while a wave is on screen. requestAnimationFrame stops by
-      // itself in hidden tabs; Motion off and reduced motion draw one still frame.
+      // The motion level in effect: the widget's setting, with the viewer's reduced-motion
+      // preference turning Joyful into Reduced.
+      function motionLevel() {
+        return config.motion === 'joyful' && REDUCED_MOTION.matches ? 'reduced' : config.motion;
+      }
+
+      // Embeds (Notion, Obsidian) and the builder's preview follow their Motion setting. Only
+      // the widget maker's gallery tiles, marked #tile, rest once loaded: no ticks and no
+      // motion until hovered, so a page of widgets sits idle.
+      function resting() {
+        return IN_GALLERY && !hovered;
+      }
+
+      // Applies resting(): pauses or resumes the CSS motion (.rest), the ticks and the wave.
+      // Waking catches the clock up at once; other widgets refresh on their next tick.
+      function updateRest() {
+        els.w.classList.toggle('rest', resting());
+        if (resting()) clearTimeout(timer);
+        else {
+          if (config.w === 'clock') updateClock();
+          scheduleNext(tickMs);
+        }
+        if (document.querySelector('.wave')) animateWaves();
+      }
+
+      function wavesMove() {
+        return !resting() && motionLevel() === 'joyful';
+      }
+
+      // About 30 frames a second while a wave is on screen and moving (wavesMove()); otherwise
+      // one still frame.
       function animateWaves() {
         cancelAnimationFrame(waveFrame);
-        drawWaves(0);
-        if (!config.motion || REDUCED_MOTION.matches) return;
+        drawWaves(wavePhase);
+        if (!wavesMove()) return;
         let last = 0;
         const tick = (t) => {
-          if (!document.getElementById('ring-wave') && !document.getElementById('bar-wave')) return;
+          if (!wavesMove() || !document.querySelector('.wave')) return;
           if (t - last >= 33) {
+            if (last) wavePhase += ((t - last) / 1600) * Math.PI * 2;
             last = t;
-            drawWaves((t / 1600) * Math.PI * 2);
+            drawWaves(wavePhase);
           }
           waveFrame = requestAnimationFrame(tick);
         };
@@ -1763,7 +1837,7 @@
       // The dots style's mark, in a 100 by 100 box. The sparkle is Year Left's ✦.
       function markPath(shape) {
         if (shape === 'dot') return 'M50 0A50 50 0 1 1 50 100A50 50 0 1 1 50 0Z';
-        if (shape === 'cookie') return cookiePath(50, 50, 50, 9, 0.12);
+        if (shape === 'cookie') return cookiePath(50, 50, 50, 12, 0.11);
         if (shape === 'heart') {
           return 'M50 92C20 70 2 52 2 31C2 16 14 6 28 6C38 6 46 12 50 20C54 12 62 6 72 6C86 6 98 16 98 31C98 52 80 70 50 92Z';
         }

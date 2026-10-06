@@ -526,13 +526,14 @@
         letter-spacing: 0.1px;
       }
 
-      .settings > .sect-title:first-child {
+      /* The open widget's own section comes first; the others are hidden. */
+      .settings > [data-for]:not([hidden]) > .sect-title {
         margin-top: 8px;
       }
 
       /* In two columns the first label lines up with the top of the preview. */
       @media (min-width: 900px) {
-        .settings > .sect-title:first-child {
+        .settings > [data-for]:not([hidden]) > .sect-title {
           margin-top: 0;
         }
       }
@@ -816,7 +817,13 @@
         border-radius: min(28px, calc(var(--h) * 0.09));
         transition:
           scale var(--spring-fast-ms) var(--spring-fast),
-          box-shadow var(--effects-ms) linear;
+          box-shadow var(--effects-ms) linear,
+          background-color var(--effects-ms) linear;
+      }
+
+      /* Holds the tile's place until its widget loads (loadNextTile()). */
+      .tile-frame:not(.loaded) {
+        background: var(--surface-container-low);
       }
 
       .tile-frame iframe {
@@ -971,7 +978,6 @@
         place-items: center;
         height: 320px;
         padding: 16px;
-        border: 2px solid transparent;
         border-radius: var(--shape-xl);
         overflow: hidden;
         background: var(--page);
@@ -1074,25 +1080,18 @@
         line-height: 20px;
       }
 
-      /* Embed fields: the link and the iframe code, read-only, in the code font. */
-      .embed-field input,
-      .embed-field textarea {
-        font: 400 13px/20px var(--font-code);
-        letter-spacing: 0;
-      }
-
-      .embed-field textarea {
+      /* Embed fields: the link and the iframe code, read-only, in the code font. Both wrap and
+         grow to show everything, clear of the copy button. Two classes, so they win over the
+         general .field rules further down. */
+      .field.embed-field textarea {
         height: auto;
         min-height: 0;
         padding-right: 44px;
         field-sizing: content;
         resize: none;
+        font: 400 13px/20px var(--font-code);
+        letter-spacing: 0;
         word-break: break-all;
-      }
-
-      .embed-field input {
-        padding-right: 56px;
-        text-overflow: ellipsis;
       }
 
       .embed-field textarea ~ .field-trailing {
@@ -2053,14 +2052,6 @@
           </div>
 
           <form class="settings" id="form" novalidate>
-            <!-- Style -->
-            <h2 class="sect-title">Style</h2>
-            <div class="group">
-              <div class="row row-stack">
-                <div class="seg" id="style-seg" role="radiogroup" aria-label="Style"></div>
-              </div>
-            </div>
-
             <!-- Clock -->
             <div data-for="clock">
               <h2 class="sect-title">Clock</h2>
@@ -2266,13 +2257,19 @@
                 </span>
                 <input class="switch" type="checkbox" role="switch" name="bg" />
               </label>
-              <label class="row">
+              <div class="row row-stack">
                 <span class="row-text">
                   <span>Motion</span>
-                  <span class="row-sub">Rolling digits, twinkles and waves</span>
+                  <span class="row-sub"
+                    >Reduced steps instead of sweeping; Off changes instantly</span
+                  >
                 </span>
-                <input class="switch" type="checkbox" role="switch" name="m" />
-              </label>
+                <div class="seg" role="radiogroup" aria-label="Motion">
+                  <label><input type="radio" name="m" value="joyful" />Joyful</label>
+                  <label><input type="radio" name="m" value="reduced" />Reduced</label>
+                  <label><input type="radio" name="m" value="off" />Off</label>
+                </div>
+              </div>
             </div>
 
             <!-- Size -->
@@ -2282,17 +2279,11 @@
                 <span class="row-text">
                   <span>Embed size</span>
                   <span class="row-sub"
-                    >For Obsidian. In Notion, drag the embed’s edges instead.</span
+                    >Widgets fit any size. Sets the Obsidian code; in Notion, drag the embed’s
+                    edges.</span
                   >
                 </span>
-                <div class="chips" role="radiogroup" aria-label="Embed size">
-                  <label><input type="radio" name="size" value="small" />Small</label>
-                  <label><input type="radio" name="size" value="medium" />Medium</label>
-                  <label><input type="radio" name="size" value="large" />Large</label>
-                  <label><input type="radio" name="size" value="banner" />Banner</label>
-                  <label><input type="radio" name="size" value="custom" />Custom</label>
-                </div>
-                <div class="fields" id="custom-size" hidden>
+                <div class="fields">
                   <label class="field">
                     <input
                       type="number"
@@ -2324,7 +2315,7 @@
             <div class="group">
               <div class="row row-stack">
                 <label class="field embed-field">
-                  <input type="text" id="link-out" readonly placeholder=" " />
+                  <textarea id="link-out" readonly rows="1" placeholder=" "></textarea>
                   <span class="field-label">Link, for Notion</span>
                   <button
                     class="icon-btn state field-trailing"
@@ -2529,12 +2520,6 @@
         ['d93025', 'Red'],
         ['mono', 'Mono'],
       ];
-      const SIZES = {
-        small: [200, 200],
-        medium: [400, 200],
-        large: [400, 400],
-        banner: [720, 180],
-      };
       const PERIODS = ['day', 'week', 'month', 'year'];
       // The dots style's mark shapes; the first is the default. Same list in widget.html.
       const SHAPES = ['dot', 'sparkle', 'star', 'heart', 'cookie'];
@@ -2557,12 +2542,12 @@
           tz: 'Asia/Tokyo',
           label: 'Tokyo',
         },
-        { name: 'Month', w: 'calendar', c: '1f8a65', size: 'large' },
+        { name: 'Month', w: 'calendar', c: '1f8a65', size: [400, 400] },
         { name: 'Today', w: 'calendar', s: 'today', wide: true, c: 'd93025' },
         { name: 'Year in dots', w: 'progress', wide: true, c: 'a63aa8' },
-        { name: 'Month ring', w: 'progress', s: 'ring', p: 'month', c: 'e0a800', size: 'small' },
+        { name: 'Month ring', w: 'progress', s: 'ring', p: 'month', c: 'e0a800' },
         { name: 'Day bar', w: 'progress', s: 'bar', p: 'day', wide: true, c: '2563eb' },
-        { name: 'New Year', w: 'countdown', c: 'd93025', size: 'small' },
+        { name: 'New Year', w: 'countdown', c: 'd93025' },
         {
           name: 'Next trip',
           w: 'countdown',
@@ -2588,6 +2573,9 @@
       let draft = null;
       let stageDark = null; // null follows the app theme; true/false once picked
       let previewReady = false;
+      let tileObserver = null;
+      let tileQueue = []; // Gallery frames near view, waiting to load, in page order
+      let tileLoading = null; // The gallery frame loading now
       let snackbarTimer = 0;
       let searchToken = 0;
       let ignorePopstate = 0;
@@ -2620,7 +2608,6 @@
         preview: document.getElementById('preview'),
         sizeMeta: document.getElementById('size-meta'),
         form: document.getElementById('form'),
-        styleSeg: document.getElementById('style-seg'),
         tzField: document.getElementById('tz-field'),
         tzSupport: document.getElementById('tz-support'),
         tzList: document.getElementById('tz-list'),
@@ -2629,7 +2616,6 @@
         placeQuery: document.getElementById('place-q'),
         results: document.getElementById('results'),
         swatches: document.getElementById('swatches'),
-        customSize: document.getElementById('custom-size'),
         shapeRow: document.getElementById('shape-row'),
         linkOut: document.getElementById('link-out'),
         codeOut: document.getElementById('code-out'),
@@ -2690,6 +2676,16 @@
           const tile = e.target.closest('.tile');
           if (tile) openEditor(draftFromPreset(PRESETS[Number(tile.dataset.i)]), tile.dataset.name);
         });
+        // Tile frames ignore the pointer so a click opens the editor; this tells the widget in
+        // a tile when it's hovered: tiles rest until then, so the gallery sits idle.
+        const hoverTile = (e, hover) => {
+          const tile = e.target.closest('.tile');
+          if (!tile || tile.contains(e.relatedTarget)) return;
+          const frame = tile.querySelector('iframe')?.contentWindow;
+          frame?.postMessage({ type: 'widget-hover', hover }, messageTarget());
+        };
+        els.gallery.addEventListener('pointerover', (e) => hoverTile(e, true));
+        els.gallery.addEventListener('pointerout', (e) => hoverTile(e, false));
         els.form.addEventListener('input', onInput);
         els.form.addEventListener('submit', (e) => e.preventDefault());
         els.placeQuery.addEventListener('keydown', (e) => {
@@ -2720,8 +2716,9 @@
           if (draft) postPreview();
         };
         window.addEventListener('message', (e) => {
-          if (e.origin !== location.origin || e.source !== els.preview.contentWindow) return;
-          if (e.data?.type === 'widget-ready') onPreviewReady();
+          if (e.origin !== location.origin || e.data?.type !== 'widget-ready') return;
+          if (e.source === els.preview.contentWindow) onPreviewReady();
+          else if (e.source === tileLoading?.contentWindow) tileLoaded(tileLoading);
         });
         els.preview.addEventListener('load', () => {
           if (els.preview.getAttribute('src')) onPreviewReady();
@@ -2767,12 +2764,7 @@
       // One handler for every setting: write the value, refresh the preview and link.
       function onInput(e) {
         const t = e.target;
-        const w = draft[draft.w];
         switch (t.name) {
-          case 's':
-            w.s = t.value;
-            els.shapeRow.hidden = draft.progress.s !== 'dots';
-            break;
           case 'h24':
           case 'sec':
           case 'date':
@@ -2833,12 +2825,10 @@
             stageDark = t.value === 'dark';
             break;
           case 'bg':
-          case 'm':
-            draft.look[t.name] = t.checked;
+            draft.look.bg = t.checked;
             break;
-          case 'size':
-            draft.look.size = t.value;
-            els.customSize.hidden = t.value !== 'custom';
+          case 'm':
+            draft.look.m = t.value;
             break;
           case 'width':
           case 'height': {
@@ -2890,8 +2880,7 @@
             c: DEFAULT_SEED,
             t: 'auto',
             bg: true,
-            m: true,
-            size: 'medium',
+            m: 'joyful',
             width: 400,
             height: 200,
           },
@@ -2911,7 +2900,8 @@
           o.date = isoDate(t);
         }
         d.look.c = p.c;
-        d.look.size = p.size || (p.wide ? 'medium' : 'small');
+        // The embed starts at the tile's shape: square, wide, or a preset's own size.
+        [d.look.width, d.look.height] = p.size || (p.wide ? [400, 200] : [200, 200]);
         return d;
       }
 
@@ -2970,7 +2960,7 @@
         if (c === 'mono' || /^[0-9a-f]{6}$/i.test(c || '')) d.look.c = c.toLowerCase();
         if (THEME_CYCLE.includes(q.get('t'))) d.look.t = q.get('t');
         d.look.bg = q.get('bg') === '1';
-        d.look.m = q.get('m') !== '0';
+        d.look.m = { 0: 'off', r: 'reduced' }[q.get('m')] || 'joyful';
         return d;
       }
 
@@ -3035,7 +3025,7 @@
         if (look.c !== DEFAULT_SEED) q.set('c', look.c);
         if (look.t !== 'auto') q.set('t', look.t);
         if (look.bg) q.set('bg', '1');
-        if (!look.m) q.set('m', '0');
+        if (look.m !== 'joyful') q.set('m', look.m === 'off' ? '0' : 'r');
         return q.toString();
       }
 
@@ -3052,8 +3042,7 @@
       }
 
       function embedSize() {
-        const { size, width, height } = draft.look;
-        return size === 'custom' ? [width, height] : SIZES[size];
+        return [draft.look.width, draft.look.height];
       }
 
       // Everything that follows from the draft: preview, size label and the embed fields.
@@ -3305,7 +3294,7 @@
                 const d = draftFromPreset(p);
                 const style = STYLES[w].find(([id]) => id === d[w].s)[1];
                 return `<button class="tile${p.wide ? ' wide' : ''}" type="button" data-i="${index}" data-name="${esc(p.name)}" style="--i:${i++}">
-                  <span class="tile-frame"><iframe src="widget.html?${widgetParams(d)}" title="" tabindex="-1" loading="lazy" aria-hidden="true"></iframe></span>
+                  <span class="tile-frame"><iframe data-src="widget.html?${widgetParams(d)}#tile" title="" tabindex="-1" aria-hidden="true"></iframe></span>
                   <span class="tile-name">${esc(p.name)}<small>${WIDGET_NAMES[w]} · ${style}</small></span>
                 </button>`;
               })
@@ -3313,18 +3302,51 @@
             return `<section><h2 class="sect-title">${title}</h2><div class="tiles">${tiles}</div></section>`;
           })
           .join('');
+        observeTiles();
+      }
+
+      // Gallery widgets load one at a time, in reading order (left to right, top to bottom),
+      // once their tile comes near view, so the page doesn't start every widget at once and
+      // they arrive in sequence.
+      function observeTiles() {
+        tileObserver?.disconnect();
+        tileQueue = [];
+        tileLoading = null;
+        const frames = [...els.gallery.querySelectorAll('iframe')];
+        tileObserver = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              tileObserver.unobserve(entry.target);
+              tileQueue.push(entry.target);
+            }
+            tileQueue.sort((a, b) => frames.indexOf(a) - frames.indexOf(b));
+            loadNextTile();
+          },
+          { rootMargin: '200px 0px' },
+        );
+        for (const frame of frames) tileObserver.observe(frame);
+      }
+
+      function loadNextTile() {
+        if (tileLoading || !tileQueue.length) return;
+        const frame = tileQueue.shift();
+        tileLoading = frame;
+        // The widget's ready message ends the wait; load is the fallback, should it not come.
+        frame.addEventListener('load', () => tileLoaded(frame), { once: true });
+        frame.src = frame.dataset.src;
+      }
+
+      function tileLoaded(frame) {
+        if (tileLoading !== frame) return;
+        frame.parentElement.classList.add('loaded');
+        tileLoading = null;
+        loadNextTile();
       }
 
       // Pushes the draft into every control and shows only the current widget's sections.
       function syncForm() {
         const w = draft.w;
-        const o = draft[w];
-        els.styleSeg.innerHTML = STYLES[w]
-          .map(
-            ([id, name]) =>
-              `<label><input type="radio" name="s" value="${id}"${id === o.s ? ' checked' : ''} />${name}</label>`,
-          )
-          .join('');
         for (const section of els.form.querySelectorAll('[data-for]')) {
           section.hidden = section.dataset.for !== w;
         }
@@ -3349,9 +3371,7 @@
         els.placeSub.textContent = draft.weather.sub;
         f.t.value = draft.look.t;
         f.bg.checked = draft.look.bg;
-        f.m.checked = draft.look.m;
-        f.size.value = draft.look.size;
-        els.customSize.hidden = draft.look.size !== 'custom';
+        f.m.value = draft.look.m;
         f.width.value = String(draft.look.width);
         f.height.value = String(draft.look.height);
         updateSwatches();
