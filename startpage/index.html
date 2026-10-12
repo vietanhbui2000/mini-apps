@@ -925,6 +925,40 @@
         height: 8px;
       }
 
+      /* On touch screens the list opens upwards, so the keyboard can't cover it. The box hangs
+         from its bottom edge, the first suggestion sits next to the bar, and the rest stack
+         above it. The space above the bar is only sure to hold three 60px rows (32px page
+         padding, the hero, a 40px gap: 208px), so a longer list scrolls. */
+      @media (hover: none) {
+        .search-box {
+          inset: auto 0 0;
+          display: flex;
+          flex-direction: column-reverse;
+        }
+
+        .suggest {
+          display: flex;
+          flex-direction: column-reverse;
+          max-height: 200px;
+          overflow-y: auto;
+          scrollbar-width: none;
+        }
+
+        .suggest > *,
+        .suggest::before,
+        .suggest::after {
+          flex: none;
+        }
+
+        /* Sticks to the bar, so rows scroll under it instead of carrying it away. */
+        .suggest::before {
+          position: sticky;
+          bottom: 0;
+          z-index: 1;
+          margin: 8px 0 0;
+        }
+      }
+
       .opt {
         display: flex;
         align-items: center;
@@ -1244,8 +1278,10 @@
         transform: none;
       }
 
+      /* Fills backwards only: an animation that kept filling after it ended would hold the
+         opacity and make the focus fade above snap. */
       .dial-empty {
-        animation: enter var(--spring-slow-ms) var(--spring-slow) 120ms both;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) 120ms backwards;
       }
 
       /* --- Toolbar --- */
@@ -3178,6 +3214,7 @@
       );
       const MOD = IS_MAC ? '⌥' : 'Alt+';
       const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+      const TOUCH = matchMedia('(hover: none)');
       const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
 
       const MATCH_MODES = ['shortcut', 'shortcut_name', 'shortcut_name_url'];
@@ -3529,7 +3566,9 @@
             suggestDismissed = false;
             return renderSearch();
           }
-          const step = e.key === 'ArrowDown' ? 1 : -1;
+          // On touch screens the list opens upwards, so Up moves away from the bar.
+          const down = TOUCH.matches ? 'ArrowUp' : 'ArrowDown';
+          const step = e.key === down ? 1 : -1;
           setActiveOption((activeOption + step + options.length) % options.length);
         } else if (e.key === 'Tab' && !e.shiftKey && triggerKeys().tab) {
           const word = els.q.value.trim();
@@ -4486,7 +4525,7 @@
                 ? favImg(option.engine.url, option.engine.name)
                 : icon('search');
           title = option.term || option.engine.name;
-          sub = `${option.kind === 'ask' ? 'Ask' : 'Search'} ${option.engine.name}`;
+          sub = `${option.kind === 'ask' ? 'Ask' : 'Search with'} ${option.engine.name}`;
         }
         return `<li class="opt" id="opt-${i}" role="option" data-i="${i}" aria-selected="${i === activeOption}">
           <span class="opt-lead">${lead}</span>
