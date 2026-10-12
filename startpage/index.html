@@ -436,14 +436,9 @@
         }
       }
 
-      /* The hero fills the upper half of the screen, less the 32px page padding, the 40px gap and
-         half the 56px search box, so the box sits at mid-screen however many links follow it.
-         svh, so the box doesn't move when a phone browser's bars slide away. The hero is never
-         shorter than the fullest clock (24px date, 4 + 8px margins, the time, 28px message
-         line), and rests its content on the bottom edge. So the last line keeps the same gap to
-         the search box for every header, with or without the message, and nothing below the
-         hero ever moves. The time scales with the narrower of the screen's two sides, so it
-         doesn't crowd a short, wide window. */
+      /* Fills the upper half, so the search box sits at mid-screen whatever follows it. Never
+         shorter than the fullest clock, and content rests on the bottom edge, so every header
+         keeps the same gap to the box. */
       .hero {
         display: flex;
         flex-direction: column;
@@ -455,19 +450,18 @@
         animation: enter var(--spring-slow-ms) var(--spring-slow) both;
       }
 
-      /* On touch screens the toolbar is at the top, so the page makes room for it there (16px
-         offset, 48px tall, 8px gap) and needs none at the bottom. The hero's fullest-clock block
-         sits in the middle of the hero, not on its bottom edge: the padding is half the height
-         the hero has to spare. Every header still rests on the bottom of that block, so
-         switching headers moves nothing. */
+      /* Touch: the toolbar is at the top, so the padding moves there. --hero-fill puts the box
+         at mid-screen, or higher when a full speed dial wouldn't fit below it (568px is all the
+         rest: paddings, gaps, the box, five rows of links). The header block is centered. */
       @media (pointer: coarse) {
         .home {
+          --hero-fill: min(50svh - 140px, 100svh - 568px);
           padding-block: 72px 32px;
         }
 
         .hero {
-          min-height: max(64px + var(--hero-time), 50svh - 140px);
-          padding-bottom: max(0px, (50svh - 204px - var(--hero-time)) / 2);
+          min-height: max(64px + var(--hero-time), var(--hero-fill));
+          padding-bottom: max(0px, (var(--hero-fill) - 64px - var(--hero-time)) / 2);
         }
       }
 
@@ -896,9 +890,7 @@
         color: var(--on-secondary);
       }
 
-      /* Closing keeps the list in place so the box shrinks over it, the reverse of opening. The
-         closed list stays in the page but is hidden once the box has shut, and can't be clicked
-         on its way out. */
+      /* The list stays while the box closes over it, then hides. */
       .suggest-wrap {
         display: grid;
         grid-template-rows: 0fr;
@@ -916,11 +908,7 @@
         transition-delay: 0s;
       }
 
-      /* The bar sits at mid-screen, so the list gets half the screen, less half the bar and 72px
-         for the toolbar and its margins, and never leaves the screen or runs under the toolbar.
-         It is never shorter than the three 60px rows the hero always leaves room for. A longer
-         list scrolls, without dragging the page along. scroll-padding keeps a row picked with
-         the arrow keys clear of the separator. */
+      /* Capped to the space below the bar, short of the toolbar, then scrolls on its own. */
       .suggest {
         min-height: 0;
         max-height: max(200px, 50svh - 100px);
@@ -945,8 +933,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      /* The separator fades out ahead of the closing box: at full strength it would cut across
-         the rounded corners as they reach it. */
+      /* Fades out before the closing box's rounded corners reach it. */
       .search-box.open .suggest::before {
         opacity: 1;
       }
@@ -957,9 +944,7 @@
         height: 8px;
       }
 
-      /* On touch screens the list opens upwards, so the keyboard can't cover it. The box hangs
-         from its bottom edge, the first suggestion sits next to the bar, and the rest stack
-         above it. */
+      /* Touch: the list opens upwards, clear of the keyboard, first suggestion next to the bar. */
       @media (pointer: coarse) {
         .search-box {
           inset: auto 0 0;
@@ -967,9 +952,11 @@
           flex-direction: column-reverse;
         }
 
+        /* The space above the bar, less the toolbar's strip. */
         .suggest {
           display: flex;
           flex-direction: column-reverse;
+          max-height: max(200px, var(--hero-fill) + 40px);
         }
 
         .suggest > *,
@@ -1304,8 +1291,7 @@
         transform: none;
       }
 
-      /* Fills backwards only: an animation that kept filling after it ended would hold the
-         opacity and make the focus fade above snap. */
+      /* Backwards only: a forwards fill would hold the opacity and block the focus fade. */
       .dial-empty {
         animation: enter var(--spring-slow-ms) var(--spring-slow) 120ms backwards;
       }
