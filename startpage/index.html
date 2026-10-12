@@ -314,7 +314,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .state:hover::before {
           opacity: 0.08;
         }
@@ -442,29 +442,32 @@
          shorter than the fullest clock (24px date, 4 + 8px margins, the time, 28px message
          line), and rests its content on the bottom edge. So the last line keeps the same gap to
          the search box for every header, with or without the message, and nothing below the
-         hero ever moves. */
+         hero ever moves. The time scales with the narrower of the screen's two sides, so it
+         doesn't crowd a short, wide window. */
       .hero {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-end;
         min-height: max(64px + var(--hero-time), 50svh - 100px);
-        --hero-time: clamp(72px, 17vw, 128px);
+        --hero-time: clamp(72px, min(17vw, 22svh), 128px);
         text-align: center;
         animation: enter var(--spring-slow-ms) var(--spring-slow) both;
       }
 
-      /* On touch screens the toolbar is at the top, so the page needs no room for it at the
-         bottom. The hero's fullest-clock block sits in the middle of the hero there, not on its
-         bottom edge: the padding is half the height the hero has to spare. Every header still
-         rests on the bottom of that block, so switching headers moves nothing. */
+      /* On touch screens the toolbar is at the top, so the page makes room for it there (16px
+         offset, 48px tall, 8px gap) and needs none at the bottom. The hero's fullest-clock block
+         sits in the middle of the hero, not on its bottom edge: the padding is half the height
+         the hero has to spare. Every header still rests on the bottom of that block, so
+         switching headers moves nothing. */
       @media (pointer: coarse) {
         .home {
-          padding-bottom: 32px;
+          padding-block: 72px 32px;
         }
 
         .hero {
-          padding-bottom: max(0px, (50svh - 164px - var(--hero-time)) / 2);
+          min-height: max(64px + var(--hero-time), 50svh - 140px);
+          padding-bottom: max(0px, (50svh - 204px - var(--hero-time)) / 2);
         }
       }
 
@@ -913,12 +916,14 @@
         transition-delay: 0s;
       }
 
-      /* The bar sits at mid-screen, so the list gets the lower half, less half the bar and a 16px
-         margin, and never leaves the screen. A longer list scrolls, without dragging the page
-         along. scroll-padding keeps a row picked with the arrow keys clear of the separator. */
+      /* The bar sits at mid-screen, so the list gets half the screen, less half the bar and 72px
+         for the toolbar and its margins, and never leaves the screen or runs under the toolbar.
+         It is never shorter than the three 60px rows the hero always leaves room for. A longer
+         list scrolls, without dragging the page along. scroll-padding keeps a row picked with
+         the arrow keys clear of the separator. */
       .suggest {
         min-height: 0;
-        max-height: max(200px, 50svh - 44px);
+        max-height: max(200px, 50svh - 100px);
         overflow-y: auto;
         overscroll-behavior: contain;
         scroll-padding-block: 9px;
@@ -954,9 +959,7 @@
 
       /* On touch screens the list opens upwards, so the keyboard can't cover it. The box hangs
          from its bottom edge, the first suggestion sits next to the bar, and the rest stack
-         above it. The list gets the upper half there, less half the bar and 72px for the toolbar
-         and its margins, and never less than the three 60px rows the hero always leaves room
-         for. */
+         above it. */
       @media (pointer: coarse) {
         .search-box {
           inset: auto 0 0;
@@ -967,7 +970,6 @@
         .suggest {
           display: flex;
           flex-direction: column-reverse;
-          max-height: max(200px, 50svh - 100px);
         }
 
         .suggest > *,
@@ -1068,7 +1070,7 @@
         visibility: visible;
       }
 
-      @media (hover: none) {
+      @media (pointer: coarse) {
         .opt-enter {
           display: none;
         }
@@ -1091,13 +1093,13 @@
         opacity: 0.38;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         body:has(.search-input:focus) .dial > *:hover {
           opacity: 1;
         }
       }
 
-      @media (hover: none) {
+      @media (pointer: coarse) {
         body:has(.search-input:focus) .dial > * {
           pointer-events: none;
         }
@@ -1182,7 +1184,7 @@
         }
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .dial-card:hover {
           background: var(--surface-container);
         }
@@ -1246,7 +1248,7 @@
         border-radius: 6px;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .dial-tile:hover .fav {
           border-radius: var(--shape-lg-plus);
         }
@@ -1329,7 +1331,7 @@
         opacity: 0.38;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         body:has(.search-input:focus) .toolbar:hover {
           opacity: 1;
         }
@@ -2156,7 +2158,7 @@
           box-shadow var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .field input:hover {
           border-color: var(--on-surface);
         }
