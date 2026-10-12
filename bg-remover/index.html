@@ -293,7 +293,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .state:hover::before {
           opacity: 0.08;
         }
@@ -615,7 +615,7 @@
         font-size: 16px;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .stage:hover .stage-hint {
           opacity: 1;
         }
@@ -1809,7 +1809,8 @@
             </div>
           </div>
           <p class="model-note">
-            The model and its runtime get downloaded once, then work even when you're offline. Images never leave your device.
+            The model and its runtime get downloaded once, then work even when you're offline.
+            Images never leave your device.
           </p>
 
           <h2 class="sect-title">Background</h2>
