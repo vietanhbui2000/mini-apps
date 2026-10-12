@@ -275,7 +275,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .state:hover::before {
           opacity: 0.08;
         }
@@ -950,7 +950,7 @@
         display: none;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .audio-toggle[data-playing='true']:hover .bars {
           display: none;
         }
@@ -1012,7 +1012,7 @@
         transition-delay: 80ms;
       }
 
-      @media (hover: none) {
+      @media (pointer: coarse) {
         .zen-pill {
           width: 172px;
           height: 56px;
@@ -1103,7 +1103,7 @@
         border-bottom-right-radius: 20px;
       }
 
-      @media (min-width: 640px) and (hover: hover) {
+      @media (min-width: 640px) and (hover: hover) and (pointer: fine) {
         body[data-zen='video'] .handle {
           display: block;
         }
