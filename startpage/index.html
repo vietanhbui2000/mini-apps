@@ -422,7 +422,6 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         gap: 40px;
         width: 100%;
         max-width: 768px;
@@ -437,19 +436,30 @@
         }
       }
 
-      /* The hero is always as tall as the fullest clock (24px date, 4 + 8px margins, the time,
-         28px message line), and rests its content on the bottom edge. So the last line keeps the
-         same gap to the search box for every header, with or without the message, and nothing
-         below the hero ever moves. */
+      /* The hero fills the upper half of the screen, less the 32px page padding, the 40px gap and
+         half the 56px search box, so the box sits at mid-screen however many links follow it.
+         svh, so the box doesn't move when a phone browser's bars slide away. The hero is never
+         shorter than the fullest clock (24px date, 4 + 8px margins, the time, 28px message
+         line), and rests its content on the bottom edge. So the last line keeps the same gap to
+         the search box for every header, with or without the message, and nothing below the
+         hero ever moves. */
       .hero {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-end;
-        min-height: calc(64px + var(--hero-time));
+        min-height: max(64px + var(--hero-time), 50svh - 100px);
         --hero-time: clamp(72px, 17vw, 128px);
         text-align: center;
         animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      /* On touch screens the toolbar is at the top, so the page needs no room for it at the
+         bottom. */
+      @media (pointer: coarse) {
+        .home {
+          padding-bottom: 32px;
+        }
       }
 
       .hero-clock {
@@ -927,9 +937,10 @@
 
       /* On touch screens the list opens upwards, so the keyboard can't cover it. The box hangs
          from its bottom edge, the first suggestion sits next to the bar, and the rest stack
-         above it. The space above the bar is only sure to hold three 60px rows (32px page
-         padding, the hero, a 40px gap: 208px), so a longer list scrolls. */
-      @media (hover: none) {
+         above it. The bar sits at mid-screen there, so the list gets the upper half, less 72px
+         for the toolbar and its margins, and never less than the three 60px rows the hero
+         always leaves room for. A longer list scrolls, without dragging the page along. */
+      @media (pointer: coarse) {
         .search-box {
           inset: auto 0 0;
           display: flex;
@@ -939,8 +950,9 @@
         .suggest {
           display: flex;
           flex-direction: column-reverse;
-          max-height: 200px;
+          max-height: max(200px, 50svh - 100px);
           overflow-y: auto;
+          overscroll-behavior: contain;
           scrollbar-width: none;
         }
 
@@ -1319,6 +1331,20 @@
           padding: 0;
           background: none;
           box-shadow: none;
+        }
+      }
+
+      /* On touch screens it moves to the top corner, clear of the speed dial and the thumb. */
+      @media (pointer: coarse) {
+        .toolbar {
+          top: 16px;
+          bottom: auto;
+        }
+      }
+
+      @media (pointer: coarse) and (min-width: 640px) {
+        .toolbar {
+          top: 24px;
         }
       }
 
@@ -3214,7 +3240,7 @@
       );
       const MOD = IS_MAC ? '⌥' : 'Alt+';
       const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
-      const TOUCH = matchMedia('(hover: none)');
+      const TOUCH = matchMedia('(pointer: coarse)');
       const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
 
       const MATCH_MODES = ['shortcut', 'shortcut_name', 'shortcut_name_url'];
