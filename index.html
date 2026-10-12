@@ -272,7 +272,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .state:hover::before {
           opacity: 0.08;
         }
@@ -1090,7 +1090,9 @@
           <img class="app-icon" src="syslog-analyzer/favicon.svg" alt="" width="40" height="40" />
           <span class="app-text">
             <span class="app-name">Syslog Analyzer</span>
-            <span class="app-sub">See what an Android or iOS device is made of, from its system log.</span>
+            <span class="app-sub"
+              >See what an Android or iOS device is made of, from its system log.</span
+            >
           </span>
         </a>
         <a class="app state" href="blank-page/" data-app="blank-page">
