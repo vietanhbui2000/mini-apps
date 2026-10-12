@@ -455,10 +455,16 @@
       }
 
       /* On touch screens the toolbar is at the top, so the page needs no room for it at the
-         bottom. */
+         bottom. The hero's fullest-clock block sits in the middle of the hero there, not on its
+         bottom edge: the padding is half the height the hero has to spare. Every header still
+         rests on the bottom of that block, so switching headers moves nothing. */
       @media (pointer: coarse) {
         .home {
           padding-bottom: 32px;
+        }
+
+        .hero {
+          padding-bottom: max(0px, (50svh - 164px - var(--hero-time)) / 2);
         }
       }
 
@@ -907,14 +913,25 @@
         transition-delay: 0s;
       }
 
+      /* The bar sits at mid-screen, so the list gets the lower half, less half the bar and a 16px
+         margin, and never leaves the screen. A longer list scrolls, without dragging the page
+         along. scroll-padding keeps a row picked with the arrow keys clear of the separator. */
       .suggest {
         min-height: 0;
-        overflow: hidden;
+        max-height: max(200px, 50svh - 44px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scroll-padding-block: 9px;
+        scrollbar-width: none;
         list-style: none;
       }
 
+      /* Sticks to the bar, so rows scroll under it instead of carrying it away. */
       .suggest::before {
         content: '';
+        position: sticky;
+        top: 0;
+        z-index: 1;
         display: block;
         height: 1px;
         margin-bottom: 8px;
@@ -937,9 +954,9 @@
 
       /* On touch screens the list opens upwards, so the keyboard can't cover it. The box hangs
          from its bottom edge, the first suggestion sits next to the bar, and the rest stack
-         above it. The bar sits at mid-screen there, so the list gets the upper half, less 72px
-         for the toolbar and its margins, and never less than the three 60px rows the hero
-         always leaves room for. A longer list scrolls, without dragging the page along. */
+         above it. The list gets the upper half there, less half the bar and 72px for the toolbar
+         and its margins, and never less than the three 60px rows the hero always leaves room
+         for. */
       @media (pointer: coarse) {
         .search-box {
           inset: auto 0 0;
@@ -951,9 +968,6 @@
           display: flex;
           flex-direction: column-reverse;
           max-height: max(200px, 50svh - 100px);
-          overflow-y: auto;
-          overscroll-behavior: contain;
-          scrollbar-width: none;
         }
 
         .suggest > *,
@@ -962,11 +976,9 @@
           flex: none;
         }
 
-        /* Sticks to the bar, so rows scroll under it instead of carrying it away. */
         .suggest::before {
-          position: sticky;
+          top: auto;
           bottom: 0;
-          z-index: 1;
           margin: 8px 0 0;
         }
       }
@@ -3596,6 +3608,7 @@
           const down = TOUCH.matches ? 'ArrowUp' : 'ArrowDown';
           const step = e.key === down ? 1 : -1;
           setActiveOption((activeOption + step + options.length) % options.length);
+          els.suggest.children[activeOption].scrollIntoView({ block: 'nearest' });
         } else if (e.key === 'Tab' && !e.shiftKey && triggerKeys().tab) {
           const word = els.q.value.trim();
           const engine = /^\S+$/.test(word) ? findEngine(word) : null;
