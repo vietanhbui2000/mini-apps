@@ -285,7 +285,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .state:hover::before {
           opacity: 0.08;
         }
@@ -1067,7 +1067,7 @@
         transition: outline-color var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .field input:hover {
           border-color: var(--on-surface);
         }
