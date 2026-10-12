@@ -36,7 +36,7 @@ The design system is Material 3 Expressive (see `DESIGN.md`). Every app uses it.
 - **Vanilla JS:** global-scope state and functions, direct DOM updates.
 - **Google Fonts:** Google Sans Flex (text), Google Sans Code (monospace, only when needed), Material Symbols Rounded (icons).
 - **Material Color Utilities** `@material/material-color-utilities@0.4.0` from jsDelivr: only in apps where people choose a color, and loaded with `import()` on first use.
-- **Platform APIs before libraries:** WebCrypto (`crypto.subtle`) for TOTP codes, `BarcodeDetector` for reading QR images (feature-detected), `TextDecoder` with streaming for large log files, the Clipboard API, and `field-sizing: content` for growing text areas.
+- **Platform APIs before libraries:** WebCrypto (`crypto.subtle`) for TOTP codes, `BarcodeDetector` for reading QR images (feature-detected), `TextDecoder` with streaming for large log files, `DecompressionStream` for reading `.tar.gz` archives without unpacking them to memory, the Clipboard API, and `field-sizing: content` for growing text areas.
 - **Third-party scripts, only where the platform has no equivalent:** `qr-code-styling@1.9.2` (QR Code Generator, loaded at the end of `<body>`) and the YouTube IFrame API (YouTube Player, loaded on the first play).
 - **On-device AI:** Transformers.js `@huggingface/transformers@4.3.0` from jsDelivr (`/+esm`), only in Background Remover. It runs in a Web Worker started from an inline script, and imports on the first image. The model (RMBG-1.4) downloads once from Hugging Face into the library's `transformers-cache` Cache Storage: the 16-bit file (88 MB) on WebGPU, the 8-bit file (44 MB) on the CPU.
 - **Web APIs:** Open-Meteo for Widget Maker's weather and place search. It's free, needs no key, and allows cross-origin requests.
@@ -115,7 +115,7 @@ Because all apps share one origin:
 | Blank Page                                         | `blank-page`                    | Theme, width, spell check, count mode, and the text                                                |
 | DNS Profile Generator                              | `dns-profile-gen`               | Theme and the form draft                                                                           |
 | YouTube Player                                     | `minimal-youtube-player`        | Theme and the last 8 videos played                                                                 |
-| Battery Checker, Icon Generator, QR Code Generator | `<folder name>`                 | Theme only. Files never leave the page.                                                            |
+| Syslog Analyzer, Icon Generator, QR Code Generator | `<folder name>`                 | Theme only. Files never leave the page.                                                            |
 | Background Remover                                 | `bg-remover`                    | Theme, fill, crop and format. Images never leave the page; the model lives in Cache Storage.       |
 | Widget Maker                                       | `widget-maker`                  | Theme and the weather place and units. A widget's own settings live in its link, never in storage. |
 

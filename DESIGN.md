@@ -218,7 +218,7 @@ Each app picks one seed when it's redesigned, which gives it a quiet identity of
 | Home page             | `#2563eb` (system default)  | Tonal | Blue                     |
 | Startpage             | `#2563eb` (user can change) | Tonal | Blue                     |
 | 2FA Authenticator     | `#1f8a65`                   | Tonal | Green                    |
-| Battery Checker       | `#e0a800`                   | Tonal | Amber                    |
+| Syslog Analyzer       | `#e0a800`                   | Tonal | Amber                    |
 | Blank Page            | `#6750a4`                   | Tonal | Purple (the M3 baseline) |
 | DNS Profile Generator | `#00838f`                   | Tonal | Teal                     |
 | macOS Icon Generator  | `#c2185b`                   | Tonal | Magenta                  |
@@ -291,7 +291,7 @@ Signature moments: give each app **one or two** at most. Everything else stays q
 
 - Startpage: clock digits that roll in when they change, and a search bar that docks open into its suggestions.
 - 2FA Authenticator: a wavy countdown that folds from a pill into a ring when search opens, and codes that roll in each period.
-- Battery Checker: the health gauge's wave sweeping up while the number counts.
+- Syslog Analyzer: the battery health gauge's wave sweeping up while the number counts.
 - Background Remover: the cutout sweeping across the original, wiping the background away.
 - YouTube Player: the video morphing into the audio card's thumbnail (a shared view-transition name).
 - Every app: the circular reveal when the theme flips.
@@ -327,7 +327,7 @@ Copy these from an app that already uses them; class names are shared across app
 - **Bottom bar (`.actionbar`):** phones and tablets only, on `surface-container`. The main action (filled) comes first, then an optional tonal one; they split the width 2:1 and line up with the page gutter. Snackbars move up to clear it.
 - **Bottom sheet (phones):** below 600px, menus (`.menu` popovers) and reading dialogs (`.dialog.bottom-sheet`, used for help) open as M3 modal bottom sheets: anchored to the bottom, 28px top corners, `surface-container-low`, a 32 × 4 drag handle, and a 32% scrim. Drag the handle down, tap the scrim, press Esc or go Back to close. They slide with M3's emphasized decelerate curve, not a spring, so they never lift off the bottom edge. Wider screens keep the anchored menu and the centered dialog. Dialogs with text fields (edit, import, links) stay dialogs: on iPhone the keyboard covers anything anchored to the bottom.
 - **Action order:** in bars and preview panels the main action comes first (left), so it's the first thing read. Dialogs keep M3's order: confirm last, on the right.
-- **Header controls:** anything that switches the whole page (icon-gen's App/Folder toggle, battery's loaded file) lives in the pinned app bar, under the title row.
+- **Header controls:** anything that switches the whole page (icon-gen's App/Folder toggle) lives in the pinned app bar, under the title row.
 - **Focus mode:** a full-screen dark layer for media. Set `color-scheme: dark` on the body instead of hard-coding colors, so every token follows. Controls sit in a floating pill that grows from a slim handle on hover (always open on touch).
 
 ## Do's and Don'ts

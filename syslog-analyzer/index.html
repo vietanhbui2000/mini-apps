@@ -1,0 +1,4488 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="See what an Android or iOS device is made of, from its system log."
+    />
+    <title>Syslog Analyzer</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#fff8f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17130b" media="(prefers-color-scheme: dark)" />
+
+    <!-- Fonts: Google Sans Flex, Google Sans Code, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:wght@400..500&family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=arrow_outward,brightness_auto,close,code,content_copy,dark_mode,description,error,expand_more,help,info,light_mode,memory,more_vert,person,upload_file&display=block"
+    />
+
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #e0a800. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#785a0b, #e9c16c);
+        --on-primary: light-dark(#ffffff, #402d00);
+        --primary-container: light-dark(#ffdf9f, #5b4300);
+        --on-primary-container: light-dark(#5b4300, #ffdf9f);
+        --secondary: light-dark(#6b5d3f, #d8c4a0);
+        --on-secondary: light-dark(#ffffff, #3b2f15);
+        --secondary-container: light-dark(#f5e0bb, #52452a);
+        --on-secondary-container: light-dark(#52452a, #f5e0bb);
+        --tertiary: light-dark(#4a6546, #b0cfa9);
+        --on-tertiary: light-dark(#ffffff, #1d361c);
+        --tertiary-container: light-dark(#ccebc4, #334d30);
+        --on-tertiary-container: light-dark(#334d30, #ccebc4);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#fff8f2, #17130b);
+        --on-surface: light-dark(#1f1b13, #ebe1d4);
+        --on-surface-variant: light-dark(#4d4639, #d0c5b4);
+        --surface-dim: light-dark(#e2d9cc, #17130b);
+        --surface-bright: light-dark(#fff8f2, #3e382f);
+        --surface-container-lowest: light-dark(#ffffff, #110e07);
+        --surface-container-low: light-dark(#fcf2e5, #1f1b13);
+        --surface-container: light-dark(#f7ecdf, #231f17);
+        --surface-container-high: light-dark(#f1e7d9, #2e2921);
+        --surface-container-highest: light-dark(#ebe1d4, #39342b);
+        --outline: light-dark(#7f7667, #998f80);
+        --outline-variant: light-dark(#d0c5b4, #4d4639);
+        --inverse-surface: light-dark(#353027, #ebe1d4);
+        --inverse-on-surface: light-dark(#faefe2, #353027);
+        --inverse-primary: light-dark(#e9c16c, #785a0b);
+        --scrim: #000;
+
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
+
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --font-code: 'Google Sans Code', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      }
+
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+      }
+
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
+
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the 40px height, not --shape-full: a press springs them smaller,
+         and the spring's overshoot from 999px would dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
+        border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .btn:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .btn .icon {
+        font-size: 20px;
+        margin-left: -8px;
+      }
+
+      .btn-filled {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
+      }
+
+      .btn-text .icon {
+        margin-left: -4px;
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* --- App bar & page --- */
+      /* The bar stays pinned while the page scrolls. Its contents line up with the page column. */
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: var(--surface);
+        transition: box-shadow var(--spring-ms) linear;
+      }
+
+      /* A divider plus a soft shadow: content cards share the container colors, so a tint alone
+         would blend in. The divider keeps the edge visible in dark mode. */
+      .appbar.scrolled {
+        box-shadow:
+          0 1px 0 var(--outline-variant),
+          0 4px 12px rgb(0 0 0 / 0.08);
+      }
+
+      .appbar-inner,
+      .page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .appbar-inner,
+        .page {
+          padding-inline: 24px;
+        }
+      }
+
+      /* The page fills the space under the bar, so empty states can stretch to the bottom edge.
+         The bottom gap matches the side gutter. */
+      .page {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        padding-bottom: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .page {
+          padding-bottom: 24px;
+        }
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        margin-right: -8px;
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 840px) {
+        .top-title {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+
+      /* --- Drop zone (empty state) --- */
+      .drop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        padding: 48px 24px;
+        border: 2px dashed transparent;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-low);
+        text-align: center;
+        justify-content: center;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+        transition:
+          border-color var(--effects-ms) linear,
+          background-color var(--effects-ms) linear;
+      }
+
+      .dragging .drop {
+        border-color: var(--primary);
+        background: var(--surface-container);
+      }
+
+      .art {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 144px;
+        height: 144px;
+        margin-bottom: 32px;
+        color: var(--on-primary-container);
+        transition: scale var(--spring-ms) var(--spring);
+      }
+
+      .dragging .art {
+        scale: 1.1;
+      }
+
+      .art svg {
+        position: absolute;
+        inset: 0;
+        fill: var(--primary-container);
+        animation: spin 40s linear infinite;
+      }
+
+      .art .icon {
+        position: relative;
+        font-size: 56px;
+        font-variation-settings: 'FILL' 1;
+      }
+
+      @keyframes spin {
+        to {
+          rotate: 1turn;
+        }
+      }
+
+      .drop h2 {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .drop p {
+        max-width: 400px;
+        margin: 8px 0 24px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .drop-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      /* Error banner */
+      .banner {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        max-width: 480px;
+        margin: 0 0 24px;
+        padding: 16px 8px 16px 16px;
+        border-radius: var(--shape-lg);
+        background: var(--error-container);
+        color: var(--on-error-container);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        text-align: left;
+        animation: enter var(--spring-ms) var(--spring) both;
+      }
+
+      .banner > .icon {
+        margin-top: 8px;
+      }
+
+      .banner-text {
+        flex: 1;
+        padding-top: 8px;
+      }
+
+      .banner strong {
+        display: block;
+        font-weight: 500;
+      }
+
+      .banner .icon-btn {
+        color: inherit;
+      }
+
+      /* --- Loading --- */
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .loading-name {
+        max-width: 100%;
+        overflow: hidden;
+        font: 500 16px/24px var(--font);
+        letter-spacing: 0.15px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .loading-line {
+        width: min(320px, 100%);
+        height: 16px;
+        overflow: visible;
+        color: var(--primary);
+      }
+
+      .loading-pct {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .wave,
+      .track {
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .wave {
+        stroke: currentColor;
+      }
+
+      .track {
+        stroke: var(--secondary-container);
+      }
+
+      /* --- File bar --- */
+      /* The loaded file, shaped like a search bar: 40px items at an 8px inset in a 56px pill. It
+         sits in the app bar, so the file stays in view while the dashboard scrolls. */
+      .file-wrap {
+        padding-bottom: 12px;
+      }
+
+      .file {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 56px;
+        padding: 0 8px;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .file-lead {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--surface-container-lowest);
+        color: var(--primary);
+      }
+
+      .file-text {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .file-name,
+      .file-meta {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-name {
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .file-meta {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      /* --- Dashboard --- */
+      .dash {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .dash > * {
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .dash > :nth-child(2) {
+        animation-delay: 40ms;
+      }
+
+      .dash > :nth-child(3) {
+        animation-delay: 80ms;
+      }
+
+      .dash > :nth-child(4) {
+        animation-delay: 120ms;
+      }
+
+      .dash > :nth-child(n + 5) {
+        animation-delay: 160ms;
+      }
+
+      @media (min-width: 840px) {
+        .dash {
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          column-gap: 16px;
+        }
+
+        .health {
+          grid-column: span 7;
+        }
+
+        .cycles {
+          grid-column: span 5;
+        }
+
+        .sect-half {
+          grid-column: span 6;
+        }
+
+        .sect-full {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .card {
+        padding: 24px;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container);
+      }
+
+      .card-title {
+        color: var(--on-surface-variant);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 16px;
+        border-radius: var(--shape-sm);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+      }
+
+      .chip[data-tone='good'] {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .chip[data-tone='bad'] {
+        background: var(--error-container);
+        color: var(--on-error-container);
+      }
+
+      /* Health: the hero. A wavy gauge for the overall figure and the two values behind it. */
+      .health {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .health-main {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px 32px;
+      }
+
+      .gauge {
+        position: relative;
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 168px;
+        height: 168px;
+        margin: 0 auto;
+        color: var(--primary);
+      }
+
+      .gauge[data-tone='fair'] {
+        color: var(--secondary);
+      }
+
+      .gauge[data-tone='bad'] {
+        color: var(--error);
+      }
+
+      .gauge svg {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+      }
+
+      .gauge .wave,
+      .gauge .track {
+        stroke-width: 10;
+      }
+
+      .gauge-value {
+        display: flex;
+        align-items: baseline;
+        color: var(--on-surface);
+        font: 450 48px/1 var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+
+      .gauge-value small {
+        margin-left: 2px;
+        color: var(--on-surface-variant);
+        font-size: 22px;
+      }
+
+      .health-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .measures {
+        display: grid;
+        flex: 1 1 220px;
+        gap: 2px;
+      }
+
+      .measure {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-bright);
+      }
+
+      .measure:first-child {
+        border-radius: var(--shape-lg) var(--shape-lg) var(--shape-xs) var(--shape-xs);
+      }
+
+      .measure:last-child {
+        border-radius: var(--shape-xs) var(--shape-xs) var(--shape-lg) var(--shape-lg);
+      }
+
+      .measure-value {
+        font: 500 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+      }
+
+      .measure-value small {
+        margin-left: 2px;
+        font-size: 14px;
+      }
+
+      /* Cycles */
+      .cycles {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .cycles-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .cycles-value {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex: 1;
+        font: 450 57px/64px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+      }
+
+      .cycles-value small {
+        color: var(--on-surface-variant);
+        font-size: 16px;
+        line-height: 24px;
+        letter-spacing: 0.15px;
+      }
+
+      .cycles-bar {
+        margin-top: auto;
+      }
+
+      .cycles-line {
+        display: block;
+        width: 100%;
+        height: 12px;
+        overflow: visible;
+        color: var(--primary);
+      }
+
+      .cycles-line .wave,
+      .cycles-line .track {
+        stroke-width: 6;
+      }
+
+      .ticks {
+        position: relative;
+        height: 16px;
+        margin-top: 8px;
+        color: var(--on-surface-variant);
+        font-size: 11px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+      }
+
+      .ticks span {
+        position: absolute;
+        translate: -50% 0;
+      }
+
+      .ticks span:first-child {
+        translate: 0;
+      }
+
+      .ticks span:last-child {
+        right: 0;
+        translate: 0;
+      }
+
+      /* Sections: title, then an Android 16 grouped list or a grid of tiles */
+      .sect-title {
+        margin: 16px 16px 8px;
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      /* Label on the left. On the right, the value as the device reported it and, under
+         it, the name decoded from that value. Padding sets the height, since baseline
+         alignment can't centre a one-line row in a min-height. */
+      .row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+      }
+
+      /* First and last visible rows: a hidden row (a setting that only shows when another is
+         on) mustn't leave its neighbour with a square outer corner. */
+      .group > .row:not([hidden]):not(.row:not([hidden]) ~ .row) {
+        border-top-left-radius: var(--shape-lg-plus);
+        border-top-right-radius: var(--shape-lg-plus);
+      }
+
+      .group > .row:not([hidden]):not(:has(~ .row:not([hidden]))) {
+        border-bottom-left-radius: var(--shape-lg-plus);
+        border-bottom-right-radius: var(--shape-lg-plus);
+      }
+
+      .row-label {
+        flex: none;
+        max-width: 45%;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 24px;
+        letter-spacing: 0.25px;
+      }
+
+      /* Values wrap: part numbers and chip names are worth reading whole. */
+      .row-end {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        min-width: 0;
+        text-align: right;
+      }
+
+      .row-value {
+        overflow-wrap: anywhere;
+        font: 500 16px/24px var(--font);
+        letter-spacing: 0.15px;
+      }
+
+      .row-decoded {
+        overflow-wrap: anywhere;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* Meters: how much of something is in use, as a bar. Meters and tiles wrap, and the
+         last line stretches, so an odd count leaves no empty cell. */
+      .meters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        overflow: hidden;
+        border-radius: var(--shape-lg-plus);
+      }
+
+      .meters:empty,
+      .tiles:empty {
+        display: none;
+      }
+
+      /* Four of a kind sit 2 × 2 or 4 × 1, never 3 + 1. */
+      .meters:has(> :nth-child(4):last-child),
+      .tiles:has(> :nth-child(4):last-child) {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      @media (min-width: 600px) {
+        .tiles:has(> :nth-child(4):last-child) {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 840px) {
+        .meters:has(> :nth-child(4):last-child) {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      /* Status sections: the one with bars takes the full width, the small ones pair up. */
+      @media (min-width: 840px) {
+        .sections {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          column-gap: 16px;
+        }
+
+        .sections > :has(.meters:not(:empty)) {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .meter {
+        display: flex;
+        flex: 1 1 220px;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+      }
+
+      .meter-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      .meter-value {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+      }
+
+      .meter-value small {
+        margin-left: 4px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        letter-spacing: 0.25px;
+      }
+
+      /* M3 linear indicator: the filled part, a gap, then the rest of the track. */
+      .meter-bar {
+        display: flex;
+        gap: 4px;
+        height: 8px;
+        margin-top: 8px;
+        color: var(--primary);
+      }
+
+      .meter-bar[data-tone='bad'] {
+        color: var(--error);
+      }
+
+      .meter-bar span {
+        min-width: 8px;
+        border-radius: var(--shape-full);
+        background: var(--secondary-container);
+      }
+
+      .meter-bar .fill {
+        flex: none;
+        background: currentColor;
+      }
+
+      .meter-bar .rest {
+        flex: 1;
+      }
+
+      .tiles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+        overflow: hidden;
+        border-radius: var(--shape-lg-plus);
+      }
+
+      .tile {
+        display: flex;
+        flex: 1 1 150px;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+      }
+
+      .tile-label {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      .tile-value {
+        overflow-wrap: anywhere;
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0;
+      }
+
+      .tile-value small {
+        margin-left: 4px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        letter-spacing: 0.25px;
+      }
+
+      .empty-value {
+        color: var(--outline);
+      }
+
+      /* Device: the log's subject, with the facts people look for first as chips. */
+      .device {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .device-name {
+        overflow-wrap: anywhere;
+        font: 400 32px/40px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .device-name:focus-visible {
+        outline: none;
+      }
+
+      .device-sub {
+        margin-top: 4px;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0.8;
+      }
+
+      .device-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .device .chip {
+        background: var(--surface-container-lowest);
+        color: var(--on-surface);
+      }
+
+      /* Zones: Hardware, Software, Current state. Each holds titled groups of rows, packed
+         into two columns on wide screens since the groups differ a lot in height. */
+      .zone-title {
+        margin: 24px 16px 0;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .groupbox {
+        break-inside: avoid;
+      }
+
+      /* Padding, not margin: a margin is dropped at the top of a column, which would leave
+         the second column's first title higher than the first's. */
+      .groupbox .sect-title {
+        margin: 0;
+        padding: 16px 16px 8px;
+      }
+
+      .groups:empty,
+      .zone-title:has(+ .groups:empty) {
+        display: none;
+      }
+
+      @media (min-width: 840px) {
+        .device,
+        .zone-title,
+        .groups {
+          grid-column: 1 / -1;
+        }
+
+        .groups {
+          columns: 2;
+          column-gap: 16px;
+        }
+      }
+
+      .legend {
+        margin: 8px 16px;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 20px;
+        letter-spacing: 0.4px;
+      }
+
+      /* Matched log lines */
+      .raw {
+        border-radius: var(--shape-lg-plus);
+        background: var(--surface-container);
+      }
+
+      .raw summary {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 8px 8px 16px;
+        border-radius: var(--shape-lg-plus);
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .raw summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .raw-title {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .raw-title small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .raw summary > .icon {
+        width: 40px;
+        color: var(--on-surface-variant);
+        text-align: center;
+        transition: rotate var(--spring-ms) var(--spring);
+      }
+
+      .raw[open] summary > .icon {
+        rotate: 180deg;
+      }
+
+      .raw-body {
+        position: relative;
+        padding: 0 8px 8px;
+      }
+
+      .raw pre {
+        margin: 0;
+        padding: 16px 56px 16px 16px;
+        overflow-x: auto;
+        border-radius: var(--shape-md);
+        background: var(--surface-container-lowest);
+        color: var(--on-surface-variant);
+        font: 400 12px/20px var(--font-code);
+        letter-spacing: 0;
+      }
+
+      .raw pre b {
+        color: var(--primary);
+        font-weight: 500;
+      }
+
+      .raw-copy {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+      }
+
+      /* Help */
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .steps li {
+        display: flex;
+        gap: 16px;
+        counter-increment: step;
+      }
+
+      .steps li::before {
+        content: counter(step);
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 28px;
+        height: 28px;
+        margin-top: -4px;
+        border-radius: 50%;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font: 500 14px/1 var(--font);
+      }
+
+      .help-head {
+        margin: 0 0 16px;
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .steps + .help-head {
+        margin-top: 24px;
+      }
+
+      .steps strong {
+        color: var(--on-surface);
+        font-weight: 500;
+      }
+
+      code {
+        padding: 1px 6px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container-highest);
+        color: var(--on-surface);
+        font: 400 13px/20px var(--font-code);
+        letter-spacing: 0;
+      }
+
+      .help-note {
+        margin-top: 24px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-head {
+        padding: 24px 24px 16px;
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 8px 24px 0;
+        overscroll-behavior: contain;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* Menu */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu.up {
+        transform-origin: bottom right;
+      }
+
+      .menu:popover-open {
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
+      }
+
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, menus and reading dialogs (help, about) open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-right: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('syslog-analyzer') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="appbar" id="appbar">
+      <div class="appbar-inner">
+        <div class="top">
+          <h1 class="top-title" id="title">Syslog Analyzer</h1>
+          <button
+            class="icon-btn state"
+            id="help-btn"
+            type="button"
+            aria-label="How to get a system log"
+            title="How to get a system log"
+          >
+            <span class="icon" aria-hidden="true">help</span>
+          </button>
+          <button
+            class="icon-btn state"
+            id="more-btn"
+            type="button"
+            aria-label="More options"
+            title="More options"
+            aria-haspopup="menu"
+          >
+            <span class="icon" aria-hidden="true">more_vert</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- Empty state: drop or choose a log -->
+      <section class="drop" id="drop">
+        <div class="banner" id="error" role="alert" hidden>
+          <span class="icon" aria-hidden="true">error</span>
+          <div class="banner-text">
+            <strong>Couldn’t read this file</strong>
+            <span id="error-text"></span>
+          </div>
+          <button
+            class="icon-btn state"
+            id="error-close"
+            type="button"
+            aria-label="Dismiss"
+            title="Dismiss"
+          >
+            <span class="icon" aria-hidden="true">close</span>
+          </button>
+        </div>
+        <div class="art">
+          <svg viewBox="0 0 144 144" aria-hidden="true"><path id="art-shape" /></svg>
+          <span class="icon" aria-hidden="true">memory</span>
+        </div>
+        <h2>See what your device is made of</h2>
+        <p>
+          Drop an Android dumpstate log or an iOS sysdiagnose archive here, or choose one. The file
+          is read on this device and never uploaded.
+        </p>
+        <div class="drop-actions">
+          <button class="btn btn-filled state" type="button" data-action="open">
+            <span class="icon" aria-hidden="true">upload_file</span>Choose log file
+          </button>
+          <button class="btn btn-text state" type="button" data-action="help">
+            How to get a log
+          </button>
+        </div>
+      </section>
+
+      <!-- Reading progress -->
+      <section class="loading" id="loading" hidden>
+        <p class="loading-name" id="loading-name"></p>
+        <svg
+          class="loading-line"
+          id="loading-line"
+          role="progressbar"
+          aria-label="Reading log file"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <path class="track" id="loading-track" stroke-width="4" />
+          <path class="wave" id="loading-wave" stroke-width="4" />
+        </svg>
+        <p class="loading-pct" id="loading-pct">0%</p>
+      </section>
+
+      <!-- The open log -->
+      <div class="file-wrap" id="file-bar" hidden>
+        <div class="file">
+          <span class="file-lead"><span class="icon" aria-hidden="true">description</span></span>
+          <span class="file-text">
+            <span class="file-name" id="file-name"></span>
+            <span class="file-meta" id="file-meta"></span>
+          </span>
+          <button
+            class="icon-btn state"
+            type="button"
+            data-action="open"
+            aria-label="Open another log"
+            title="Open another log"
+          >
+            <span class="icon" aria-hidden="true">upload_file</span>
+          </button>
+          <button
+            class="icon-btn state"
+            type="button"
+            data-action="reset"
+            aria-label="Close this log"
+            title="Close this log"
+          >
+            <span class="icon" aria-hidden="true">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <section id="results" hidden>
+        <div class="dash">
+          <article class="card device">
+            <div>
+              <h2 class="device-name" id="device-name" tabindex="-1"></h2>
+              <p class="device-sub" id="device-sub"></p>
+            </div>
+            <div class="device-chips" id="device-chips"></div>
+          </article>
+
+          <h2 class="zone-title">Hardware</h2>
+          <div class="groups" id="hardware-groups"></div>
+
+          <h2 class="zone-title">Software</h2>
+          <div class="groups" id="software-groups"></div>
+
+          <h2 class="zone-title">Status</h2>
+          <div class="sections sect-full" id="sections"></div>
+          <h3 class="sect-title sect-full">Battery</h3>
+          <div class="tiles sect-full" id="tiles"></div>
+          <article class="card health">
+            <div class="health-head">
+              <h3 class="card-title">Battery health</h3>
+              <span class="chip" id="health-chip" hidden></span>
+            </div>
+            <div class="health-main">
+              <div class="gauge" id="gauge">
+                <svg viewBox="0 0 168 168" aria-hidden="true">
+                  <path class="track" id="gauge-track" pathLength="100" />
+                  <path class="wave" id="gauge-wave" pathLength="100" />
+                </svg>
+                <span class="gauge-value"><span id="health-val">–</span><small>%</small></span>
+              </div>
+              <div class="measures" id="measures"></div>
+            </div>
+          </article>
+
+          <article class="card cycles">
+            <div class="cycles-head">
+              <h3 class="card-title">Charge cycles</h3>
+              <span class="chip" id="cycles-chip" hidden></span>
+            </div>
+            <p class="cycles-value"><span id="cycles-val">–</span><small>cycles</small></p>
+            <div class="cycles-bar">
+              <svg class="cycles-line" id="cycles-line" aria-hidden="true">
+                <path class="track" id="cycles-track" />
+                <path class="wave" id="cycles-wave" />
+              </svg>
+              <div class="ticks" aria-hidden="true">
+                <span>0</span>
+                <span style="left: 10%">100</span>
+                <span style="left: 20%">200</span>
+                <span style="left: 50%">500</span>
+                <span>1000+</span>
+              </div>
+            </div>
+          </article>
+
+          <p class="legend sect-full">
+            Each value is shown as the device reported it, with the name decoded from it underneath.
+            Serial numbers, IMEI and device IDs are never read.
+          </p>
+
+          <section class="sect-full">
+            <details class="raw" id="raw">
+              <summary class="state">
+                <span class="raw-title">
+                  <span>Matched log lines</span>
+                  <small id="raw-count"></small>
+                </span>
+                <span class="icon" aria-hidden="true">expand_more</span>
+              </summary>
+              <div class="raw-body">
+                <pre id="raw-lines"></pre>
+                <button
+                  class="icon-btn state raw-copy"
+                  id="raw-copy"
+                  type="button"
+                  aria-label="Copy lines"
+                  title="Copy lines"
+                >
+                  <span class="icon" aria-hidden="true">content_copy</span>
+                </button>
+              </div>
+            </details>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <!-- Menus -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
+    </div>
+
+    <!-- Help Dialog -->
+    <dialog class="dialog bottom-sheet" id="help" aria-labelledby="help-title">
+      <div class="dialog-head">
+        <h2 class="dialog-title" id="help-title">Get a system log</h2>
+      </div>
+      <div class="dialog-body">
+        <h3 class="help-head">Samsung Galaxy</h3>
+        <ol class="steps">
+          <li>
+            <span
+              >Open the Phone app and dial <code>*#9900#</code>. If nothing happens, turn off Auto
+              Blocker in Settings and try again.</span
+            >
+          </li>
+          <li>
+            <span>Tap <strong>Run dumpstate/logcat</strong> and wait for it to finish.</span>
+          </li>
+          <li>
+            <span
+              >Tap <strong>Copy to sdcard</strong>. The <code>dumpState</code>
+              <code>.log</code> file appears in the <strong>log</strong> folder of the phone’s
+              storage.</span
+            >
+          </li>
+        </ol>
+        <h3 class="help-head">iPhone and iPad</h3>
+        <ol class="steps">
+          <li>
+            <span
+              >Press both volume buttons and the side (or top) button together for about a second,
+              then let go. A short buzz means the sysdiagnose has started.</span
+            >
+          </li>
+          <li>
+            <span
+              >Wait about ten minutes, then open <strong>Settings</strong>,
+              <strong>Privacy &amp; Security</strong>,
+              <strong>Analytics &amp; Improvements</strong>, <strong>Analytics Data</strong>.</span
+            >
+          </li>
+          <li>
+            <span
+              >Find the file starting with <code>sysdiagnose_</code>, share it to Files or your
+              computer, and choose the <code>.tar.gz</code> here as it is.</span
+            >
+          </li>
+        </ol>
+        <p class="help-note">
+          Other Android devices: <code>adb bugreport</code> on a computer creates a zip. Unzip it
+          and choose the <code>.txt</code> bugreport inside. Part names such as camera sensors and
+          the display panel come from Samsung’s own diagnostics, so other brands show fewer of them.
+          iOS names its storage and memory makers, but not its camera sensors.
+        </p>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Got it</button>
+      </div>
+    </dialog>
+
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">Syslog Analyzer</h2>
+        <p class="about-desc">See what an Android or iOS device is made of, from its system log.</p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/syslog-analyzer"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
+
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
+
+    <input
+      type="file"
+      id="file-input"
+      accept=".log,.txt,.gz,.tgz,.tar,text/plain,application/gzip,application/x-gzip,application/x-tar"
+      hidden
+    />
+    <div id="probe" hidden></div>
+
+    <script>
+      // --- Constants & Config ---
+      const APP_NAME = 'Syslog Analyzer';
+      const STORE_KEY = 'syslog-analyzer';
+      const CHUNK_SIZE = 4 * 1024 * 1024;
+      const MAX_LINE = 1024 * 1024; // a longer "line" is binary data, not a log line
+      const NOTE_LENGTH = 160; // longest matched line kept for the "Matched log lines" list
+      const CYCLE_SCALE = 1000;
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+
+      // Android ------------------------------------------------------------------
+
+      // System properties worth keeping from a dumpstate's getprop section. Serial numbers,
+      // IMEI and device IDs are left out on purpose, so they are never read or shown.
+      const ANDROID_PROPS = new Set([
+        'ro.product.manufacturer',
+        'ro.product.brand',
+        'ro.product.model',
+        'ro.product.device',
+        'ro.product.marketname',
+        'ro.product.vendor.marketname',
+        'ro.config.marketing_name',
+        'ro.board.platform',
+        'ro.product.board',
+        'ro.product.cpu.abi',
+        'ro.hardware.chipname',
+        'ro.soc.manufacturer',
+        'ro.soc.model',
+        'ro.boot.dram_info',
+        'ro.revision',
+        'ril.hw_ver',
+        'ril.product_code',
+        'ril.modem.board',
+        'ro.build.version.release',
+        'ro.build.version.sdk',
+        'ro.build.version.security_patch',
+        'ro.build.version.oneui',
+        'ro.build.display.id',
+        'ro.build.date',
+        'ro.build.type',
+        'ro.build.tags',
+        'ro.bootloader',
+        'gsm.version.baseband',
+        'ro.boot.verifiedbootstate',
+        'ro.boot.vbmeta.device_state',
+        'ro.boot.warranty_bit',
+        'ro.crypto.state',
+        'ro.crypto.type',
+        'ro.product.first_api_level',
+        'ro.csc.sales_code',
+        'ro.csc.country_code',
+        'ro.boot.bootreason',
+        'nfc.fw.ver',
+        'ro.multisim.simslotcount',
+        'persist.radio.multisim.config',
+        'ro.sf.lcd_density',
+      ]);
+      const PROP_RE = /^\[([\w.-]+)\]: \[(.*)\]$/;
+
+      // Dumpstate sections whose value is the single line after the heading.
+      const ANDROID_SECTIONS = {
+        'UFS PART NUMBER': 'ufsModel',
+        'UFS REV': 'ufsRev',
+        'UFS VENDOR': 'ufsVendor',
+        'UFS LT': 'ufsLife',
+        UPTIME: 'uptime',
+      };
+
+      // Single-line details. `hint` is a cheap substring test that runs before the regex, and
+      // each field keeps its first match. `zone` limits a field to one section or dumpsys
+      // service, so short keys like "level:" can't match elsewhere. `short` keeps only the
+      // matched text for the "Matched log lines" list, for lines that hold identifiers too.
+      const ANDROID_FIELDS = [
+        {
+          key: 'logDate',
+          hint: 'dumpstate:',
+          re: /dumpstate:\s*(\d{4})-(\d{2})-(\d{2})\s+(\d{2}:\d{2}):\d{2}/i,
+          parse: (m) => {
+            const date = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}`);
+            return Number.isNaN(date.getTime()) ? undefined : { date };
+          },
+        },
+        {
+          key: 'kernel',
+          hint: 'Kernel: Linux version',
+          re: /^Kernel: Linux version (\S+)/,
+          short: true,
+          parse: (m) => m[1],
+        },
+        {
+          // The first line of top's summary. Each core counts for 100%.
+          key: 'cores',
+          hint: '%cpu',
+          re: /^(\d+)%cpu/,
+          short: true,
+          parse: (m) => num(m[1]) / 100,
+        },
+        // The bootloader's own readings of the memory and storage chips.
+        {
+          key: 'ramMaker',
+          hint: 'DDR vendor:',
+          re: /DDR vendor:(\w+)/,
+          short: true,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'ufsSize',
+          hint: 'UFS Total Size:',
+          re: /UFS Total Size: (\d+) GB/,
+          short: true,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'panel',
+          hint: 'Command line:',
+          re: /(?:msm_drm\.dsi_display0|mdss_mdp\.panel)=(\S+)/,
+          short: true,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'gles',
+          hint: 'GLES: ',
+          re: /^GLES: ([^,]+), ([^,]+), (OpenGL ES [\d.]+)/,
+          parse: (m) => ({ vendor: m[1], renderer: m[2].replace(' (TM)', ''), version: m[3] }),
+        },
+        {
+          key: 'gnss',
+          hint: 'GNSS Hardware Model Name:',
+          re: /GNSS Hardware Model Name:\s*(.+)/,
+          parse: (m) => m[1].trim(),
+        },
+        {
+          key: 'widevine',
+          hint: 'default_security_level:',
+          re: /default_security_level:\s*(L\d)/,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'memTotal',
+          zone: 'MEMORY INFO',
+          hint: 'MemTotal:',
+          re: /^MemTotal:\s+(\d+) kB/,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'memAvailable',
+          zone: 'MEMORY INFO',
+          hint: 'MemAvailable:',
+          re: /^MemAvailable:\s+(\d+) kB/,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'swapTotal',
+          zone: 'MEMORY INFO',
+          hint: 'SwapTotal:',
+          re: /^SwapTotal:\s+(\d+) kB/,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'swapFree',
+          zone: 'MEMORY INFO',
+          hint: 'SwapFree:',
+          re: /^SwapFree:\s+(\d+) kB/,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'data',
+          zone: 'FILESYSTEMS & FREE SPACE',
+          hint: ' /data',
+          re: /^\S+\s+(\d+)\s+(\d+)\s+(\d+)\s+\d+%\s+\/data$/,
+          parse: (m) => ({ total: num(m[1]), used: num(m[2]), free: num(m[3]) }),
+        },
+        // The resolution in use, which can be set lower than the panel's own.
+        {
+          key: 'mode',
+          hint: ' base=',
+          re: /init=\d+x\d+ \d+dpi.*? base=(\d+)x(\d+) /,
+          short: true,
+          parse: (m) => `${m[1]} × ${m[2]}`,
+        },
+        {
+          key: 'display',
+          zone: 'display',
+          hint: 'DisplayDeviceInfo{"Built-in',
+          re: /DisplayDeviceInfo\{"Built-in[^"]*":.*?, (\d+) x (\d+),/,
+          short: true,
+          parse: (m) => {
+            const line = m.input;
+            const rates = [...line.matchAll(/fps=([\d.]+)/g)].map((f) => Math.round(num(f[1])));
+            const hdr = /supportedHdrTypes=\[([\d, ]*)\]/.exec(line);
+            return {
+              width: num(m[1]),
+              height: num(m[2]),
+              fps: rates.length ? Math.max(...rates) : undefined,
+              rate: Math.round(num(/renderFrameRate ([\d.]+)/.exec(line)?.[1])),
+              density: num(/density (\d+)/.exec(line)?.[1]),
+              hdr: hdr
+                ? hdr[1]
+                    .split(',')
+                    .map((t) => t.trim())
+                    .filter(Boolean)
+                    .map((t) => HDR_TYPES[t] || `Type ${t}`)
+                    .join(', ')
+                : '',
+            };
+          },
+        },
+        {
+          key: 'level',
+          zone: 'battery',
+          hint: '  level: ',
+          re: /^\s+level: (\d+)/,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'voltage',
+          zone: 'battery',
+          hint: '  voltage: ',
+          re: /^\s+voltage: (\d+)/,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'temperature',
+          zone: 'battery',
+          hint: '  temperature: ',
+          re: /^\s+temperature: (-?\d+)/,
+          parse: (m) => num(m[1]) / 10,
+        },
+        {
+          key: 'technology',
+          zone: 'battery',
+          hint: '  technology: ',
+          re: /^\s+technology: (\S.*)/,
+          parse: (m) => m[1].trim(),
+        },
+        {
+          key: 'status',
+          zone: 'battery',
+          hint: '  status: ',
+          re: /^\s+status: (\d)/,
+          parse: (m) => BATTERY_STATUS[m[1]] || `Code ${m[1]}`,
+        },
+        {
+          key: 'batteryPart',
+          hint: 'QrData',
+          re: /QrData efsValue:([A-Z]{2}\d{2}-\d{5}[A-Z])/,
+          short: true,
+          parse: (m) => m[1],
+        },
+        {
+          key: 'capacity',
+          hint: 'Typical:',
+          re: /Capacity:\s*(\d+),\s*(?:Rated:\s*(\d+),\s*)?Typical:\s*(\d+)/i,
+          parse: (m) => ({ rated: num(m[2]), typical: num(m[3]) || num(m[1]) }),
+        },
+        {
+          key: 'manufactured',
+          hint: 'LLB ',
+          re: /LLB\s*(?:CAL|MAN):\s*(\d{8})/i,
+          parse: (m) => ymd(m[1]),
+        },
+        {
+          key: 'firstUse',
+          hint: 'FirstUseDate',
+          re: /battery\s+FirstUseDate:\s+\[?(\d{8})\]?/i,
+          parse: (m) => ymd(m[1]),
+        },
+        {
+          key: 'asoc',
+          hint: 'mSavedBatteryAsoc',
+          re: /mSavedBatteryAsoc\s*[:=]\s*\[?(\d+)\]?/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'bsoh',
+          hint: 'mSavedBatteryBsoh',
+          re: /mSavedBatteryBsoh\s*[:=]\s*(\d+(?:\.\d+)?)/i,
+          parse: (m) => num(m[1]),
+        },
+        {
+          key: 'cycles',
+          hint: 'mSavedBatteryUsage',
+          re: /mSavedBatteryUsage\s*[:=]\s*\[?(\d+)\]?/i,
+          parse: (m) => num(m[1]) / 100,
+        },
+      ];
+
+      // One line of the sensor list: name | vendor | version | type(number).
+      const SENSOR_RE = /^0x[0-9a-f]+\) (.+?)\s*\|\s*(.+?)\s*\| ver: \d+ \| type: [\w.]+\((\d+)\)/;
+      // Android sensor types backed by a physical part. Virtual ones (gravity, step counter)
+      // are computed from these, so they say nothing about the hardware.
+      const SENSOR_TYPES = {
+        1: 'Accelerometer',
+        2: 'Magnetometer',
+        4: 'Gyroscope',
+        5: 'Ambient light',
+        6: 'Barometer',
+        8: 'Proximity',
+        12: 'Humidity',
+        13: 'Ambient temperature',
+        21: 'Heart rate',
+        36: 'Hinge angle',
+      };
+
+      // Camera characteristics in the media.camera dump. Each value sits on the next line.
+      const CAMERA_KEYS = [
+        {
+          hint: 'android.lens.facing (',
+          set: (cam, v) =>
+            (cam.facing = /FRONT/.test(v) ? 'Front' : /BACK/.test(v) ? 'Back' : 'External'),
+        },
+        { hint: 'lens.info.availableApertures (', set: (cam, v) => (cam.aperture = nums(v)[0]) },
+        { hint: 'lens.info.availableFocalLengths (', set: (cam, v) => (cam.focal = nums(v)[0]) },
+        { hint: 'sensor.info.physicalSize (', set: (cam, v) => (cam.size = nums(v).slice(0, 2)) },
+        // Samsung's vendor tag: the sensor's model as ASCII codes.
+        {
+          hint: 'sensor.info.sensorName (',
+          set: (cam, v) =>
+            (cam.name = String.fromCharCode(...nums(v).filter((n) => n > 32 && n < 127))),
+        },
+      ];
+      const CAMERA_MAKERS = [
+        [/^IMX/, 'Sony'],
+        [/^S5K/, 'Samsung ISOCELL'],
+        [/^OV\d/, 'OmniVision'],
+        [/^GC\d/, 'GalaxyCore'],
+        [/^HI\d/, 'SK hynix'],
+      ];
+
+      const SOC_MAKERS = { QTI: 'Qualcomm', QUALCOMM: 'Qualcomm', MEDIATEK: 'MediaTek' };
+      // LPDDR maker codes (JEDEC mode register 5), as Samsung's bootloader passes them on.
+      const DRAM_MAKERS = {
+        '01': 'Samsung',
+        '05': 'Nanya',
+        '06': 'SK hynix',
+        '08': 'Winbond',
+        13: 'CXMT',
+        FF: 'Micron',
+      };
+      const STORAGE_SIZES = [8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+      // The package whose version Settings shows as the Google Play system update.
+      const PLAY_SYSTEM_PACKAGE = '  Package [com.google.android.modulemetadata]';
+      // A CPU cluster in the battery stats: its first core, then the speeds it can run at.
+      const CPU_POLICY_RE = /^\s+policy(\d+): .*?(\d+)\s*$/;
+      const HDR_TYPES = { 1: 'Dolby Vision', 2: 'HDR10', 3: 'HLG', 4: 'HDR10+' };
+      const BATTERY_STATUS = {
+        1: 'Unknown',
+        2: 'Charging',
+        3: 'Discharging',
+        4: 'Not charging',
+        5: 'Full',
+      };
+      const SIM_MODES = {
+        ss: 'Single SIM',
+        dsds: 'Dual SIM, dual standby',
+        dsda: 'Dual SIM, dual active',
+        tsts: 'Triple SIM, triple standby',
+      };
+      const VERIFIED_BOOT = {
+        green: 'Verified',
+        yellow: 'Verified with a custom key',
+        orange: 'Unlocked, not verified',
+        red: 'Failed verification',
+      };
+      const ANDROID_VERSIONS = {
+        23: '6',
+        24: '7',
+        25: '7.1',
+        26: '8',
+        27: '8.1',
+        28: '9',
+        29: '10',
+        30: '11',
+        31: '12',
+        32: '12L',
+        33: '13',
+        34: '14',
+        35: '15',
+        36: '16',
+      };
+
+      // iOS ------------------------------------------------------------------------
+
+      // The text files read from a sysdiagnose archive. Everything else is skipped.
+      const IOS_FILES = [
+        'remotectl_dumpstate.txt',
+        'ioreg/IODeviceTree.txt',
+        'ioreg/IOService.txt',
+        'logs/BatteryHealth/BatteryHealth.log',
+        'disks.txt',
+        'vm_stat.txt',
+      ];
+      const APPLE_SYSTEMS = {
+        iPhone: 'iOS',
+        iPod: 'iOS',
+        iPad: 'iPadOS',
+        Watch: 'watchOS',
+        AppleTV: 'tvOS',
+      };
+      // Like ANDROID_PROPS: the serial number, UDID and chip ID next to these are never read.
+      const IOS_DEVICE_KEYS = new Set([
+        'ProductType',
+        'ProductName',
+        'DeviceClass',
+        'HWModel',
+        'OSVersion',
+        'BuildVersion',
+        'ModelNumber',
+        'RegionInfo',
+        'HardwarePlatform',
+        'CPUArchitecture',
+        'HasSEP',
+        'EffectiveProductionStatusAp',
+        'EffectiveSecurityModeAp',
+      ]);
+      // Device tree keys, and whether their bytes hold text or a little-endian number.
+      const IOS_TREE_KEYS = {
+        'product-name': 'str',
+        'dram-vendor': 'str',
+        'dram-type': 'str',
+        'dram-size': 'int',
+        'model-config': 'str',
+        'regulatory-model-number': 'str',
+        'baseband-chipset': 'str',
+        'wifi-chipset': 'str',
+        'panel-typical-freq': 'int',
+        'raw-panel-serial-number': 'str',
+        'oled-display': 'int',
+        'firmware-version': 'str',
+      };
+      // The first three characters of the panel's serial number name its maker.
+      const IOS_PANEL_MAKERS = { G9N: 'Samsung', G9Q: 'Samsung', GVC: 'LG', GH3: 'LG' };
+      const IOS_BATTERY_KEYS = new Set([
+        'CycleCount',
+        'DesignCapacity',
+        'AppleRawMaxCapacity',
+        'NominalChargeCapacity',
+        'CurrentCapacity',
+        'Temperature',
+        'Voltage',
+        'IsCharging',
+        'ExternalConnected',
+        'FullyCharged',
+        'GasGaugeFirmwareVersion',
+      ]);
+      // Lifetime counters nested in the battery's "BatteryData" value.
+      const IOS_BATTERY_DATA = ['DateOfFirstUse', 'ChemID'];
+      const IOS_NAND_KEYS = new Set([
+        'Model Number',
+        'Firmware Revision',
+        'NVMe Revision Supported',
+      ]);
+      // Nested in the storage controller's "Controller Characteristics" value.
+      const IOS_NAND_DETAILS = [
+        'vendor-name',
+        'nand-marketing-name',
+        'capacity',
+        'default-bits-per-cell',
+        'chip-id',
+        'msp-version',
+        'Encryption Type',
+      ];
+      const IOREG_NODE_RE = /^[\s|]*\+-o ([^\s@<]+)/;
+      const IOREG_KEY_RE = /^[\s|]*"([^"]+)" = (.*)$/;
+      const IOS_CAMERAS = {
+        Back: 'Wide',
+        BackSuperWide: 'Ultra wide',
+        BackTele: 'Telephoto',
+        Front: 'Front',
+        FrontIR: 'Front infrared',
+      };
+
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let report = null; // { file, view, lines, ms }
+      let readToken = 0;
+      let gaugeFrame = 0;
+      let snackbarTimer = 0;
+      let ignorePopstate = 0;
+      let dragDepth = 0;
+      const dialogStack = [];
+
+      // --- DOM Elements ---
+      const els = {
+        appbar: document.getElementById('appbar'),
+        title: document.getElementById('title'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        helpBtn: document.getElementById('help-btn'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        help: document.getElementById('help'),
+        about: document.getElementById('about'),
+        drop: document.getElementById('drop'),
+        artShape: document.getElementById('art-shape'),
+        error: document.getElementById('error'),
+        errorText: document.getElementById('error-text'),
+        errorClose: document.getElementById('error-close'),
+        loading: document.getElementById('loading'),
+        loadingName: document.getElementById('loading-name'),
+        loadingLine: document.getElementById('loading-line'),
+        loadingWave: document.getElementById('loading-wave'),
+        loadingTrack: document.getElementById('loading-track'),
+        loadingPct: document.getElementById('loading-pct'),
+        results: document.getElementById('results'),
+        fileBar: document.getElementById('file-bar'),
+        fileName: document.getElementById('file-name'),
+        fileMeta: document.getElementById('file-meta'),
+        deviceName: document.getElementById('device-name'),
+        deviceSub: document.getElementById('device-sub'),
+        deviceChips: document.getElementById('device-chips'),
+        hardwareGroups: document.getElementById('hardware-groups'),
+        softwareGroups: document.getElementById('software-groups'),
+        sections: document.getElementById('sections'),
+        gauge: document.getElementById('gauge'),
+        gaugeWave: document.getElementById('gauge-wave'),
+        gaugeTrack: document.getElementById('gauge-track'),
+        healthVal: document.getElementById('health-val'),
+        healthChip: document.getElementById('health-chip'),
+        measures: document.getElementById('measures'),
+        cyclesVal: document.getElementById('cycles-val'),
+        cyclesChip: document.getElementById('cycles-chip'),
+        cyclesLine: document.getElementById('cycles-line'),
+        cyclesWave: document.getElementById('cycles-wave'),
+        cyclesTrack: document.getElementById('cycles-track'),
+        tiles: document.getElementById('tiles'),
+        raw: document.getElementById('raw'),
+        rawCount: document.getElementById('raw-count'),
+        rawLines: document.getElementById('raw-lines'),
+        rawCopy: document.getElementById('raw-copy'),
+        fileInput: document.getElementById('file-input'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
+
+      // --- Initialization ---
+      function init() {
+        // A reload while a dialog was open leaves its history entry behind.
+        if (history.state?.dialog) history.replaceState(null, '');
+
+        els.artShape.setAttribute('d', cookiePath(72, 72, 72, 9, 0.12));
+        els.gaugeTrack.setAttribute('d', wavyCircle(84, 84, 72, 0, 0, 0));
+        applyTheme();
+        bindEvents();
+      }
+
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.help, () => closeDialog(els.help));
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        document.addEventListener('click', (e) => {
+          const action = e.target.closest('[data-action]')?.dataset.action;
+          if (action === 'open') els.fileInput.click();
+          else if (action === 'help') openDialog(els.help);
+          else if (action === 'about') openDialog(els.about);
+          else if (action === 'reset') resetApp();
+        });
+        DARK_QUERY.addEventListener('change', applyTheme);
+        window.addEventListener('scroll', updateAppbar, { passive: true });
+
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.helpBtn.addEventListener('click', () => openDialog(els.help));
+        els.moreBtn.addEventListener('click', () => toggleMenu(els.moreMenu, els.moreBtn));
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          if (e.target.closest('.menu-item:not(#theme-btn)')) els.moreMenu.hidePopover();
+        });
+        els.errorClose.addEventListener('click', () => (els.error.hidden = true));
+        els.fileInput.addEventListener('change', () => {
+          const [file] = els.fileInput.files;
+          els.fileInput.value = '';
+          if (file) readFile(file);
+        });
+        els.rawCopy.addEventListener('click', copyRawLines);
+
+        // The whole window is a drop target.
+        document.addEventListener('dragenter', (e) => {
+          if (!e.dataTransfer.types.includes('Files')) return;
+          dragDepth++;
+          document.body.classList.add('dragging');
+        });
+        document.addEventListener('dragleave', () => {
+          if (--dragDepth <= 0) stopDragging();
+        });
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+          e.preventDefault();
+          stopDragging();
+          const [file] = e.dataTransfer.files;
+          if (file && !dialogStack.length) readFile(file);
+        });
+
+        // Redraw the cycle bar's wave when its width changes.
+        new ResizeObserver(() => report && drawCycles(report.view.battery.cycles)).observe(
+          els.cyclesLine,
+        );
+
+        // Dialogs
+        for (const dialog of [els.help, els.about]) {
+          dialog.addEventListener('close', () => onDialogClosed(dialog));
+          bindBackdropClose(dialog);
+          dialog.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close]')) closeDialog(dialog);
+          });
+        }
+        window.addEventListener('popstate', () => {
+          if (ignorePopstate) return ignorePopstate--;
+          const top = dialogStack.at(-1);
+          if (top) {
+            dialogStack.pop();
+            top.close();
+          }
+        });
+
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
+      }
+
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        items.at(i < 0 && step < 0 ? -1 : (i + step) % items.length)?.focus();
+      }
+
+      function stopDragging() {
+        dragDepth = 0;
+        document.body.classList.remove('dragging');
+      }
+
+      // --- Core Logic ---
+
+      // Preferences -------------------------------------------------------------
+
+      function loadPrefs() {
+        const saved = readJson(STORE_KEY);
+        return { theme: THEME_CYCLE.includes(saved?.theme) ? saved.theme : 'auto' };
+      }
+
+      function savePrefs() {
+        writeJson(STORE_KEY, prefs);
+      }
+
+      // Log reading ---------------------------------------------------------------
+
+      async function readFile(file) {
+        const token = ++readToken;
+        els.error.hidden = true;
+        showView('loading');
+        els.loadingName.textContent = `Reading ${file.name}`;
+        renderProgress(0);
+        const start = performance.now();
+        const isCurrent = () => token === readToken;
+        // An archive reports progress thousands of times; redraw about 30 times a second.
+        let drawn = 0;
+        const onProgress = (p) => {
+          const now = performance.now();
+          if (!isCurrent() || (p < 1 && now - drawn < 32)) return;
+          drawn = now;
+          renderProgress(p);
+        };
+        try {
+          const kind = await sniffFile(file);
+          if (kind === 'zip') {
+            throw new Error(
+              'Zip files can’t be read. Unzip it and choose the dumpstate .log or bugreport .txt inside.',
+            );
+          }
+          const parsed =
+            kind === 'text'
+              ? await parseAndroid(file, onProgress, isCurrent)
+              : await parseIos(file, kind === 'gzip', onProgress, isCurrent);
+          if (!isCurrent()) return;
+          if (!parsed) {
+            throw new Error(
+              kind === 'text'
+                ? 'No device details were found. Choose a dumpstate .log or bugreport .txt file from an Android device.'
+                : 'This archive isn’t an iOS sysdiagnose. Choose the sysdiagnose .tar.gz file as the iPhone or iPad saved it.',
+            );
+          }
+          report = { file, ...parsed, ms: performance.now() - start };
+          showView('results');
+          renderResults();
+          // The button that opened the file picker is hidden now; move focus to the results.
+          els.deviceName.focus({ preventScroll: true });
+        } catch (err) {
+          if (!isCurrent()) return;
+          const message = err.message || 'The file could not be read.';
+          if (report) {
+            // Keep the log that was already open instead of dropping to the empty state.
+            showView('results');
+            showError(message);
+            els.deviceName.focus({ preventScroll: true });
+            return;
+          }
+          showView('drop');
+          els.errorText.textContent = message;
+          els.error.hidden = false;
+        }
+      }
+
+      // Tells an iOS sysdiagnose (a gzipped tar) from an Android log (plain text) by its
+      // first bytes, since file names and extensions vary.
+      async function sniffFile(file) {
+        const head = new Uint8Array(await file.slice(0, 512).arrayBuffer());
+        if (head[0] === 0x1f && head[1] === 0x8b) return 'gzip';
+        if (head[0] === 0x50 && head[1] === 0x4b) return 'zip';
+        if (String.fromCharCode(...head.subarray(257, 262)) === 'ustar') return 'tar';
+        return 'text';
+      }
+
+      // Collects the log line behind each detail, one per key, with identifiers masked.
+      function createNotes() {
+        const seen = new Set();
+        const list = [];
+        let file = '';
+        let n = 0;
+        return {
+          list,
+          open: (name) => {
+            file = name;
+            n = 0;
+          },
+          next: () => n++,
+          add: (key, text) => {
+            if (seen.has(key)) return;
+            seen.add(key);
+            const clean = mask(text.trim());
+            list.push({
+              file,
+              n,
+              text: clean.length > NOTE_LENGTH ? `${clean.slice(0, NOTE_LENGTH)}…` : clean,
+            });
+          },
+        };
+      }
+
+      // Android --------------------------------------------------------------------
+
+      // Reads the log in chunks, so a file of a few hundred MB never sits in memory at once.
+      async function parseAndroid(file, onProgress, isCurrent) {
+        const notes = createNotes();
+        const scanner = createAndroidScanner(notes.add);
+        const decoder = new TextDecoder();
+        let remainder = '';
+        let offset = 0;
+        const scan = (line) => {
+          notes.next();
+          scanner.scan(line);
+        };
+
+        while (offset < file.size && isCurrent()) {
+          const end = Math.min(offset + CHUNK_SIZE, file.size);
+          const bytes = await file.slice(offset, end).arrayBuffer();
+          offset = end;
+          const parts = (remainder + decoder.decode(bytes, { stream: offset < file.size })).split(
+            /\r?\n/,
+          );
+          remainder = parts.pop();
+          for (const line of parts) scan(line);
+          // A binary file has no newlines; don't let it pile up in memory.
+          if (remainder.length > MAX_LINE) {
+            remainder = '';
+            notes.next();
+          }
+          onProgress(offset / file.size);
+          await new Promise((resolve) => setTimeout(resolve));
+        }
+        if (remainder) scan(remainder);
+        onProgress(1);
+        const raw = scanner.finish();
+        return notes.list.length ? { view: buildAndroidView(raw), lines: notes.list } : null;
+      }
+
+      // Reads a dumpstate one line at a time. `zone` is the section or dumpsys service the
+      // line belongs to. `note(key, line)` records the line a detail came from.
+      function createAndroidScanner(note) {
+        const raw = { props: {}, sensors: [], cameras: [], clusters: {} };
+        const pending = new Set(ANDROID_FIELDS);
+        let zone = '';
+        let next = null; // reads the value on the line after a heading
+        let cam = {};
+        let camDevice = [];
+        let inPlaySystem = false;
+
+        // A multi-camera device lists its combined view first, then each real sensor. The
+        // combined view can show up again as a device of its own, with the main lens's
+        // figures under another sensor's name, so a lens is only counted once.
+        const flushCameras = () => {
+          if (camDevice.length > 1) camDevice.shift();
+          for (const c of camDevice) {
+            const id = `${c.facing}|${c.aperture}|${c.focal}`;
+            if (!raw.cameras.some((other) => other.id === id)) raw.cameras.push({ ...c, id });
+          }
+          camDevice = [];
+          cam = {};
+        };
+
+        const setZone = (name) => {
+          if (zone === 'media.camera') flushCameras();
+          zone = name;
+        };
+
+        const scanSensor = (line) => {
+          const m = SENSOR_RE.exec(line);
+          const type = m && Number(m[3]);
+          if (!m || !SENSOR_TYPES[type] || raw.sensors.some((s) => s.type === type)) return;
+          raw.sensors.push({ type, name: m[1].trim(), vendor: m[2].trim() });
+          note(`sensor:${type}`, line);
+        };
+
+        const scanCamera = (line) => {
+          if (line.includes('static information')) return flushCameras();
+          const key = CAMERA_KEYS.find((k) => line.includes(k.hint));
+          if (!key) return;
+          next = (value) => {
+            key.set(cam, value);
+            if (!cam.name) return;
+            camDevice.push({ facing: 'Camera', ...cam });
+            note(`camera:${cam.name}`, `${line.trim()} ${value}`);
+            cam = {};
+          };
+        };
+
+        const scan = (line) => {
+          if (next) {
+            const read = next;
+            next = null;
+            if (!line.startsWith('------')) return read(line.trim());
+          }
+          if (line.startsWith('------ ')) {
+            setZone(/^------ (.+?) \(/.exec(line)?.[1] || '');
+            const key = ANDROID_SECTIONS[zone];
+            if (key && raw[key] === undefined) {
+              const heading = zone;
+              next = (value) => {
+                if (!value) return;
+                raw[key] = value;
+                note(key, `${heading}: ${value}`);
+              };
+            }
+            return;
+          }
+          if (line.startsWith('DUMP OF SERVICE ')) {
+            return setZone(/^DUMP OF SERVICE (?:[A-Z]+ )?([^\s:]+):/.exec(line)?.[1] || '');
+          }
+          if (line.charCodeAt(0) === 91) {
+            const m = PROP_RE.exec(line);
+            if (m) {
+              if (ANDROID_PROPS.has(m[1]) && m[2] && !(m[1] in raw.props)) {
+                raw.props[m[1]] = m[2];
+                note(m[1], line);
+              }
+              return;
+            }
+          }
+          if (zone === 'sensorservice') scanSensor(line);
+          else if (zone === 'media.camera') scanCamera(line);
+          else if (zone === 'package' && !raw.playSystem) {
+            if (line.startsWith('  Package [')) inPlaySystem = line.startsWith(PLAY_SYSTEM_PACKAGE);
+            const version = inPlaySystem && /^\s+versionName=(\S+)/.exec(line);
+            if (version) {
+              raw.playSystem = version[1];
+              note('playSystem', `modulemetadata ${line.trim()}`);
+            }
+          }
+          if (line.includes('policy')) {
+            const policy = CPU_POLICY_RE.exec(line);
+            if (policy && !(policy[1] in raw.clusters)) {
+              raw.clusters[policy[1]] = num(policy[2]);
+              note(`cluster:${policy[1]}`, `policy${policy[1]}: up to ${policy[2]} kHz`);
+            }
+          }
+
+          for (const field of pending) {
+            if ((field.zone && field.zone !== zone) || !line.includes(field.hint)) continue;
+            const match = field.re.exec(line);
+            if (!match) continue;
+            const value = field.parse(match);
+            // An unusable value (empty, NaN, bad date) leaves the field open for a later line.
+            if (value === undefined || value === '' || Number.isNaN(value)) continue;
+            raw[field.key] = value;
+            note(field.key, field.short ? match[0] : line);
+            pending.delete(field);
+          }
+        };
+
+        return {
+          scan,
+          finish: () => {
+            flushCameras();
+            raw.cameras.sort((a, b) => a.facing.localeCompare(b.facing));
+            return raw;
+          },
+        };
+      }
+
+      function buildAndroidView(raw) {
+        const p = raw.props;
+        const maker = titleCase(p['ro.product.manufacturer'] || p['ro.product.brand'] || '');
+        const model = p['ro.product.model'];
+        const marketName =
+          p['ro.product.marketname'] ||
+          p['ro.config.marketing_name'] ||
+          p['ro.product.vendor.marketname'];
+        const socId = (p['ro.soc.model'] || p['ro.hardware.chipname'] || '').toUpperCase();
+        const socMaker =
+          SOC_MAKERS[(p['ro.soc.manufacturer'] || '').toUpperCase()] || p['ro.soc.manufacturer'];
+        // "maker code, …, …, size", as the bootloader read it from the memory chip.
+        const dram = (p['ro.boot.dram_info'] || '').split(',');
+        const ram = /^\d+G$/.test(dram[3] || '')
+          ? `${parseInt(dram[3], 10)} GB`
+          : raw.memTotal && formatKb(raw.memTotal);
+        const ramMaker = DRAM_MAKERS[(dram[0] || '').toUpperCase()];
+        // The bootloader states the size. Without it, the chip is the smallest standard size
+        // that holds the user partition.
+        const storage =
+          raw.ufsSize || (raw.data ? roundUpTo((raw.data.total * 1024) / 1e9, STORAGE_SIZES) : 0);
+        const storageLabel =
+          storage >= 1024 ? `${storage / 1024} TB` : storage ? `${storage} GB` : '';
+        const panel = parsePanel(raw.panel);
+        const d = raw.display;
+        const density = d?.density || p['ro.sf.lcd_density'];
+        const release = p['ro.build.version.release'];
+        const sdk = p['ro.build.version.sdk'];
+        const oneUi = formatOneUi(p['ro.build.version.oneui']);
+        const firstApi = p['ro.product.first_api_level'];
+        const shipped = ANDROID_VERSIONS[firstApi];
+        const boot = p['ro.boot.verifiedbootstate'];
+        const lock = p['ro.boot.vbmeta.device_state'];
+        const warranty = p['ro.boot.warranty_bit'];
+        const logDate = raw.logDate?.date;
+        const uptime = parseUptime(raw.uptime);
+
+        const hardware = [
+          group('Platform', [
+            row('Board', p['ro.product.board'] || p['ro.board.platform']),
+            row('Chipset', [socMaker, socId].filter(Boolean).join(' · ')),
+            row(
+              'CPU',
+              [
+                raw.cores && `${raw.cores} cores`,
+                cpuClusters(raw.clusters, raw.cores),
+                p['ro.product.cpu.abi'],
+              ]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+            row('GPU', raw.gles?.renderer),
+            row('Hardware revision', p['ril.hw_ver'] || p['ro.revision']),
+          ]),
+          group('Memory and storage', [
+            row(
+              'Memory',
+              [raw.ramMaker, ram].filter(Boolean).join(' · '),
+              raw.ramMaker ? '' : ramMaker,
+            ),
+            row(
+              'Storage',
+              [titleCase(raw.ufsVendor || ''), raw.ufsModel, raw.ufsSize && `${raw.ufsSize} GB`]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+            row('Storage firmware', raw.ufsRev),
+          ]),
+          group('Display', [
+            row('Panel', panel.model, panel.maker),
+            row('Driver chip', panel.driver, panel.driverMaker),
+            row('Resolution', d && `${d.width} × ${d.height}`),
+            row('Refresh rate', d?.fps && `${d.fps} Hz`),
+            row('Pixel density', density && `${density} dpi`),
+            row('HDR', d?.hdr),
+          ]),
+          group(
+            'Camera',
+            raw.cameras.map((c) =>
+              row(
+                c.facing,
+                [
+                  c.name,
+                  c.aperture && `f/${trimNumber(c.aperture)}`,
+                  c.focal && `${trimNumber(c.focal)} mm`,
+                ]
+                  .filter(Boolean)
+                  .join(' · '),
+                CAMERA_MAKERS.find(([re]) => re.test(c.name))?.[1],
+              ),
+            ),
+          ),
+          group('Network and connectivity', [
+            row('Modem', p['ril.modem.board']),
+            row('NFC', p['nfc.fw.ver']),
+            row('GNSS', raw.gnss),
+            row(
+              'SIM slots',
+              p['ro.multisim.simslotcount'],
+              SIM_MODES[p['persist.radio.multisim.config']],
+            ),
+          ]),
+          group(
+            'Sensors',
+            raw.sensors.map((s) =>
+              row(SENSOR_TYPES[s.type], [s.vendor, sensorModel(s.name)].join(' · ')),
+            ),
+          ),
+          group('Battery', [
+            row('Part number', raw.batteryPart),
+            row('Design capacity', raw.capacity?.typical && `${raw.capacity.typical} mAh`),
+            row('Rated capacity', raw.capacity?.rated && `${raw.capacity.rated} mAh`),
+            row('Chemistry', raw.technology),
+            row('Manufactured', raw.manufactured && formatDate(raw.manufactured)),
+            row('First used', raw.firstUse && formatDate(raw.firstUse)),
+          ]),
+        ];
+
+        const software = [
+          group('System', [
+            row('Android', [release, sdk && `API ${sdk}`].filter(Boolean).join(' · ')),
+            row('One UI', oneUi),
+            row('Google Play system', raw.playSystem),
+            row('Kernel', raw.kernel),
+            row('Build', p['ro.build.display.id']),
+            row('Bootloader', p['ro.bootloader']),
+            row('Baseband', (p['gsm.version.baseband'] || '').split(',')[0]),
+            row('Security patch', p['ro.build.version.security_patch']),
+            row('Shipped with', firstApi && `API ${firstApi}`, shipped && `Android ${shipped}`),
+            row(
+              'Region',
+              [p['ro.csc.sales_code'], titleCase(p['ro.csc.country_code'] || '')]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+            row('Model number', p['ril.product_code']),
+          ]),
+          group('Security', [
+            row('Verified boot', boot, VERIFIED_BOOT[boot]),
+            row('Bootloader lock', lock),
+            row(
+              'Knox warranty bit',
+              warranty,
+              warranty === '0' ? 'Intact' : warranty === '1' ? 'Tripped' : '',
+            ),
+            row(
+              'Encryption',
+              [p['ro.crypto.state'], p['ro.crypto.type']].filter(Boolean).join(' · '),
+            ),
+            row('Build type', [p['ro.build.type'], p['ro.build.tags']].filter(Boolean).join(' · ')),
+            row('Widevine', raw.widevine),
+          ]),
+        ];
+
+        return {
+          platform: 'Android',
+          name: marketName || [maker, model].filter(Boolean).join(' ') || 'Android device',
+          sub: [marketName && model, p['ro.product.device'], p['ril.product_code']]
+            .filter(Boolean)
+            .join(' · '),
+          chips: [
+            release && `Android ${release}`,
+            oneUi && `One UI ${oneUi}`,
+            socId,
+            ram && `${ram} memory`,
+            storageLabel && `${storageLabel} storage`,
+          ],
+          logDate,
+          hardware,
+          software,
+          sections: [
+            section(
+              'System',
+              [],
+              [
+                ['Uptime', uptime ? formatDuration(uptime, true) : '', ''],
+                ['Last boot reason', p['ro.boot.bootreason'], ''],
+              ],
+            ),
+            section(
+              'Display',
+              [],
+              [
+                ['Resolution', raw.mode, ''],
+                ['Refresh rate', d?.rate, 'Hz'],
+              ],
+            ),
+            section(
+              'Memory and storage',
+              [
+                meter('Memory', raw.memTotal - raw.memAvailable, raw.memTotal, formatKb),
+                meter('Swap', raw.swapTotal - (raw.swapFree || 0), raw.swapTotal, formatKb),
+                meter('Storage', raw.data?.used, raw.data?.total, formatKb),
+                wearMeter(raw.ufsLife),
+              ],
+              [],
+            ),
+          ],
+          tiles: [
+            ['Level', raw.level, '%'],
+            ['Status', raw.status, ''],
+            ['Temperature', raw.temperature, '°C'],
+            ['Voltage', raw.voltage && (raw.voltage / 1000).toFixed(2), 'V'],
+          ],
+          battery: {
+            health: healthOf([raw.asoc, raw.bsoh]),
+            measures: [
+              ['Capacity (ASOC)', raw.asoc],
+              ['Condition (BSOH)', raw.bsoh],
+            ],
+            cycles: raw.cycles,
+          },
+        };
+      }
+
+      // Cluster sizes and top speeds, fastest first: "1 × 3.40 GHz + 3 × 3.15 GHz". A cluster
+      // runs from its first core to the next cluster's, so the last one needs the core count.
+      function cpuClusters(clusters, cores) {
+        const starts = Object.keys(clusters)
+          .map(Number)
+          .sort((a, b) => a - b);
+        if (!cores || starts.length < 2 || starts.at(-1) >= cores) return '';
+        return starts
+          .map((start, i) => ({ count: (starts[i + 1] ?? cores) - start, khz: clusters[start] }))
+          .sort((a, b) => b.khz - a.khz)
+          .map((c) => `${c.count} × ${(c.khz / 1e6).toFixed(2)} GHz`)
+          .join(' + ');
+      }
+
+      // "E3_S6E3HAF_AMB679FN01" → Samsung's driver chip and panel model. Other makers' panel
+      // strings have no common shape, so they are shown as they are.
+      function parsePanel(text) {
+        if (!text) return {};
+        const clean = text.replace(/:+$/, '');
+        const m = /([A-Z0-9]+)_(AM[BS][A-Z0-9]+?)(?=_|:|$)/.exec(clean);
+        if (!m) return { model: clean };
+        return {
+          model: m[2],
+          maker: 'Samsung Display',
+          driver: m[1],
+          driverMaker: m[1].startsWith('S6E') ? 'Samsung LSI' : '',
+        };
+      }
+
+      // "lsm6dsv LSM6DSV Accelerometer Non-wakeup" → "LSM6DSV". Names without a part number
+      // are kept whole.
+      function sensorModel(name) {
+        const part = name.split(/\s+/).find((word) => /^[a-z]+\d[a-z0-9-]*$/i.test(word));
+        return part ? part.toUpperCase() : name.replace(/\s*(?:Non-wakeup|Wakeup)\s*$/i, '');
+      }
+
+      // Samsung's "lt" value is the UFS life-time estimate: step 1 is 0 to 10% used, and so on.
+      function wearMeter(value) {
+        const step = Number(value);
+        // 11 means past its rated life. Anything higher isn't a defined step.
+        if (!Number.isInteger(step) || step < 1 || step > 11) return null;
+        const label = 'Storage wear';
+        if (step > 10) return { label, pct: 100, value: 'Past', unit: 'its rated life', head: '' };
+        return {
+          label,
+          pct: step * 10,
+          value: `${(step - 1) * 10} to ${step * 10}%`,
+          unit: 'used',
+          head: '',
+        };
+      }
+
+      // 70000 → "7.0", 60101 → "6.1.1"
+      function formatOneUi(value) {
+        const v = Number(value);
+        if (!v) return '';
+        const patch = v % 100;
+        return `${Math.floor(v / 10000)}.${Math.floor((v % 10000) / 100)}${patch ? `.${patch}` : ''}`;
+      }
+
+      // "23:02:16 up 1 day,  8:55,  0 users, …" → minutes
+      function parseUptime(text) {
+        const up = /up\s+(.*?),\s+\d+ users?/.exec(text || '')?.[1];
+        if (!up) return 0;
+        const days = Number(/(\d+) days?/.exec(up)?.[1] || 0);
+        const clock = /(\d+):(\d+)/.exec(up);
+        const mins = Number(/(\d+) min/.exec(up)?.[1] || 0);
+        return days * 1440 + (clock ? Number(clock[1]) * 60 + Number(clock[2]) : mins);
+      }
+
+      // iOS ------------------------------------------------------------------------
+
+      // Unpacks the archive as a stream and reads only the few text files that matter.
+      async function parseIos(file, gzipped, onProgress, isCurrent) {
+        if (gzipped && !window.DecompressionStream) {
+          throw new Error('This browser can’t unpack .tar.gz archives. Update it and try again.');
+        }
+        const notes = createNotes();
+        const scanner = createIosScanner(notes.add);
+        let read = 0;
+        // Progress follows the packed bytes going in: the unpacked size isn't known up front.
+        const counter = new TransformStream({
+          transform(chunk, controller) {
+            read += chunk.byteLength;
+            onProgress(read / file.size);
+            controller.enqueue(chunk);
+          },
+        });
+        let stream = file.stream().pipeThrough(counter);
+        if (gzipped) stream = stream.pipeThrough(new DecompressionStream('gzip'));
+        const sink = {
+          open: notes.open,
+          line: (name, line) => {
+            notes.next();
+            scanner.scan(name, line);
+          },
+        };
+        let found = 0;
+        try {
+          found = await readTar(stream, IOS_FILES, sink, isCurrent);
+        } catch (err) {
+          throw new Error('The archive is damaged or incomplete.');
+        }
+        onProgress(1);
+        if (!found || !notes.list.length) return null;
+        return { view: buildIosView(scanner.finish(), file.name), lines: notes.list };
+      }
+
+      // Walks a tar stream without unpacking it: only the files in `wanted` are decoded, and
+      // reading stops once all of them have passed. Returns how many were found.
+      async function readTar(stream, wanted, sink, isCurrent) {
+        const reader = stream.getReader();
+        const header = new Uint8Array(512);
+        const ascii = new TextDecoder();
+        let have = 0; // header bytes collected so far
+        let left = 0; // bytes left in the current entry
+        let pad = 0; // padding after it, up to the next 512-byte block
+        let write = null; // takes the current entry's bytes; null skips the entry
+        let longPath = ''; // a path from a pax header, for the entry after it
+        let found = 0;
+        let paused = performance.now();
+
+        const field = (from, to) => {
+          const end = header.indexOf(0, from);
+          return ascii.decode(header.subarray(from, end === -1 || end > to ? to : end));
+        };
+
+        const openEntry = () => {
+          const size = parseInt(field(124, 136).trim(), 8) || 0;
+          const type = String.fromCharCode(header[156] || 48);
+          const prefix = field(345, 500);
+          const path = longPath || (prefix ? `${prefix}/${field(0, 100)}` : field(0, 100));
+          left = size;
+          pad = (512 - (size % 512)) % 512;
+          if (type === 'x') {
+            const parts = [];
+            write = (bytes) => {
+              if (bytes) return parts.push(ascii.decode(bytes, { stream: true }));
+              longPath = /\d+ path=([^\n]*)\n/.exec(parts.join(''))?.[1] || '';
+            };
+            return;
+          }
+          longPath = '';
+          const name = type === '0' && wanted.find((w) => path.endsWith(`/${w}`));
+          if (!name) return;
+          found++;
+          sink.open(name);
+          write = lineWriter((line) => sink.line(name, line));
+        };
+
+        const closeEntry = () => {
+          write?.(null);
+          write = null;
+        };
+
+        try {
+          while (isCurrent()) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            let i = 0;
+            while (i < value.length) {
+              if (left) {
+                const n = Math.min(left, value.length - i);
+                write?.(value.subarray(i, i + n));
+                i += n;
+                left -= n;
+                if (!left) closeEntry();
+              } else if (pad) {
+                const n = Math.min(pad, value.length - i);
+                i += n;
+                pad -= n;
+              } else {
+                const n = Math.min(512 - have, value.length - i);
+                header.set(value.subarray(i, i + n), have);
+                have += n;
+                i += n;
+                if (have < 512) continue;
+                have = 0;
+                // Blocks of zeros mark the end of the archive.
+                if (!header.some((byte) => byte)) continue;
+                openEntry();
+                if (!left) closeEntry();
+              }
+            }
+            if (found === wanted.length && !write) break;
+            // Chunks that are already buffered resolve without a pause; let the page repaint.
+            if (performance.now() - paused > 50) {
+              await new Promise((resolve) => setTimeout(resolve));
+              paused = performance.now();
+            }
+          }
+        } finally {
+          reader.cancel().catch(() => {});
+        }
+        return found;
+      }
+
+      // Turns one file's bytes into lines. Call it with null when the file ends.
+      function lineWriter(onLine) {
+        const decoder = new TextDecoder();
+        let rest = '';
+        return (bytes) => {
+          const text = bytes ? decoder.decode(bytes, { stream: true }) : decoder.decode();
+          const parts = (rest + text).split(/\r?\n/);
+          rest = bytes ? parts.pop() : '';
+          if (rest.length > MAX_LINE) rest = '';
+          for (const line of parts) onLine(line);
+        };
+      }
+
+      // Reads the sysdiagnose text files. In the IORegistry dumps, `node` is the entry the
+      // current property belongs to, so a key like "CycleCount" only counts on the battery.
+      function createIosScanner(note) {
+        const raw = {
+          device: {},
+          tree: {},
+          cores: {},
+          battery: {},
+          batteryData: {},
+          nand: {},
+          nandDetails: {},
+          cameras: [],
+        };
+        let node = '';
+        let vmPage = 0;
+        let vmColumns = null;
+
+        const nested = (target, keys, value, label) => {
+          for (const key of keys) {
+            const m = new RegExp(`"${key}"="?([^",}]*)`).exec(value);
+            if (!m || key in target) continue;
+            target[key] = m[1].trim();
+            note(`${label}:${key}`, `${label} › "${key}" = ${m[1].trim()}`);
+          }
+        };
+
+        const scanService = (line) => {
+          const entry = IOREG_NODE_RE.exec(line);
+          if (entry) {
+            node = entry[1];
+            const gpu = /^AGXAccelerator(\w+)$/.exec(node);
+            if (gpu && !raw.gpu) {
+              raw.gpu = gpu[1];
+              note('gpu', line);
+            }
+            return;
+          }
+          const m = IOREG_KEY_RE.exec(line);
+          if (!m) return;
+          const [, key, value] = m;
+          if (node === 'AppleSmartBattery') {
+            if (key === 'BatteryData')
+              nested(raw.batteryData, IOS_BATTERY_DATA, value, 'BatteryData');
+            else if (IOS_BATTERY_KEYS.has(key) && !(key in raw.battery)) {
+              raw.battery[key] = value;
+              note(`battery:${key}`, line);
+            }
+          } else if (node === 'AppleBatteryAuth' && key === 'BatteryAuthPassed') {
+            raw.batteryAuth = value;
+            note(key, line);
+          } else if (node.startsWith('AppleANS')) {
+            if (key === 'Controller Characteristics') {
+              nested(raw.nandDetails, IOS_NAND_DETAILS, value, 'Controller Characteristics');
+            } else if (IOS_NAND_KEYS.has(key) && !(key in raw.nand)) {
+              raw.nand[key] = unquote(value);
+              note(`nand:${key}`, line);
+            }
+          }
+          if (key === 'GPUConfigurationVariable' && node.startsWith('AGXAccelerator')) {
+            raw.gpuCores = num(/"num_cores"=(\d+)/.exec(value)?.[1]);
+            note(key, `"GPUConfigurationVariable" › num_cores ${raw.gpuCores}`);
+          }
+          const camera = /^(\w+)CameraExpected$/.exec(key);
+          if (camera && value === 'Yes' && !raw.cameras.includes(camera[1])) {
+            raw.cameras.push(camera[1]);
+            note(key, line);
+          } else if (key === 'IOKitBuildVersion' && !raw.kernel) {
+            raw.kernel = unquote(value);
+            note(key, line);
+          } else if (key === 'IO80211HardwareVersion' && !raw.wifiVersion) {
+            raw.wifiVersion = unquote(value);
+            note(key, line);
+          } else if (key === 'TimingElements' && !raw.screen) {
+            const width = /"HorizontalAttributes"=\{[^}]*"Active"=(\d+)/.exec(value);
+            const height = /"VerticalAttributes"=\{[^}]*"Active"=(\d+)/.exec(value);
+            if (!width || !height || !Number(width[1])) return;
+            raw.screen = { width: num(width[1]), height: num(height[1]) };
+            note(key, `"TimingElements" › active ${width[1]} × ${height[1]}`);
+          }
+        };
+
+        const scanners = {
+          'remotectl_dumpstate.txt': (line) => {
+            const m = /^\s*(\w+) => (.+)$/.exec(line);
+            if (!m || !IOS_DEVICE_KEYS.has(m[1]) || m[1] in raw.device) return;
+            raw.device[m[1]] = m[2].trim();
+            note(`device:${m[1]}`, line);
+          },
+          'ioreg/IODeviceTree.txt': (line) => {
+            const m = IOREG_KEY_RE.exec(line);
+            if (!m) return;
+            if (m[1] === 'cluster-type') {
+              const kind = dtValue(m[2], 'str');
+              raw.cores[kind] = (raw.cores[kind] || 0) + 1;
+              return note(`cores:${kind}`, line);
+            }
+            const type = IOS_TREE_KEYS[m[1]];
+            if (!type || m[1] in raw.tree) return;
+            let value = dtValue(m[2], type);
+            if (value === undefined || value === '') return;
+            // Only the maker code is kept. The rest of the serial identifies the unit.
+            if (m[1] === 'raw-panel-serial-number') value = value.slice(0, 3);
+            raw.tree[m[1]] = value;
+            // "model-config" also carries a device-specific hash, so it isn't kept as a note.
+            if (m[1] !== 'model-config') note(`tree:${m[1]}`, `"${m[1]}" = ${value}`);
+          },
+          'ioreg/IOService.txt': scanService,
+          'logs/BatteryHealth/BatteryHealth.log': (line) => {
+            const m = /"Maximum Capacity Percent" = (\d+)/.exec(line);
+            if (!m) return;
+            raw.maxCapacity = num(m[1]);
+            note('maxCapacity', line);
+          },
+          // The header names the columns, and the first row of figures is the running state.
+          // Memory in use is app memory, wired memory and the compressor, as macOS counts it.
+          'vm_stat.txt': (line) => {
+            const page = /page size of (\d+) bytes/.exec(line);
+            if (page) return void (vmPage = num(page[1]));
+            const cells = line.trim().split(/\s+/);
+            if (!vmColumns) {
+              if (cells.includes('wired')) vmColumns = cells;
+              return;
+            }
+            if (raw.memUsed !== undefined || !vmPage) return;
+            const at = (name) => {
+              const m = /^(\d+)([KM]?)$/.exec(cells[vmColumns.indexOf(name)] || '');
+              return m ? num(m[1]) * { '': 1, K: 1e3, M: 1e6 }[m[2]] : NaN;
+            };
+            const pages = at('anonymous') - at('prgable') + at('wired') + at('cmprssor');
+            if (Number.isNaN(pages) || pages <= 0) return;
+            raw.memUsed = pages * vmPage;
+            note('memUsed', `vm_stat › ${pages} pages of ${vmPage} bytes in use`);
+          },
+          'disks.txt': (line) => {
+            // The data volume. Its free space is shared by every volume on the device.
+            const m =
+              /^\S+\s+([\d.]+)([KMGT])i?\s+\S+\s+([\d.]+)([BKMGT])i?\s.*\s\/private\/var$/.exec(
+                line,
+              );
+            if (!m) return;
+            const unit = { B: 1, K: 1e3, M: 1e6, G: 1e9, T: 1e12 };
+            raw.disk = { size: num(m[1]) * unit[m[2]], free: num(m[3]) * unit[m[4]] };
+            note('disk', line.replace(/\s{2,}/g, '  '));
+          },
+        };
+
+        return { scan: (name, line) => scanners[name](line), finish: () => raw };
+      }
+
+      function buildIosView(raw, fileName) {
+        const { device: d, tree: t, battery: b, batteryData: life, nand, nandDetails: flash } = raw;
+        const config = Object.fromEntries(
+          (t['model-config'] || '')
+            .split(';')
+            .map((pair) => pair.split('='))
+            .filter((pair) => pair.length === 2),
+        );
+        const platform = (d.HardwarePlatform || '').toLowerCase();
+        const os = APPLE_SYSTEMS[d.DeviceClass] || d.ProductName || 'System';
+        const ram = t['dram-size'] ? `${trimNumber(t['dram-size'] / 2 ** 30)} GB` : '';
+        const capacity = num(flash.capacity) ? `${Math.round(num(flash.capacity) / 1e9)} GB` : '';
+        // Core kinds as the device tree names them: P for performance, E for efficiency.
+        const kinds = Object.entries(raw.cores).sort(([a], [b]) => b.localeCompare(a));
+        const cores = kinds.reduce((sum, [, count]) => sum + count, 0);
+        const modem = t['baseband-chipset'];
+        const panelCode = t['raw-panel-serial-number'];
+        const design = num(b.DesignCapacity);
+        const rawMax = num(b.AppleRawMaxCapacity);
+        const measured = design && rawMax ? (rawMax / design) * 100 : undefined;
+        const stamp = /sysdiagnose_(\d{4})\.(\d{2})\.(\d{2})_(\d{2})-(\d{2})/.exec(fileName);
+        const logDate = stamp
+          ? new Date(`${stamp[1]}-${stamp[2]}-${stamp[3]}T${stamp[4]}:${stamp[5]}`)
+          : undefined;
+        // Counted in seconds from 1 Jan 2001. A date outside the iPhone's lifetime means the
+        // value isn't in that form, so it is left out.
+        const firstUseDate = new Date((num(life.DateOfFirstUse) + 978307200) * 1000);
+        const firstUse =
+          num(life.DateOfFirstUse) > 0 &&
+          firstUseDate.getFullYear() >= 2007 &&
+          firstUseDate <= (logDate || new Date())
+            ? firstUseDate
+            : undefined;
+        const kernel = /Darwin Kernel Version ([\d.]+).*?(xnu-[\d.]+)/.exec(raw.kernel || '');
+        const wifiFirmware = /firmware \[Rev ([\d.]+)/.exec(raw.wifiVersion || '')?.[1];
+        const used = raw.disk ? raw.disk.size - raw.disk.free : 0;
+        const cameraOrder = Object.keys(IOS_CAMERAS);
+        const yes = (value, text) => (value === 'true' || value === 'Yes' ? text : '');
+
+        const hardware = [
+          group('Platform', [
+            row('Board', d.HWModel),
+            row('Chipset', platform),
+            row(
+              'CPU',
+              [
+                cores && `${cores} cores`,
+                kinds.map(([kind, count]) => `${count}${kind}`).join(' + '),
+                d.CPUArchitecture,
+              ]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+            row(
+              'GPU',
+              [raw.gpu, raw.gpuCores && `${raw.gpuCores} cores`].filter(Boolean).join(' · '),
+            ),
+          ]),
+          group('Memory and storage', [
+            row('Memory', [t['dram-vendor'], ram, t['dram-type']].filter(Boolean).join(' · ')),
+            row(
+              'Storage',
+              [flash['vendor-name'], flash['nand-marketing-name'], capacity]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+            row('Storage controller', nand['Model Number']),
+            row('Storage firmware', nand['Firmware Revision']),
+            row('NVMe version', nand['NVMe Revision Supported']),
+          ]),
+          group('Display', [
+            row('Panel', panelCode, IOS_PANEL_MAKERS[panelCode]),
+            row('Type', t['oled-display'] === 1 && 'OLED'),
+            row('Resolution', raw.screen && `${raw.screen.width} × ${raw.screen.height}`),
+            row('Refresh rate', t['panel-typical-freq'] && `${t['panel-typical-freq']} Hz`),
+          ]),
+          group(
+            'Camera',
+            [...raw.cameras]
+              .sort((a, b) => cameraOrder.indexOf(a) - cameraOrder.indexOf(b))
+              .map((name) => row(IOS_CAMERAS[name] || name, name)),
+          ),
+          group('Network and connectivity', [
+            row('Modem', modem, /^mav/.test(modem || '') ? 'Qualcomm' : ''),
+            row(
+              'Wi-Fi and Bluetooth',
+              [t['wifi-chipset'], wifiFirmware && `firmware ${wifiFirmware}`]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+            row('Wi-Fi module', config.wifi_module_vendor),
+          ]),
+          group('Battery', [
+            row('Design capacity', design && `${design} mAh`),
+            row('Chemistry ID', life.ChemID),
+            row('Gauge firmware', b.GasGaugeFirmwareVersion),
+            row('Genuine battery check', yes(raw.batteryAuth, 'Passed')),
+            row('First used', firstUse && formatDate(firstUse)),
+          ]),
+        ];
+
+        const software = [
+          group('System', [
+            row(os, d.OSVersion),
+            row('Kernel', kernel && `Darwin ${kernel[1]} · ${kernel[2]}`),
+            row('Build', d.BuildVersion),
+            row('Bootloader', t['firmware-version']),
+            row('Model identifier', d.ProductType),
+            row('Model number', [d.ModelNumber, d.RegionInfo].filter(Boolean).join(' · ')),
+            row('Regulatory model', t['regulatory-model-number']),
+          ]),
+          group('Security', [
+            row('Secure Enclave', yes(d.HasSEP, 'Present')),
+            row('Secure boot', yes(d.EffectiveSecurityModeAp, 'Enforced')),
+            row('Production device', yes(d.EffectiveProductionStatusAp, 'Yes')),
+            row('Storage encryption', flash['Encryption Type']),
+          ]),
+        ];
+
+        const status =
+          b.IsCharging === 'Yes'
+            ? 'Charging'
+            : b.FullyCharged === 'Yes'
+              ? 'Full'
+              : b.IsCharging
+                ? 'Discharging'
+                : '';
+
+        return {
+          platform: os,
+          name: t['product-name'] || d.ProductType || 'Apple device',
+          sub: [t['product-name'] && d.ProductType, d.ModelNumber, t['regulatory-model-number']]
+            .filter(Boolean)
+            .join(' · '),
+          chips: [
+            d.OSVersion && `${os} ${d.OSVersion}`,
+            platform,
+            ram && `${ram} memory`,
+            capacity && `${capacity} storage`,
+          ],
+          logDate,
+          hardware,
+          software,
+          sections: [
+            section(
+              'Memory and storage',
+              [
+                meter('Memory', raw.memUsed, t['dram-size'], formatGib),
+                meter('Storage', used, raw.disk?.size, formatSize),
+              ],
+              [],
+            ),
+          ],
+          tiles: [
+            ['Level', num(b.CurrentCapacity), '%'],
+            ['Status', status, ''],
+            ['Temperature', num(b.Temperature) && (num(b.Temperature) / 100).toFixed(1), '°C'],
+            ['Voltage', num(b.Voltage) && (num(b.Voltage) / 1000).toFixed(2), 'V'],
+          ],
+          battery: {
+            health: healthOf([raw.maxCapacity ?? measured]),
+            measures: [
+              ['Capacity', raw.maxCapacity ?? measured],
+              ['Capacity (Raw)', rawMax || undefined, 'mAh'],
+            ],
+            cycles: num(b.CycleCount),
+          },
+        };
+      }
+
+      // Reads a device tree value, <"text"> or <hex bytes>, as text or a little-endian number.
+      function dtValue(value, type) {
+        const quoted = /^<"([^"]*)"/.exec(value);
+        if (quoted) return type === 'int' ? num(quoted[1]) : quoted[1];
+        const hex = /^<([0-9a-f]+)>/i.exec(value)?.[1];
+        if (!hex) return undefined;
+        const bytes = hex.match(/../g).map((byte) => parseInt(byte, 16));
+        if (type === 'int')
+          return bytes.slice(0, 8).reduce((sum, byte, i) => sum + byte * 256 ** i, 0);
+        const end = bytes.indexOf(0);
+        return String.fromCharCode(
+          ...bytes
+            .slice(0, end === -1 ? bytes.length : end)
+            .filter((byte) => byte > 31 && byte < 127),
+        );
+      }
+
+      // Shared ---------------------------------------------------------------------
+
+      // A detail row, or null when the log didn't have the value. `decoded` is the name worked
+      // out from the value, such as a maker's name from its code.
+      function row(label, value, decoded = '') {
+        if (value === undefined || value === null || value === '' || value === false) return null;
+        return { label, value: String(value), decoded: decoded || '' };
+      }
+
+      // How much of a total is in use, or null when the log didn't have both.
+      function meter(label, used, total, format) {
+        if (!total || typeof used !== 'number' || Number.isNaN(used)) return null;
+        const pct = clamp((used / total) * 100, 0, 100);
+        return { label, pct, value: format(used).replace(/ GB$/, ''), unit: `of ${format(total)}` };
+      }
+
+      // A titled part of Status: bars, tiles or both. Null when the log had neither.
+      function section(title, meters, tiles) {
+        const found = { title, meters: meters.filter(Boolean), tiles: tiles.filter((t) => t[1]) };
+        return found.meters.length || found.tiles.length ? found : null;
+      }
+
+      function group(title, rows) {
+        const found = rows.filter(Boolean);
+        return found.length ? { title, rows: found } : null;
+      }
+
+      // The average of the health figures a log has, like Samsung's own diagnostics do with
+      // ASOC and BSOH. A new battery can measure above its design capacity, so cap it at 100.
+      function healthOf(figures) {
+        const values = figures.filter((v) => typeof v === 'number' && !Number.isNaN(v));
+        if (!values.length) return null;
+        return clamp(values.reduce((a, b) => a + b, 0) / values.length, 0, 100);
+      }
+
+      function healthRating(pct) {
+        if (pct >= 90) return { label: 'Excellent', tone: 'good' };
+        if (pct >= 80) return { label: 'Good', tone: 'good' };
+        if (pct >= 70) return { label: 'Fair', tone: 'fair' };
+        return { label: 'Worn', tone: 'bad' };
+      }
+
+      function cycleRating(cycles) {
+        if (cycles <= 100) return { label: 'Like new', tone: 'good' };
+        if (cycles <= 200) return { label: 'Light use', tone: 'good' };
+        if (cycles <= 500) return { label: 'Normal', tone: '' };
+        if (cycles <= 1000) return { label: 'Heavy use', tone: 'fair' };
+        return { label: 'Very heavy use', tone: 'bad' };
+      }
+
+      function resetApp() {
+        readToken++;
+        report = null;
+        els.error.hidden = true;
+        showView('drop');
+        els.drop.querySelector('[data-action="open"]').focus();
+      }
+
+      async function copyRawLines() {
+        try {
+          await navigator.clipboard.writeText(els.rawLines.textContent);
+          showSnackbar('Lines copied');
+        } catch (err) {
+          showError('Couldn’t copy the lines');
+        }
+      }
+
+      // Theme -----------------------------------------------------------------------
+
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
+
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
+        );
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        savePrefs();
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
+      }
+
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
+      }
+
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
+
+      // Menus & dialogs --------------------------------------------------------------
+
+      // Opens under the button, right-aligned, or above it when there is no room below.
+      // The source link keeps a click on the open menu's button from light-dismissing and
+      // reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        const up = r.bottom + 4 + menu.offsetHeight > innerHeight - 8;
+        menu.classList.toggle('up', up);
+        menu.style.top = up ? `${r.top - 4 - menu.offsetHeight}px` : `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        history.pushState({ dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
+        }
+      }
+
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
+      }
+
+      // --- UI Updates ---
+
+      function showView(name) {
+        els.drop.hidden = name !== 'drop';
+        els.loading.hidden = name !== 'loading';
+        els.results.hidden = name !== 'results';
+        els.fileBar.hidden = name !== 'results';
+        updateAppbar();
+      }
+
+      // Once the device's name has scrolled under the bar, the bar's title shows it instead,
+      // so it stays clear which device the details belong to.
+      function updateAppbar() {
+        els.appbar.classList.toggle('scrolled', window.scrollY > 0);
+        const hidden =
+          !els.results.hidden &&
+          els.deviceName.getBoundingClientRect().bottom < els.appbar.offsetHeight;
+        const title = hidden ? els.deviceName.textContent : APP_NAME;
+        if (els.title.textContent !== title) els.title.textContent = title;
+      }
+
+      function renderProgress(p) {
+        const pct = Math.round(p * 100);
+        els.loadingPct.textContent = `${pct}%`;
+        els.loadingLine.setAttribute('aria-valuenow', pct);
+        const phase = REDUCED_MOTION.matches ? 0 : performance.now() / 300;
+        drawLine(els.loadingLine, els.loadingWave, els.loadingTrack, p, 3, phase);
+      }
+
+      function renderResults() {
+        const { file, view, lines, ms } = report;
+        els.fileName.textContent = file.name;
+        const meta = [formatBytes(file.size), `read in ${(ms / 1000).toFixed(1)}s`];
+        if (view.logDate) meta.unshift(`Logged ${formatDate(view.logDate, true)}`);
+        els.fileMeta.textContent = meta.join(' · ');
+
+        // Device
+        els.deviceName.textContent = view.name;
+        els.deviceSub.textContent = view.sub;
+        els.deviceSub.hidden = !view.sub;
+        els.deviceChips.innerHTML = view.chips
+          .filter(Boolean)
+          .map((text) => `<span class="chip">${esc(text)}</span>`)
+          .join('');
+
+        // Hardware, software and state details
+        els.hardwareGroups.innerHTML = groupsHtml(view.hardware);
+        els.softwareGroups.innerHTML = groupsHtml(view.software);
+
+        // Status
+        els.sections.innerHTML = view.sections
+          .filter(Boolean)
+          .map(
+            (sect) => `
+          <section class="groupbox">
+            <h3 class="sect-title">${esc(sect.title)}</h3>
+            <div class="meters">${sect.meters.map(meterHtml).join('')}</div>
+            <div class="tiles">${tilesHtml(sect.tiles)}</div>
+          </section>`,
+          )
+          .join('');
+        els.tiles.innerHTML = tilesHtml(view.tiles);
+
+        // Battery health
+        const { battery } = view;
+        const health = battery.health === null ? null : Math.round(battery.health);
+        const rating = health === null ? null : healthRating(health);
+        els.gauge.dataset.tone = rating?.tone || '';
+        setChip(els.healthChip, rating);
+        els.measures.innerHTML = battery.measures
+          .map(
+            ([label, value, unit]) => `
+          <div class="measure">
+            <span>${esc(label)}</span>
+            <span class="measure-value">${measureHtml(value, unit)}</span>
+          </div>`,
+          )
+          .join('');
+        animateGauge(health);
+
+        // Cycles
+        const { cycles } = battery;
+        els.cyclesVal.textContent = cycles === undefined ? '–' : Math.round(cycles);
+        setChip(els.cyclesChip, cycles === undefined ? null : cycleRating(Math.round(cycles)));
+        drawCycles(cycles);
+
+        // Matched lines, in the order they were read
+        const width = String(Math.max(0, ...lines.map((l) => l.n))).length;
+        els.rawCount.textContent = `${lines.length} details found`;
+        els.rawLines.innerHTML = lines
+          .map((l) => {
+            const where = `${l.file ? `${l.file.split('/').pop()}:` : ''}${String(l.n).padStart(width, ' ')}`;
+            return `<b>${esc(where)}</b>  ${esc(l.text)}`;
+          })
+          .join('\n');
+        els.raw.open = false;
+      }
+
+      // Titled groups of rows. Groups the log had nothing for are left out.
+      function groupsHtml(groups) {
+        return groups
+          .filter(Boolean)
+          .map(
+            (g) => `
+          <section class="groupbox">
+            <h3 class="sect-title">${esc(g.title)}</h3>
+            <div class="group">${rowsHtml(g.rows)}</div>
+          </section>`,
+          )
+          .join('');
+      }
+
+      function setChip(chip, rating) {
+        chip.hidden = !rating;
+        if (!rating) return;
+        chip.textContent = rating.label;
+        chip.dataset.tone = rating.tone;
+      }
+
+      // Signature moment: the gauge's wave sweeps up to the value while the number counts up.
+      // A zero-length dash still paints a round cap, so an empty wave or track is hidden
+      // instead. A new report cancels the previous run.
+      function animateGauge(health) {
+        cancelAnimationFrame(gaugeFrame);
+        const target = health ?? 0;
+        const duration = REDUCED_MOTION.matches ? 0 : 1100;
+        const start = performance.now();
+        const frame = (now) => {
+          const t = duration ? Math.min((now - start) / duration, 1) : 1;
+          const eased = 1 - (1 - t) ** 4;
+          const value = target * eased;
+          const gap = 4;
+          els.gaugeWave.setAttribute('d', wavyCircle(84, 84, 72, 3, 14, (1 - eased) * Math.PI * 4));
+          els.gaugeWave.style.strokeDasharray = `${value} 200`;
+          els.gaugeWave.style.visibility = value > 0 ? '' : 'hidden';
+          const track = Math.max(0, 100 - value - gap * 2);
+          els.gaugeTrack.style.strokeDasharray = value > 0 ? `${track} 200` : '100 200';
+          els.gaugeTrack.style.strokeDashoffset = value > 0 ? -(value + gap) : 0;
+          els.gaugeTrack.style.visibility = value > 0 && !track ? 'hidden' : '';
+          els.healthVal.textContent = health === null ? '–' : Math.round(value);
+          if (t < 1) gaugeFrame = requestAnimationFrame(frame);
+        };
+        gaugeFrame = requestAnimationFrame(frame);
+      }
+
+      function drawCycles(cycles) {
+        const p = cycles === undefined ? 0 : clamp(cycles / CYCLE_SCALE, 0, 1);
+        drawLine(els.cyclesLine, els.cyclesWave, els.cyclesTrack, p, 3, 0);
+      }
+
+      // M3 wavy linear indicator: a wave up to `p`, then a gap and a flat track.
+      function drawLine(svg, wave, track, p, amp, phase) {
+        const w = svg.clientWidth;
+        const h = svg.clientHeight;
+        if (!w) return;
+        const mid = h / 2;
+        const inset = 4;
+        const end = inset + (w - inset * 2) * p;
+        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        let d = '';
+        if (p > 0) {
+          for (let x = inset; x <= end; x += 1.5) {
+            const y = mid + amp * Math.sin((x / 24) * Math.PI * 2 - phase);
+            d += `${d ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(2)}`;
+          }
+        }
+        wave.setAttribute('d', d);
+        const trackStart = p > 0 ? end + 10 : inset;
+        track.setAttribute('d', trackStart < w - inset ? `M${trackStart} ${mid}H${w - inset}` : '');
+      }
+
+      function rowsHtml(rows) {
+        return rows
+          .map(
+            ({ label, value, decoded }) => `
+          <div class="row">
+            <span class="row-label">${esc(label)}</span>
+            <span class="row-end">
+              <span class="row-value">${esc(value)}</span>${
+                decoded ? `<span class="row-decoded">${esc(decoded)}</span>` : ''
+              }
+            </span>
+          </div>`,
+          )
+          .join('');
+      }
+
+      function measureHtml(value, unit = '%') {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
+          return '<span class="empty-value">–</span>';
+        }
+        return `${Math.round(value * 10) / 10}<small>${esc(unit)}</small>`;
+      }
+
+      // `head` replaces the percentage at the top right when the bar isn't a share of a total.
+      function meterHtml(m) {
+        const pct = Math.round(m.pct);
+        return `
+          <div class="meter">
+            <span class="meter-head">
+              <span>${esc(m.label)}</span>
+              <span>${esc(m.head ?? `${pct}%`)}</span>
+            </span>
+            <span class="meter-value">${esc(m.value)}<small>${esc(m.unit)}</small></span>
+            <span class="meter-bar" data-tone="${m.pct >= 90 ? 'bad' : ''}" aria-hidden="true">
+              <span class="fill" style="width: ${m.pct.toFixed(1)}%"></span>
+              <span class="rest"></span>
+            </span>
+          </div>`;
+      }
+
+      // A long value such as "reboot,userrequested" may wrap after a comma.
+      function tilesHtml(tiles) {
+        return tiles
+          .filter(([, value]) => value)
+          .map(
+            ([label, value, unit]) => `
+          <div class="tile">
+            <span class="tile-label">${esc(label)}</span>
+            <span class="tile-value">${esc(value).replaceAll(',', ',<wbr>')}<small>${esc(unit)}</small></span>
+          </div>`,
+          )
+          .join('');
+      }
+
+      // Snackbars render inside the top dialog, since modal dialogs make everything else inert.
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        (dialogStack.at(-1) || document.body).append(els.snackbar);
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
+
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
+
+      function hideSnackbar() {
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
+
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
+
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
+
+      // --- Utilities ---
+
+      // Every number in a string: "[4080 3060 ]" → [4080, 3060]
+      function nums(str) {
+        return (str.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+      }
+
+      // 1.70000005 → "1.7"
+      function trimNumber(n) {
+        return String(Math.round(n * 10) / 10);
+      }
+
+      // The smallest size on the list that fits the value: a 460 GB partition → 512.
+      function roundUpTo(value, sizes) {
+        return sizes.find((size) => size >= value) || Math.round(value);
+      }
+
+      // "SAMSUNG" → "Samsung". Mixed-case names like "SK hynix" and short codes like "USA"
+      // are left alone.
+      function titleCase(str) {
+        if (str !== str.toUpperCase() && str !== str.toLowerCase()) return str;
+        if (str.length < 4 && str === str.toUpperCase()) return str;
+        return str.toLowerCase().replace(/(^|[\s-])[a-z]/g, (c) => c.toUpperCase());
+      }
+
+      // '"APPLE SSD"' → 'APPLE SSD'
+      function unquote(str) {
+        return str.replace(/^"|"$/g, '');
+      }
+
+      // Kilobytes, as Linux counts them, to GB
+      function formatKb(kb) {
+        const gb = kb / 2 ** 20;
+        return `${gb < 100 ? trimNumber(gb) : Math.round(gb)} GB`;
+      }
+
+      // Bytes to GB the way memory is counted, in powers of two
+      function formatGib(bytes) {
+        return `${trimNumber(bytes / 2 ** 30)} GB`;
+      }
+
+      // Bytes to decimal GB, the way Apple states storage
+      function formatSize(bytes) {
+        const gb = bytes / 1e9;
+        return `${gb < 100 ? trimNumber(gb) : Math.round(gb)} GB`;
+      }
+
+      // Minutes → "1 day, 8 h 55 min", or "1d 8h" when short
+      function formatDuration(minutes, short = false) {
+        const days = Math.floor(minutes / 1440);
+        const hours = Math.floor((minutes % 1440) / 60);
+        const mins = minutes % 60;
+        if (short) {
+          return days ? `${days}d ${hours}h` : hours ? `${hours}h ${mins}m` : `${mins}m`;
+        }
+        const parts = [];
+        if (days) parts.push(`${days} day${days === 1 ? '' : 's'}`);
+        if (hours) parts.push(`${hours} h`);
+        if (mins || !parts.length) parts.push(`${mins} min`);
+        return parts.join(', ').replace(/ h, (\d+ min)$/, ' h $1');
+      }
+
+      // Hides anything that could identify the device in a line kept for display: long digit
+      // runs (IMEI, ICCID), MAC addresses, and the value after a serial-number style key.
+      function mask(text) {
+        return text
+          .replace(/\b\d{14,}\b/g, '•••')
+          .replace(/\b(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\b/gi, '•••')
+          .replace(
+            /((?:serial|imei|meid|iccid|imsi|udid|ecid|unique)[\w .-]*["']?\s*(?:=>|[:=])\s*["'[<]?)[\w:.-]{4,}/gi,
+            '$1•••',
+          );
+      }
+
+      function num(str) {
+        const n = Number(str);
+        return Number.isFinite(n) ? n : undefined;
+      }
+
+      // "20240312" → Date
+      function ymd(str) {
+        const date = new Date(`${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}T00:00`);
+        return Number.isNaN(date.getTime()) ? undefined : date;
+      }
+
+      function formatDate(date, withTime = false) {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        if (withTime) Object.assign(options, { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleString('en-GB', options);
+      }
+
+      function formatBytes(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        const units = ['KB', 'MB', 'GB'];
+        let value = bytes;
+        let i = -1;
+        do {
+          value /= 1024;
+          i++;
+        } while (value >= 1024 && i < units.length - 1);
+        return `${value.toFixed(value < 10 ? 1 : 0)} ${units[i]}`;
+      }
+
+      // A circle whose radius ripples `waves` times around, starting at 12 o'clock.
+      function wavyCircle(cx, cy, r, amp, waves, phase) {
+        let d = '';
+        for (let i = 0; i <= 240; i++) {
+          const a = (i / 240) * Math.PI * 2;
+          const rr = r + amp * Math.sin(waves * a + phase);
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(2)} ${(cy - rr * Math.cos(a)).toFixed(2)}`;
+        }
+        return d;
+      }
+
+      // M3 Expressive "cookie" shape: a circle with n soft scallops.
+      function cookiePath(cx, cy, r, n, depth) {
+        let d = '';
+        for (let i = 0; i <= 360; i++) {
+          const a = (i / 360) * Math.PI * 2;
+          const rr = r * (1 - depth / 2 + (depth / 2) * Math.cos(n * a));
+          d += `${i ? 'L' : 'M'}${(cx + rr * Math.sin(a)).toFixed(1)} ${(cy - rr * Math.cos(a)).toFixed(1)}`;
+        }
+        return `${d}Z`;
+      }
+
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function esc(str) {
+        return String(str).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+      }
+
+      function clamp(n, min, max) {
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {
+          // Storage full or blocked: the theme still applies for this visit.
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
