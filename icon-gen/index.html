@@ -293,7 +293,7 @@
         transition: opacity var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .state:hover::before {
           opacity: 0.08;
         }
@@ -632,7 +632,7 @@
         font-size: 16px;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .stage:not(.text-mode):hover .stage-hint {
           opacity: 1;
         }
@@ -1010,7 +1010,7 @@
           box-shadow var(--effects-ms) linear;
       }
 
-      @media (hover: hover) {
+      @media (hover: hover) and (pointer: fine) {
         .field input:hover {
           border-color: var(--on-surface);
         }
