@@ -215,6 +215,7 @@
 
       button,
       input,
+      textarea,
       select {
         font: inherit;
         letter-spacing: inherit;
@@ -436,12 +437,82 @@
         }
       }
 
+      /* The hero is always as tall as the fullest clock (24px date, 4 + 8px margins, the time,
+         28px message line), and rests its content on the bottom edge. So the last line keeps the
+         same gap to the search box for every header, with or without the message, and nothing
+         below the hero ever moves. */
       .hero {
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: flex-end;
+        min-height: calc(64px + var(--hero-time));
+        --hero-time: clamp(72px, 17vw, 128px);
         text-align: center;
         animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      .hero-clock {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .hero-title {
+        color: var(--on-surface);
+        font-size: clamp(56px, 13vw, 96px);
+        line-height: 1.1;
+        font-weight: 450;
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: -0.02em;
+      }
+
+      /* The app icon's arcs, one palette color each, as tall as the clock's date and time so the
+         message line fits under it. Each arc draws itself in when the illustration appears (page
+         load, or picking it in Settings), outer arc first. The paths carry pathLength="1", so a
+         dash of 1 is the whole arc. */
+      .hero-art {
+        height: calc(28px + var(--hero-time));
+        fill: none;
+        stroke-linecap: round;
+        stroke-width: 28;
+      }
+
+      .hero-art path {
+        stroke-dasharray: 1;
+        animation: draw 900ms cubic-bezier(0.2, 0, 0, 1) both;
+      }
+
+      .hero-art path:nth-child(1) {
+        stroke: var(--primary);
+      }
+
+      .hero-art path:nth-child(2) {
+        stroke: var(--tertiary);
+        animation-delay: 120ms;
+      }
+
+      .hero-art path:nth-child(3) {
+        stroke: var(--secondary);
+        animation-delay: 240ms;
+      }
+
+      /* Opacity hides the round cap that would otherwise show as a dot before an arc starts. */
+      @keyframes draw {
+        from {
+          opacity: 0;
+          stroke-dashoffset: 1;
+        }
+
+        5% {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero-art path {
+          animation-delay: 0s;
+        }
       }
 
       .hero-date {
@@ -453,9 +524,9 @@
       .hero-time {
         display: flex;
         align-items: baseline;
-        margin: 4px 0 8px;
+        margin-top: 4px;
         color: var(--on-surface);
-        font-size: clamp(72px, 17vw, 128px);
+        font-size: var(--hero-time);
         line-height: 1;
         font-weight: 450;
         font-variation-settings: 'ROND' 100;
@@ -484,7 +555,8 @@
         letter-spacing: 0.04em;
       }
 
-      .hero-greeting {
+      .hero-message {
+        margin-top: 8px;
         color: var(--on-surface-variant);
         font: 400 22px/28px var(--font);
         font-variation-settings: 'ROND' 100;
@@ -526,13 +598,14 @@
         box-shadow: var(--elevation-2);
       }
 
-      /* Everything inside the bar is concentric with it: 40px pills sit at an 8px inset. */
+      /* Everything inside the bar is concentric with it: 40px pills sit at an 8px inset. The bar
+         grows with a long query: the lead stays on the first line and the action on the last. */
       .search-bar {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         gap: 4px;
-        height: 56px;
-        padding: 0 8px;
+        min-height: 56px;
+        padding: 8px;
       }
 
       .search-lead {
@@ -541,7 +614,7 @@
         flex: none;
         width: 40px;
         height: 40px;
-        margin-right: 8px;
+        align-self: flex-start;
         border-radius: 50%;
         background: var(--surface-container-lowest);
         color: var(--primary);
@@ -553,16 +626,93 @@
         border-radius: 4px;
       }
 
-      .search-input {
+      /* The field grows to fit a long query, up to five lines, then scrolls. The textarea and its
+         mirror share the one grid cell, so they scroll and resize as one. */
+      .search-field {
+        display: grid;
         flex: 1;
+        align-self: flex-start;
         min-width: 0;
-        height: 100%;
-        padding: 0;
+        max-height: 136px;
+        margin: 0 8px;
+        overflow-y: auto;
+        font-size: 16px;
+        line-height: 24px;
+        scrollbar-width: none;
+      }
+
+      .search-field > * {
+        grid-area: 1 / 1;
+        min-width: 0;
+        padding: 8px 0;
+      }
+
+      /* Its height follows its content (browsers without field-sizing keep it at one line), and
+         it never scrolls itself: the field does. The width is set, or field-sizing would shrink
+         it to the text. */
+      .search-input {
+        width: 100%;
+        overflow: hidden;
         border: 0;
         outline: none;
         background: none;
         color: var(--on-surface);
-        font-size: 16px;
+        overflow-wrap: break-word;
+        resize: none;
+        field-sizing: content;
+      }
+
+      /* Out of focus, a long query folds back to its first line. */
+      .search-input:not(:focus) {
+        white-space: nowrap;
+      }
+
+      /* A copy of the query under the textarea, laid out the same way. A textarea can't cut text
+         with an ellipsis or hold styled text, so the copy does both: folded, it is what shows,
+         and with the text action hint the action follows it. In focus the copy is invisible and
+         only places the action. */
+      .search-mirror {
+        pointer-events: none;
+      }
+
+      .search-echo {
+        color: transparent;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      /* An inline block, so it can break away from the query's last word. As plain nowrap text it
+         glued to that word, and the pair wrapped together onto a line the textarea doesn't have.
+         pre keeps its leading space. */
+      .search-suffix {
+        display: inline-block;
+        color: var(--on-surface-variant);
+        white-space: pre;
+      }
+
+      .search-suffix.own-line {
+        display: block;
+      }
+
+      /* Folded, the copy is what shows: the query cut short with an ellipsis, then the action,
+         the way the action button keeps its place beside a long query. */
+      .search-field:not(:focus-within) .search-mirror {
+        display: flex;
+      }
+
+      .search-field:not(:focus-within) .search-echo {
+        overflow: hidden;
+        color: var(--on-surface);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .search-field:not(:focus-within) .search-suffix {
+        flex: none;
+      }
+
+      .search-field:not(:focus-within) .search-mirror:not([hidden]) + .search-input {
+        color: transparent;
       }
 
       .search-input::placeholder {
@@ -591,7 +741,7 @@
         gap: 6px;
         max-width: 100%;
         height: 40px;
-        padding: 0 20px 0 14px;
+        padding: 0 14px 0 18px;
         border-radius: 20px;
         background: var(--primary);
         color: var(--on-primary);
@@ -710,7 +860,7 @@
         font-size: 18px;
       }
 
-      .search-chip span:last-child {
+      .search-chip span:first-child {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -798,7 +948,14 @@
         min-width: 0;
       }
 
-      .opt-title,
+      .opt-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .opt-title > span,
       .opt-sub {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -815,6 +972,11 @@
       .opt[aria-selected='true'] .opt-sub {
         color: inherit;
         opacity: 0.8;
+      }
+
+      /* The selected row is already secondary-container, so its badge darkens that a step. */
+      .opt[aria-selected='true'] kbd {
+        background: color-mix(in srgb, currentColor 12%, transparent);
       }
 
       /* What Enter opens: a plain return glyph in the row's own color, only on the selected
@@ -898,17 +1060,20 @@
         background: var(--primary-container);
       }
 
-      /* Themed icons: tint favicons into the palette, like Android themed app icons. */
-      .themed .fav {
+      /* Themed icons: tint every site icon into the palette, like Android themed app icons. The
+         class sits on <body>, so it reaches the search box, suggestions, speed dial and settings.
+         :has(img) leaves the search box's own glyphs alone and outranks the tile and row
+         backgrounds below. */
+      .themed :is(.fav, .search-lead, .opt-lead):has(img) {
         background: var(--primary-container);
       }
 
-      .themed .fav img {
+      .themed :is(.fav, .search-lead, .opt-lead) img {
         filter: grayscale(1) contrast(1.4);
         mix-blend-mode: multiply;
       }
 
-      .dark .themed .fav img {
+      .dark .themed :is(.fav, .search-lead, .opt-lead) img {
         filter: grayscale(1) invert(1) contrast(1.4) brightness(1.3);
         mix-blend-mode: screen;
       }
@@ -1003,10 +1168,6 @@
         width: 28px;
         height: 28px;
         border-radius: 6px;
-      }
-
-      .themed .dial-tile .fav {
-        background: var(--primary-container);
       }
 
       @media (hover: hover) {
@@ -1474,7 +1635,8 @@
         flex: none;
       }
 
-      .row kbd {
+      .row kbd,
+      .opt kbd {
         padding: 1px 6px;
         background: var(--secondary-container);
         color: var(--on-secondary-container);
@@ -2257,11 +2419,19 @@
     <main class="home">
       <h1 class="sr-only">Startpage</h1>
 
-      <!-- Clock -->
+      <!-- Header: the clock, the app title or the illustration, picked by headerStyle -->
       <header class="hero">
-        <p class="hero-date" id="date"></p>
-        <time class="hero-time" id="time"></time>
-        <p class="hero-greeting" id="greeting" hidden></p>
+        <div class="hero-clock" id="hero-clock">
+          <p class="hero-date" id="date"></p>
+          <time class="hero-time" id="time"></time>
+        </div>
+        <p class="hero-title" id="hero-title" aria-hidden="true" hidden>Startpage</p>
+        <svg class="hero-art" id="hero-art" viewBox="4 57 248 142" aria-hidden="true" hidden>
+          <path pathLength="1" d="M21.33,181.33a106.67,106.67 0 0 1 213.34,0" />
+          <path pathLength="1" d="M64,181.33a64,64 0 0 1 128,0" />
+          <path pathLength="1" d="M106.67,181.33a21.33,21.33 0 0 1 42.66,0" />
+        </svg>
+        <p class="hero-message" id="message" hidden></p>
       </header>
 
       <!-- Search -->
@@ -2271,21 +2441,27 @@
             <span class="search-lead" id="search-lead" aria-hidden="true"
               ><span class="icon">search</span></span
             >
-            <input
-              class="search-input"
-              id="q"
-              type="text"
-              role="combobox"
-              aria-label="Search or ask"
-              aria-autocomplete="list"
-              aria-expanded="false"
-              aria-controls="suggest"
-              placeholder="Search or ask"
-              autocapitalize="off"
-              autocorrect="off"
-              spellcheck="false"
-              enterkeyhint="go"
-            />
+            <div class="search-field" id="search-field">
+              <div class="search-mirror" id="search-mirror" aria-hidden="true" hidden>
+                <span class="search-echo" id="search-echo"></span
+                ><span class="search-suffix" id="search-suffix"></span>
+              </div>
+              <textarea
+                class="search-input"
+                id="q"
+                rows="1"
+                role="combobox"
+                aria-label="Search or ask"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="suggest"
+                placeholder="Search or ask"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                enterkeyhint="go"
+              ></textarea>
+            </div>
             <kbd class="search-hint" id="search-hint" aria-hidden="true">/</kbd>
             <span class="search-action" id="search-action">
               <span class="edge-light halo" aria-hidden="true"></span>
@@ -2343,7 +2519,7 @@
             <span>Start or end with ? to ask your AI engine</span>
           </div>
           <div class="help-row">
-            <span class="keys"><kbd>g</kbd><kbd>Tab</kbd></span>
+            <span class="keys"><kbd>gg</kbd><kbd>Tab</kbd></span>
             <span>Type an engine shortcut, then Space or Tab, to search with it</span>
           </div>
           <div class="help-row">
@@ -2370,7 +2546,7 @@
           <h3>Anywhere</h3>
           <div class="help-row">
             <span class="keys"><kbd>/</kbd></span>
-            <span>Focus search</span>
+            <span>Focus input box</span>
           </div>
           <div class="help-row">
             <span class="keys"><kbd>Esc</kbd></span>
@@ -2430,11 +2606,11 @@
         <button class="tab state" role="tab" type="button" data-tab="appearance">
           <span>Appearance</span>
         </button>
-        <button class="tab state" role="tab" type="button" data-tab="clock">
-          <span>Clock</span>
+        <button class="tab state" role="tab" type="button" data-tab="header">
+          <span>Header</span>
         </button>
-        <button class="tab state" role="tab" type="button" data-tab="search">
-          <span>Search</span>
+        <button class="tab state" role="tab" type="button" data-tab="engine">
+          <span>Engine</span>
         </button>
         <button class="tab state" role="tab" type="button" data-tab="dial">
           <span>Speed dial</span>
@@ -2530,127 +2706,179 @@
                 >
               </div>
             </div>
+            <label class="row">
+              <span class="row-text">
+                <span>Themed icons</span>
+                <span class="row-sub">Tint site icons to match your colors</span>
+              </span>
+              <input class="switch" type="checkbox" role="switch" data-pref="themedIcons" />
+            </label>
           </div>
         </section>
 
-        <!-- Clock -->
-        <section role="tabpanel" data-panel="clock" aria-label="Clock" hidden>
-          <h3 class="sect-title">Greeting</h3>
+        <!-- Header -->
+        <section role="tabpanel" data-panel="header" aria-label="Header" hidden>
+          <h3 class="sect-title">Display</h3>
+          <div class="group">
+            <div class="row">
+              <div class="seg" role="radiogroup" aria-label="Header">
+                <label
+                  ><input
+                    type="radio"
+                    name="headerStyle"
+                    value="clock"
+                    data-pref="headerStyle"
+                  />Clock</label
+                >
+                <label
+                  ><input
+                    type="radio"
+                    name="headerStyle"
+                    value="title"
+                    data-pref="headerStyle"
+                  />Title</label
+                >
+                <label
+                  ><input
+                    type="radio"
+                    name="headerStyle"
+                    value="illustration"
+                    data-pref="headerStyle"
+                  />Illustration</label
+                >
+              </div>
+            </div>
+          </div>
+
+          <h3 class="sect-title">Message</h3>
           <div class="group">
             <label class="row">
               <span class="row-text">
-                <span>Show greeting</span>
-                <span class="row-sub">Good morning, afternoon or evening</span>
+                <span>Show message</span>
+                <span class="row-sub">A line of text under the header</span>
               </span>
-              <input class="switch" type="checkbox" role="switch" data-pref="enableGreetings" />
+              <input class="switch" type="checkbox" role="switch" data-pref="enableMessage" />
             </label>
-            <div class="row" data-needs="enableGreetings">
+            <div class="row" data-needs="enableMessage">
+              <div class="seg" role="radiogroup" aria-label="Message type">
+                <label
+                  ><input
+                    type="radio"
+                    name="messageType"
+                    value="greeting"
+                    data-pref="messageType"
+                  />Greeting</label
+                >
+                <label
+                  ><input
+                    type="radio"
+                    name="messageType"
+                    value="custom"
+                    data-pref="messageType"
+                  />Custom</label
+                >
+              </div>
+            </div>
+            <div class="row" id="message-name-row" data-needs="enableMessage">
               <label class="field">
                 <input type="text" placeholder=" " data-pref="username" autocomplete="given-name" />
                 <span class="field-label">Your name</span>
               </label>
             </div>
+            <div class="row" id="message-content-row" data-needs="enableMessage">
+              <label class="field">
+                <input type="text" placeholder=" " data-pref="messageContent" autocomplete="off" />
+                <span class="field-label">Message</span>
+              </label>
+            </div>
           </div>
 
-          <h3 class="sect-title">Time</h3>
-          <div class="group">
-            <div class="row">
-              <div class="seg" role="radiogroup" aria-label="Time format">
-                <label
-                  ><input
-                    type="radio"
-                    name="timeFormat"
-                    value="12"
-                    data-pref="timeFormat"
-                  />12-hour</label
-                >
-                <label
-                  ><input
-                    type="radio"
-                    name="timeFormat"
-                    value="24"
-                    data-pref="timeFormat"
-                  />24-hour</label
-                >
+          <div id="clock-settings">
+            <h3 class="sect-title">Time</h3>
+            <div class="group">
+              <div class="row">
+                <div class="seg" role="radiogroup" aria-label="Time format">
+                  <label
+                    ><input
+                      type="radio"
+                      name="timeFormat"
+                      value="12"
+                      data-pref="timeFormat"
+                    />12-hour</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="timeFormat"
+                      value="24"
+                      data-pref="timeFormat"
+                    />24-hour</label
+                  >
+                </div>
               </div>
+              <label class="row" data-needs="timeFormat12">
+                <span class="row-text">Show AM/PM</span>
+                <input class="switch" type="checkbox" role="switch" data-pref="showAmPm" />
+              </label>
+              <label class="row">
+                <span class="row-text">Show seconds</span>
+                <input class="switch" type="checkbox" role="switch" data-pref="showSeconds" />
+              </label>
+              <label class="row">
+                <span class="row-text">Pulse the separators</span>
+                <input class="switch" type="checkbox" role="switch" data-pref="flashSeparators" />
+              </label>
             </div>
-            <label class="row" data-needs="timeFormat12">
-              <span class="row-text">Show AM/PM</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="showAmPm" />
-            </label>
-            <label class="row">
-              <span class="row-text">Show seconds</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="showSeconds" />
-            </label>
-            <label class="row">
-              <span class="row-text">Pulse the separators</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="flashSeparators" />
-            </label>
-          </div>
 
-          <h3 class="sect-title">Date</h3>
-          <div class="group">
-            <div class="row row-stack">
-              <div class="seg" role="radiogroup" aria-label="Date format">
-                <label
-                  ><input
-                    type="radio"
-                    name="dateFormat"
-                    value="short"
-                    data-pref="dateFormat"
-                  />Short</label
-                >
-                <label
-                  ><input
-                    type="radio"
-                    name="dateFormat"
-                    value="long"
-                    data-pref="dateFormat"
-                  />Long</label
-                >
-                <label
-                  ><input
-                    type="radio"
-                    name="dateFormat"
-                    value="numeric"
-                    data-pref="dateFormat"
-                  />Numeric</label
-                >
+            <h3 class="sect-title">Date</h3>
+            <div class="group">
+              <div class="row row-stack">
+                <div class="seg" role="radiogroup" aria-label="Date format">
+                  <label
+                    ><input
+                      type="radio"
+                      name="dateFormat"
+                      value="short"
+                      data-pref="dateFormat"
+                    />Short</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="dateFormat"
+                      value="long"
+                      data-pref="dateFormat"
+                    />Long</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="dateFormat"
+                      value="numeric"
+                      data-pref="dateFormat"
+                    />Numeric</label
+                  >
+                </div>
+                <span class="row-sub" id="date-preview"></span>
               </div>
-              <span class="row-sub" id="date-preview"></span>
+              <label class="row">
+                <span class="row-text">Day of the week</span>
+                <input class="switch" type="checkbox" role="switch" data-pref="showWeekday" />
+              </label>
+              <label class="row">
+                <span class="row-text">Year</span>
+                <input class="switch" type="checkbox" role="switch" data-pref="showYear" />
+              </label>
+              <label class="row">
+                <span class="row-text">Leading zeros</span>
+                <input class="switch" type="checkbox" role="switch" data-pref="showLeadingZero" />
+              </label>
             </div>
-            <label class="row">
-              <span class="row-text">Day of the week</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="showWeekday" />
-            </label>
-            <label class="row">
-              <span class="row-text">Year</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="showYear" />
-            </label>
-            <label class="row">
-              <span class="row-text">Leading zeros</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="showLeadingZero" />
-            </label>
           </div>
         </section>
 
-        <!-- Search -->
-        <section role="tabpanel" data-panel="search" aria-label="Search" hidden>
-          <h3 class="sect-title">Behavior</h3>
-          <div class="group">
-            <label class="row">
-              <span class="row-text">
-                <span>Focus search on open</span>
-                <span class="row-sub">Start typing right away</span>
-              </span>
-              <input class="switch" type="checkbox" role="switch" data-pref="autofocusInput" />
-            </label>
-            <label class="row">
-              <span class="row-text">Open results in a new tab</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="openQueryNewTab" />
-            </label>
-          </div>
-
+        <!-- Engine -->
+        <section role="tabpanel" data-panel="engine" aria-label="Engine" hidden>
           <h3 class="sect-title">Engines</h3>
           <p class="sect-note">
             Choose one engine for <strong>Search</strong> and one for <strong>Ask</strong> (queries
@@ -2658,8 +2886,39 @@
           </p>
           <div class="group" id="engine-list"></div>
 
-          <h3 class="sect-title">Switching engines</h3>
+          <h3 class="sect-title">Behavior</h3>
           <div class="group">
+            <label class="row">
+              <span class="row-text">
+                <span>Focus input box on open</span>
+                <span class="row-sub">Start typing right away</span>
+              </span>
+              <input class="switch" type="checkbox" role="switch" data-pref="autofocusInput" />
+            </label>
+            <div class="row row-stack">
+              <div class="row-text">
+                <span>Action hint</span>
+                <span class="row-sub">How the input box shows what Enter will do</span>
+              </div>
+              <div class="seg" role="radiogroup" aria-label="Action hint">
+                <label
+                  ><input
+                    type="radio"
+                    name="actionHint"
+                    value="chip"
+                    data-pref="actionHint"
+                  />Button</label
+                >
+                <label
+                  ><input
+                    type="radio"
+                    name="actionHint"
+                    value="text"
+                    data-pref="actionHint"
+                  />Text</label
+                >
+              </div>
+            </div>
             <div class="row row-stack">
               <div class="row-text">
                 <span>Trigger key</span>
@@ -2705,6 +2964,10 @@
                 </select>
               </span>
             </div>
+            <label class="row">
+              <span class="row-text">Open results in a new tab</span>
+              <input class="switch" type="checkbox" role="switch" data-pref="openQueryNewTab" />
+            </label>
           </div>
         </section>
 
@@ -2732,38 +2995,14 @@
                 >
               </div>
             </div>
-            <label class="row" data-needs="showSpeedDial">
-              <span class="row-text">
-                <span>Themed icons</span>
-                <span class="row-sub">Tint site icons to match your colors</span>
-              </span>
-              <input class="switch" type="checkbox" role="switch" data-pref="themedIcons" />
-            </label>
-            <label class="row">
-              <span class="row-text">Open links in a new tab</span>
-              <input class="switch" type="checkbox" role="switch" data-pref="openLinkNewTab" />
-            </label>
           </div>
 
           <h3 class="sect-title" id="links-title">Links</h3>
           <p class="sect-note">The first 10 show on your startpage. Drag to reorder.</p>
           <div class="group" id="link-list"></div>
 
-          <h3 class="sect-title">Opening links</h3>
+          <h3 class="sect-title">Behavior</h3>
           <div class="group">
-            <div class="row">
-              <span class="row-text">
-                <span>Match by</span>
-                <span class="row-sub">What you can type to open a link</span>
-              </span>
-              <span class="select">
-                <select data-pref="linkMatchMode" aria-label="Link match mode">
-                  <option value="shortcut">Shortcut</option>
-                  <option value="shortcut_name">Shortcut or name</option>
-                  <option value="shortcut_name_url">Shortcut, name or URL</option>
-                </select>
-              </span>
-            </div>
             <div class="row">
               <span class="row-text">
                 <span>Hotkeys</span>
@@ -2774,6 +3013,19 @@
                   <option value="alt" data-mod-option>Alt + 0–9</option>
                   <option value="numeric">0–9 only</option>
                   <option value="disabled">Off</option>
+                </select>
+              </span>
+            </div>
+            <div class="row">
+              <span class="row-text">
+                <span>Match by</span>
+                <span class="row-sub">What you can type to open a link</span>
+              </span>
+              <span class="select">
+                <select data-pref="linkMatchMode" aria-label="Link match mode">
+                  <option value="shortcut">Shortcut</option>
+                  <option value="shortcut_name">Shortcut or name</option>
+                  <option value="shortcut_name_url">Shortcut, name or URL</option>
                 </select>
               </span>
             </div>
@@ -2791,6 +3043,10 @@
                 </select>
               </span>
             </div>
+            <label class="row">
+              <span class="row-text">Open links in a new tab</span>
+              <input class="switch" type="checkbox" role="switch" data-pref="openLinkNewTab" />
+            </label>
           </div>
         </section>
       </div>
@@ -2878,6 +3134,8 @@
     <input type="file" id="import-input" accept="application/json,.json" hidden />
     <div id="probe" hidden></div>
 
+    <!-- Shipped defaults: DEFAULT_PREFS -->
+    <script src="defaults.js"></script>
     <script>
       // --- Constants & Config ---
       const STORE_KEY = 'startpage';
@@ -2885,7 +3143,6 @@
       const COLOR_LIB_URL =
         'https://cdn.jsdelivr.net/npm/@material/material-color-utilities@0.4.0/+esm';
       const DISPLAY_LIMIT = 10;
-      const DEFAULT_SEED = '#2563eb';
       const IS_MAC = /mac|iphone|ipad/i.test(
         navigator.userAgentData?.platform || navigator.platform || '',
       );
@@ -2893,55 +3150,20 @@
       const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
       const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
 
-      const DEFAULT_ENGINES = [
-        { name: 'Google', shortcut: 'g', url: 'https://www.google.com/search?q=%s' },
-        { name: 'DuckDuckGo', shortcut: 'ddg', url: 'https://duckduckgo.com/?q=%s' },
-        { name: 'Bing', shortcut: 'b', url: 'https://www.bing.com/search?q=%s' },
-        { name: 'ChatGPT', shortcut: 'ai', url: 'https://chatgpt.com/?q=%s' },
-      ];
-
-      const DEFAULT_PREFS = {
-        theme: 'auto',
-        seedColor: DEFAULT_SEED,
-        schemeVariant: 'tonal',
-        username: '',
-        enableGreetings: true,
-        dateFormat: 'short',
-        showWeekday: true,
-        showYear: false,
-        showLeadingZero: false,
-        timeFormat: '12',
-        showAmPm: true,
-        showSeconds: false,
-        flashSeparators: false,
-        autofocusInput: false,
-        openQueryNewTab: false,
-        engines: DEFAULT_ENGINES,
-        engineDefaultSearch: 'Google',
-        engineDefaultAsk: 'ChatGPT',
-        engineTriggerKey: 'both',
-        engineMatchMode: 'shortcut',
-        showSpeedDial: true,
-        linkLayout: 'list',
-        themedIcons: false,
-        openLinkNewTab: false,
-        links: [],
-        linkMatchMode: 'shortcut',
-        linkHotkeyMode: 'alt',
-        linkAutoOpen: 'disabled',
-      };
-
       const MATCH_MODES = ['shortcut', 'shortcut_name', 'shortcut_name_url'];
       const ENUMS = {
         theme: ['auto', 'light', 'dark'],
         schemeVariant: ['tonal', 'vibrant', 'expressive', 'neutral', 'mono'],
-        dateFormat: ['short', 'long', 'numeric'],
+        headerStyle: ['clock', 'title', 'illustration'],
+        messageType: ['greeting', 'custom'],
         timeFormat: ['12', '24'],
+        dateFormat: ['short', 'long', 'numeric'],
+        actionHint: ['chip', 'text'],
         engineTriggerKey: ['both', 'space', 'tab'],
         engineMatchMode: MATCH_MODES,
         linkLayout: ['list', 'grid'],
-        linkMatchMode: MATCH_MODES,
         linkHotkeyMode: ['alt', 'numeric', 'disabled'],
+        linkMatchMode: MATCH_MODES,
         linkAutoOpen: ['disabled', 'immediate', 'delay_1s', 'delay_2s'],
       };
 
@@ -3017,6 +3239,8 @@
       let snackbarTimer = null;
       let lastClock = '';
       let lastLeadKey = '';
+      let inputHeight = 0; // the search field's height at rest, to animate from when it changes
+      let inputSizing = null; // the running height animation
       let editing = null; // { kind: 'link' | 'engine', index: number | null }
       let colorLib = null; // promise for the lazily imported color utilities
       let ignorePopstate = 0;
@@ -3026,12 +3250,22 @@
       const els = {
         date: document.getElementById('date'),
         time: document.getElementById('time'),
-        greeting: document.getElementById('greeting'),
+        message: document.getElementById('message'),
+        heroClock: document.getElementById('hero-clock'),
+        heroTitle: document.getElementById('hero-title'),
+        heroArt: document.getElementById('hero-art'),
+        clockSettings: document.getElementById('clock-settings'),
+        messageNameRow: document.getElementById('message-name-row'),
+        messageContentRow: document.getElementById('message-content-row'),
         searchForm: document.getElementById('search-form'),
         searchBox: document.getElementById('search-box'),
         searchLead: document.getElementById('search-lead'),
         q: document.getElementById('q'),
         searchHint: document.getElementById('search-hint'),
+        searchField: document.getElementById('search-field'),
+        searchMirror: document.getElementById('search-mirror'),
+        searchEcho: document.getElementById('search-echo'),
+        searchSuffix: document.getElementById('search-suffix'),
         searchChip: document.getElementById('search-chip'),
         searchAction: document.getElementById('search-action'),
         suggest: document.getElementById('suggest'),
@@ -3077,7 +3311,6 @@
         // A reload while a dialog was open leaves its history entry behind.
         if (history.state?.dialog) history.replaceState(null, '');
 
-        renderHelpHotkeys();
         document
           .querySelectorAll('[data-mod-hold]')
           .forEach((el) => (el.textContent = MOD.replace('+', '')));
@@ -3088,9 +3321,8 @@
 
         applyTheme();
         applyScheme();
+        refreshAll();
         tick();
-        renderDial();
-        updateSearch();
         bindEvents();
 
         if (prefs.autofocusInput) els.q.focus();
@@ -3102,16 +3334,30 @@
         bindSheet(els.help, () => closeDialog(els.help));
         bindSheet(els.about, () => closeDialog(els.about));
         // Search
-        els.q.addEventListener('input', updateSearch);
+        els.q.addEventListener('input', () => {
+          // A query is one line: pasted line breaks become spaces.
+          if (els.q.value.includes('\n')) els.q.value = els.q.value.replace(/\s*\n\s*/g, ' ');
+          updateSearch();
+        });
         els.searchChip.addEventListener('pointerenter', (e) => followHover(e, true));
         els.searchChip.addEventListener('pointermove', (e) => followHover(e));
         els.q.addEventListener('keydown', handleSearchKeydown);
+        // While the field grows to fit a new line, the browser scrolls it to keep the cursor in
+        // view, which slides the text up and back. Hold it still when the text will fit anyway.
+        els.searchField.addEventListener('scroll', () => {
+          if (inputSizing?.playState === 'running' && els.searchField.scrollHeight <= inputHeight)
+            els.searchField.scrollTop = 0;
+        });
         els.q.addEventListener('focus', () => {
           suggestDismissed = false;
           renderSearch();
         });
         els.q.addEventListener('blur', () => {
           cancelAutoOpen();
+          // Fold at once, from the first line, not when the deferred render gets to it.
+          els.searchField.scrollTop = 0;
+          renderSearchMirror();
+          animateInputHeight();
           setTimeout(renderSearch, 0);
         });
         els.searchForm.addEventListener('submit', (e) => {
@@ -3119,6 +3365,9 @@
           runOption(options[activeOption]);
         });
         els.suggest.addEventListener('pointerdown', (e) => e.preventDefault());
+        // Keep focus in the field while pressing the action button: losing it would fold a long
+        // query to one line and move the button out from under the pointer before the click.
+        els.searchChip.addEventListener('pointerdown', (e) => e.preventDefault());
         els.suggest.addEventListener('click', (e) => {
           const opt = e.target.closest('.opt');
           if (opt) runOption(options[Number(opt.dataset.i)]);
@@ -3258,6 +3507,10 @@
           if (!engine) return;
           e.preventDefault();
           lockEngine(engine, word);
+        } else if (e.key === 'Enter' && !e.isComposing) {
+          // A textarea doesn't submit its form on Enter the way an input does.
+          e.preventDefault();
+          els.searchForm.requestSubmit();
         } else if (e.key === 'Escape') {
           // One step back per press, like a standard combobox: close the suggestions (stopping a
           // pending auto-open), then clear the text, then leave the field.
@@ -3355,27 +3608,7 @@
       // Preferences ------------------------------------------------------------
 
       function loadPrefs() {
-        if (storageGet(STORE_KEY) !== null) return sanitizePrefs(readJson(STORE_KEY));
-        // First run on this version: carry over the old one-key-per-setting storage, if any.
-        const legacy = readLegacyPrefs();
-        const migrated = sanitizePrefs(legacy);
-        if (legacy) writeJson(STORE_KEY, migrated);
-        return migrated;
-      }
-
-      // Earlier releases stored each setting under its own localStorage key, as strings.
-      // The old keys are left in place; only the new key is read from now on.
-      function readLegacyPrefs() {
-        const out = {};
-        let found = false;
-        for (const [key, fallback] of Object.entries(DEFAULT_PREFS)) {
-          const raw = storageGet(key);
-          if (raw === null) continue;
-          found = true;
-          if (Array.isArray(fallback)) out[key] = parseJson(raw);
-          else out[key] = typeof fallback === 'boolean' ? raw === 'true' : raw;
-        }
-        return found ? out : null;
+        return sanitizePrefs(readJson(STORE_KEY));
       }
 
       // Accepts anything (storage or an imported file) and returns a complete, valid prefs object.
@@ -3390,8 +3623,8 @@
             if (!ENUMS[key] || ENUMS[key].includes(value)) out[key] = value;
           }
         }
-        if (!/^#[0-9a-f]{6}$/i.test(out.seedColor)) out.seedColor = DEFAULT_SEED;
-        if (!out.engines.length) out.engines = structuredClone(DEFAULT_ENGINES);
+        if (!/^#[0-9a-f]{6}$/i.test(out.seedColor)) out.seedColor = DEFAULT_PREFS.seedColor;
+        if (!out.engines.length) out.engines = structuredClone(DEFAULT_PREFS.engines);
         return out;
       }
 
@@ -3451,6 +3684,8 @@
       }
 
       function refreshAll() {
+        document.body.classList.toggle('themed', prefs.themedIcons);
+        renderHeader();
         lastClock = '';
         renderClock();
         renderDial();
@@ -3516,7 +3751,7 @@
       // on the next visit by the inline script in <head>.
       async function applyScheme(animate = false) {
         const key = `${prefs.seedColor}|${prefs.schemeVariant}`;
-        if (key === `${DEFAULT_SEED}|tonal`) {
+        if (key === `${DEFAULT_PREFS.seedColor}|tonal`) {
           storageRemove(SCHEME_KEY);
           return withViewTransition(() => setSchemeCss(''), animate);
         }
@@ -3964,11 +4199,21 @@
         tickTimer = setTimeout(tick, 1000 - (Date.now() % 1000) + 10);
       }
 
+      // Shows the one header that headerStyle picks. The illustration is an SVG, which has no
+      // hidden property, so all three go through the attribute.
+      function renderHeader() {
+        const styles = { clock: els.heroClock, title: els.heroTitle, illustration: els.heroArt };
+        for (const [style, el] of Object.entries(styles))
+          el.toggleAttribute('hidden', style !== prefs.headerStyle);
+      }
+
+      // Runs every second for all header styles: the message under the header depends on the
+      // time of day too.
       function renderClock() {
         const now = new Date();
         els.date.textContent = formatDate(now, prefs);
         renderTime(now);
-        renderGreeting(now);
+        renderMessage(now);
         if (els.settings.open) els.datePreview.textContent = formatDate(now, prefs);
       }
 
@@ -4018,20 +4263,24 @@
         els.time.querySelector('.suffix').textContent = suffix;
       }
 
-      function renderGreeting(now) {
-        els.greeting.hidden = !prefs.enableGreetings;
-        if (!prefs.enableGreetings) return;
-        const hour = now.getHours();
-        const word = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-        const name = prefs.username.trim();
-        els.greeting.textContent = name ? `${word}, ${name}` : word;
+      // The line under the header: a greeting for the time of day, or the user's own message.
+      function renderMessage(now) {
+        let text = prefs.messageContent.trim();
+        if (prefs.messageType === 'greeting') {
+          const hour = now.getHours();
+          const word = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+          const name = prefs.username.trim();
+          text = name ? `${word}, ${name}` : word;
+        }
+        els.message.hidden = !prefs.enableMessage || !text;
+        els.message.textContent = text;
       }
 
       function renderDial() {
         const links = prefs.links.slice(0, DISPLAY_LIMIT);
         els.dial.hidden = !prefs.showSpeedDial;
         if (!prefs.showSpeedDial) return;
-        els.dial.className = `dial ${prefs.linkLayout}${prefs.themedIcons ? ' themed' : ''}`;
+        els.dial.className = `dial ${prefs.linkLayout}`;
         if (!links.length) {
           els.dial.innerHTML = `<button class="btn btn-tonal state dial-empty" type="button" data-add-first><span class="icon">add</span>Add a link</button>`;
           return;
@@ -4063,7 +4312,8 @@
         const open = focused && !suggestDismissed && options.length > 1;
 
         els.searchHint.hidden = !!raw || !matchMedia('(hover: hover) and (pointer: fine)').matches;
-        els.searchChip.hidden = !selected;
+        els.searchChip.hidden = !selected || prefs.actionHint === 'text';
+        renderSearchMirror();
         if (selected) {
           els.searchChip.dataset.kind = selected.kind;
           els.searchChip.innerHTML = chipHtml(selected);
@@ -4078,6 +4328,31 @@
         } else els.suggest.innerHTML = open ? options.map(optionHtml).join('') : '';
         if (open) els.q.setAttribute('aria-activedescendant', `opt-${activeOption}`);
         else els.q.removeAttribute('aria-activedescendant');
+        animateInputHeight();
+      }
+
+      // Eases the field to its new height when a long query wraps, folds on blur or unfolds on
+      // focus. CSS can't transition between two automatic heights, so the change is measured.
+      // The curve starts fast and has no overshoot: a slow start would crawl when key repeat
+      // retargets it every few milliseconds, and a spring would dip the field under one line.
+      function animateInputHeight() {
+        const running = inputSizing?.playState === 'running';
+        const from = running ? els.searchField.offsetHeight : inputHeight;
+        const elapsed = running ? inputSizing.currentTime : 0;
+        const keyframes = inputSizing?.effect.getKeyframes();
+        // The height at rest can only be read with the animation off.
+        inputSizing?.cancel();
+        const to = els.searchField.offsetHeight;
+        const retarget = to !== inputHeight;
+        inputHeight = to;
+        inputSizing = null;
+        if (!from || from === to || REDUCED_MOTION.matches) return;
+        inputSizing = els.searchField.animate(
+          retarget || !running ? [{ height: `${from}px` }, { height: `${to}px` }] : keyframes,
+          { duration: 280, easing: 'cubic-bezier(0.05, 0.7, 0.1, 1)' },
+        );
+        // Same target as before: carry on from where it was, so typing doesn't restart it.
+        if (!retarget && running) inputSizing.currentTime = elapsed;
       }
 
       function setActiveOption(i) {
@@ -4091,7 +4366,9 @@
       function renderSearchLead(option, moved = false) {
         let key = 'search';
         let html = icon('search');
-        const site = option?.kind === 'link' ? option.link : option?.engine;
+        const site = { link: option?.link, engine: option?.engine, lock: option?.engine }[
+          option?.kind
+        ];
         if (option?.kind === 'ask') [key, html] = ['ask', icon('auto_awesome')];
         else if (site) [key, html] = [hostOf(site.url) || site.name, favImg(site.url, site.name)];
         if (key === lastLeadKey) return;
@@ -4110,6 +4387,39 @@
         );
       }
 
+      // The copy of the query under the textarea. Folded, it is what shows, so a long query ends
+      // in an ellipsis. With the text action hint it also carries the action, "cats — Search" in
+      // place of the button: on the query's last line, or on a line of its own when there is no
+      // room left there, which makes the field one line taller.
+      function renderSearchMirror() {
+        const option = prefs.actionHint === 'text' ? options[activeOption] : null;
+        els.searchMirror.hidden = !els.q.value;
+        els.searchEcho.textContent = els.q.value;
+        els.searchSuffix.hidden = !option;
+        if (!option) return;
+        const name = option.link?.name ?? option.engine?.name;
+        const action = {
+          search: 'Search',
+          ask: 'Ask',
+          engine: `Search with ${name}`,
+          lock: `Search with ${name}`,
+          link: `Open ${name}`,
+        }[option.kind];
+        // Measure it inline first, then pin the outcome: without its leading space it could
+        // squeeze back onto the last line while the field still held a line open for it.
+        els.searchSuffix.classList.remove('own-line');
+        els.searchSuffix.textContent = ` — ${action}`;
+        const lines = els.searchEcho.getClientRects();
+        const lastLine = lines[lines.length - 1];
+        const wrapped =
+          !!lastLine && els.searchSuffix.getBoundingClientRect().top >= lastLine.bottom;
+        if (wrapped) els.searchSuffix.textContent = `— ${action}`;
+        els.searchSuffix.classList.toggle('own-line', wrapped);
+        // Typing at the end of a query that scrolls: keep the action's line in view too.
+        if (wrapped && els.q.selectionEnd === els.q.value.length)
+          els.searchField.scrollTop = els.searchField.scrollHeight;
+      }
+
       function chipHtml(option) {
         const label = {
           search: [icon('search'), 'Search'],
@@ -4118,19 +4428,19 @@
           lock: [icon('search'), option.engine?.name],
           link: [icon('arrow_outward'), option.link?.name],
         }[option.kind];
-        return `${label[0]}<span>${esc(label[1])}</span>`;
+        return `<span>${esc(label[1])}</span>${label[0]}`;
       }
 
       function optionHtml(option, i) {
         let lead;
         let title;
+        let badge = '';
         let sub;
         if (option.kind === 'link') {
           lead = favImg(option.link.url, option.link.name);
           title = option.link.name;
-          sub = option.link.shortcut
-            ? `${hostOf(option.link.url)} · ${option.link.shortcut}`
-            : hostOf(option.link.url);
+          if (option.link.shortcut) badge = `<kbd>${esc(option.link.shortcut)}</kbd>`;
+          sub = hostOf(option.link.url);
         } else if (option.kind === 'lock') {
           const keys = [triggerKeys().tab && 'Tab', triggerKeys().space && 'Space']
             .filter(Boolean)
@@ -4150,7 +4460,7 @@
         }
         return `<li class="opt" id="opt-${i}" role="option" data-i="${i}" aria-selected="${i === activeOption}">
           <span class="opt-lead">${lead}</span>
-          <span class="opt-text"><span class="opt-title">${esc(title)}</span><span class="opt-sub">${esc(sub)}</span></span>
+          <span class="opt-text"><span class="opt-title"><span>${esc(title)}</span>${badge}</span><span class="opt-sub">${esc(sub)}</span></span>
           <span class="icon opt-enter" aria-hidden="true">keyboard_return</span></li>`;
       }
 
@@ -4163,7 +4473,7 @@
           else if (el !== document.activeElement) el.value = value;
         }
         const needs = {
-          enableGreetings: prefs.enableGreetings,
+          enableMessage: prefs.enableMessage,
           timeFormat12: prefs.timeFormat === '12',
           showSpeedDial: prefs.showSpeedDial,
         };
@@ -4172,6 +4482,9 @@
           row.classList.toggle('disabled', !on);
           row.querySelectorAll('input').forEach((input) => (input.disabled = !on));
         });
+        els.clockSettings.hidden = prefs.headerStyle !== 'clock';
+        els.messageNameRow.hidden = prefs.messageType !== 'greeting';
+        els.messageContentRow.hidden = prefs.messageType !== 'custom';
         const custom = !SEEDS.some((s) => s.hex === prefs.seedColor);
         const customSwatch = els.swatches.querySelector('.custom');
         customSwatch.classList.toggle('checked', custom);
