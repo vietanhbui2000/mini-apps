@@ -339,7 +339,7 @@ Copy these from an app that already uses them; class names are shared across app
 - **Do** make `/` focus the app's main input (search, link field), and let Esc step back out one layer per press, as a standard combobox does: close suggestions (and stop a pending auto-open), clear the text, then leave the field. Typing or an arrow key brings the suggestions back. Studio apps whose fields are settings, like the QR generator, don't need `/`. **Don't** blur on Backspace, and **don't** take over Space or Enter outside fields: a focused button must keep its native press.
 - **Do** escape any user text before putting it in `innerHTML`.
 - **Do** give every icon-only button an `aria-label` and a `title`.
-- **Do** use `@media (hover: hover)` for hover-only styling, so touch devices never get sticky hover.
+- **Do** use `@media (hover: hover) and (pointer: fine)` for hover-only styling, so touch devices never get sticky hover. Plain `(hover: hover)` isn't enough: some phones (Samsung, for its pen) report that they can hover. For touch-only rules use `@media (pointer: coarse)`, not `(hover: none)`, for the same reason.
 - **Don't** use more than one filled `primary` button in a view.
 - **Don't** add decorative motion that isn't tied to an interaction or a state change.
 - **Don't** bring back Tailwind, Lucide or Geist. They belonged to the legacy design.
