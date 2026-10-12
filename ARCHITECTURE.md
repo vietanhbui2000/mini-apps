@@ -58,6 +58,8 @@ mini-apps/
     │                          # in its primary-container colors, light and dark
     ├── manifest.json          # PWA manifest (optional)
     ├── widget.html            # Other pages (optional), like Widget Maker's embeddable widget
+    ├── defaults.js            # Shipped defaults (optional), like the startpage's preferences and
+    │                          # engines, loaded by a script tag before the main script
     └── icons, assets…         # Other assets (optional)
 ```
 

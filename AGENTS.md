@@ -4,7 +4,7 @@ This workspace contains a collection of independent, client-side, zero-build min
 
 ## Architecture & Layout
 - **Standalone Folders:** Each app lives in its own top-level directory (e.g., `2fa-auth`, `blank-page`, `qr-code-gen`).
-- **Single Files:** Each app is one `index.html` holding its HTML, CSS and JS.
+- **Single Files:** Each app is one `index.html` holding its HTML, CSS and JS. Exception: the startpage keeps its shipped defaults (preferences and engines) in `defaults.js`, so they can be edited without touching the app.
 - **Zero-Build Stack:** Vanilla HTML/CSS/JS with Material 3 tokens as CSS custom properties, Google Sans Flex, and Material Symbols Rounded. No bundlers, frameworks or build steps.
 - **Shared Origin:** All apps deploy to one origin and share one `localStorage`. Store an app's data under its own key (`localStorage['<app-name>']`) and never call `localStorage.clear()`.
 - **Migration Status:** Every app uses the Material 3 Expressive system. Don't bring back the legacy Tailwind/Lucide design. References: the startpage for the full component set, 2FA Authenticator for list apps, macOS Icon Generator for preview-and-settings tools.
