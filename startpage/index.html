@@ -877,14 +877,24 @@
         color: var(--on-secondary);
       }
 
+      /* Closing keeps the list in place so the box shrinks over it, the reverse of opening. The
+         closed list stays in the page but is hidden once the box has shut, and can't be clicked
+         on its way out. */
       .suggest-wrap {
         display: grid;
         grid-template-rows: 0fr;
-        transition: grid-template-rows var(--spring-ms) var(--spring);
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          grid-template-rows var(--spring-ms) var(--spring),
+          visibility 0s var(--spring-ms);
       }
 
       .search-box.open .suggest-wrap {
         grid-template-rows: 1fr;
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
       }
 
       .suggest {
@@ -899,6 +909,14 @@
         height: 1px;
         margin-bottom: 8px;
         background: var(--outline-variant);
+        opacity: 0;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      /* The separator fades out ahead of the closing box: at full strength it would cut across
+         the rounded corners as they reach it. */
+      .search-box.open .suggest::before {
+        opacity: 1;
       }
 
       .suggest:not(:empty)::after {
@@ -1243,6 +1261,18 @@
         border-radius: var(--shape-full);
         background: var(--surface-container-high);
         box-shadow: var(--elevation-2);
+        transition: opacity var(--spring-ms) var(--ease-effects);
+      }
+
+      /* Steps back with the speed dial while the search box has focus. */
+      body:has(.search-input:focus) .toolbar {
+        opacity: 0.38;
+      }
+
+      @media (hover: hover) {
+        body:has(.search-input:focus) .toolbar:hover {
+          opacity: 1;
+        }
       }
 
       /* On wide screens the page never reaches the corner, so the toolbar can stay bare. */
@@ -4325,7 +4355,7 @@
         if (moved && open) {
           for (const li of els.suggest.children)
             li.setAttribute('aria-selected', String(Number(li.dataset.i) === activeOption));
-        } else els.suggest.innerHTML = open ? options.map(optionHtml).join('') : '';
+        } else if (open) els.suggest.innerHTML = options.map(optionHtml).join('');
         if (open) els.q.setAttribute('aria-activedescendant', `opt-${activeOption}`);
         else els.q.removeAttribute('aria-activedescendant');
         animateInputHeight();
