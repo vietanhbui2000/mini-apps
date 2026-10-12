@@ -2125,7 +2125,8 @@
         --field-bg: var(--surface-container-high);
       }
 
-      .field + .field {
+      .field + .field,
+      .field-support + .field {
         margin-top: 16px;
       }
 
@@ -3179,6 +3180,11 @@
             <span class="field-label" id="ed-url-label">URL</span>
           </label>
           <p class="field-support" id="ed-support"></p>
+          <label class="field" id="ed-action-field">
+            <input id="ed-action" type="text" placeholder=" " />
+            <span class="field-label">Action (optional)</span>
+          </label>
+          <p class="field-support" id="ed-action-support"></p>
         </div>
         <div class="dialog-actions">
           <button class="btn btn-text btn-danger state" id="ed-delete" type="button">Delete</button>
@@ -3388,6 +3394,8 @@
         editorTitle: document.getElementById('editor-title'),
         edName: document.getElementById('ed-name'),
         edShortcut: document.getElementById('ed-shortcut'),
+        edAction: document.getElementById('ed-action'),
+        edActionSupport: document.getElementById('ed-action-support'),
         edUrl: document.getElementById('ed-url'),
         edUrlLabel: document.getElementById('ed-url-label'),
         edSupport: document.getElementById('ed-support'),
@@ -3733,6 +3741,7 @@
           name: String(entry.name).trim(),
           shortcut: String(entry.shortcut ?? '').trim(),
           url: formatUrl(String(entry.url)),
+          action: String(entry.action ?? '').trim(),
         };
       }
 
@@ -4118,17 +4127,19 @@
       function openEditor(kind, index) {
         editing = { kind, index };
         const item = index === null ? null : listOf(kind)[index];
-        const noun = kind === 'link' ? 'link' : 'search engine';
+        const noun = kind === 'link' ? 'link' : 'engine';
         els.editorTitle.textContent = `${item ? 'Edit' : 'Add'} ${noun}`;
         els.edName.value = item?.name ?? '';
         els.edShortcut.value = item?.shortcut ?? '';
         els.edUrl.value = item?.url ?? '';
-        els.edUrlLabel.textContent = kind === 'link' ? 'URL' : 'Search URL';
+        els.edAction.value = item?.action ?? '';
+        els.edUrlLabel.textContent = kind === 'link' ? 'URL' : 'Query URL';
         els.edSupport.textContent =
           kind === 'link'
             ? 'For example youtube.com'
-            : 'Use %s where the search term goes, for example google.com/search?q=%s';
+            : 'Use %s where the query goes, for example google.com/search?q=%s';
         els.edSupport.classList.remove('error');
+        els.edActionSupport.textContent = `Shown in place of “${kind === 'link' ? 'Open' : 'Search with'} …”`;
         els.edDelete.hidden = !item || (kind === 'engine' && prefs.engines.length < 2);
         els.editorForm.querySelectorAll('.field').forEach((f) => f.classList.remove('invalid'));
         openDialog(els.editor);
@@ -4140,6 +4151,7 @@
         const list = listOf(kind);
         const name = els.edName.value.trim();
         const shortcut = els.edShortcut.value.trim();
+        const action = els.edAction.value.trim();
         const rawUrl = els.edUrl.value.trim();
         const others = list.filter((_, i) => i !== index);
 
@@ -4158,7 +4170,7 @@
         if (!rawUrl || !isHttpUrl(url.replaceAll('%s', 'x')))
           return showFieldError(els.edUrl, 'Enter a valid URL');
 
-        const entry = { name, shortcut, url };
+        const entry = { name, shortcut, url, action };
         if (index === null) list.push(entry);
         else {
           // Defaults reference engines by name, so follow renames.
@@ -4493,14 +4505,7 @@
         els.searchEcho.textContent = els.q.value;
         els.searchSuffix.hidden = !option;
         if (!option) return;
-        const name = option.link?.name ?? option.engine?.name;
-        const action = {
-          search: 'Search',
-          ask: 'Ask',
-          engine: `Search with ${name}`,
-          lock: `Search with ${name}`,
-          link: `Open ${name}`,
-        }[option.kind];
+        const action = { search: 'Search', ask: 'Ask' }[option.kind] ?? actionLabel(option);
         // Measure it inline first, then pin the outcome: without its leading space it could
         // squeeze back onto the last line while the field still held a line open for it.
         els.searchSuffix.classList.remove('own-line');
@@ -4517,14 +4522,23 @@
       }
 
       function chipHtml(option) {
+        const entry = option.link ?? option.engine;
         const label = {
           search: [icon('search'), 'Search'],
           ask: [icon('auto_awesome'), 'Ask'],
-          engine: [icon('search'), option.engine?.name],
-          lock: [icon('search'), option.engine?.name],
-          link: [icon('arrow_outward'), option.link?.name],
+          engine: [icon('search'), entry.action || entry.name],
+          lock: [icon('search'), entry.action || entry.name],
+          link: [icon('arrow_outward'), entry.action || entry.name],
         }[option.kind];
         return `<span>${esc(label[1])}</span>${label[0]}`;
+      }
+
+      // What picking an option does, in words. An entry's own action text replaces the default.
+      function actionLabel(option) {
+        const entry = option.link ?? option.engine;
+        if (entry.action) return entry.action;
+        if (option.kind === 'link') return `Open ${entry.name}`;
+        return `${option.kind === 'ask' ? 'Ask' : 'Search with'} ${entry.name}`;
       }
 
       function optionHtml(option, i) {
@@ -4542,7 +4556,7 @@
             .filter(Boolean)
             .join(' or ');
           lead = favImg(option.engine.url, option.engine.name);
-          title = `Search with ${option.engine.name}`;
+          title = actionLabel(option);
           sub = `Press ${keys}`;
         } else {
           lead =
@@ -4552,7 +4566,7 @@
                 ? favImg(option.engine.url, option.engine.name)
                 : icon('search');
           title = option.term || option.engine.name;
-          sub = `${option.kind === 'ask' ? 'Ask' : 'Search with'} ${option.engine.name}`;
+          sub = actionLabel(option);
         }
         return `<li class="opt" id="opt-${i}" role="option" data-i="${i}" aria-selected="${i === activeOption}">
           <span class="opt-lead">${lead}</span>
@@ -4714,7 +4728,7 @@
         els.edSupport.textContent =
           editing?.kind === 'link'
             ? 'For example youtube.com'
-            : 'Use %s where the search term goes, for example google.com/search?q=%s';
+            : 'Use %s where the query goes, for example google.com/search?q=%s';
       }
 
       // Snackbars render inside the top dialog, since modal dialogs make everything else inert.

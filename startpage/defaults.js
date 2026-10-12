@@ -29,8 +29,8 @@ const DEFAULT_PREFS = {
 
   // Engine
   // %s in the URL is replaced by the query. A shortcut picks the engine from the search box
-  // ("gg cats"), so each one must be unique. engineDefaultSearch and engineDefaultAsk must match
-  // a name in this list.
+  // ("gg cats"), so each one must be unique. An optional action replaces "Search with <name>".
+  // engineDefaultSearch and engineDefaultAsk must match a name in this list.
   engines: [
     { name: 'Google', shortcut: 'gg', url: 'https://www.google.com/search?q=%s' },
     { name: 'Bing', shortcut: 'bg', url: 'https://www.bing.com/search?q=%s' },
