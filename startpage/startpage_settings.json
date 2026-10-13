@@ -1,0 +1,498 @@
+{
+  "theme": "auto",
+  "seedColor": "#2563eb",
+  "schemeVariant": "tonal",
+  "themedIcons": true,
+  "headerStyle": "clock",
+  "enableMessage": true,
+  "messageType": "greeting",
+  "username": "",
+  "messageContent": "",
+  "timeFormat": "24",
+  "showAmPm": true,
+  "showSeconds": false,
+  "flashSeparators": false,
+  "dateFormat": "short",
+  "showWeekday": true,
+  "showYear": false,
+  "showLeadingZero": false,
+  "engines": [
+    {
+      "name": "Google",
+      "shortcut": "gg",
+      "url": "https://www.google.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Bing",
+      "shortcut": "bg",
+      "url": "https://www.bing.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "DuckDuckGo",
+      "shortcut": "ddg",
+      "url": "https://duckduckgo.com/?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Perplexity",
+      "shortcut": "pplx",
+      "url": "https://www.perplexity.ai/?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Google AI Mode",
+      "shortcut": "ggai",
+      "url": "https://www.google.com/aimode?q=%s",
+      "action": "Ask Google AI Mode"
+    },
+    {
+      "name": "ChatGPT",
+      "shortcut": "gpt",
+      "url": "https://chatgpt.com/?prompt=%s",
+      "action": "Ask ChatGPT"
+    },
+    {
+      "name": "Claude",
+      "shortcut": "cla",
+      "url": "https://claude.ai/new?q=%s",
+      "action": "Ask Claude"
+    },
+    {
+      "name": "Gemini",
+      "shortcut": "gem",
+      "url": "https://gemini.google.com/app?q=%s",
+      "action": "Ask Gemini"
+    },
+    {
+      "name": "Google Images",
+      "shortcut": "ggi",
+      "url": "https://www.google.com/search?q=%s&tbm=isch",
+      "action": ""
+    },
+    {
+      "name": "Google Videos",
+      "shortcut": "ggv",
+      "url": "https://www.google.com/search?q=%s&udm=vids",
+      "action": ""
+    },
+    {
+      "name": "Google Shopping",
+      "shortcut": "ggs",
+      "url": "https://www.google.com/search?q=%s&udm=28",
+      "action": ""
+    },
+    {
+      "name": "Google Maps",
+      "shortcut": "ggm",
+      "url": "https://www.google.com/maps/search/%s",
+      "action": ""
+    },
+    {
+      "name": "Google Drive",
+      "shortcut": "ggd",
+      "url": "https://drive.google.com/drive/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Google Docs",
+      "shortcut": "doc+",
+      "url": "https://docs.google.com/document/create?title=%s",
+      "action": "New Google Doc w/ name"
+    },
+    {
+      "name": "Google Sheets",
+      "shortcut": "sheet+",
+      "url": "https://docs.google.com/spreadsheet/create?title=%s",
+      "action": "New Google Sheet w/ name"
+    },
+    {
+      "name": "Google Slides",
+      "shortcut": "slide+",
+      "url": "https://docs.google.com/presentation/create?title=%s",
+      "action": "New Google Slide w/ name"
+    },
+    {
+      "name": "Google Forms",
+      "shortcut": "form+",
+      "url": "https://docs.google.com/forms/create?title=%s",
+      "action": "New Google Form w/ name"
+    },
+    {
+      "name": "Facebook",
+      "shortcut": "fb",
+      "url": "https://www.facebook.com/search/top?q=%s",
+      "action": ""
+    },
+    {
+      "name": "X",
+      "shortcut": "x",
+      "url": "https://x.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Reddit",
+      "shortcut": "rd",
+      "url": "https://www.reddit.com/search/?q=%s",
+      "action": ""
+    },
+    {
+      "name": "YouTube",
+      "shortcut": "yt",
+      "url": "https://www.youtube.com/results?search_query=%s",
+      "action": ""
+    },
+    {
+      "name": "Twitch",
+      "shortcut": "tw",
+      "url": "https://www.twitch.tv/search?term=%s",
+      "action": ""
+    },
+    {
+      "name": "TikTok",
+      "shortcut": "tt",
+      "url": "https://www.tiktok.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Spotify",
+      "shortcut": "sp",
+      "url": "https://open.spotify.com/search/%s",
+      "action": ""
+    },
+    {
+      "name": "YouTube Music",
+      "shortcut": "ytm",
+      "url": "https://music.youtube.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Letterboxd",
+      "shortcut": "lttb",
+      "url": "https://letterboxd.com/search/%s/",
+      "action": ""
+    },
+    {
+      "name": "Trakt",
+      "shortcut": "trkt",
+      "url": "https://app.trakt.tv/search?m=media&q=%s",
+      "action": ""
+    },
+    {
+      "name": "Shopee",
+      "shortcut": "spe",
+      "url": "https://shopee.vn/search?keyword=%s",
+      "action": ""
+    },
+    {
+      "name": "Lazada",
+      "shortcut": "laz",
+      "url": "https://www.lazada.vn/?q=%s&catalog_redirect_tag=true",
+      "action": ""
+    },
+    {
+      "name": "GitHub",
+      "shortcut": "gh",
+      "url": "https://github.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Pinterest",
+      "shortcut": "pin",
+      "url": "https://www.pinterest.com/search/pins/?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Behance",
+      "shortcut": "bh",
+      "url": "https://www.behance.net/search/projects/%s",
+      "action": ""
+    },
+    {
+      "name": "花瓣网 (Huaban)",
+      "shortcut": "hb",
+      "url": "https://huaban.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Freepik",
+      "shortcut": "fp",
+      "url": "https://www.freepik.com/search?&query=%s",
+      "action": ""
+    },
+    {
+      "name": "Flaticon",
+      "shortcut": "flt",
+      "url": "https://www.flaticon.com/search?word=%s",
+      "action": ""
+    },
+    {
+      "name": "Unsplash",
+      "shortcut": "uns",
+      "url": "https://slidesgo.com/search?q=%s",
+      "action": ""
+    },
+    {
+      "name": "Shutterstock",
+      "shortcut": "stts",
+      "url": "https://www.shutterstock.com/search/%s",
+      "action": ""
+    },
+    {
+      "name": "17TRACK",
+      "shortcut": "17t",
+      "url": "https://t.17track.net/en#nums=%s",
+      "action": ""
+    },
+    {
+      "name": "Parcels",
+      "shortcut": "par",
+      "url": "https://parcelsapp.com/en/tracking/%s",
+      "action": ""
+    },
+    {
+      "name": "Shopee Express",
+      "shortcut": "spx",
+      "url": "https://spx.vn/track?%s",
+      "action": ""
+    },
+    {
+      "name": "Lazada Express (LEX)",
+      "shortcut": "lex",
+      "url": "https://logistics.lazada.vn/tracking?references=%s",
+      "action": ""
+    },
+    {
+      "name": "Giao Hàng Tiết Kiệm",
+      "shortcut": "ghtk",
+      "url": "https://i.ghtk.vn/%s",
+      "action": ""
+    },
+    {
+      "name": "Giao Hàng Nhanh",
+      "shortcut": "ghn",
+      "url": "https://donhang.ghn.vn/?order_code=%s",
+      "action": ""
+    },
+    {
+      "name": "Oxford Learner's Dictionaries",
+      "shortcut": "dic",
+      "url": "https://www.oxfordlearnersdictionaries.com/definition/english/%s?q=%s",
+      "action": ""
+    },
+    {
+      "name": "EN → VI",
+      "shortcut": "envi",
+      "url": "https://translate.google.com/?op=translate&sl=en&tl=vi&text=%s",
+      "action": "Translate 🇬🇧 → 🇻🇳"
+    },
+    {
+      "name": "VI → EN",
+      "shortcut": "vien",
+      "url": "https://translate.google.com/?op=translate&sl=vi&tl=en&text=%s",
+      "action": "Translate 🇻🇳 → 🇬🇧"
+    },
+    {
+      "name": "EN → CN",
+      "shortcut": "encn",
+      "url": "https://translate.google.com/?op=translate&sl=en&tl=zh-CN&text=%s",
+      "action": "Translate 🇬🇧 → 🇨🇳"
+    }
+  ],
+  "engineDefaultSearch": "Google",
+  "engineDefaultAsk": "Google AI Mode",
+  "autofocusInput": false,
+  "actionHint": "text",
+  "engineTriggerKey": "both",
+  "engineMatchMode": "shortcut_name_url",
+  "openQueryNewTab": false,
+  "showSpeedDial": true,
+  "linkLayout": "list",
+  "links": [
+    {
+      "name": "Facebook",
+      "shortcut": "fb",
+      "url": "https://www.facebook.com",
+      "action": ""
+    },
+    {
+      "name": "Instagram",
+      "shortcut": "ig",
+      "url": "https://www.instagram.com",
+      "action": ""
+    },
+    {
+      "name": "X",
+      "shortcut": "x",
+      "url": "https://x.com",
+      "action": ""
+    },
+    {
+      "name": "Reddit",
+      "shortcut": "rd",
+      "url": "https://www.reddit.com",
+      "action": ""
+    },
+    {
+      "name": "YouTube",
+      "shortcut": "yt",
+      "url": "https://www.youtube.com",
+      "action": ""
+    },
+    {
+      "name": "TikTok",
+      "shortcut": "tt",
+      "url": "https://www.tiktok.com",
+      "action": ""
+    },
+    {
+      "name": "ChatGPT",
+      "shortcut": "gpt",
+      "url": "https://chatgpt.com",
+      "action": ""
+    },
+    {
+      "name": "Claude",
+      "shortcut": "cla",
+      "url": "https://claude.ai",
+      "action": ""
+    },
+    {
+      "name": "Gemini",
+      "shortcut": "gem",
+      "url": "https://gemini.google.com",
+      "action": ""
+    },
+    {
+      "name": "Perplexity",
+      "shortcut": "pplx",
+      "url": "https://www.perplexity.ai",
+      "action": ""
+    },
+    {
+      "name": "Google Drive",
+      "shortcut": "ggd",
+      "url": "https://drive.google.com",
+      "action": ""
+    },
+    {
+      "name": "Google Docs",
+      "shortcut": "doc",
+      "url": "https://docs.google.com/document/",
+      "action": ""
+    },
+    {
+      "name": "Google Docs",
+      "shortcut": "doc+",
+      "url": "https://doc.new",
+      "action": "New Google Doc"
+    },
+    {
+      "name": "Google Sheets",
+      "shortcut": "sheet",
+      "url": "https://docs.google.com/spreadsheets/",
+      "action": ""
+    },
+    {
+      "name": "Google Sheets",
+      "shortcut": "sheet+",
+      "url": "https://sheet.new",
+      "action": "New Google Sheet"
+    },
+    {
+      "name": "Google Slides",
+      "shortcut": "slide",
+      "url": "https://docs.google.com/presentation/",
+      "action": ""
+    },
+    {
+      "name": "Google Slides",
+      "shortcut": "slide+",
+      "url": "https://slide.new",
+      "action": "New Google Slide"
+    },
+    {
+      "name": "Google Forms",
+      "shortcut": "form",
+      "url": "https://docs.google.com/forms/",
+      "action": ""
+    },
+    {
+      "name": "Google Forms",
+      "shortcut": "form+",
+      "url": "https://form.new",
+      "action": "New Google Form"
+    },
+    {
+      "name": "Google Meet",
+      "shortcut": "meet",
+      "url": "https://meet.google.com",
+      "action": ""
+    },
+    {
+      "name": "Google Meet",
+      "shortcut": "meet+",
+      "url": "https://meet.google.com/new",
+      "action": "New Google Meet"
+    },
+    {
+      "name": "Twitch",
+      "shortcut": "tw",
+      "url": "https://www.twitch.tv/search?term=%s",
+      "action": ""
+    },
+    {
+      "name": "Spotify",
+      "shortcut": "sp",
+      "url": "https://open.spotify.com",
+      "action": ""
+    },
+    {
+      "name": "YouTube Music",
+      "shortcut": "ytm",
+      "url": "https://music.youtube.com",
+      "action": ""
+    },
+    {
+      "name": "Letterboxd",
+      "shortcut": "lttb",
+      "url": "https://letterboxd.com",
+      "action": ""
+    },
+    {
+      "name": "Trakt",
+      "shortcut": "trkt",
+      "url": "https://app.trakt.tv",
+      "action": ""
+    },
+    {
+      "name": "GitHub",
+      "shortcut": "gh",
+      "url": "https://github.com",
+      "action": ""
+    },
+    {
+      "name": "Shopee",
+      "shortcut": "spe",
+      "url": "https://shopee.vn",
+      "action": ""
+    },
+    {
+      "name": "Lazada",
+      "shortcut": "laz",
+      "url": "https://www.lazada.vn",
+      "action": ""
+    },
+    {
+      "name": "Google Translate",
+      "shortcut": "ts",
+      "url": "https://translate.google.com",
+      "action": ""
+    }
+  ],
+  "linkHotkeyMode": "alt",
+  "linkMatchMode": "shortcut_name_url",
+  "linkAutoOpen": "disabled",
+  "openLinkNewTab": false
+}

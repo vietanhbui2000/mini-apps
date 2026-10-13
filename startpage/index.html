@@ -483,7 +483,7 @@
       /* The app icon's arcs, one palette color each, as tall as the clock's date and time so the
          message line fits under it. Each arc draws itself in when the illustration appears (page
          load, or picking it in Settings), outer arc first. The paths carry pathLength="1", so a
-         dash of 1 is the whole arc. */
+         dash of 1 is the whole arc. The gap of 2 keeps the next dash's round cap off the far end. */
       .hero-art {
         height: calc(28px + var(--hero-time));
         fill: none;
@@ -492,7 +492,7 @@
       }
 
       .hero-art path {
-        stroke-dasharray: 1;
+        stroke-dasharray: 1 2;
         animation: draw 900ms cubic-bezier(0.2, 0, 0, 1) both;
       }
 
@@ -2679,11 +2679,11 @@
           <span class="icon">more_vert</span>
         </button>
         <div class="menu" id="more-menu" popover>
-          <button class="menu-item state" id="export-btn" type="button">
-            <span class="icon">download</span>Export settings
-          </button>
           <button class="menu-item state" id="import-btn" type="button">
             <span class="icon">upload</span>Import settings
+          </button>
+          <button class="menu-item state" id="export-btn" type="button">
+            <span class="icon">download</span>Export settings
           </button>
           <button class="menu-item state" id="reset-btn" type="button">
             <span class="icon">restart_alt</span>Reset to defaults
@@ -3425,6 +3425,7 @@
         refreshAll();
         tick();
         bindEvents();
+        importWelcome();
 
         if (prefs.autofocusInput) els.q.focus();
       }
@@ -3821,6 +3822,21 @@
           snapshotAndReplace(sanitizePrefs(data), 'Settings imported');
         } catch (err) {
           showError("That file isn't a Startpage settings export");
+        }
+      }
+
+      // Opened with ?welcome: loads the shared settings file, so a new user starts set up.
+      async function importWelcome() {
+        const url = new URL(location.href);
+        if (!url.searchParams.has('welcome')) return;
+        url.searchParams.delete('welcome');
+        history.replaceState(history.state, '', url);
+        try {
+          const res = await fetch('startpage_settings.json');
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          snapshotAndReplace(sanitizePrefs(await res.json()), 'Settings imported');
+        } catch (err) {
+          showError("Couldn't load the welcome settings");
         }
       }
 
