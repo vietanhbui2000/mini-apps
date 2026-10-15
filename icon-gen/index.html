@@ -1797,6 +1797,13 @@
                 </span>
                 <input class="switch" type="checkbox" role="switch" id="shadow" checked />
               </label>
+              <label class="row">
+                <span class="row-text">
+                  <span>Edge light</span>
+                  <span class="row-sub">The glass rim on the squircle’s top and bottom edges</span>
+                </span>
+                <input class="switch" type="checkbox" role="switch" id="edge-light" checked />
+              </label>
             </div>
 
             <h2 class="sect-title">Background</h2>
@@ -1880,10 +1887,10 @@
                     min="0.1"
                     max="1"
                     step="0.05"
-                    value="0.6"
+                    value="0.65"
                     aria-label="Artwork size"
                   />
-                  <span class="slider-value" id="zoom-value">60%</span>
+                  <span class="slider-value" id="zoom-value">65%</span>
                 </div>
               </div>
               <label class="row" id="adapt-row">
@@ -1990,19 +1997,40 @@
           { typeId: 'ic09', size: 512 }, // 512x512
           { typeId: 'ic10', size: 1024 }, // 512x512@2x
         ],
-        squircleN: 2.4,
-        squircleCornerRatio: 0.261,
+        squircleN: 2.6,
+        squircleCornerRatio: 0.3225,
+        // Each hex is the folder's main color: the middle of its front panel. The Finder tag
+        // colors are measured from macOS 27 folders, in Finder's order; Default keeps the stock
+        // art untouched. Custom colors cover anything else.
         folderColors: [
           { id: 'default', label: 'Default', hex: '#339DE0' },
-          { id: 'green', label: 'Green', hex: '#18AB68' },
-          { id: 'lime', label: 'Lime', hex: '#3AAD4B' },
-          { id: 'yellow', label: 'Yellow', hex: '#CAA41B' },
-          { id: 'orange', label: 'Orange', hex: '#CD6F04' },
-          { id: 'red', label: 'Red', hex: '#CE2D24' },
-          { id: 'purple', label: 'Purple', hex: '#833F9D' },
-          { id: 'gray', label: 'Gray', hex: '#666666' },
-          { id: 'black', label: 'Black', hex: '#111111' },
+          { id: 'red', label: 'Red', hex: '#F73337' },
+          { id: 'orange', label: 'Orange', hex: '#F78A21' },
+          { id: 'yellow', label: 'Yellow', hex: '#F7C700' },
+          { id: 'green', label: 'Green', hex: '#2EC255' },
+          { id: 'blue', label: 'Blue', hex: '#0085F7' },
+          { id: 'purple', label: 'Purple', hex: '#C62ADA' },
+          { id: 'gray', label: 'Gray', hex: '#8B8B8F' },
         ],
+        // How macOS 27 shades a colored folder, fitted from all seven Finder tag colors. Keyed by
+        // the stock art's brightness (every 5 levels, 0-200), each pixel in linear light is
+        // a * mainColor + b: plain shading below the highlight, then a blend toward white.
+        // Brighter pixels (the paper in the filled folder) keep their stock color.
+        folderShade: {
+          step: 5,
+          a: [
+            0, 0, 0.008, 0.008, 0, 0, 0, 0, 0.065, 0.018, 0.036, 0.122, 0.159, 0.18, 0.207, 0.189,
+            0.221, 0.234, 0.249, 0.332, 0.257, 0.393, 0.457, 0.454, 0.493, 0.597, 0.642, 0.652,
+            0.731, 0.762, 0.81, 0.865, 0.916, 0.965, 1.008, 1.047, 1.025, 0.967, 0.923, 0.851,
+            0.791,
+          ],
+          b: [
+            0, 0, 0.002, 0.002, 0.016, 0.017, 0.023, 0.026, 0.002, 0.039, 0.039, 0, -0.006, -0.011,
+            -0.005, 0, 0.001, 0.002, -0.005, -0.004, 0.024, -0.002, -0.004, 0.008, 0, -0.003, -0.002,
+            -0.002, -0.002, -0.002, -0.001, -0.002, -0.001, 0, -0.001, 0, 0.043, 0.099, 0.141,
+            0.207, 0.263,
+          ],
+        },
         folderVariants: {
           empty: 'assets/empty.png',
           filled: 'assets/filled.png',
@@ -2030,6 +2058,7 @@
           manualBgEnabled: false,
           paddingEnabled: true,
           shadowEnabled: true,
+          edgeLightEnabled: true,
           fittingMode: 'cover',
           squircleEnabled: true,
           bgEnabled: false,
@@ -2048,7 +2077,7 @@
           artworkText: '',
           artworkTextCanvas: null,
           adaptColorEnabled: true,
-          zoom: 0.6,
+          zoom: 0.65,
           sizes: new Set(SIZES),
         },
       };
@@ -2075,6 +2104,7 @@
         squircle: document.getElementById('squircle'),
         padding: document.getElementById('padding'),
         shadow: document.getElementById('shadow'),
+        edgeLight: document.getElementById('edge-light'),
         bg: document.getElementById('bg'),
         bgSub: document.getElementById('bg-sub'),
         bgColorRow: document.getElementById('bg-color-row'),
@@ -2220,6 +2250,7 @@
         } else if (t === els.squircle) app.squircleEnabled = t.checked;
         else if (t === els.padding) app.paddingEnabled = t.checked;
         else if (t === els.shadow) app.shadowEnabled = t.checked;
+        else if (t === els.edgeLight) app.edgeLightEnabled = t.checked;
         else if (t === els.bg) app.manualBgEnabled = t.checked;
         else if (t.name === 'variant') {
           folder.variant = t.value;
@@ -2316,6 +2347,7 @@
           URL.revokeObjectURL(url);
           showError('That image couldn’t be opened');
         };
+        if (isSvg) vectorImages.add(img);
         img.onload = () => {
           // SVGs without width/height can report 0 in some browsers, which breaks the drawing math.
           if (!img.naturalWidth || !img.naturalHeight) return fail();
@@ -2333,10 +2365,11 @@
         img.src = url;
       }
 
+      // The folder's main color, or null for the untouched stock art.
       function folderColor(f = state.folder) {
-        return f.colorId === 'custom'
-          ? f.customColor
-          : CONFIG.folderColors.find((c) => c.id === f.colorId)?.hex || '#339DE0';
+        if (f.colorId === 'custom') return f.customColor;
+        if (f.colorId === 'default') return null;
+        return CONFIG.folderColors.find((c) => c.id === f.colorId)?.hex || null;
       }
 
       async function generateAndDownload() {
@@ -2384,6 +2417,7 @@
           size,
           a.paddingEnabled,
           a.shadowEnabled,
+          a.edgeLightEnabled,
           a.squircleEnabled,
           a.fittingMode,
           a.bgEnabled,
@@ -2723,6 +2757,7 @@
         if (imageCache[src]) return Promise.resolve(imageCache[src]);
         return new Promise((resolve, reject) => {
           const img = new Image();
+          if (src.endsWith('.svg')) vectorImages.add(img);
           img.onload = () => {
             imageCache[src] = img;
             resolve(img);
@@ -2740,22 +2775,49 @@
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       }
 
-      // Recolors the stock blue folder art; the default blue needs no tint.
-      function applyFolderTint(ctx, fImg, width, height, colorHex) {
-        if (!colorHex || colorHex.toUpperCase() === '#339DE0') return;
-        ctx.globalCompositeOperation = 'color';
-        ctx.fillStyle = colorHex;
-        ctx.fillRect(0, 0, width, height);
-        ctx.globalCompositeOperation = 'destination-in';
-        ctx.drawImage(fImg, 0, 0, width, height);
-        ctx.globalCompositeOperation = 'source-over';
+      // sRGB <-> linear light lookups for the folder recolor, which runs per pixel.
+      const SRGB_TO_LINEAR = Array.from({ length: 256 }, (_, v) => {
+        v /= 255;
+        return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      const LINEAR_TO_SRGB = Array.from({ length: 4097 }, (_, i) => {
+        const v = i / 4096;
+        return Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055));
+      });
+
+      // Recolors the stock blue folder art the way macOS shades its tag colors (see
+      // CONFIG.folderShade). A hue swap keeps the light-blue art's brightness, which washes
+      // out reds and purples; this rebuilds each pixel from the chosen main color instead.
+      function applyFolderTint(ctx, width, height, colorHex) {
+        if (!colorHex) return;
+        const n = parseInt(colorHex.slice(1), 16);
+        const main = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => SRGB_TO_LINEAR[v]);
+        const { step, a, b } = CONFIG.folderShade;
+        const maxKey = (a.length - 1) * step;
+        const image = ctx.getImageData(0, 0, width, height);
+        const d = image.data;
+        for (let i = 0; i < d.length; i += 4) {
+          if (!d[i + 3]) continue;
+          const key = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          if (key > maxKey) continue;
+          const f = key / step;
+          const j = Math.min(a.length - 2, Math.floor(f));
+          const w = f - j;
+          const ka = a[j] + (a[j + 1] - a[j]) * w;
+          const kb = b[j] + (b[j + 1] - b[j]) * w;
+          for (let c = 0; c < 3; c++) {
+            const lin = Math.min(1, Math.max(0, ka * main[c] + kb));
+            d[i + c] = LINEAR_TO_SRGB[Math.round(lin * 4096)];
+          }
+        }
+        ctx.putImageData(image, 0, 0);
       }
 
       // Icon rendering ------------------------------------------------------------------
 
       function pathSquircle(ctx, x, y, width, height) {
         const n = CONFIG.squircleN;
-        const fp = Math.round(Math.min(width, height) * CONFIG.squircleCornerRatio);
+        const fp = Math.min(width, height) * CONFIG.squircleCornerRatio;
         const steps = 64;
 
         function cornerInset(d) {
@@ -2801,10 +2863,101 @@
         ctx.closePath();
       }
 
-      function drawImageFormatted(ctx, img, dx, dy, dWidth, dHeight, fittingMode) {
-        // Big photos shrunk to 16px alias badly with the default quality.
+      // Lights the squircle's rim the way macOS 27 lights app icons. Fitted to the system's
+      // 1024px icons (824px body): two soft white bands on edges that face up, the same bands at
+      // 71% on edges that face down, and a faint dark inner shadow all around. Each band is the
+      // tile minus a copy shifted inward, so its strength follows how much an edge faces up or
+      // down and fades to nothing on the sides. Shapes are drawn off-canvas so only their blurred
+      // shadow lands, which keeps this working where canvas filters are missing.
+      function drawEdgeLight(ctx, x, y, w, h) {
+        const k = w / 824;
+        const { width, height } = ctx.canvas;
+        const off = width + height;
+        const layer = (cw, ch, draw) => {
+          const c = document.createElement('canvas');
+          c.width = cw;
+          c.height = ch;
+          draw(c.getContext('2d'));
+          return c;
+        };
+        const tile = layer(width, height, (c) => {
+          c.fillStyle = '#fff';
+          pathSquircle(c, x, y, w, h);
+          c.fill();
+        });
+        const band = (shift) =>
+          layer(width, height, (c) => {
+            c.drawImage(tile, 0, 0);
+            c.globalCompositeOperation = 'destination-out';
+            c.drawImage(tile, 0, shift);
+          });
+
+        const light = layer(width, height, (c) => {
+          c.globalCompositeOperation = 'lighter';
+          c.shadowOffsetY = off;
+          for (const [dir, strength] of [[1, 1], [-1, 0.71]]) {
+            for (const [depth, sigma, alpha] of [[1, 2, 0.8], [4, 5, 1]]) {
+              c.shadowColor = `rgba(255, 255, 255, ${alpha * strength})`;
+              c.shadowBlur = 2 * sigma * k;
+              c.drawImage(band(dir * depth * k), 0, -off);
+            }
+          }
+          // Keep the light on the artwork's own pixels, so transparent areas stay clear.
+          c.shadowColor = 'transparent';
+          c.globalCompositeOperation = 'destination-in';
+          c.drawImage(ctx.canvas, 0, 0);
+        });
+
+        // The area around the tile casts the dark inner shadow. It gets a margin so tiles that
+        // touch the canvas edge (padding off) still have something outside them to cast it.
+        const m = Math.ceil(20 * k) + 2;
+        const outside = layer(width + 2 * m, height + 2 * m, (c) => {
+          c.fillRect(0, 0, c.canvas.width, c.canvas.height);
+          c.globalCompositeOperation = 'destination-out';
+          c.drawImage(tile, m, m);
+        });
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
+        ctx.shadowBlur = 2 * 5 * k;
+        ctx.shadowOffsetY = off;
+        ctx.drawImage(outside, -m, -m - off);
+        ctx.shadowColor = 'transparent';
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.drawImage(light, 0, 0);
+        ctx.restore();
+      }
+
+      // Images Chrome redraws from vectors at any size (SVG files); they skip the stepped downscale.
+      const vectorImages = new WeakSet();
+
+      // Draws an image, or a crop of it, scaled down without jagged edges. Past about 2x, a single
+      // drawImage in Chrome samples the source instead of averaging it, which leaves stair-stepped
+      // curves on text and photos. Halving first averages 2x2 pixels per step, so the last draw
+      // never shrinks by more than 2x. The output size, and so the icon file, is unchanged.
+      function drawImageSmooth(ctx, img, sx, sy, sw, sh, dx, dy, dw, dh) {
+        let src = img;
+        if (!vectorImages.has(img)) {
+          while (sw > dw * 2 && sh > dh * 2) {
+            const half = document.createElement('canvas');
+            half.width = Math.max(1, Math.round(sw / 2));
+            half.height = Math.max(1, Math.round(sh / 2));
+            const halfCtx = half.getContext('2d');
+            halfCtx.imageSmoothingEnabled = true;
+            halfCtx.drawImage(src, sx, sy, sw, sh, 0, 0, half.width, half.height);
+            src = half;
+            sx = sy = 0;
+            sw = half.width;
+            sh = half.height;
+          }
+        }
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(src, sx, sy, sw, sh, dx, dy, dw, dh);
+      }
+
+      function drawImageFormatted(ctx, img, dx, dy, dWidth, dHeight, fittingMode) {
         if (fittingMode === 'cover') {
           const imgRatio = img.width / img.height;
           const destRatio = dWidth / dHeight;
@@ -2820,7 +2973,7 @@
             sHeight = img.width / destRatio;
             sy = (img.height - sHeight) / 2;
           }
-          ctx.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+          drawImageSmooth(ctx, img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
         } else {
           let drawWidth = dWidth,
             drawHeight = dHeight,
@@ -2833,10 +2986,12 @@
             drawWidth = dWidth * (img.width / img.height);
             posX = dx + (dWidth - drawWidth) / 2;
           }
-          ctx.drawImage(img, posX, posY, drawWidth, drawHeight);
+          drawImageSmooth(ctx, img, 0, 0, img.width, img.height, posX, posY, drawWidth, drawHeight);
         }
       }
 
+      // Tile size inside each canvas, from Apple's icon grid. At 32px and 16px macOS draws a
+      // smaller tile than the grid ratio gives (measured from Settings.icns), with soft edges.
       function getLayoutDimensions(targetSize, usePadding) {
         let scaledSize = targetSize;
         if (usePadding) {
@@ -2857,10 +3012,10 @@
               scaledSize = 52;
               break;
             case 32:
-              scaledSize = 28;
+              scaledSize = 25;
               break;
             case 16:
-              scaledSize = 14;
+              scaledSize = 12.2;
               break;
             default:
               scaledSize = Math.round(targetSize * 0.8047);
@@ -2876,38 +3031,49 @@
         targetSize,
         usePadding,
         useShadow,
+        useEdgeLight,
         enableSquircle,
         fittingMode,
         enableBg,
         squircleBgColor,
       ) {
+        // 16px and 32px icons are drawn at 8x and scaled down: the browser draws path edges in
+        // coarse steps at that size, which leaves the tile's soft edge uneven from side to side.
+        const ss = targetSize <= 32 ? 8 : 1;
+        const size = targetSize * ss;
         const canvas = document.createElement('canvas');
-        canvas.width = targetSize;
-        canvas.height = targetSize;
+        canvas.width = size;
+        canvas.height = size;
         const ctx = canvas.getContext('2d');
 
         const { scaledSize, padding } = getLayoutDimensions(targetSize, usePadding);
-        const drawWidth = scaledSize,
-          drawHeight = scaledSize,
-          dx = padding,
-          dy = padding;
+        // macOS drops the drop shadow at 32px and below; it would only blur the tile's edge.
+        if (targetSize <= 32) useShadow = false;
+        const drawWidth = scaledSize * ss,
+          drawHeight = scaledSize * ss,
+          dx = padding * ss,
+          dy = padding * ss;
 
         ctx.save();
 
         if (enableSquircle) {
           const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = targetSize;
-          tempCanvas.height = targetSize;
+          tempCanvas.width = size;
+          tempCanvas.height = size;
           const tempCtx = tempCanvas.getContext('2d');
 
+          // The content is drawn as a square 1px larger than the tile and cut to the squircle
+          // last. At 16px and 32px the tile edge falls mid-pixel: an image drawn there leaves
+          // that pixel empty, and the additive edge light would make a half-covered pixel more
+          // opaque. Cutting after both keeps the soft edge exactly as the squircle mask sets it.
           if (enableBg) {
             tempCtx.fillStyle = squircleBgColor;
-            pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-            tempCtx.fill();
+            tempCtx.fillRect(dx - 1, dy - 1, drawWidth + 2, drawHeight + 2);
           }
 
-          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
-          tempCtx.clip();
+          if (fittingMode === 'cover') {
+            drawImageFormatted(tempCtx, img, dx - 1, dy - 1, drawWidth + 2, drawHeight + 2, 'cover');
+          }
 
           if (fittingMode === 'cover' || fittingMode === 'contain') {
             drawImageFormatted(tempCtx, img, dx, dy, drawWidth, drawHeight, fittingMode);
@@ -2926,18 +3092,25 @@
             );
           }
 
+          if (useEdgeLight) drawEdgeLight(tempCtx, dx, dy, drawWidth, drawHeight);
+
+          tempCtx.globalCompositeOperation = 'destination-in';
+          pathSquircle(tempCtx, dx, dy, drawWidth, drawHeight);
+          tempCtx.fill();
+          tempCtx.globalCompositeOperation = 'source-over';
+
           if (useShadow) {
             ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
-            ctx.shadowBlur = targetSize * 0.031;
-            ctx.shadowOffsetY = targetSize * 0.009;
+            ctx.shadowBlur = size * 0.031;
+            ctx.shadowOffsetY = size * 0.009;
             ctx.shadowOffsetX = 0;
           }
           ctx.drawImage(tempCanvas, 0, 0);
         } else {
           if (useShadow) {
             ctx.shadowColor = 'rgba(0, 0, 0, 0.23)';
-            ctx.shadowBlur = targetSize * 0.031;
-            ctx.shadowOffsetY = targetSize * 0.009;
+            ctx.shadowBlur = size * 0.031;
+            ctx.shadowOffsetY = size * 0.009;
             ctx.shadowOffsetX = 0;
           }
           if (enableBg) {
@@ -2964,7 +3137,19 @@
           }
         }
         ctx.restore();
-        return canvas;
+
+        // Halve until back at the target size. One large downscale point-samples in Chrome and
+        // loses the soft edge; each exact halving averages 2x2 pixels, so three give a true 8x8 box.
+        let out = canvas;
+        while (out.width > targetSize) {
+          const half = document.createElement('canvas');
+          half.width = half.height = out.width / 2;
+          const halfCtx = half.getContext('2d');
+          halfCtx.imageSmoothingEnabled = true;
+          halfCtx.drawImage(out, 0, 0, half.width, half.height);
+          out = half;
+        }
+        return out;
       }
 
       // Folder rendering ----------------------------------------------------------------
@@ -2991,35 +3176,6 @@
         return { w: Math.min(w, maxW), h: Math.min(h, maxH) };
       }
 
-      const colorShiftCache = {};
-      function shiftColor(hex, factor) {
-        const key = hex + '_' + factor;
-        if (colorShiftCache[key]) return colorShiftCache[key];
-
-        let c = (hex || '#339DE0').replace('#', '');
-        if (c.length === 3)
-          c = c
-            .split('')
-            .map((char) => char + char)
-            .join('');
-        const num = parseInt(c, 16);
-        let r = (num >> 16) & 255,
-          g = (num >> 8) & 255,
-          b = num & 255;
-        if (factor > 0) {
-          r = Math.round(r + (255 - r) * factor);
-          g = Math.round(g + (255 - g) * factor);
-          b = Math.round(b + (255 - b) * factor);
-        } else {
-          r = Math.round(r * (1 + factor));
-          g = Math.round(g * (1 + factor));
-          b = Math.round(b * (1 + factor));
-        }
-        const result = `rgb(${r}, ${g}, ${b})`;
-        colorShiftCache[key] = result;
-        return result;
-      }
-
       // Text artwork on a canvas twice the font size tall. 512px is still larger than the
       // artwork's share of a 1024px icon, and keeps long text under browser canvas limits.
       function createTextIcon(text) {
@@ -3043,24 +3199,54 @@
         return c;
       }
 
-      const sharedTintCanvas = document.createElement('canvas');
-      const sharedTintCtx = sharedTintCanvas.getContext('2d');
+      // Stamps artwork into the folder the way macOS 27 does: a debossed silhouette, fitted
+      // across the Finder tag colors. In linear light the glyph is the folder color at 70%, a
+      // thin inner shadow runs along its top edge, and a soft light just below it (a blend
+      // toward white peaking at 26%) makes the lower edge catch the light. Working from the
+      // folder's own pixels keeps it right on every color, where a fixed tint color could not.
+      function stampFolderGlyph(ctx, img, x, y, w, h) {
+        const sz = ctx.canvas.width;
+        const k = sz / 1024;
+        const off = sz * 2;
+        const layer = (draw) => {
+          const c = document.createElement('canvas');
+          c.width = c.height = sz;
+          draw(c.getContext('2d'));
+          return c;
+        };
+        const glyph = layer((c) => drawImageSmooth(c, img, 0, 0, img.width, img.height, x, y, w, h));
+        const around = layer((c) => {
+          c.fillRect(0, 0, sz, sz);
+          c.globalCompositeOperation = 'destination-out';
+          c.drawImage(glyph, 0, 0);
+        });
+        // Blurred, shifted copies drawn off-canvas so only their shadow lands.
+        const shadowOf = (src, dy, sigma) =>
+          layer((c) => {
+            c.shadowColor = '#000';
+            c.shadowBlur = 2 * sigma * k;
+            c.shadowOffsetY = off + dy * k;
+            c.drawImage(src, 0, -off);
+          });
+        const read = (c) => c.getContext('2d').getImageData(0, 0, sz, sz).data;
+        const g = read(glyph);
+        const light = read(shadowOf(glyph, 1.5, 1.5));
+        const inner = read(shadowOf(around, 0.5, 0.5));
 
-      function createTintedIcon(img, colorHex, outW, outH) {
-        if (!outW) outW = img.width;
-        if (!outH) outH = img.height;
-
-        sharedTintCanvas.width = outW;
-        sharedTintCanvas.height = outH;
-
-        sharedTintCtx.globalCompositeOperation = 'source-over';
-        sharedTintCtx.drawImage(img, 0, 0, outW, outH);
-
-        sharedTintCtx.globalCompositeOperation = 'source-in';
-        sharedTintCtx.fillStyle = shiftColor(colorHex, -0.1);
-        sharedTintCtx.fillRect(0, 0, outW, outH);
-
-        return sharedTintCanvas;
+        const image = ctx.getImageData(0, 0, sz, sz);
+        const d = image.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const ga = g[i + 3] / 255;
+          const la = Math.max(0, light[i + 3] / 255 - ga);
+          if (!ga && !la) continue;
+          const shade = (1 - ga * 0.3) * (1 - (inner[i + 3] / 255) * ga * 0.4);
+          for (let c = 0; c < 3; c++) {
+            let v = SRGB_TO_LINEAR[d[i + c]] * shade;
+            v += la * 0.26 * (1 - v);
+            d[i + c] = LINEAR_TO_SRGB[Math.round(Math.min(1, v) * 4096)];
+          }
+        }
+        ctx.putImageData(image, 0, 0);
       }
 
       function renderFolderToCanvas(fImg, finalImg, sz, colorHex, f) {
@@ -3093,8 +3279,8 @@
           return cv;
         }
 
-        ctx.drawImage(fImg, 0, 0, sz, sz);
-        applyFolderTint(ctx, fImg, sz, sz, colorHex);
+        drawImageSmooth(ctx, fImg, 0, 0, fImg.width, fImg.height, 0, 0, sz, sz);
+        applyFolderTint(ctx, sz, sz, colorHex);
 
         if (finalImg) {
           const scale = sz / 1024;
@@ -3125,42 +3311,10 @@
           const ix = sz / 2 - dim.w / 2;
           const iy = startY + areaH / 2 - dim.h / 2;
 
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-
           if (f.adaptColorEnabled) {
-            const outW = Math.max(1, Math.ceil(dim.w * 4));
-            const outH = Math.max(1, Math.ceil(dim.h * 4));
-
-            // 1. Draw highlight drop shadow
-            // Use a temp canvas to prevent shadow from bleeding inside the glyph
-            const shadowCv = document.createElement('canvas');
-            shadowCv.width = sz;
-            shadowCv.height = sz;
-            const sCtx = shadowCv.getContext('2d');
-
-            sCtx.shadowColor = shiftColor(colorHex, 0.5);
-            sCtx.shadowOffsetY = sz + 3 * scale;
-            sCtx.shadowBlur = 3 * scale;
-            sCtx.shadowOffsetX = 0;
-            // Draw out of bounds to cast shadow into bounds
-            sCtx.drawImage(finalImg, ix, iy - sz, dim.w, dim.h);
-
-            // Cut out the glyph interior so the highlight only shows on the outside bottom edge
-            sCtx.globalCompositeOperation = 'destination-out';
-            sCtx.drawImage(finalImg, ix, iy, dim.w, dim.h);
-
-            ctx.drawImage(shadowCv, 0, 0);
-
-            // 2. Draw the darkened glyph with multiply blending
-            ctx.save();
-            ctx.globalCompositeOperation = 'multiply';
-            const tinted = createTintedIcon(finalImg, '#000000', outW, outH);
-            ctx.globalAlpha = 0.15; // Match Apple's ~0.85x darkening ratio
-            ctx.drawImage(tinted, ix, iy, dim.w, dim.h);
-            ctx.restore();
+            stampFolderGlyph(ctx, finalImg, ix, iy, dim.w, dim.h);
           } else {
-            ctx.drawImage(finalImg, ix, iy, dim.w, dim.h);
+            drawImageSmooth(ctx, finalImg, 0, 0, finalImg.width, finalImg.height, ix, iy, dim.w, dim.h);
           }
         }
         return cv;
