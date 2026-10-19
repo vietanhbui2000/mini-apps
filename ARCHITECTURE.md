@@ -109,17 +109,17 @@ Because all apps share one origin:
 - **Sanitize on every read.** `sanitizePrefs()` merges defaults, type-checks each field, validates enums, and drops unknown keys. Storage and imported files both go through it.
 - **No migrations by default.** When a storage layout changes, start from defaults. Add migration code only for data that can't simply be re-entered: read the old key once, write the new one, and remove the old key only after the write succeeds. Current migrations: 2FA secrets (`totpAccounts` → `2fa-auth`) and Blank Page text (`blank-page-single-v1` → `blank-page`).
 
-| App                                                | Key                             | Holds                                                                                              |
-| :------------------------------------------------- | :------------------------------ | :------------------------------------------------------------------------------------------------- |
-| Home page                                          | `mini-apps`                     | Theme only. The viewer starts empty on every visit.                                                |
-| Startpage                                          | `startpage`, `startpage:scheme` | Preferences, links, engines; cached color scheme                                                   |
-| 2FA Authenticator                                  | `2fa-auth`                      | Theme and accounts (name, secret, optional digits/period/algorithm)                                |
-| Blank Page                                         | `blank-page`                    | Theme, width, spell check, count mode, and the text                                                |
-| DNS Profile Generator                              | `dns-profile-gen`               | Theme and the form draft                                                                           |
-| YouTube Player                                     | `minimal-youtube-player`        | Theme and the last 8 videos played                                                                 |
-| Syslog Analyzer, Icon Generator, QR Code Generator | `<folder name>`                 | Theme only. Files never leave the page.                                                            |
-| Background Remover                                 | `bg-remover`                    | Theme, fill, crop and format. Images never leave the page; the model lives in Cache Storage.       |
-| Widget Maker                                       | `widget-maker`                  | Theme and the weather place and units. A widget's own settings live in its link, never in storage. |
+| App                                                | Key                             | Holds                                                                                                                        |
+| :------------------------------------------------- | :------------------------------ | :--------------------------------------------------------------------------------------------------------------------------- |
+| Home page                                          | `mini-apps`                     | Theme only. The viewer starts empty on every visit.                                                                          |
+| Startpage                                          | `startpage`, `startpage:scheme` | Preferences, links, engines; cached color scheme                                                                             |
+| 2FA Authenticator                                  | `2fa-auth`                      | Theme and accounts (name, secret, optional digits/period/algorithm)                                                          |
+| Blank Page                                         | `blank-page`                    | Theme, width, spell check, count mode, and the text                                                                          |
+| DNS Profile Generator                              | `dns-profile-gen`               | Theme and the form draft                                                                                                     |
+| YouTube Player                                     | `minimal-youtube-player`        | Theme and the last 8 videos played                                                                                           |
+| Syslog Analyzer, Icon Generator, QR Code Generator | `<folder name>`                 | Theme only. Files never leave the page.                                                                                      |
+| Background Remover                                 | `bg-remover`                    | Theme, fill, crop, format and how to download several images. Images never leave the page; the model lives in Cache Storage. |
+| Widget Maker                                       | `widget-maker`                  | Theme and the weather place and units. A widget's own settings live in its link, never in storage.                           |
 
 - Wrap every storage call in `try/catch`. The app must still work, unsaved, when storage is blocked (private windows, `data:` URLs).
 
