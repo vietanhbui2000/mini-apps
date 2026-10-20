@@ -226,6 +226,7 @@ Each app picks one seed when it's redesigned, which gives it a quiet identity of
 | QR Code Generator     | `#8bc34a`                   | Tonal | Lime                     |
 | Widget Maker          | `#a63aa8`                   | Tonal | Orchid                   |
 | Background Remover    | `#008cc6`                   | Tonal | Sky blue                 |
+| Image Converter       | `#f38200`                   | Tonal | Orange                   |
 
 Pick a seed whose hue is clearly apart from the others: Tonal Spot lowers chroma, so seeds closer than about 30° of hue come out looking alike (orange and red both turn brown).
 

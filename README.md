@@ -14,6 +14,7 @@ A small collection of *mini apps* built with *web technologies*. Vibe-coded with
 | [Widget Maker](https://vietanhbui2000.pages.dev/mini-apps/widget-maker/) | Clock, calendar, progress, countdown and weather widgets for Notion and Obsidian. | [`./widget-maker`](./widget-maker) |
 | [macOS Icon Generator](https://vietanhbui2000.pages.dev/mini-apps/icon-gen/) | Convert any image into a compliant macOS icon pack. | [`./icon-gen`](./icon-gen) |
 | [Background Remover](https://vietanhbui2000.pages.dev/mini-apps/bg-remover/) | Remove the background from any image, right on your device. | [`./bg-remover`](./bg-remover) |
+| [Image Converter](https://vietanhbui2000.pages.dev/mini-apps/image-converter/) | Convert images to JPEG, PNG, WebP or AVIF, right on your device. | [`./image-converter`](./image-converter) |
 | [QR Code Generator](https://vietanhbui2000.pages.dev/mini-apps/qr-code-gen/) | Simple, customizable QR Code generator. | [`./qr-code-gen`](./qr-code-gen) |
 | [Minimal YouTube Player](https://vietanhbui2000.pages.dev/mini-apps/minimal-youtube-player/) | Play any YouTube video or livestream without distraction. | [`./minimal-youtube-player`](./minimal-youtube-player) |
 

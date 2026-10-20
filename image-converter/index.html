@@ -1,0 +1,3893 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Convert images to JPEG, PNG, WebP or AVIF. Runs on your device, so images never leave it."
+    />
+    <title>Image Converter</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="theme-color" content="#fff8f5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#19120d" media="(prefers-color-scheme: dark)" />
+
+    <!-- Fonts: Google Sans Flex, Material Symbols (subset) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..1000,0..100&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=add,add_photo_alternate,arrow_outward,brightness_auto,close,code,compare,dark_mode,delete,delete_sweep,download,error,info,light_mode,more_vert,open_in_full,person&display=block"
+    />
+
+    <style>
+      /* --- Tokens --- */
+      /* Color roles: Material Color Utilities, SchemeTonalSpot, seed #f38200. */
+      :root {
+        color-scheme: light dark;
+        --primary: light-dark(#895120, #ffb780);
+        --on-primary: light-dark(#ffffff, #4e2600);
+        --primary-container: light-dark(#ffdcc4, #6d3a09);
+        --on-primary-container: light-dark(#6d3a09, #ffdcc4);
+        --secondary: light-dark(#745944, #e4bfa7);
+        --on-secondary: light-dark(#ffffff, #422b1a);
+        --secondary-container: light-dark(#ffdcc4, #5b412f);
+        --on-secondary-container: light-dark(#5b412f, #ffdcc4);
+        --tertiary: light-dark(#5d6236, #c6ca95);
+        --on-tertiary: light-dark(#ffffff, #2f330c);
+        --tertiary-container: light-dark(#e2e7af, #464a20);
+        --on-tertiary-container: light-dark(#464a20, #e2e7af);
+        --error: light-dark(#ba1a1a, #ffb4ab);
+        --on-error: light-dark(#ffffff, #690005);
+        --error-container: light-dark(#ffdad6, #93000a);
+        --on-error-container: light-dark(#93000a, #ffdad6);
+        --surface: light-dark(#fff8f5, #19120d);
+        --on-surface: light-dark(#221a14, #f0dfd6);
+        --on-surface-variant: light-dark(#51443b, #d6c3b7);
+        --surface-dim: light-dark(#e7d7ce, #19120d);
+        --surface-bright: light-dark(#fff8f5, #413731);
+        --surface-container-lowest: light-dark(#ffffff, #140d08);
+        --surface-container-low: light-dark(#fff1e9, #221a14);
+        --surface-container: light-dark(#fbebe1, #261e18);
+        --surface-container-high: light-dark(#f5e5dc, #312822);
+        --surface-container-highest: light-dark(#f0dfd6, #3c332d);
+        --outline: light-dark(#84746a, #9f8d82);
+        --outline-variant: light-dark(#d6c3b7, #51443b);
+        --inverse-surface: light-dark(#382f28, #f0dfd6);
+        --inverse-on-surface: light-dark(#feeee4, #382f28);
+        --inverse-primary: light-dark(#ffb780, #895120);
+        --scrim: #000;
+
+        /* Shape */
+        --shape-xs: 4px;
+        --shape-sm: 8px;
+        --shape-md: 12px;
+        --shape-lg: 16px;
+        --shape-lg-plus: 20px;
+        --shape-xl: 28px;
+        --shape-full: 999px;
+
+        /* Motion: M3 Expressive springs (damping, stiffness) sampled into linear() */
+        --spring-fast: linear(
+          0,
+          0.089,
+          0.289,
+          0.519,
+          0.73,
+          0.894,
+          1.005,
+          1.068,
+          1.093,
+          1.092,
+          1.076,
+          1.055,
+          1.034,
+          1.016,
+          1.003,
+          0.996,
+          0.992,
+          0.991,
+          0.992,
+          1
+        );
+        --spring-fast-ms: 320ms;
+        --spring: linear(
+          0,
+          0.043,
+          0.144,
+          0.273,
+          0.407,
+          0.535,
+          0.648,
+          0.744,
+          0.822,
+          0.883,
+          0.928,
+          0.961,
+          0.984,
+          0.999,
+          1.008,
+          1.013,
+          1.015,
+          1.015,
+          1.014,
+          1.012,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-ms: 360ms;
+        --spring-slow: linear(
+          0,
+          0.037,
+          0.125,
+          0.239,
+          0.362,
+          0.483,
+          0.593,
+          0.69,
+          0.772,
+          0.838,
+          0.891,
+          0.931,
+          0.961,
+          0.983,
+          0.997,
+          1.007,
+          1.012,
+          1.015,
+          1.015,
+          1.015,
+          1.013,
+          1.011,
+          1.01,
+          1.008,
+          1
+        );
+        --spring-slow-ms: 500ms;
+        --ease-effects: linear(
+          0,
+          0.122,
+          0.337,
+          0.537,
+          0.692,
+          0.801,
+          0.874,
+          0.922,
+          0.952,
+          0.971,
+          0.983,
+          0.99,
+          1
+        );
+        --effects-ms: 180ms;
+        --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+        /* Elevation */
+        --elevation-1: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+        --elevation-2: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+        --elevation-3: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+
+        /* Type */
+        --font: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      :root[data-theme='light'] {
+        color-scheme: light;
+      }
+
+      :root[data-theme='dark'] {
+        color-scheme: dark;
+      }
+
+      /* --- Base --- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--surface);
+        color: var(--on-surface);
+        font: 400 16px/24px var(--font);
+        letter-spacing: 0.5px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+      }
+
+      button {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      h1,
+      h2,
+      p,
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      ::selection {
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .icon {
+        flex: none;
+        display: inline-block;
+        width: 1em;
+        overflow: hidden;
+        font-family: 'Material Symbols Rounded';
+        font-size: 24px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        font-variation-settings: 'FILL' 0;
+        user-select: none;
+        transition: font-variation-settings var(--effects-ms) var(--ease-effects);
+      }
+
+      /* --- State layer & ripple --- */
+      /* Any interactive surface gets .state: hover/focus/press overlays in its content color. */
+      .state {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .state::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: currentColor;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .state:hover::before {
+          opacity: 0.08;
+        }
+      }
+
+      .state:focus-visible::before,
+      .state:active::before {
+        opacity: 0.1;
+      }
+
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: currentColor;
+        pointer-events: none;
+        animation: ripple 600ms cubic-bezier(0.2, 0, 0, 1) forwards;
+      }
+
+      @keyframes ripple {
+        from {
+          transform: scale(0);
+          opacity: 0.14;
+        }
+        to {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* --- Buttons --- */
+      /* Pill corners are half the height (20px here, 24px in the 48px bottom bar), not
+         --shape-full: a press springs them smaller, and the spring's overshoot from 999px would
+         dip below zero and flash square corners. */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 40px;
+        padding: 0 24px;
+        border-radius: 20px;
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        transition: border-radius var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .btn:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .btn .icon {
+        font-size: 20px;
+        margin-left: -8px;
+      }
+
+      .btn-filled {
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .btn-tonal {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      .btn-text {
+        padding: 0 12px;
+        color: var(--primary);
+      }
+
+      .btn-text .icon {
+        margin-left: -4px;
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 20px;
+        color: var(--on-surface-variant);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      .icon-btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* --- App bar & page --- */
+      /* The bar stays pinned while the page scrolls. Its contents line up with the page column. */
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: var(--surface);
+        transition: box-shadow var(--spring-ms) linear;
+      }
+
+      /* A divider plus a soft shadow: content cards share the container colors, so a tint alone
+         would blend in. The divider keeps the edge visible in dark mode. */
+      .appbar.scrolled {
+        box-shadow:
+          0 1px 0 var(--outline-variant),
+          0 4px 12px rgb(0 0 0 / 0.08);
+      }
+
+      .appbar-inner,
+      .page {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 16px;
+      }
+
+      @media (min-width: 640px) {
+        .appbar-inner,
+        .page {
+          padding-inline: 24px;
+        }
+      }
+
+      .page {
+        padding-bottom: 112px;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        margin-right: -8px;
+      }
+
+      .top-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      @media (min-width: 840px) {
+        .top-title {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+
+      /* No extra controls under the title, so the bar is just its 64px row. */
+      :root {
+        --appbar-h: 64px;
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+      }
+
+      /* --- Studio --- */
+      /* Wide screens: settings on the left, a pinned preview on the right, so each change reads
+         left to right into its result. The image is the point of this app, so the two split the
+         width evenly instead of the usual 380px preview column. Phones: the preview pins under
+         the app bar so every change stays in view. */
+      .studio {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px 32px;
+        align-items: start;
+      }
+
+      @media (min-width: 900px) {
+        .page {
+          padding-top: 16px;
+          padding-bottom: 24px;
+        }
+
+        .studio {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .stage-col {
+          position: sticky;
+          top: calc(var(--appbar-h) + 16px);
+          grid-column: 2;
+          grid-row: 1;
+        }
+
+        .settings {
+          grid-column: 1;
+        }
+      }
+
+      .stage-col {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) both;
+      }
+
+      @media (max-width: 899px) {
+        .stage-col {
+          position: sticky;
+          top: var(--appbar-h);
+          z-index: 2;
+          padding-bottom: 12px;
+          background: var(--surface);
+        }
+      }
+
+      /* The preview: a drop target, then one canvas showing the converted image, or the
+         original while Compare is on. */
+      .stage-wrap {
+        position: relative;
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: 304px;
+        padding: 24px;
+        border: 2px dashed transparent;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container);
+        cursor: pointer;
+        transition:
+          border-color var(--effects-ms) linear,
+          border-radius var(--spring-ms) var(--spring);
+      }
+
+      .stage:active {
+        border-radius: var(--shape-lg);
+      }
+
+      .dragging .stage {
+        border-color: var(--primary);
+      }
+
+      /* A soft checkerboard behind the canvas, so transparent areas read as transparent. */
+      .stage-canvas {
+        grid-area: 1 / 1;
+        max-width: 100%;
+        /* The window less the app bar, the page's top and bottom spacing, the stage padding,
+           the filmstrip, the two status lines and the action under it. */
+        max-height: max(240px, calc(100dvh - var(--appbar-h) - 316px));
+        border-radius: var(--shape-lg);
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 16px 16px;
+      }
+
+      @media (max-width: 899px) {
+        .stage {
+          min-height: 168px;
+          padding: 12px;
+        }
+
+        .stage-canvas {
+          max-height: 200px;
+        }
+      }
+
+      .stage-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .stage-empty .icon {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--shape-lg);
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font-size: 28px;
+      }
+
+      /* With images in it, the preview is no longer a button: the strip's Add tile adds more. */
+      .stage.filled {
+        cursor: default;
+      }
+
+      .stage.filled:active {
+        border-radius: var(--shape-xl);
+      }
+
+      /* Toggles turn filled and square-ish while pressed. */
+      .icon-btn[aria-pressed='true'] {
+        border-radius: var(--shape-md);
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .icon-btn[aria-pressed='true'] .icon {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      /* Compare and Open larger sit over the stage's corner, outside the stage's own button, so
+         each stays its own control. Tonal, so they show over any image. */
+      .stage-tools {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .stage-tools .icon-btn:not([aria-pressed='true']) {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      @media (max-width: 899px) {
+        .stage-tools {
+          top: 8px;
+          right: 8px;
+        }
+      }
+
+      /* Two lines: the image and its place in the batch, then its state or result. Each cuts
+         off on its own, and only the name gives way, so a long name never hides the position
+         or the result. */
+      .file-name {
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .file-name > span,
+      #file-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-name > span {
+        display: block;
+      }
+
+      .file-name > .file-title {
+        display: flex;
+        justify-content: center;
+      }
+
+      #file-position {
+        flex: none;
+        white-space: pre;
+      }
+
+      /* Filmstrip: every image as a thumbnail, in the order added, then an Add tile. It scrolls
+         sideways; the padding leaves room for the ring around the chosen one. */
+      .strip {
+        display: flex;
+        gap: 8px;
+        margin: -4px;
+        padding: 4px;
+        position: relative; /* the thumbnails' offsetParent, for revealThumb() */
+        overflow-x: auto;
+        scrollbar-width: none;
+        /* An edge with more images past it fades out, so a thumbnail there reads as "scroll
+           for more" rather than cut off. renderStripEdges() sets the classes. */
+        --fade-start: 0px;
+        --fade-end: 0px;
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          #000 var(--fade-start),
+          #000 calc(100% - var(--fade-end)),
+          transparent
+        );
+      }
+
+      .strip.more-start {
+        --fade-start: 32px;
+      }
+
+      .strip.more-end {
+        --fade-end: 32px;
+      }
+
+      /* Phones and tablets: the strip runs to the screen edges, so it reads as scrolling on
+         rather than clipped, while the first thumbnail still lines up with the page gutter. */
+      @media (max-width: 899px) {
+        .strip {
+          margin-inline: -16px;
+          padding-inline: 16px;
+        }
+      }
+
+      @media (min-width: 640px) and (max-width: 899px) {
+        .strip {
+          margin-inline: -24px;
+          padding-inline: 24px;
+        }
+      }
+
+      /* One grid cell the size of the tile. An auto-sized cell would grow to the photo's
+         shape (84px tall for a portrait one), and the spinner centered in it would sit low. */
+      .thumb {
+        display: grid;
+        flex: none;
+        grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--shape-md);
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 8px 8px var(--surface-container);
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          box-shadow var(--effects-ms) linear;
+      }
+
+      .thumb:active {
+        border-radius: var(--shape-sm);
+      }
+
+      .thumb > img {
+        grid-area: 1 / 1;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity var(--effects-ms) linear;
+      }
+
+      .thumb[aria-current='true'] {
+        box-shadow:
+          0 0 0 2px var(--surface),
+          0 0 0 4px var(--primary);
+      }
+
+      /* Waiting images are dimmed until the encoder gets to them. */
+      .thumb[data-status='waiting'] > img {
+        opacity: 0.4;
+      }
+
+      /* The one in progress dims under the M3 Expressive contained loading indicator: a
+         shape on a disc that morphs through seven Material shapes while it spins. The morph
+         keyframes come from addLoaderKeyframes(), since each shape is a 72-point polygon. */
+      .thumb[data-status='working'] > img,
+      .thumb[data-status='working'] > canvas {
+        opacity: 0.6;
+      }
+
+      .loader {
+        display: none;
+        grid-area: 1 / 1;
+        z-index: 1;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-container);
+      }
+
+      .thumb[data-status='working'] > .loader {
+        display: grid;
+      }
+
+      .loader::before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background: var(--on-primary-container);
+        animation:
+          loader-morph 4550ms var(--spring-fast) infinite,
+          loader-spin 4666ms linear infinite;
+      }
+
+      @keyframes loader-spin {
+        to {
+          rotate: 1turn;
+        }
+      }
+
+      .thumb[data-status='failed'] > img {
+        opacity: 0.3;
+      }
+
+      .thumb[data-status='failed']::after {
+        content: 'error';
+        grid-area: 1 / 1;
+        z-index: 1;
+        color: var(--error);
+        font: 24px/1 'Material Symbols Rounded';
+      }
+
+      .thumb.add {
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+      }
+
+      /* The main action, 56px with lg corners, across the preview's width. */
+      .stage-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .stage-actions .btn {
+        height: 56px;
+        border-radius: var(--shape-lg);
+        font-size: 16px;
+      }
+
+      .stage-actions .btn-filled {
+        flex: 1;
+      }
+
+      .stage-actions .btn:active {
+        border-radius: var(--shape-md);
+      }
+
+      /* Below 900px the bottom bar holds these actions. */
+      @media (max-width: 899px) {
+        .stage-actions {
+          display: none;
+        }
+      }
+
+      .note {
+        margin: 8px 16px 0;
+        color: var(--on-surface-variant);
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.4px;
+      }
+
+      /* --- Settings --- */
+      .settings {
+        min-width: 0;
+        animation: enter var(--spring-slow-ms) var(--spring-slow) 60ms both;
+      }
+
+      .sect-title {
+        margin: 24px 16px 8px;
+        color: var(--primary);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+      }
+
+      .settings > .sect-title:first-child {
+        margin-top: 8px;
+      }
+
+      /* In two columns the first label lines up with the top of the preview. */
+      @media (min-width: 900px) {
+        .settings > .sect-title:first-child {
+          margin-top: 0;
+        }
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .row {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        min-height: 72px;
+        padding: 12px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--surface-container);
+        transition: opacity var(--effects-ms) linear;
+        --field-bg: var(--surface-container);
+      }
+
+      /* First and last visible rows: a hidden row (a setting that only shows when another is
+         on) mustn't leave its neighbour with a square outer corner. */
+      .group > .row:not([hidden]):not(.row:not([hidden]) ~ .row) {
+        border-top-left-radius: var(--shape-lg-plus);
+        border-top-right-radius: var(--shape-lg-plus);
+      }
+
+      .group > .row:not([hidden]):not(:has(~ .row:not([hidden]))) {
+        border-bottom-left-radius: var(--shape-lg-plus);
+        border-bottom-right-radius: var(--shape-lg-plus);
+      }
+
+      label.row {
+        cursor: pointer;
+      }
+
+      .row.disabled {
+        opacity: 0.38;
+        pointer-events: none;
+      }
+
+      .row-stack {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .row-text {
+        display: flex;
+        flex: 1 1 160px;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .row-stack .row-text {
+        flex: none;
+      }
+
+      /* Supporting text, only where the name and the options don't say enough: .row-sub under
+         a setting's name says what it does; .row-note under its control speaks to the option
+         picked, or how to fill it in. */
+      .row-sub,
+      .row-note {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .switch:disabled {
+        opacity: 0.38;
+      }
+
+      /* M3 Expressive slider: a thick track with a slim handle and gaps around it */
+      /* As tall as a text field, so the quality and file size rows swap without a jump. */
+      .slider-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        min-height: 56px;
+      }
+
+      .slider-value {
+        min-width: 4ch;
+        color: var(--on-surface-variant);
+        font: 500 14px/20px var(--font);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+
+      .slider {
+        flex: 1;
+        height: 44px;
+        margin: 0;
+        background: none;
+        cursor: pointer;
+        appearance: none;
+        --p: 50%;
+      }
+
+      .slider::-webkit-slider-runnable-track {
+        height: 16px;
+        border-radius: var(--shape-full);
+        background: linear-gradient(
+          to right,
+          var(--primary) calc(var(--p) - 6px),
+          transparent calc(var(--p) - 6px) calc(var(--p) + 6px),
+          var(--secondary-container) calc(var(--p) + 6px)
+        );
+      }
+
+      .slider::-webkit-slider-thumb {
+        width: 4px;
+        height: 44px;
+        margin-top: -14px;
+        border-radius: 2px;
+        background: var(--primary);
+        appearance: none;
+        transition: width var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .slider:active::-webkit-slider-thumb {
+        width: 2px;
+      }
+
+      .slider::-moz-range-track {
+        height: 16px;
+        border-radius: var(--shape-full);
+        background: var(--secondary-container);
+      }
+
+      .slider::-moz-range-progress {
+        height: 16px;
+        border-radius: var(--shape-full);
+        background: var(--primary);
+      }
+
+      .slider::-moz-range-thumb {
+        width: 4px;
+        height: 44px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--primary);
+      }
+
+      .slider:focus-visible {
+        outline: none;
+      }
+
+      .slider:focus-visible::-webkit-slider-thumb {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      /* Outlined text field with floating label. It takes the row's color behind its label
+         (--field-bg), and a unit after the number. */
+      .fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+        gap: 16px 12px;
+        width: 100%;
+      }
+
+      .field {
+        position: relative;
+        display: block;
+        width: 100%;
+      }
+
+      .field input {
+        display: block;
+        width: 100%;
+        height: 56px;
+        padding: 0 48px 0 16px;
+        border: 1px solid var(--outline);
+        border-radius: var(--shape-md);
+        outline: none;
+        background: transparent;
+        color: var(--on-surface);
+        font-size: 16px;
+        font-variant-numeric: tabular-nums;
+        appearance: textfield;
+        transition:
+          border-color var(--effects-ms) linear,
+          box-shadow var(--effects-ms) linear;
+      }
+
+      /* The unit sits where the spin buttons would; arrow keys still step the number. */
+      .field input::-webkit-inner-spin-button,
+      .field input::-webkit-outer-spin-button {
+        margin: 0;
+        appearance: none;
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .field input:hover {
+          border-color: var(--on-surface);
+        }
+      }
+
+      .field input:focus {
+        border-color: var(--primary);
+        box-shadow: inset 0 0 0 1px var(--primary);
+      }
+
+      .field-label {
+        position: absolute;
+        top: 28px;
+        left: 12px;
+        padding: 0 4px;
+        border-radius: var(--shape-xs);
+        background: var(--field-bg);
+        color: var(--on-surface-variant);
+        font-size: 16px;
+        line-height: 16px;
+        pointer-events: none;
+        translate: 0 -50%;
+        transition:
+          top var(--spring-fast-ms) var(--spring-fast),
+          font-size var(--spring-fast-ms) var(--spring-fast),
+          color var(--effects-ms) linear;
+      }
+
+      .field input:focus + .field-label,
+      .field input:not(:placeholder-shown) + .field-label {
+        top: 0;
+        font-size: 12px;
+      }
+
+      .field input:focus + .field-label {
+        color: var(--primary);
+      }
+
+      .field-suffix {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        color: var(--on-surface-variant);
+        pointer-events: none;
+        translate: 0 -50%;
+      }
+
+      /* Bottom bar on phones and tablets */
+      .actionbar {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        gap: 8px;
+        padding: 12px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+          max(16px, env(safe-area-inset-left));
+        background: var(--surface-container);
+      }
+
+      @media (min-width: 640px) {
+        .actionbar {
+          padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right));
+        }
+      }
+
+      /* The main action fills the bar. */
+      .actionbar .btn {
+        flex: 1;
+        min-width: 0;
+        height: 48px;
+        border-radius: 24px;
+      }
+
+      @media (min-width: 900px) {
+        .actionbar {
+          display: none;
+        }
+      }
+
+      @media (max-width: 899px) {
+        body > .snackbar {
+          bottom: 88px;
+        }
+      }
+
+      /* On phones the pinned preview sits under the app bar, so it carries the scroll edge. */
+      @media (max-width: 899px) {
+        .stage-col {
+          margin-inline: -16px;
+          padding-inline: 16px;
+          transition: box-shadow var(--spring-ms) linear;
+        }
+
+        body.scrolled .appbar {
+          box-shadow: none;
+        }
+
+        body.scrolled .stage-col {
+          box-shadow:
+            0 1px 0 var(--outline-variant),
+            0 4px 12px rgb(0 0 0 / 0.08);
+        }
+      }
+
+      @media (min-width: 640px) and (max-width: 899px) {
+        .stage-col {
+          margin-inline: -24px;
+          padding-inline: 24px;
+        }
+      }
+
+      /* Switch */
+      .switch {
+        position: relative;
+        flex: none;
+        width: 52px;
+        height: 32px;
+        margin: 0;
+        border: 2px solid var(--outline);
+        border-radius: var(--shape-full);
+        background: var(--surface-container-highest);
+        cursor: pointer;
+        appearance: none;
+        transition:
+          background-color var(--effects-ms) linear,
+          border-color var(--effects-ms) linear;
+      }
+
+      .switch::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--outline);
+        translate: 0 -50%;
+        transition:
+          left var(--spring-fast-ms) var(--spring-fast),
+          width var(--spring-fast-ms) var(--spring-fast),
+          height var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear;
+      }
+
+      .switch::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 26px;
+        width: 16px;
+        height: 16px;
+        background: var(--on-primary-container);
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.55 15.15 18.03 6.68a1 1 0 0 1 1.41 1.41l-9.19 9.2a1 1 0 0 1-1.41 0l-4.3-4.3a1 1 0 1 1 1.41-1.41z'/%3E%3C/svg%3E")
+          center / contain no-repeat;
+        opacity: 0;
+        translate: 0 -50%;
+        scale: 0.4;
+        transition:
+          opacity var(--effects-ms) linear,
+          scale var(--spring-fast-ms) var(--spring-fast);
+      }
+
+      .switch:checked {
+        border-color: var(--primary);
+        background: var(--primary);
+      }
+
+      .switch:checked::before {
+        left: 22px;
+        width: 24px;
+        height: 24px;
+        background: var(--on-primary);
+      }
+
+      .switch:checked::after {
+        opacity: 1;
+        scale: 1;
+      }
+
+      .switch:active::before {
+        left: 0;
+        width: 28px;
+        height: 28px;
+      }
+
+      .switch:checked:active::before {
+        left: 20px;
+      }
+
+      .switch:disabled {
+        cursor: default;
+      }
+
+      /* Connected button group (single choice) */
+      .seg {
+        display: flex;
+        gap: 2px;
+        width: 100%;
+      }
+
+      .seg label {
+        position: relative;
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-width: 0;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: var(--shape-sm);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+          border-radius var(--spring-fast-ms) var(--spring-fast),
+          background-color var(--effects-ms) linear,
+          color var(--effects-ms) linear;
+      }
+
+      /* Ends use half the 40px height, not --shape-full: when corners on one edge add up to
+         more than its length, the browser shrinks them all, and the 8px inner corners would
+         flatten to square. */
+      .seg label:first-child {
+        border-top-left-radius: 20px;
+        border-bottom-left-radius: 20px;
+      }
+
+      .seg label:last-child {
+        border-top-right-radius: 20px;
+        border-bottom-right-radius: 20px;
+      }
+
+      .seg label:has(:checked) {
+        border-radius: 20px;
+        background: var(--primary);
+        color: var(--on-primary);
+      }
+
+      .seg label:has(:checked) .icon {
+        font-variation-settings: 'FILL' 1;
+      }
+
+      .seg label:has(:focus-visible) {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+      }
+
+      .seg label:active {
+        border-radius: var(--shape-md);
+      }
+
+      .seg .icon {
+        font-size: 18px;
+      }
+
+      /* A single option that doesn't apply. A whole disabled row already fades. */
+      .row:not(.disabled) .seg label:has(:disabled) {
+        opacity: 0.38;
+        cursor: default;
+      }
+
+      .seg input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* --- About --- */
+      /* What the app is, who made it and where its source lives. Opened from the ⋮ menu. */
+      .about-head {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 24px 24px 16px;
+        text-align: center;
+      }
+
+      .about-icon {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 8px;
+      }
+
+      .about-desc {
+        margin: 0;
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      .about-list {
+        display: flex;
+        flex-direction: column;
+        padding: 0 8px;
+      }
+
+      .about-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-height: 56px;
+        padding: 8px 16px;
+        border-radius: var(--shape-md);
+        color: var(--on-surface);
+        text-decoration: none;
+      }
+
+      .about-row > .icon {
+        flex: none;
+        color: var(--on-surface-variant);
+      }
+
+      .about-row .trail {
+        margin-left: auto;
+        font-size: 20px;
+      }
+
+      .about-text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        font-size: 16px;
+        line-height: 24px;
+      }
+
+      .about-text small {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* --- Viewer --- */
+      /* The output at full size, built like a page: a 64px header that matches the app bar, the
+         image fitted to the space left, and the same bottom bar as phones, at every width. */
+      .dialog.viewer {
+        width: 100%;
+        max-width: none;
+        height: 100dvh;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+        background: var(--surface);
+        touch-action: none;
+      }
+
+      .viewer-head {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 4px;
+        height: 64px;
+        padding: 0 8px 0 16px;
+      }
+
+      .viewer-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        font: 400 22px/28px var(--font);
+        font-variation-settings: 'ROND' 100;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Zoom moves the image alone (see setView()), so the page never zooms under it. */
+      .viewer-body {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .viewer-body.zoomed {
+        cursor: grab;
+      }
+
+      .viewer-body.zoomed:active {
+        cursor: grabbing;
+      }
+
+      /* Absolutely placed with auto margins, the canvas keeps its ratio, shrinks to fit and
+         centers. Small images stay at their own size. */
+      .viewer-canvas {
+        position: absolute;
+        transform-origin: 0 0;
+        inset: 0 16px 16px;
+        max-width: calc(100% - 32px);
+        max-height: calc(100% - 16px);
+        margin: auto;
+        border-radius: var(--shape-lg);
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 16px 16px;
+      }
+
+      .viewer .actionbar {
+        position: static;
+        display: flex;
+        flex: none;
+      }
+
+      @media (min-width: 640px) {
+        .viewer-head {
+          padding-left: 24px;
+        }
+
+        .viewer-canvas {
+          inset: 0 24px 24px;
+          max-width: calc(100% - 48px);
+          max-height: calc(100% - 24px);
+        }
+      }
+
+      /* Feedback sits above the viewer's own buttons instead of covering them. */
+      .viewer > .snackbar {
+        position: absolute;
+        bottom: 88px;
+      }
+
+      /* --- Dialogs --- */
+      /* Native <dialog>: top layer, focus trap, Esc, and Android back via close watchers. */
+      .dialog {
+        flex-direction: column;
+        width: calc(100% - 32px);
+        max-width: 560px;
+        max-height: calc(100dvh - 48px);
+        padding: 0;
+        border: 0;
+        border-radius: var(--shape-xl);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-3);
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .dialog:focus-visible {
+        outline: none;
+      }
+
+      .dialog[open] {
+        display: flex;
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-slow-ms) var(--spring-slow),
+          overlay var(--spring-slow-ms) allow-discrete,
+          display var(--spring-slow-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .dialog[open] {
+          opacity: 0;
+          transform: translateY(24px) scale(0.96);
+        }
+      }
+
+      /* The exit fade matches the dialog's 200ms exit: a backdrop still fading when the
+         dialog leaves the top layer would vanish mid-fade. */
+      .dialog::backdrop {
+        background: rgb(0 0 0 / 0);
+        transition: background-color 200ms linear;
+      }
+
+      .dialog[open]::backdrop {
+        background: rgb(0 0 0 / 0.32);
+        transition: background-color var(--spring-ms) linear;
+      }
+
+      @starting-style {
+        .dialog[open]::backdrop {
+          background: rgb(0 0 0 / 0);
+        }
+      }
+
+      .dialog-title {
+        font: 400 24px/32px var(--font);
+        font-variation-settings: 'ROND' 100;
+        letter-spacing: 0;
+      }
+
+      .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 24px;
+      }
+
+      /* Menu */
+      .menu {
+        position: fixed;
+        inset: auto;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        border-radius: var(--shape-lg);
+        background: var(--surface-container-high);
+        color: var(--on-surface);
+        box-shadow: var(--elevation-2);
+        opacity: 0;
+        transform: scale(0.9);
+        transform-origin: top right;
+        /* Closing eases out in 200ms, like dialogs: a spring would keep the faded menu in the
+           top layer, catching clicks, until its bounce settled. */
+        transition:
+          opacity var(--effects-ms) linear,
+          transform 200ms var(--ease-exit),
+          overlay 200ms allow-discrete,
+          display 200ms allow-discrete;
+      }
+
+      .menu.up {
+        transform-origin: bottom right;
+      }
+
+      .menu:popover-open {
+        opacity: 1;
+        transform: none;
+        transition:
+          opacity var(--effects-ms) linear,
+          transform var(--spring-fast-ms) var(--spring-fast),
+          overlay var(--spring-fast-ms) allow-discrete,
+          display var(--spring-fast-ms) allow-discrete;
+      }
+
+      @starting-style {
+        .menu:popover-open {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        padding: 0 16px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        text-align: left;
+      }
+
+      .menu-item .icon {
+        color: var(--on-surface-variant);
+        font-size: 20px;
+      }
+
+      /* Trailing supporting text, such as the current value of a setting. */
+      .menu-trail {
+        margin-left: auto;
+        color: var(--on-surface-variant);
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 0;
+        background: var(--outline-variant);
+      }
+
+      /* --- Bottom sheets (phones) --- */
+      /* Below 600px, menus and the About dialog open as M3 modal bottom sheets, in thumb
+         reach. They stay the same popover or <dialog>, so tapping outside, Esc, Back and focus
+         work as before. Sheets slide with M3's emphasized decelerate curve: a spring's
+         overshoot would lift the sheet off the bottom edge. */
+      .sheet-handle {
+        display: none;
+      }
+
+      @media (max-width: 599px) {
+        .sheet-handle {
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 1;
+          display: grid;
+          place-items: center;
+          height: 32px;
+          cursor: grab;
+          touch-action: none;
+        }
+
+        .sheet-handle::before {
+          content: '';
+          width: 32px;
+          height: 4px;
+          border-radius: 2px;
+          background: var(--on-surface-variant);
+          opacity: 0.4;
+        }
+
+        .dialog.bottom-sheet {
+          width: 100%;
+          max-width: none;
+          max-height: calc(100dvh - 72px);
+          margin: auto 0 0;
+          padding: 16px 0 env(safe-area-inset-bottom);
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .dialog.bottom-sheet[open] {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .dialog.bottom-sheet[open] {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        /* !important beats the position toggleMenu() writes inline for the dropdown. */
+        .menu {
+          inset: auto 0 0 !important;
+          width: 100%;
+          max-height: calc(100dvh - 72px);
+          overflow-y: auto;
+          padding: 32px 0 max(16px, env(safe-area-inset-bottom));
+          border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+          background: var(--surface-container-low);
+          box-shadow: var(--elevation-1);
+          opacity: 1;
+          transform: translateY(100%);
+          transition:
+            transform 200ms var(--ease-exit),
+            overlay 200ms allow-discrete,
+            display 200ms allow-discrete;
+        }
+
+        .menu:popover-open {
+          transform: none;
+          transition:
+            transform 400ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            overlay 400ms allow-discrete,
+            display 400ms allow-discrete;
+        }
+
+        @starting-style {
+          .menu:popover-open {
+            opacity: 1;
+            transform: translateY(100%);
+          }
+        }
+
+        .menu::backdrop {
+          background: rgb(0 0 0 / 0);
+          transition: background-color 200ms linear;
+        }
+
+        .menu:popover-open::backdrop {
+          background: rgb(0 0 0 / 0.32);
+        }
+
+        @starting-style {
+          .menu:popover-open::backdrop {
+            background: rgb(0 0 0 / 0);
+          }
+        }
+
+        .menu-item {
+          gap: 16px;
+          height: 56px;
+          padding: 0 24px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+
+        .menu-item .icon {
+          font-size: 24px;
+        }
+
+        .menu-divider {
+          margin-inline: 24px;
+        }
+      }
+
+      /* On phones the menu sheet dims the page, so the page should act covered too: a tap
+         outside lands on the page itself, which only closes the sheet, and nothing underneath
+         reacts (no ripple, press or click). The popover's backdrop doesn't block pointer
+         input on its own. Desktop dropdowns don't dim anything, so clicks there go through. */
+      @media (max-width: 599px) {
+        body:has(.menu:popover-open) :not(.menu, .menu *) {
+          pointer-events: none !important;
+        }
+
+        .menu:popover-open {
+          pointer-events: auto;
+        }
+      }
+
+      /* Snackbar */
+      .snackbar {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: calc(100vw - 32px);
+        min-height: 48px;
+        padding: 6px 8px 6px 16px;
+        border-radius: var(--shape-xs);
+        background: var(--inverse-surface);
+        color: var(--inverse-on-surface);
+        box-shadow: var(--elevation-3);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+        opacity: 0;
+        visibility: hidden;
+        translate: -50% 16px;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring),
+          visibility 0s linear var(--effects-ms);
+      }
+
+      .snackbar.show {
+        opacity: 1;
+        visibility: visible;
+        translate: -50% 0;
+        transition:
+          opacity var(--effects-ms) linear,
+          translate var(--spring-ms) var(--spring);
+      }
+
+      .snackbar:has(> #snackbar-action[hidden]) {
+        padding-inline: 16px;
+      }
+
+      #snackbar-text {
+        flex: 1;
+        padding: 8px 0;
+      }
+
+      .snackbar .btn-text {
+        color: var(--inverse-primary);
+      }
+
+      /* Circular reveal when toggling the theme */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+
+      .reveal::view-transition-new(root) {
+        animation: reveal 500ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      @keyframes reveal {
+        from {
+          clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+        }
+        to {
+          clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after,
+        ::backdrop {
+          animation-duration: 1ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+
+    <!-- Apply saved theme before first paint -->
+    <script>
+      try {
+        const saved = JSON.parse(localStorage.getItem('image-converter') || 'null');
+        const theme = saved && saved.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
+  </head>
+
+  <body>
+    <header class="appbar" id="appbar">
+      <div class="appbar-inner">
+        <div class="top">
+          <h1 class="top-title">Image Converter</h1>
+          <button
+            class="icon-btn state"
+            id="more-btn"
+            type="button"
+            aria-label="More options"
+            title="More options"
+            aria-haspopup="menu"
+          >
+            <span class="icon" aria-hidden="true">more_vert</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="studio">
+        <div class="stage-col">
+          <div class="stage-wrap">
+            <div class="stage" id="stage" role="button" tabindex="0" aria-label="Choose images">
+              <canvas class="stage-canvas" id="preview" hidden></canvas>
+              <div class="stage-empty" id="stage-empty">
+                <span class="icon" id="stage-empty-icon" aria-hidden="true"
+                  >add_photo_alternate</span
+                >
+                <span id="stage-empty-text">Drop images, paste them, or choose some</span>
+              </div>
+            </div>
+            <div class="stage-tools" id="stage-tools" hidden>
+              <button
+                class="icon-btn state"
+                type="button"
+                data-action="compare"
+                aria-pressed="false"
+                aria-label="Show original"
+                title="Show original"
+              >
+                <span class="icon" aria-hidden="true">compare</span>
+              </button>
+              <button
+                class="icon-btn state"
+                type="button"
+                data-action="view"
+                aria-label="Open larger preview"
+                title="Open larger preview"
+              >
+                <span class="icon" aria-hidden="true">open_in_full</span>
+              </button>
+            </div>
+          </div>
+          <div class="strip" id="strip" role="group" aria-label="Images" hidden>
+            <button
+              class="thumb add state"
+              id="add-thumb"
+              type="button"
+              aria-label="Add images"
+              title="Add images"
+            >
+              <span class="icon" aria-hidden="true">add</span>
+            </button>
+          </div>
+          <p class="file-name" id="file-name" hidden>
+            <span class="file-title"
+              ><span id="file-title"></span><span id="file-position"></span
+            ></span>
+            <span id="file-detail"></span>
+          </p>
+          <div class="stage-actions">
+            <button class="btn btn-filled state" type="button" data-action="download" disabled>
+              <span class="icon" aria-hidden="true">download</span
+              ><span data-download-label>Download JPEG</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings">
+          <h2 class="sect-title">Adjust</h2>
+          <div class="group">
+            <label class="row">
+              <span class="row-text">
+                <span>Resize</span>
+                <span class="row-sub"
+                  >Scale images up or down to fit a size, keeping their shape</span
+                >
+              </span>
+              <input class="switch" type="checkbox" role="switch" id="resize" />
+            </label>
+            <div class="row row-stack" id="box-row">
+              <div class="fields">
+                <label class="field">
+                  <input
+                    type="number"
+                    id="resize-width"
+                    min="1"
+                    max="16384"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder=" "
+                  />
+                  <span class="field-label">Width</span>
+                  <span class="field-suffix" aria-hidden="true">px</span>
+                </label>
+                <label class="field">
+                  <input
+                    type="number"
+                    id="resize-height"
+                    min="1"
+                    max="16384"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder=" "
+                  />
+                  <span class="field-label">Height</span>
+                  <span class="field-suffix" aria-hidden="true">px</span>
+                </label>
+              </div>
+              <p class="row-note">Leave one empty to set only the other. Up to 16384 px each.</p>
+            </div>
+            <div class="row row-stack" id="target-row">
+              <span class="row-text">
+                <span>Compress</span>
+              </span>
+              <div class="seg" role="radiogroup" aria-label="Compress">
+                <label><input type="radio" name="target" value="off" checked />Off</label>
+                <label><input type="radio" name="target" value="quality" />Quality</label>
+                <label><input type="radio" name="target" value="size" />Size</label>
+                <label><input type="radio" name="target" value="lossless" />Lossless</label>
+              </div>
+            </div>
+            <div class="row row-stack" id="quality-row">
+              <span class="row-text">
+                <span>Compression mode: Quality</span>
+              </span>
+              <div class="seg" role="radiogroup" aria-label="Quality presets">
+                <label><input type="radio" name="qualityPreset" value="20" />Low</label>
+                <label><input type="radio" name="qualityPreset" value="50" />Medium</label>
+                <label><input type="radio" name="qualityPreset" value="75" />High</label>
+              </div>
+              <div class="slider-wrap">
+                <input
+                  class="slider"
+                  type="range"
+                  id="quality"
+                  min="1"
+                  max="100"
+                  step="1"
+                  aria-label="Quality"
+                />
+                <span class="slider-value" id="quality-value"></span>
+              </div>
+            </div>
+            <div class="row row-stack" id="size-row">
+              <span class="row-text">
+                <span>Compression mode: Size</span>
+              </span>
+              <div class="seg" role="radiogroup" aria-label="File size presets">
+                <label><input type="radio" name="sizePreset" value="200" />Smallest</label>
+                <label><input type="radio" name="sizePreset" value="500" />Small</label>
+                <label><input type="radio" name="sizePreset" value="1000" />Medium</label>
+                <label><input type="radio" name="sizePreset" value="2000" />Large</label>
+              </div>
+              <label class="field">
+                <input
+                  type="number"
+                  id="target-kb"
+                  min="1"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder=" "
+                />
+                <span class="field-label">At most</span>
+                <span class="field-suffix" aria-hidden="true">KB</span>
+              </label>
+            </div>
+          </div>
+
+          <h2 class="sect-title">Output</h2>
+          <div class="group">
+            <div class="row row-stack">
+              <span class="row-text">
+                <span>Format</span>
+              </span>
+              <div class="seg" role="radiogroup" aria-label="Format">
+                <label><input type="radio" name="format" value="jpeg" checked />JPEG</label>
+                <label><input type="radio" name="format" value="png" />PNG</label>
+                <label><input type="radio" name="format" value="webp" />WebP</label>
+                <label><input type="radio" name="format" value="avif" />AVIF</label>
+              </div>
+              <p class="row-note" id="format-note"></p>
+            </div>
+            <div class="row row-stack" id="save-as-row" hidden>
+              <span class="row-text">
+                <span>Download all as</span>
+              </span>
+              <div class="seg" role="radiogroup" aria-label="Download all as">
+                <label><input type="radio" name="saveAs" value="zip" checked />ZIP file</label>
+                <label><input type="radio" name="saveAs" value="files" />Separate files</label>
+              </div>
+            </div>
+          </div>
+
+          <p class="note">
+            Uses the encoders from jSquash. Each one downloads the first time you use its format,
+            about 3.5 MB for AVIF and under 400 KB for the others, and stays on your device. Images
+            never leave your device, and metadata such as location is left out.
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <div class="actionbar">
+      <button class="btn btn-filled state" type="button" data-action="download" disabled>
+        <span class="icon" aria-hidden="true">download</span
+        ><span data-download-label>Download JPEG</span>
+      </button>
+    </div>
+
+    <!-- Menus -->
+    <div class="menu" id="more-menu" popover role="menu">
+      <button class="menu-item state" id="clear-btn" type="button" role="menuitem">
+        <span class="icon" aria-hidden="true">delete_sweep</span>Clear
+      </button>
+      <button class="menu-item state" id="delete-encoders-btn" type="button" role="menuitem">
+        <span class="icon" aria-hidden="true">delete</span>Delete encoders
+        <span class="menu-trail" id="encoders-size"></span>
+      </button>
+      <div class="menu-divider" role="separator"></div>
+      <button class="menu-item state" id="theme-btn" type="button" role="menuitem">
+        <span class="icon" id="theme-icon" aria-hidden="true">brightness_auto</span>Theme
+        <span class="menu-trail" id="theme-name">Auto</span>
+      </button>
+      <button class="menu-item state" type="button" role="menuitem" data-action="about">
+        <span class="icon" aria-hidden="true">info</span>About
+      </button>
+    </div>
+
+    <!-- Larger preview -->
+    <dialog class="dialog viewer" id="viewer" aria-labelledby="viewer-title">
+      <div class="viewer-head">
+        <h2 class="viewer-title" id="viewer-title"></h2>
+        <button
+          class="icon-btn state"
+          type="button"
+          data-action="compare"
+          aria-pressed="false"
+          aria-label="Show original"
+          title="Show original"
+        >
+          <span class="icon" aria-hidden="true">compare</span>
+        </button>
+        <button class="icon-btn state" type="button" data-close aria-label="Close" title="Close">
+          <span class="icon" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <div class="viewer-body" id="viewer-body">
+        <canvas class="viewer-canvas" id="viewer-canvas"></canvas>
+      </div>
+      <div class="actionbar">
+        <button class="btn btn-filled state" type="button" data-action="download-one" disabled>
+          <span class="icon" aria-hidden="true">download</span
+          ><span data-format-label>Download JPEG</span>
+        </button>
+      </div>
+    </dialog>
+
+    <dialog class="dialog bottom-sheet" id="about" aria-labelledby="about-title">
+      <div class="about-head">
+        <img class="about-icon" src="favicon.svg" alt="" width="64" height="64" />
+        <h2 class="dialog-title" id="about-title">Image Converter</h2>
+        <p class="about-desc">
+          Convert images to JPEG, PNG, WebP or AVIF. Runs on your device, so images never leave it.
+        </p>
+      </div>
+      <div class="about-list">
+        <div class="about-row">
+          <span class="icon" aria-hidden="true">person</span>
+          <span class="about-text"><small>Made by</small>Việt Anh Bùi</span>
+        </div>
+        <a
+          class="about-row state"
+          href="https://github.com/vietanhbui2000/mini-apps/tree/main/image-converter"
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="icon" aria-hidden="true">code</span>
+          <span class="about-text"><small>Source code</small>GitHub</span>
+          <span class="icon trail" aria-hidden="true">arrow_outward</span>
+        </a>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-text state" type="button" data-close>Close</button>
+      </div>
+    </dialog>
+
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar" role="status" aria-live="polite">
+      <span id="snackbar-text"></span>
+      <button class="btn btn-text state" id="snackbar-action" type="button"></button>
+    </div>
+
+    <input type="file" id="file-input" accept="image/*,.heic,.heif" multiple hidden />
+    <div id="probe" hidden></div>
+
+    <!-- Converts off the main thread, so the page stays responsive while an encoder works. It's
+         started from a Blob URL to keep the app in one file. The page sends one image at a time
+         and stops the worker to cancel one. -->
+    <script type="text/js-worker" id="worker-src">
+      // jSquash packages the Squoosh codecs as WebAssembly. jsDelivr's +esm build resolves
+      // their imports and points each one at its .wasm file on the CDN.
+      const CDN = 'https://cdn.jsdelivr.net/npm/@jsquash';
+      const ENCODERS = {
+        webp: `${CDN}/webp@1.5.0/encode.js/+esm`,
+        avif: `${CDN}/avif@2.1.1/encode.js/+esm`,
+        jpeg: `${CDN}/jpeg@1.6.0/encode.js/+esm`,
+        png: `${CDN}/oxipng@2.3.0/optimise.js/+esm`,
+      };
+      const RESIZER = `${CDN}/resize@2.1.1/+esm`;
+      // The .wasm files, nearly all of each download. WebP, AVIF and JPEG name theirs (with or
+      // without SIMD) inside a folder; OxiPNG and the resizer have one file each.
+      const WASM_DIRS = {
+        webp: `${CDN}/webp@1.5.0/codec/enc/`,
+        avif: `${CDN}/avif@2.1.1/codec/enc/`,
+        jpeg: `${CDN}/jpeg@1.6.0/codec/enc/`,
+      };
+      const PNG_WASM = `${CDN}/oxipng@2.3.0/codec/pkg/squoosh_oxipng_bg.wasm`;
+      const RESIZE_WASM = `${CDN}/resize@2.1.1/lib/resize/pkg/squoosh_resize_bg.wasm`;
+      const CODEC_CACHE = 'image-converter-codecs'; // the page deletes it from the ⋮ menu
+      const ready = {};
+      let resizer = null;
+
+      // The .wasm files are kept in the app's own Cache Storage, not just the browser's HTTP
+      // cache, because a page can delete one but not the other. With storage blocked, they
+      // come from the network each time.
+      async function wasmResponse(url) {
+        let cache = null;
+        try {
+          cache = await caches.open(CODEC_CACHE);
+          const hit = await cache.match(url);
+          if (hit) return hit;
+        } catch (err) {
+          cache = null;
+        }
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} for ${url}`);
+        await cache?.put(url, response.clone()).catch(() => {});
+        return response;
+      }
+
+      // Emscripten codecs pick their .wasm file through locateFile, then hand loading it to
+      // instantiateWasm. A failed load goes to `fail`: the library itself would wait forever.
+      function emscriptenOptions(dir, fail) {
+        let url = '';
+        return {
+          locateFile: (name) => (url = new URL(name, dir).href),
+          instantiateWasm(imports, receiveInstance) {
+            wasmResponse(url)
+              .then((response) => response.arrayBuffer())
+              .then((bytes) => WebAssembly.instantiate(bytes, imports))
+              .then(({ instance, module }) => receiveInstance(instance, module))
+              .catch(fail);
+            return {}; // filled in once receiveInstance runs
+          },
+        };
+      }
+
+      // Each encoder loads on first use, then a 1-pixel encode checks it works, so a failed
+      // download shows up here as a load error rather than as a bad image.
+      function encoder(format) {
+        ready[format] ??= (async () => {
+          const { default: encode, init } = await import(ENCODERS[format]);
+          let fail;
+          const failure = new Promise((_, reject) => (fail = reject));
+          // init must finish before the first encode: WebP's and AVIF's are async, and an encode
+          // that finds no module yet starts its own, which skips this cache.
+          const options =
+            format === 'png'
+              ? await wasmResponse(PNG_WASM)
+              : emscriptenOptions(WASM_DIRS[format], fail);
+          await Promise.race([init(options), failure]);
+          await Promise.race([encode(new ImageData(1, 1), {}), failure]);
+          return encode;
+        })();
+        return ready[format];
+      }
+
+      // Loads like an encoder, on the first image to resize.
+      function loadResizer() {
+        resizer ??= (async () => {
+          const { default: resize, initResize } = await import(RESIZER);
+          await initResize(await wasmResponse(RESIZE_WASM));
+          return resize;
+        })();
+        return resizer;
+      }
+
+      // The browser's own decoder reads the file, so anything it can show converts (HEIC only
+      // on Safari). It applies the EXIF rotation; the metadata itself goes no further. JPEG has
+      // no transparency, so transparent areas go on white instead of turning black.
+      async function decode(file, flatten) {
+        const bitmap = await createImageBitmap(file);
+        const { width, height } = bitmap;
+        const canvas = new OffscreenCanvas(width, height);
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (flatten) {
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, width, height);
+        }
+        ctx.drawImage(bitmap, 0, 0);
+        bitmap.close();
+        return ctx.getImageData(0, 0, width, height);
+      }
+
+      // `mode` is how to compress: 'off' converts at the highest quality, 'lossless' keeps
+      // every pixel, and anything else uses `quality`.
+      function encodeOptions({ format, quality, mode }) {
+        if (format === 'png') return { level: 2 }; // OxiPNG's default effort
+        if (mode === 'lossless') return format === 'webp' ? { lossless: 1 } : { lossless: true };
+        return { quality: mode === 'off' ? 100 : quality };
+      }
+
+      // A plain PNG from the browser's own encoder, for PNG with compression off: no OxiPNG
+      // download and no optimizing pass.
+      async function encodePlainPng(image) {
+        const canvas = new OffscreenCanvas(image.width, image.height);
+        canvas.getContext('2d').putImageData(image, 0, 0);
+        return (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer();
+      }
+
+      // Scales the image up or down to fit the box, keeping its shape. With one side empty, the
+      // other sets the size alone. Lanczos3 in linear light, as Squoosh does it, keeps detail
+      // sharper than a canvas would in both directions.
+      function fit(resize, image, box) {
+        const scale = Math.min(
+          box.width ? box.width / image.width : Infinity,
+          box.height ? box.height / image.height : Infinity,
+        );
+        if (scale === 1) return image;
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        return resize(image, { width, height });
+      }
+
+      // No encoder takes a byte budget, so this looks for the highest quality whose file fits:
+      // a binary search over 1 to 100, at most 7 encodes. When even quality 1 is too big, that
+      // smallest file comes back marked `over`.
+      async function encodeToSize(encode, image, format, target) {
+        let lo = 1;
+        let hi = 100;
+        let best = null;
+        let smallest = null;
+        while (lo <= hi) {
+          const quality = Math.floor((lo + hi) / 2);
+          const buffer = await encode(image, encodeOptions({ format, quality }));
+          if (buffer.byteLength <= target) {
+            best = { buffer, quality };
+            lo = quality + 1;
+          } else {
+            smallest = { buffer, quality };
+            hi = quality - 1;
+          }
+        }
+        return best || { ...smallest, over: true };
+      }
+
+      // `stage` tells the page what failed: a library download, reading the file, or encoding.
+      self.onmessage = async ({ data: job }) => {
+        const { id, key } = job;
+        let stage = 'load';
+        try {
+          const plain = job.format === 'png' && job.mode === 'off';
+          const encode = plain ? encodePlainPng : await encoder(job.format);
+          const resize = job.box && (await loadResizer());
+          stage = 'decode';
+          const source = await decode(job.file, job.format === 'jpeg');
+          stage = 'encode';
+          const image = job.box ? await fit(resize, source, job.box) : source;
+          const { buffer, quality, over } = job.targetBytes
+            ? await encodeToSize(encode, image, job.format, job.targetBytes)
+            : { buffer: await encode(image, encodeOptions(job)) };
+          postMessage({
+            type: 'result',
+            id,
+            key,
+            buffer,
+            width: image.width,
+            height: image.height,
+            sourceWidth: source.width,
+            sourceHeight: source.height,
+            quality,
+            over,
+          });
+        } catch (err) {
+          postMessage({ type: 'error', id, stage, message: String(err?.message || err) });
+        }
+      };
+    </script>
+
+    <script>
+      // --- Constants & Config ---
+      const STORE_KEY = 'image-converter';
+      const CODEC_CACHE = 'image-converter-codecs'; // the worker's .wasm files
+      // `lossy` formats have a quality setting; `lossless` ones can keep every pixel. PNG is
+      // always lossless: its Lossless mode only makes the file smaller, with OxiPNG.
+      const FORMATS = {
+        webp: {
+          type: 'image/webp',
+          ext: 'webp',
+          label: 'WebP',
+          lossy: true,
+          lossless: true,
+          note: 'Web-native, small and fast',
+        },
+        avif: {
+          type: 'image/avif',
+          ext: 'avif',
+          label: 'AVIF',
+          lossy: true,
+          lossless: true,
+          note: 'Best quality even when compressed, less supported',
+        },
+        jpeg: {
+          type: 'image/jpeg',
+          ext: 'jpg',
+          label: 'JPEG',
+          lossy: true,
+          lossless: false,
+          note: 'Lossy, large file size, best for photos',
+        },
+        png: {
+          type: 'image/png',
+          ext: 'png',
+          label: 'PNG',
+          lossy: false,
+          lossless: true,
+          note: 'Lossless, smaller file size, best for graphics',
+        },
+      };
+      // Each format keeps its own quality: the scales differ, and AVIF at 50 looks about like
+      // JPEG at 75. These are the encoders' own defaults.
+      const DEFAULT_PREFS = {
+        theme: 'auto',
+        format: 'jpeg',
+        quality: { webp: 75, avif: 50, jpeg: 75 },
+        target: 'off', // compress by 'off' | 'quality' | 'size' | 'lossless'
+        targetKb: 200,
+        resize: false,
+        width: 2000, // px of the box images fit; null leaves that side free
+        height: 2000,
+        saveAs: 'zip', // several images: 'zip' | 'files'
+      };
+      const TARGETS = ['off', 'quality', 'size', 'lossless'];
+      const MAX_SIDE = 16384; // the largest image browsers decode
+      const SAVE_AS = ['zip', 'files'];
+      // Browsers drop downloads started in the same instant, so separate files go out spaced.
+      const DOWNLOAD_GAP_MS = 250;
+      const PREVIEW_MAX = 2048; // sharp on 2x screens at the stage's widest
+      const STRIP_FADE = 32; // px, matches .strip.more-start / .more-end
+      const MAX_ZOOM = 8; // the viewer's, times the fitted size
+      const TAP_ZOOM = 2.5; // a double tap's
+      const STATUS_LABELS = {
+        waiting: 'waiting',
+        working: 'converting',
+        done: 'done',
+        failed: 'failed',
+      };
+      const THEME_CYCLE = ['auto', 'light', 'dark'];
+      const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
+      const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+      const DARK_QUERY = matchMedia('(prefers-color-scheme: dark)');
+      const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
+
+      // --- State Management ---
+      let prefs = loadPrefs();
+      let snackbarTimer = 0;
+      let snackbarFrame = 0;
+      let dragDepth = 0;
+      let ignorePopstate = 0;
+      const dialogStack = [];
+      let worker = null;
+      let showOriginal = false;
+      // The viewer's zoom: the canvas's scale, and its offset from where it sits unzoomed.
+      const view = { scale: 1, x: 0, y: 0 };
+      const viewPointers = new Map(); // fingers or the mouse on the viewer, by pointerId
+      let lastTap = null; // { time, x, y } of the last quick tap, for double-tap zoom
+      let gestureScale = 1; // the zoom when a Safari trackpad pinch began
+      // Every image added, in order. Each is { id, name, file, url (for its thumbnail),
+      // output ({ blob, key, ext, width, height } from the last conversion), original and
+      // preview (ImageBitmaps of the file and the output, kept only while it's in the preview),
+      // status ('waiting' | 'working' | 'done' | 'failed'), error, unreadable (the browser
+      // can't decode it, so new settings won't help), el (its thumbnail) }.
+      let images = [];
+      let current = null; // the image in the preview
+      let working = null; // the image in the encoder now
+      let nextId = 0;
+      let following = true; // the preview moves to each image as the encoder starts on it
+      let selectToken = 0; // the newest pick; an older one still decoding gives way
+      let selecting = null; // the image whose pick is decoding
+      let stalled = false; // an encoder couldn't download; waiting images resume on Retry
+      let cleared = []; // images taken away by Clear, still restorable with Undo
+      let crcTable = null; // for ZIP checksums, built on the first download
+
+      // --- DOM Elements ---
+      const els = {
+        appbar: document.getElementById('appbar'),
+        themeBtn: document.getElementById('theme-btn'),
+        themeIcon: document.getElementById('theme-icon'),
+        themeName: document.getElementById('theme-name'),
+        moreBtn: document.getElementById('more-btn'),
+        moreMenu: document.getElementById('more-menu'),
+        clearBtn: document.getElementById('clear-btn'),
+        deleteEncodersBtn: document.getElementById('delete-encoders-btn'),
+        encodersSize: document.getElementById('encoders-size'),
+        strip: document.getElementById('strip'),
+        addThumb: document.getElementById('add-thumb'),
+        downloadOneBtns: document.querySelectorAll('[data-action="download-one"]'),
+        formatLabels: document.querySelectorAll('[data-format-label]'),
+        saveAsRow: document.getElementById('save-as-row'),
+        about: document.getElementById('about'),
+        themeColorMetas: document.querySelectorAll('meta[name="theme-color"]'),
+        stage: document.getElementById('stage'),
+        preview: document.getElementById('preview'),
+        stageEmpty: document.getElementById('stage-empty'),
+        stageEmptyIcon: document.getElementById('stage-empty-icon'),
+        stageEmptyText: document.getElementById('stage-empty-text'),
+        stageTools: document.getElementById('stage-tools'),
+        stageToolBtns: document.querySelectorAll('#stage-tools button'),
+        compareBtns: document.querySelectorAll('[data-action="compare"]'),
+        viewer: document.getElementById('viewer'),
+        viewerTitle: document.getElementById('viewer-title'),
+        viewerBody: document.getElementById('viewer-body'),
+        viewerCanvas: document.getElementById('viewer-canvas'),
+        status: document.getElementById('status'),
+        fileName: document.getElementById('file-name'),
+        fileTitle: document.getElementById('file-title'),
+        filePosition: document.getElementById('file-position'),
+        fileDetail: document.getElementById('file-detail'),
+        fileInput: document.getElementById('file-input'),
+        downloadBtns: document.querySelectorAll('[data-action="download"]'),
+        downloadLabels: document.querySelectorAll('[data-download-label]'),
+        formatNote: document.getElementById('format-note'),
+        qualityRow: document.getElementById('quality-row'),
+        quality: document.getElementById('quality'),
+        qualityValue: document.getElementById('quality-value'),
+        targetRow: document.getElementById('target-row'),
+        losslessOption: document.querySelector('input[name="target"][value="lossless"]'),
+        sizeRow: document.getElementById('size-row'),
+        targetKb: document.getElementById('target-kb'),
+        resize: document.getElementById('resize'),
+        boxRow: document.getElementById('box-row'),
+        resizeWidth: document.getElementById('resize-width'),
+        resizeHeight: document.getElementById('resize-height'),
+        workerSrc: document.getElementById('worker-src'),
+        snackbar: document.getElementById('snackbar'),
+        snackbarText: document.getElementById('snackbar-text'),
+        snackbarAction: document.getElementById('snackbar-action'),
+        probe: document.getElementById('probe'),
+      };
+
+      // --- Initialization ---
+      function init() {
+        applyTheme();
+        addLoaderKeyframes();
+        renderSettings();
+        renderAll();
+        bindEvents();
+      }
+
+      // --- Event Listeners ---
+      function bindEvents() {
+        bindSheet(els.moreMenu, () => els.moreMenu.hidePopover());
+        bindSheet(els.about, () => closeDialog(els.about));
+        document.addEventListener('pointerdown', addRipple);
+        DARK_QUERY.addEventListener('change', applyTheme);
+        window.addEventListener(
+          'scroll',
+          () => {
+            const scrolled = window.scrollY > 0;
+            els.appbar.classList.toggle('scrolled', scrolled);
+            document.body.classList.toggle('scrolled', scrolled);
+          },
+          { passive: true },
+        );
+        els.themeBtn.addEventListener('click', cycleTheme);
+        els.moreBtn.addEventListener('click', () => {
+          renderEncoders();
+          toggleMenu(els.moreMenu, els.moreBtn);
+        });
+        els.clearBtn.addEventListener('click', clearImages);
+        els.deleteEncodersBtn.addEventListener('click', deleteEncoders);
+        els.addThumb.addEventListener('click', () => els.fileInput.click());
+        els.strip.addEventListener('keydown', handleStripKeydown);
+        els.strip.addEventListener('scroll', renderStripEdges, { passive: true });
+        new ResizeObserver(renderStripEdges).observe(els.strip);
+
+        // Image input: click, keyboard, drop anywhere on the page, or paste. Each adds to the
+        // images already there.
+        els.stage.addEventListener('click', () => {
+          if (!current) els.fileInput.click();
+        });
+        els.stage.addEventListener('keydown', (e) => {
+          if (!current && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            els.fileInput.click();
+          }
+        });
+        els.fileInput.addEventListener('change', () => {
+          const files = [...els.fileInput.files];
+          els.fileInput.value = '';
+          addFiles(files);
+        });
+        document.addEventListener('dragenter', (e) => {
+          if (!e.dataTransfer.types.includes('Files') || dialogStack.length) return;
+          dragDepth++;
+          document.body.classList.add('dragging');
+        });
+        document.addEventListener('dragleave', () => {
+          if (--dragDepth <= 0) stopDragging();
+        });
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+          e.preventDefault();
+          stopDragging();
+          if (!dialogStack.length) addFiles([...e.dataTransfer.files]);
+        });
+        document.addEventListener('paste', (e) => {
+          const files = [...e.clipboardData.files].filter(isValidImageFile);
+          if (files.length && !dialogStack.length) addFiles(files);
+        });
+
+        document.addEventListener('click', (e) => {
+          if (e.target.closest('[data-action="compare"]')) toggleCompare();
+          else if (e.target.closest('[data-action="view"]')) openViewer();
+          else if (e.target.closest('[data-action="download"]')) downloadAll();
+          else if (e.target.closest('[data-action="download-one"]')) downloadOne();
+          else if (e.target.closest('[data-action="about"]')) openDialog(els.about);
+        });
+
+        // Menu
+        els.moreMenu.addEventListener('keydown', handleMenuKeydown);
+        els.moreMenu.addEventListener('click', (e) => {
+          if (e.target.closest('.menu-item:not(#theme-btn)')) els.moreMenu.hidePopover();
+        });
+
+        // Dialogs
+        bindBackdropClose(els.about);
+        for (const dialog of [els.about, els.viewer]) {
+          dialog.addEventListener('close', () => onDialogClosed(dialog));
+          dialog.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close]')) closeDialog(dialog);
+          });
+        }
+        // Viewer zoom, on the image alone: pinch, a trackpad pinch (ctrl + wheel, or Safari's
+        // gesture events), or a double tap or click. Dragging and scrolling pan once zoomed.
+        els.viewerBody.addEventListener('pointerdown', (e) => {
+          if (e.button !== 0) return;
+          els.viewerBody.setPointerCapture(e.pointerId);
+          const at = { x: e.clientX, y: e.clientY };
+          viewPointers.set(e.pointerId, { ...at, start: at, time: e.timeStamp });
+        });
+        els.viewerBody.addEventListener('pointermove', moveViewPointer);
+        els.viewerBody.addEventListener('pointerup', endViewPointer);
+        els.viewerBody.addEventListener('pointercancel', (e) => viewPointers.delete(e.pointerId));
+        els.viewer.addEventListener(
+          'wheel',
+          (e) => {
+            e.preventDefault();
+            const lines = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
+            const dx = e.deltaX * lines;
+            const dy = e.deltaY * lines;
+            if (e.ctrlKey) zoomViewAt(e.clientX, e.clientY, view.scale * Math.exp(-dy / 100));
+            else setView(view.scale, view.x - dx, view.y - dy);
+          },
+          { passive: false },
+        );
+        els.viewer.addEventListener('gesturestart', (e) => {
+          e.preventDefault();
+          gestureScale = view.scale;
+        });
+        els.viewer.addEventListener('gesturechange', (e) => {
+          e.preventDefault();
+          // iOS sends these alongside the touches, which zoom already.
+          if (!viewPointers.size) zoomViewAt(e.clientX, e.clientY, gestureScale * e.scale);
+        });
+        window.addEventListener('resize', () => {
+          if (els.viewer.open) setView(view.scale, view.x, view.y);
+        });
+        window.addEventListener('popstate', () => {
+          if (ignorePopstate) return ignorePopstate--;
+          const top = dialogStack.at(-1);
+          if (top) {
+            dialogStack.pop();
+            top.close();
+          }
+        });
+
+        // Settings apply at once and are saved. The slider shows its value while it moves and
+        // converts again only when let go.
+        document.addEventListener('change', handleChange);
+        els.quality.addEventListener('input', () => renderQuality(Number(els.quality.value)));
+
+        els.snackbarAction.addEventListener('click', () => {
+          const action = els.snackbarAction.onAction;
+          hideSnackbar();
+          action?.();
+        });
+      }
+
+      function handleChange(e) {
+        const t = e.target;
+        if (t.name === 'format') setPrefs({ format: t.value });
+        else if (t === els.quality) {
+          setPrefs({ quality: { ...prefs.quality, [prefs.format]: Number(t.value) } });
+        } else if (t.name === 'qualityPreset') {
+          setPrefs({ quality: { ...prefs.quality, [prefs.format]: Number(t.value) } });
+        } else if (t.name === 'sizePreset') setPrefs({ targetKb: Number(t.value) });
+        else if (t.name === 'target') setPrefs({ target: t.value });
+        else if (t === els.targetKb) setNumberPref('targetKb', t.value, false);
+        else if (t === els.resize) setPrefs({ resize: t.checked });
+        else if (t === els.resizeWidth) setNumberPref('width', t.value, true, MAX_SIDE);
+        else if (t === els.resizeHeight) setNumberPref('height', t.value, true, MAX_SIDE);
+        else if (t.name === 'saveAs') setPrefs({ saveAs: t.value });
+      }
+
+      // Whole numbers from 1 up to `max`. A side of the resize box can also be left empty;
+      // anything else puts the field back to the value in use.
+      function setNumberPref(key, text, emptyAllowed, max = Infinity) {
+        const value = text.trim() === '' && emptyAllowed ? null : Number(text);
+        if (value === null || (isPositiveInt(value) && value <= max)) setPrefs({ [key]: value });
+        else renderSettings();
+      }
+
+      // The strip is one Tab stop, the image in the preview; arrows, Home and End move along it.
+      function handleStripKeydown(e) {
+        const items = [...els.strip.children];
+        const i = items.indexOf(document.activeElement);
+        const next = { ArrowLeft: i - 1, ArrowRight: i + 1, Home: 0, End: items.length - 1 }[e.key];
+        if (i < 0 || next === undefined) return;
+        e.preventDefault();
+        const el = items[Math.max(0, Math.min(items.length - 1, next))];
+        el.focus();
+        revealThumb(el);
+      }
+
+      function stopDragging() {
+        dragDepth = 0;
+        document.body.classList.remove('dragging');
+      }
+
+      // --- Core Logic ---
+
+      function loadPrefs() {
+        return sanitizePrefs(readJson(STORE_KEY));
+      }
+
+      // Merges defaults and type-checks each field; unknown keys are dropped.
+      function sanitizePrefs(saved) {
+        const p = { ...DEFAULT_PREFS, quality: { ...DEFAULT_PREFS.quality } };
+        if (!saved || typeof saved !== 'object') return p;
+        if (THEME_CYCLE.includes(saved.theme)) p.theme = saved.theme;
+        if (saved.format in FORMATS) p.format = saved.format;
+        for (const f of Object.keys(p.quality)) {
+          const q = saved.quality?.[f];
+          if (Number.isInteger(q) && q >= 1 && q <= 100) p.quality[f] = q;
+        }
+        if (TARGETS.includes(saved.target)) p.target = saved.target;
+        if (isPositiveInt(saved.targetKb)) p.targetKb = saved.targetKb;
+        if (typeof saved.resize === 'boolean') p.resize = saved.resize;
+        for (const side of ['width', 'height']) {
+          const v = saved[side];
+          if (v === null || (isPositiveInt(v) && v <= MAX_SIDE)) p[side] = v;
+        }
+        if (SAVE_AS.includes(saved.saveAs)) p.saveAs = saved.saveAs;
+        return p;
+      }
+
+      // A change to anything that shapes the output converts every image again.
+      function setPrefs(changes) {
+        const before = settingsKey();
+        prefs = { ...prefs, ...changes };
+        writeJson(STORE_KEY, prefs);
+        renderSettings();
+        if (settingsKey() !== before) reconvert();
+        renderAll();
+      }
+
+      // How the chosen format compresses. The saved choice stays as it is, so it comes back
+      // with a format that has it: PNG, with no quality, uses Lossless in place of Quality or
+      // File size, and JPEG, which can't be lossless, uses Quality.
+      function effectiveTarget() {
+        const format = FORMATS[prefs.format];
+        const { target } = prefs;
+        if (target === 'off') return 'off';
+        if (!format.lossy) return 'lossless';
+        if (target === 'lossless' && !format.lossless) return 'quality';
+        return target;
+      }
+
+      function isSized() {
+        return effectiveTarget() === 'size';
+      }
+
+      // The box images scale to fit, or null when they keep their size.
+      function resizeBox() {
+        const { resize, width, height } = prefs;
+        return resize && (width || height) ? { width, height } : null;
+      }
+
+      // Names the output the current settings make, so a result can be matched to them. The
+      // format comes first: showResult() reads it back.
+      function settingsKey() {
+        const { format } = prefs;
+        const parts = [format];
+        const target = effectiveTarget();
+        if (target === 'size') parts.push(`${prefs.targetKb}kb`);
+        else if (target === 'quality') parts.push(`q${prefs.quality[format]}`);
+        else parts.push(target);
+        const box = resizeBox();
+        if (box) parts.push(`${box.width || ''}x${box.height || ''}`);
+        return parts.join(':');
+      }
+
+      // Conversion ----------------------------------------------------------------------
+
+      function getWorker() {
+        if (worker) return worker;
+        const url = URL.createObjectURL(
+          new Blob([els.workerSrc.textContent], { type: 'text/javascript' }),
+        );
+        worker = new Worker(url, { type: 'module' });
+        URL.revokeObjectURL(url);
+        worker.addEventListener('message', onWorkerMessage);
+        // The worker itself failed to start. Retry starts a new one.
+        worker.addEventListener('error', (e) => {
+          console.error(e);
+          stallQueue('Couldn’t start the encoder in this browser');
+        });
+        return worker;
+      }
+
+      // Ends the worker, and with it any conversion in progress. A failed encoder download
+      // stays failed inside a worker, so a retry needs a new one too.
+      function stopWorker() {
+        worker?.terminate();
+        worker = null;
+      }
+
+      function onWorkerMessage({ data }) {
+        const entry = working;
+        if (!entry || data.id !== entry.id) return;
+        if (data.type === 'result') return showResult(entry, data);
+        console.error(data.message);
+        if (data.stage === 'load') {
+          stallQueue('Couldn’t download the encoder. Check your connection and try again.');
+        } else {
+          failImage(entry, data.stage === 'decode');
+        }
+      }
+
+      // Images --------------------------------------------------------------------------
+
+      // Adds images after the ones already there, shows the first new one, and puts them in
+      // line for the encoder. Files that aren't images are skipped.
+      function addFiles(files) {
+        const valid = files.filter(isValidImageFile);
+        const skipped = files.length - valid.length;
+        if (!valid.length) {
+          if (skipped) showError('Choose image files');
+          return;
+        }
+        const added = valid.map((file) => {
+          const entry = {
+            id: ++nextId,
+            name: file.name || 'image',
+            file,
+            url: URL.createObjectURL(file),
+            output: null,
+            original: null,
+            preview: null,
+            status: 'waiting',
+            error: '',
+            unreadable: false,
+            el: null,
+          };
+          entry.el = makeThumb(entry);
+          return entry;
+        });
+        images.push(...added);
+        if (skipped === 1) showError('Skipped 1 file that isn’t an image');
+        else if (skipped) showError(`Skipped ${skipped} files that aren’t images`);
+        stalled = false;
+        following = true;
+        // While the encoder works on earlier images, the preview stays where it is.
+        if (!working) select(added[0]);
+        processNext();
+      }
+
+      // Converts the waiting images one at a time, in the order they were added.
+      function processNext() {
+        if (working || stalled) return renderAll();
+        working = images.find((e) => e.status === 'waiting') || null;
+        if (!working) return renderAll();
+        const entry = working;
+        entry.status = 'working';
+        renderAll();
+        followQueue(entry);
+        const { format } = prefs;
+        getWorker().postMessage({
+          id: entry.id,
+          key: settingsKey(),
+          file: entry.file,
+          format,
+          quality: prefs.quality[format],
+          mode: effectiveTarget(),
+          targetBytes: isSized() ? prefs.targetKb * 1000 : null,
+          box: resizeBox(),
+        });
+      }
+
+      // New settings: the image in the encoder stops, and every image goes back in line,
+      // except those that already match (after switching back) and those the browser can't read.
+      function reconvert() {
+        if (working) stopWorker();
+        working = null;
+        stalled = false;
+        const key = settingsKey();
+        for (const e of images) {
+          if (e.unreadable) continue;
+          e.status = e.output?.key === key ? 'done' : 'waiting';
+        }
+        processNext();
+        if (current) loadPreview(current);
+      }
+
+      // The preview moves, quietly, to each image as the encoder starts on it, so the preview,
+      // the status line and the spinner all point at the same image. Picking another thumbnail
+      // stops this until images are added or the working one is picked again. An open viewer
+      // or Compare holds the image where it is: the user is looking at it.
+      function followQueue(entry) {
+        if (!following || els.viewer.open || showOriginal) return;
+        if (current !== entry && selecting !== entry) select(entry, false);
+      }
+
+      function showResult(entry, { key, buffer, ...details }) {
+        working = null;
+        if (key !== settingsKey()) {
+          entry.status = 'waiting'; // made with settings that changed since
+        } else {
+          const format = FORMATS[key.split(':')[0]];
+          const blob = new Blob([buffer], { type: format.type });
+          // details: width, height, sourceWidth, sourceHeight, and for a size target the
+          // quality found and whether it's still `over`.
+          entry.output = { blob, key, ext: format.ext, ...details };
+          entry.status = 'done';
+          if (entry === current) loadPreview(entry);
+        }
+        processNext();
+      }
+
+      // One image failed in an encoder that works: mark it and go on with the rest.
+      function failImage(entry, unreadable) {
+        entry.status = 'failed';
+        entry.unreadable = unreadable;
+        if (!unreadable) entry.error = 'Couldn’t convert this image';
+        else if (isHeic(entry.file))
+          entry.error = 'This browser can’t open HEIC images. Try Safari.';
+        else entry.error = 'This browser can’t open this image';
+        working = null;
+        if (entry === current) showError(entry.error);
+        processNext();
+      }
+
+      // An encoder couldn't download or start. The image goes back in line, and the rest wait
+      // for Retry instead of each failing the same way.
+      function stallQueue(message) {
+        stopWorker();
+        if (working) working.status = 'waiting';
+        working = null;
+        stalled = images.some((e) => e.status === 'waiting');
+        renderAll();
+        if (!stalled) return showError(message);
+        showSnackbar(
+          message,
+          'Retry',
+          () => {
+            stalled = false;
+            processNext();
+          },
+          true,
+        );
+      }
+
+      // Shows an image in the preview. Its bitmaps decode before the swap, so the preview never
+      // goes blank between images, and only that image keeps them: twenty full-size photos at
+      // once would take gigabytes on a phone. `pop` springs it in for a pick or a new image;
+      // following the queue swaps quietly.
+      async function select(entry, pop = true) {
+        const token = ++selectToken;
+        selecting = entry;
+        if (entry) {
+          const original = entry.original || (await decodeBitmap(entry.file));
+          const preview = entry.preview || (await outputBitmap(entry));
+          if (token !== selectToken) {
+            if (original !== entry.original) original?.close();
+            if (preview !== entry.preview) preview?.close();
+            return;
+          }
+          entry.original = original;
+          entry.preview = preview;
+        }
+        selecting = null;
+        if (current && current !== entry) releaseBitmaps(current);
+        current = entry;
+        showOriginal = false;
+        renderAll();
+        if (entry) revealThumb(entry.el);
+        if (pop && shownBitmap()) popStage();
+      }
+
+      // Swaps in the preview of a new output for the image on show. Until it decodes, the last
+      // output stays up.
+      async function loadPreview(entry) {
+        const { output } = entry;
+        const preview = await outputBitmap(entry);
+        if (entry !== current || entry.output !== output) return preview?.close();
+        entry.preview?.close();
+        entry.preview = preview;
+        renderStage();
+      }
+
+      // The output as a bitmap, but only when it matches the settings: a stale one would show
+      // an image the download wouldn't give.
+      function outputBitmap(entry) {
+        return entry.status === 'done' ? decodeBitmap(entry.output.blob) : null;
+      }
+
+      function releaseBitmaps(entry) {
+        entry.original?.close();
+        entry.preview?.close();
+        entry.original = null;
+        entry.preview = null;
+      }
+
+      // Clear empties the list so a new batch can start, with Undo. The images are only let
+      // go once a later Clear replaces them.
+      function clearImages() {
+        if (!images.length) return;
+        releaseCleared();
+        if (working) stopWorker();
+        const before = images;
+        const shown = current;
+        cleared = before;
+        images = [];
+        working = null;
+        select(null);
+        processNext();
+        // Undo puts them back in front of any added since.
+        showSnackbar(`Cleared ${plural(before.length, 'image')}`, 'Undo', () => {
+          for (const e of before) if (e.status === 'working') e.status = 'waiting';
+          images = [...before, ...images];
+          cleared = [];
+          following = true;
+          select(shown);
+          processNext();
+        });
+      }
+
+      function releaseCleared() {
+        for (const e of cleared) {
+          URL.revokeObjectURL(e.url);
+          releaseBitmaps(e);
+        }
+        cleared = [];
+      }
+
+      // The converted image, or the original while Compare is on or until the output is ready.
+      function shownBitmap() {
+        if (!current) return null;
+        return (!showOriginal && current.preview) || current.original;
+      }
+
+      function toggleCompare() {
+        if (!current?.preview) return;
+        showOriginal = !showOriginal;
+        renderStage();
+      }
+
+      function openViewer() {
+        if (!current?.preview) return;
+        renderViewer();
+        openDialog(els.viewer);
+        setView(1, 0, 0);
+      }
+
+      // One finger or the mouse pans; two pinch, zooming around their midpoint as it moves.
+      function moveViewPointer(e) {
+        const p = viewPointers.get(e.pointerId);
+        if (!p) return;
+        if (viewPointers.size === 2) {
+          const other = [...viewPointers.values()].find((q) => q !== p);
+          const span = () => Math.hypot(p.x - other.x, p.y - other.y);
+          const before = { x: (p.x + other.x) / 2, y: (p.y + other.y) / 2, span: span() };
+          p.x = e.clientX;
+          p.y = e.clientY;
+          const x = (p.x + other.x) / 2;
+          const y = (p.y + other.y) / 2;
+          setView(view.scale, view.x + x - before.x, view.y + y - before.y);
+          zoomViewAt(x, y, (view.scale * span()) / before.span);
+          return;
+        }
+        setView(view.scale, view.x + e.clientX - p.x, view.y + e.clientY - p.y);
+        p.x = e.clientX;
+        p.y = e.clientY;
+      }
+
+      // Two quick taps or clicks in one spot zoom in there, or back out.
+      function endViewPointer(e) {
+        const p = viewPointers.get(e.pointerId);
+        if (!p) return;
+        viewPointers.delete(e.pointerId);
+        const moved = Math.hypot(e.clientX - p.start.x, e.clientY - p.start.y);
+        if (viewPointers.size || e.timeStamp - p.time > 300 || moved > 10) {
+          lastTap = null;
+          return;
+        }
+        const near = lastTap && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30;
+        if (near && e.timeStamp - lastTap.time < 300) {
+          lastTap = null;
+          if (view.scale > 1) setView(1, 0, 0);
+          else zoomViewAt(e.clientX, e.clientY, TAP_ZOOM);
+        } else {
+          lastTap = { time: e.timeStamp, x: e.clientX, y: e.clientY };
+        }
+      }
+
+      // Zooms the viewer to `scale`, keeping the spot under (clientX, clientY) in place.
+      function zoomViewAt(clientX, clientY, scale) {
+        const next = Math.min(MAX_ZOOM, Math.max(1, scale));
+        const box = els.viewerBody.getBoundingClientRect();
+        const x = clientX - box.left - els.viewerCanvas.offsetLeft;
+        const y = clientY - box.top - els.viewerCanvas.offsetTop;
+        const k = next / view.scale;
+        setView(next, x - (x - view.x) * k, y - (y - view.y) * k);
+      }
+
+      // Applies a zoom and offset to the canvas alone. Held so the image never drifts away:
+      // along a side where it's smaller than the viewer it stays centered on its own spot, and
+      // where it's larger its edges can't come inside the viewer's.
+      function setView(scale, x, y) {
+        const canvas = els.viewerCanvas;
+        const hold = (offset, start, size, space) => {
+          const scaled = size * scale;
+          if (scaled <= space) return (size - scaled) / 2;
+          return Math.min(-start, Math.max(space - start - scaled, offset));
+        };
+        view.scale = scale;
+        view.x = hold(x, canvas.offsetLeft, canvas.offsetWidth, els.viewerBody.clientWidth);
+        view.y = hold(y, canvas.offsetTop, canvas.offsetHeight, els.viewerBody.clientHeight);
+        canvas.style.transform =
+          scale === 1 ? '' : `translate(${view.x}px, ${view.y}px) scale(${scale})`;
+        els.viewerBody.classList.toggle('zoomed', scale > 1);
+      }
+
+      // The main Download: the one image, or every converted one as a ZIP or separate files.
+      // The files are the encoder's own bytes; nothing is encoded again.
+      async function downloadAll() {
+        const done = images.filter((e) => e.status === 'done');
+        if (done.length < 2) return downloadOne(done[0]);
+        const names = outputNames(done);
+        try {
+          if (prefs.saveAs === 'zip') {
+            const files = done.map((e) => ({ name: names.get(e), blob: e.output.blob }));
+            downloadBlob(await makeZip(files), 'converted-images.zip');
+            showSnackbar(`Saved ${plural(done.length, 'image')} in converted-images.zip`);
+          } else {
+            for (const e of done) {
+              downloadBlob(e.output.blob, names.get(e));
+              await sleep(DOWNLOAD_GAP_MS);
+            }
+            showSnackbar(`Saved ${plural(done.length, 'image')}`);
+          }
+        } catch (err) {
+          console.error(err);
+          showError('Couldn’t save the images');
+        }
+      }
+
+      // Just one image: the one in the preview and the viewer.
+      function downloadOne(entry = current) {
+        if (entry?.status !== 'done') return;
+        const name = `${baseName(entry.name)}.${entry.output.ext}`;
+        downloadBlob(entry.output.blob, name);
+        showSnackbar(`Saved ${name}`);
+      }
+
+      // Encoders ------------------------------------------------------------------------
+
+      // Bytes of the encoders saved on this device, or 0 when none are (or storage is blocked).
+      async function encodersSize() {
+        try {
+          if (!(await caches.has(CODEC_CACHE))) return 0; // opening would create it
+          const cache = await caches.open(CODEC_CACHE);
+          const responses = await cache.matchAll();
+          const blobs = await Promise.all(responses.map((r) => r.blob()));
+          return blobs.reduce((total, blob) => total + blob.size, 0);
+        } catch (err) {
+          return 0;
+        }
+      }
+
+      // The worker holds the encoders in memory too, so it stops with them; the next image
+      // downloads what it needs again. There's no Undo: a download brings them back.
+      async function deleteEncoders() {
+        if (working) return showError('Wait for the images to finish');
+        const size = await encodersSize();
+        try {
+          await caches.delete(CODEC_CACHE);
+        } catch (err) {
+          return showError('Couldn’t delete the encoders');
+        }
+        stopWorker();
+        showSnackbar(
+          `Deleted the encoders (${formatSize(size)}). They download again when needed.`,
+        );
+      }
+
+      // Theme ---------------------------------------------------------------------------
+
+      function applyTheme() {
+        const root = document.documentElement;
+        if (prefs.theme === 'auto') delete root.dataset.theme;
+        else root.dataset.theme = prefs.theme;
+        els.themeIcon.textContent = THEME_ICONS[prefs.theme];
+        els.themeName.textContent = THEME_NAMES[prefs.theme];
+        updateThemeColor();
+      }
+
+      function cycleTheme() {
+        const next = THEME_CYCLE[(THEME_CYCLE.indexOf(prefs.theme) + 1) % THEME_CYCLE.length];
+        const r = els.themeBtn.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const root = document.documentElement.style;
+        root.setProperty('--reveal-x', `${x}px`);
+        root.setProperty('--reveal-y', `${y}px`);
+        root.setProperty(
+          '--reveal-r',
+          `${Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))}px`,
+        );
+        const willChange =
+          isDark() !== (next === 'dark' || (next === 'auto' && DARK_QUERY.matches));
+        prefs.theme = next;
+        writeJson(STORE_KEY, prefs);
+        withViewTransition(applyTheme, willChange, 'reveal');
+        els.themeIcon.animate(
+          [
+            { transform: 'rotate(-90deg) scale(0.5)', opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: REDUCED_MOTION.matches ? 0 : 400, easing: cssVar('--spring-fast') },
+        );
+      }
+
+      function isDark() {
+        return prefs.theme === 'dark' || (prefs.theme === 'auto' && DARK_QUERY.matches);
+      }
+
+      // Browser chrome follows the page surface in both color schemes.
+      function updateThemeColor() {
+        const light = resolveColor('--surface', 'light');
+        const dark = resolveColor('--surface', 'dark');
+        const [lightMeta, darkMeta] = els.themeColorMetas;
+        lightMeta.content = prefs.theme === 'dark' ? dark : light;
+        darkMeta.content = prefs.theme === 'light' ? light : dark;
+      }
+
+      // Menus & dialogs ----------------------------------------------------------------
+
+      // Up/Down move through menu items, wrapping around.
+      function handleMenuKeydown(e) {
+        if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+        e.preventDefault();
+        const items = [...e.currentTarget.querySelectorAll('.menu-item:not(:disabled)')];
+        const i = items.indexOf(document.activeElement);
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        items.at(i < 0 && step < 0 ? -1 : (i + step) % items.length)?.focus();
+      }
+
+      // Opens under the button, right-aligned, or above it when there is no room below.
+      // The source link keeps a click on the open menu's button from light-dismissing and
+      // reopening it, and returns focus there on close.
+      function toggleMenu(menu, anchor) {
+        if (menu.matches(':popover-open')) return menu.hidePopover();
+        menu.showPopover({ source: anchor });
+        const r = anchor.getBoundingClientRect();
+        const up = r.bottom + 4 + menu.offsetHeight > innerHeight - 8;
+        menu.classList.toggle('up', up);
+        menu.style.top = up ? `${r.top - 4 - menu.offsetHeight}px` : `${r.bottom + 4}px`;
+        menu.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+        menu.querySelector('.menu-item:not(:disabled)')?.focus({ focusVisible: false });
+      }
+
+      // Each open dialog owns a history entry so the back button/gesture closes it.
+      function openDialog(dialog) {
+        if (dialog.open) return;
+        dialog.showModal();
+        dialogStack.push(dialog);
+        history.pushState({ dialog: dialog.id }, '');
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog.open) return;
+        dialog.close();
+        onDialogClosed(dialog);
+      }
+
+      // Runs for every close path: buttons, Esc, backdrop, Android back (close watchers).
+      function onDialogClosed(dialog) {
+        const i = dialogStack.indexOf(dialog);
+        if (i === -1) return;
+        dialogStack.splice(i, 1);
+        if (history.state?.dialog === dialog.id) {
+          ignorePopstate++;
+          history.back();
+        }
+      }
+
+      function bindBackdropClose(dialog) {
+        let downOutside = false;
+        const outside = (e) => {
+          const r = dialog.getBoundingClientRect();
+          return (
+            e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+          );
+        };
+        dialog.addEventListener(
+          'pointerdown',
+          (e) => (downOutside = e.target === dialog && outside(e)),
+        );
+        dialog.addEventListener('click', (e) => {
+          if (downOutside && e.target === dialog && outside(e)) closeDialog(dialog);
+          downOutside = false;
+        });
+      }
+
+      // --- UI Updates ---
+
+      function renderAll() {
+        renderStage(); // and the status under the strip
+        renderStrip();
+        renderActions();
+      }
+
+      // The menu item shows the space the encoders take, and turns off when there are none.
+      async function renderEncoders() {
+        const size = await encodersSize();
+        els.encodersSize.textContent = size ? formatSize(size) : '';
+        els.deleteEncodersBtn.disabled = !size;
+      }
+
+      // Pushes prefs into every settings control. Format sits below Compress, so a format
+      // change never adds or removes rows above it: options that don't apply are disabled
+      // instead. Only Compress itself swaps the rows under it: none when off, quality or size.
+      function renderSettings() {
+        const format = FORMATS[prefs.format];
+        const target = effectiveTarget();
+        document.querySelector(`input[name="format"][value="${prefs.format}"]`).checked = true;
+        els.formatNote.textContent = format.note;
+        els.resize.checked = prefs.resize;
+        els.boxRow.hidden = !prefs.resize;
+        els.resizeWidth.value = prefs.width ?? '';
+        els.resizeHeight.value = prefs.height ?? '';
+        // Quality and File size need a lossy format; Lossless, a format that has it.
+        for (const input of els.targetRow.querySelectorAll('input')) {
+          const lossyOnly = input.value === 'quality' || input.value === 'size';
+          input.disabled = lossyOnly
+            ? !format.lossy
+            : input === els.losslessOption && !format.lossless;
+        }
+        document.querySelector(`input[name="target"][value="${target}"]`).checked = true;
+        // Off is only ever picked here, so hiding its row moves nothing under the pointer. PNG
+        // can switch to Lossless by itself, so Lossless keeps the row, disabled at 100, and the
+        // Format buttons stay put.
+        els.qualityRow.hidden = target === 'size' || target === 'off';
+        const fixed = target !== 'quality';
+        els.qualityRow.classList.toggle('disabled', fixed);
+        for (const input of els.qualityRow.querySelectorAll('input')) input.disabled = fixed;
+        const quality = fixed ? 100 : prefs.quality[prefs.format];
+        els.quality.value = quality;
+        renderQuality(quality);
+        els.sizeRow.hidden = target !== 'size';
+        els.targetKb.value = prefs.targetKb;
+        markPreset('sizePreset', prefs.targetKb);
+        document.querySelector(`input[name="saveAs"][value="${prefs.saveAs}"]`).checked = true;
+      }
+
+      // Also marks the preset the value matches, live while the slider moves. Values between
+      // presets leave none marked.
+      function renderQuality(value) {
+        els.qualityValue.textContent = value;
+        els.quality.style.setProperty('--p', `${((value - 1) / 99) * 100}%`);
+        markPreset('qualityPreset', value);
+      }
+
+      function markPreset(name, value) {
+        for (const input of document.querySelectorAll(`input[name="${name}"]`)) {
+          input.checked = Number(input.value) === value;
+        }
+      }
+
+      // The preview shows the converted image at preview size, or the original while Compare is
+      // on and until the first output is ready.
+      function renderStage() {
+        const bitmap = shownBitmap();
+        // An image the browser can't read has nothing to show, so the stage says so.
+        const blank = !current || (!bitmap && current.unreadable);
+        els.stageEmpty.hidden = !blank;
+        els.stageEmptyIcon.textContent = current ? 'error' : 'add_photo_alternate';
+        els.stageEmptyText.textContent = current
+          ? 'Can’t preview this image'
+          : 'Drop images, paste them, or choose some';
+        // Empty, the preview is the button that chooses images; after that the Add tile is.
+        els.stage.classList.toggle('filled', Boolean(current));
+        if (current) {
+          els.stage.removeAttribute('role');
+          els.stage.removeAttribute('tabindex');
+          els.stage.removeAttribute('aria-label');
+        } else {
+          els.stage.setAttribute('role', 'button');
+          els.stage.setAttribute('tabindex', '0');
+          els.stage.setAttribute('aria-label', 'Choose images');
+        }
+        // The tools stay put while an image is in the preview, so a batch moving from image to
+        // image doesn't shift the layout. They work once the image has an output.
+        els.stageTools.hidden = !current;
+        els.stageToolBtns.forEach((b) => (b.disabled = !current?.preview));
+        els.compareBtns.forEach((b) => b.setAttribute('aria-pressed', String(showOriginal)));
+        els.preview.hidden = !bitmap;
+        renderStatus();
+        if (bitmap) {
+          // Drawn at the original's shape and size, so a resized output and Compare line up.
+          const base = current.original || bitmap;
+          const scale = Math.min(1, PREVIEW_MAX / Math.max(base.width, base.height));
+          drawBitmap(els.preview, bitmap, base.width * scale, base.height * scale);
+        }
+        if (els.viewer.open) renderViewer();
+      }
+
+      // The viewer draws at full size: the output's own pixels, the original's while Compare is on.
+      function renderViewer() {
+        els.viewerTitle.textContent = current.name;
+        drawBitmap(els.viewerCanvas, shownBitmap());
+        setView(view.scale, view.x, view.y);
+      }
+
+      function drawBitmap(canvas, bitmap, width = bitmap.width, height = bitmap.height) {
+        canvas.width = Math.max(1, Math.round(width));
+        canvas.height = Math.max(1, Math.round(height));
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      }
+
+      // Thumbnails keep their elements: a render only marks them, and moves them when the
+      // order changed, so focus and the working one's animation survive.
+      function renderStrip() {
+        els.strip.hidden = !images.length;
+        const want = [...images.map((e) => e.el), els.addThumb];
+        const have = [...els.strip.children];
+        if (want.length !== have.length || want.some((el, i) => el !== have[i])) {
+          els.strip.replaceChildren(...want);
+        }
+        for (const e of images) {
+          e.el.dataset.status = e.status;
+          e.el.setAttribute('aria-current', String(e === current));
+          e.el.tabIndex = e === current ? 0 : -1;
+          e.el.setAttribute('aria-label', `${e.name}, ${STATUS_LABELS[e.status]}`);
+        }
+        renderStripEdges();
+      }
+
+      // Fades the edges that have more thumbnails past them.
+      function renderStripEdges() {
+        const { scrollLeft, scrollWidth, clientWidth } = els.strip;
+        els.strip.classList.toggle('more-start', scrollLeft > 1);
+        els.strip.classList.toggle('more-end', scrollLeft + clientWidth < scrollWidth - 1);
+      }
+
+      // Scrolls the strip, never the page, so a thumbnail and the ring around it are in view,
+      // clear of the edge fade. Done by hand: browsers differ on whether scrollIntoView() keeps
+      // scroll-padding.
+      function revealThumb(el) {
+        // The strip's padding (the page gutter on phones), the ring 4px outside the thumbnail,
+        // and the fade.
+        const margin = parseFloat(getComputedStyle(els.strip).paddingLeft) + 4 + STRIP_FADE;
+        const start = el.offsetLeft - margin;
+        const end = el.offsetLeft + el.offsetWidth + margin - els.strip.clientWidth;
+        if (els.strip.scrollLeft > start) els.strip.scrollLeft = start;
+        else if (els.strip.scrollLeft < end) els.strip.scrollLeft = end;
+      }
+
+      function makeThumb(entry) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'thumb state';
+        button.title = entry.name;
+        const img = document.createElement('img');
+        img.src = entry.url;
+        img.alt = '';
+        img.decoding = 'async';
+        // A file that won't decode shows only its failed mark, not a broken-image icon.
+        img.addEventListener('error', () => img.remove());
+        const loader = document.createElement('span');
+        loader.className = 'loader';
+        button.append(img, loader);
+        // Picking another image mid-run keeps it in the preview instead of following the queue.
+        button.addEventListener('click', () => {
+          following = !working || entry === working;
+          select(entry);
+        });
+        return button;
+      }
+
+      // A new image springs in.
+      function popStage() {
+        if (REDUCED_MOTION.matches) return;
+        els.preview.animate([{ scale: 0.92 }, { scale: 1 }], {
+          duration: parseFloat(cssVar('--spring-ms')),
+          easing: cssVar('--spring'),
+        });
+      }
+
+      // Under the strip, two lines about the image in the preview: its name and place among
+      // several, then its state, or once converted the size change. They keep their space
+      // while there are images, so a batch never shifts the layout.
+      function renderStatus() {
+        els.fileName.hidden = !current;
+        // Following a batch, the line names the working image at once; the preview catches up
+        // when that image has decoded.
+        const shown = following && working ? working : current;
+        if (shown) {
+          const position =
+            images.length > 1 ? ` · ${images.indexOf(shown) + 1} of ${images.length}` : '';
+          els.fileTitle.textContent = shown.name;
+          els.filePosition.textContent = position;
+          els.fileDetail.textContent = imageDetail(shown);
+        }
+      }
+
+      // Once converted: the size in pixels (before and after, when resized), the file size
+      // before and after, and the quality a size target settled on.
+      function imageDetail(entry) {
+        if (entry.status === 'done') return outputDetail(entry);
+        if (entry.status === 'failed') return entry.error;
+        if (entry.status === 'waiting') return stalled ? 'Waiting for the encoder' : 'Waiting…';
+        if (isSized()) return `Finding the best quality under ${prefs.targetKb} KB…`;
+        return prefs.format === 'avif' ? 'Converting, AVIF takes a few seconds…' : 'Converting…';
+      }
+
+      // Reads as before → after: the source's size and weight, then the output's. The output
+      // repeats the dimensions only when resizing changed them.
+      function outputDetail(entry) {
+        const { width, height, sourceWidth, sourceHeight, blob, quality, over } = entry.output;
+        const resized = width !== sourceWidth || height !== sourceHeight;
+        const before = entry.file.size;
+        const source = `${sourceWidth} × ${sourceHeight} · ${formatSize(before)}`;
+        const weight = `${formatSize(blob.size)} (${sizeChange(before, blob.size)})`;
+        const parts = [`${source} → ${resized ? `${width} × ${height} · ${weight}` : weight}`];
+        if (over) parts.push('still over the target at quality 1');
+        else if (quality) parts.push(`quality ${quality}`);
+        return parts.join(' · ');
+      }
+
+      // The main Download saves every converted image; the viewer's saves the one shown. Both
+      // wait, disabled, while images are converting.
+      function renderActions() {
+        const done = images.filter((e) => e.status === 'done').length;
+        const format = FORMATS[prefs.format].label;
+        let label = `Download ${format}`;
+        if (done > 1) {
+          label = prefs.saveAs === 'zip' ? `Download ZIP (${done})` : `Download ${done} ${format}s`;
+        }
+        els.downloadLabels.forEach((l) => (l.textContent = label));
+        els.formatLabels.forEach((l) => (l.textContent = `Download ${format}`));
+        els.downloadBtns.forEach((b) => (b.disabled = !done || Boolean(working)));
+        els.downloadOneBtns.forEach((b) => (b.disabled = current?.status !== 'done'));
+        els.saveAsRow.hidden = images.length < 2;
+        els.clearBtn.disabled = !images.length;
+      }
+
+      // Messages with an action stay 5s so there's time to react; plain ones 3s.
+      // It goes in the top open dialog, since a modal dialog makes the rest of the page inert.
+      function showSnackbar(message, actionLabel, onAction, long = !!actionLabel) {
+        const host = dialogStack.at(-1) || document.body;
+        if (els.snackbar.parentElement !== host) host.append(els.snackbar);
+        els.snackbarText.textContent = message;
+        els.snackbarAction.hidden = !actionLabel;
+        els.snackbarAction.textContent = actionLabel || '';
+        els.snackbarAction.onAction = onAction;
+        // A background tab runs this frame only when shown again, so hiding cancels it.
+        cancelAnimationFrame(snackbarFrame);
+        snackbarFrame = requestAnimationFrame(() => els.snackbar.classList.add('show'));
+        clearTimeout(snackbarTimer);
+        snackbarTimer = setTimeout(hideSnackbar, long ? 5000 : 3000);
+      }
+
+      // Errors stay as long as an action would, so there's time to read them.
+      function showError(message) {
+        showSnackbar(message, '', null, true);
+      }
+
+      function hideSnackbar() {
+        cancelAnimationFrame(snackbarFrame);
+        clearTimeout(snackbarTimer);
+        els.snackbar.classList.remove('show');
+      }
+
+      function addRipple(e) {
+        const host = e.target.closest('.state');
+        if (!host || host.disabled || REDUCED_MOTION.matches || e.button !== 0) return;
+        const r = host.getBoundingClientRect();
+        const size = Math.hypot(r.width, r.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - r.left - size / 2}px;top:${e.clientY - r.top - size / 2}px`;
+        host.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      }
+
+      // Bottom sheets (phones): a drag handle at the top. Dragging it down past a third of the
+      // sheet, or flicking it, closes the sheet; a shorter drag springs back.
+      function bindSheet(sheet, close) {
+        const handle = document.createElement('span');
+        handle.className = 'sheet-handle';
+        handle.setAttribute('aria-hidden', 'true');
+        sheet.prepend(handle);
+        let drag = null;
+        handle.addEventListener('pointerdown', (e) => {
+          drag = { y: e.clientY, t: e.timeStamp };
+          handle.setPointerCapture(e.pointerId);
+          sheet.style.transition = 'none';
+        });
+        handle.addEventListener('pointermove', (e) => {
+          if (drag) sheet.style.transform = `translateY(${Math.max(0, e.clientY - drag.y)}px)`;
+        });
+        const end = (e) => {
+          if (!drag) return;
+          const dy = e.clientY - drag.y;
+          const flick = dy > 24 && dy / (e.timeStamp - drag.t) > 0.5;
+          drag = null;
+          sheet.style.transition = '';
+          sheet.style.transform = '';
+          if (dy > sheet.offsetHeight / 3 || flick) close();
+        };
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      }
+
+      function withViewTransition(update, animate = true, className = '') {
+        if (
+          !animate ||
+          !document.startViewTransition ||
+          REDUCED_MOTION.matches ||
+          document.hidden
+        ) {
+          return update();
+        }
+        const root = document.documentElement;
+        if (className) root.classList.add(className);
+        const transition = document.startViewTransition(update);
+        // A newer transition (or a hidden tab) skips this one; the update still runs.
+        transition.ready.catch(() => {});
+        transition.finished.finally(() => className && root.classList.remove(className));
+      }
+
+      // --- Utilities ---
+
+      // Writes the loading indicator's morph: the seven shapes M3 Expressive cycles through
+      // (soft burst, 9-sided cookie, pentagon, pill, sunny, 4-sided cookie, oval), each step a
+      // little more than a quarter turn on. CSS morphs polygons only point for point, so each
+      // shape is traced from the center at the same 72 angles, its corners rounded by
+      // averaging nearby radii.
+      function addLoaderKeyframes() {
+        const POINTS = 72;
+        const FINE = 720; // samples per turn before rounding
+        const TAU = Math.PI * 2;
+        const zigzag = (t) => 1 - Math.abs((t - Math.floor(t)) * 2 - 1);
+        const polygon = (n, a) =>
+          Math.cos(Math.PI / n) / Math.cos(((a + Math.PI / 2) % (TAU / n)) - Math.PI / n);
+        // How far a ray at angle `a` goes before it leaves a shape given as an inside test.
+        const trace = (inside, a) => {
+          let lo = 0;
+          let hi = 2;
+          for (let i = 0; i < 24; i++) {
+            const mid = (lo + hi) / 2;
+            if (inside(mid * Math.cos(a), mid * Math.sin(a))) lo = mid;
+            else hi = mid;
+          }
+          return lo;
+        };
+        const pill = (x, y) => Math.hypot(Math.max(Math.abs(x) - 0.4, 0), y) <= 0.6;
+        const oval = (x, y) => x * x + (y / 0.64) ** 2 <= 1;
+        // Each shape: its radius at an angle, and how many fine samples to round over.
+        const shapes = [
+          [(a) => 0.78 + 0.22 * zigzag((a * 10) / TAU + 0.5), 12],
+          [(a) => 0.84 + 0.16 * Math.abs(Math.cos((a * 9) / 2)), 6],
+          [(a) => polygon(5, a), 24],
+          [(a) => trace(pill, a - Math.PI / 4), 0],
+          [(a) => 0.86 + 0.14 * zigzag((a * 8) / TAU + 0.5), 12],
+          [(a) => 0.78 + 0.22 * Math.abs(Math.cos(a * 2)), 16],
+          [(a) => trace(oval, a - Math.PI / 4), 0],
+        ];
+        const toPolygon = ([radius, round]) => {
+          const fine = Array.from({ length: FINE }, (_, i) => radius((i / FINE) * TAU));
+          const radii = Array.from({ length: POINTS }, (_, i) => {
+            const at = (i * FINE) / POINTS;
+            let sum = 0;
+            for (let j = -round; j <= round; j++) sum += fine[(at + j + FINE) % FINE];
+            return sum / (round * 2 + 1);
+          });
+          const max = Math.max(...radii);
+          const points = radii.map((r, i) => {
+            const a = (i / POINTS) * TAU;
+            const x = 50 + (50 * r * Math.cos(a)) / max;
+            const y = 50 + (50 * r * Math.sin(a)) / max;
+            return `${x.toFixed(1)}% ${y.toFixed(1)}%`;
+          });
+          return `polygon(${points.join(', ')})`;
+        };
+        const frames = [...shapes, shapes[0]].map((shape, i) => {
+          const at = ((i / shapes.length) * 100).toFixed(2);
+          const turn = ((i * 720) / shapes.length).toFixed(1);
+          return `${at}% { clip-path: ${toPolygon(shape)}; transform: rotate(${turn}deg); }`;
+        });
+        const style = document.createElement('style');
+        style.textContent = `@keyframes loader-morph { ${frames.join(' ')} }`;
+        document.head.append(style);
+      }
+
+      // Any image the browser might decode. SVGs are left out: they have no pixel size, and
+      // browsers can't decode them in a worker.
+      function isValidImageFile(file) {
+        if (!file) return false;
+        if (file.type) return file.type.startsWith('image/') && file.type !== 'image/svg+xml';
+        return /\.(png|jpe?g|webp|avif|gif|bmp|ico|heic|heif)$/i.test(file.name);
+      }
+
+      function isHeic(file) {
+        return /^image\/hei[cf]/.test(file.type) || /\.hei[cf]$/i.test(file.name);
+      }
+
+      // Resolves to null when the browser can't decode the image.
+      function decodeBitmap(blob) {
+        return createImageBitmap(blob).catch(() => null);
+      }
+
+      // Never empty, so a file named only ".png" still downloads with a name.
+      function baseName(name) {
+        return name.replace(/\.[^.]+$/, '') || 'image';
+      }
+
+      // File names for a batch: the new extension, and a number when two images share a name.
+      function outputNames(entries) {
+        const names = new Map();
+        const used = new Set();
+        for (const e of entries) {
+          const base = baseName(e.name);
+          const { ext } = e.output;
+          let name = `${base}.${ext}`;
+          for (let n = 2; used.has(name.toLowerCase()); n++) name = `${base}-${n}.${ext}`;
+          used.add(name.toLowerCase());
+          names.set(e, name);
+        }
+        return names;
+      }
+
+      function isPositiveInt(n) {
+        return Number.isInteger(n) && n >= 1;
+      }
+
+      function plural(n, word) {
+        return `${n} ${word}${n === 1 ? '' : 's'}`;
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      // Decimal units, as file managers on macOS and phones show them.
+      function formatSize(bytes) {
+        if (bytes < 1000) return `${bytes} B`;
+        if (bytes < 1e6) return `${(bytes / 1e3).toFixed(bytes < 1e4 ? 1 : 0)} KB`;
+        return `${(bytes / 1e6).toFixed(1)} MB`;
+      }
+
+      function sizeChange(before, after) {
+        const pct = Math.round((after / before - 1) * 100);
+        if (pct === 0) return 'about the same';
+        return pct < 0 ? `−${-pct}%` : `+${pct}%`;
+      }
+
+      // A ZIP that stores files as they are: the images are compressed already, so compressing
+      // again would gain almost nothing. Names are UTF-8 (flag bit 11).
+      async function makeZip(files) {
+        const encoder = new TextEncoder();
+        const { time, date } = dosDateTime(new Date());
+        const parts = [];
+        const directory = [];
+        let offset = 0;
+        for (const { name, blob } of files) {
+          const data = new Uint8Array(await blob.arrayBuffer());
+          const nameBytes = encoder.encode(name);
+          const crc = crc32(data);
+          const local = new DataView(new ArrayBuffer(30));
+          local.setUint32(0, 0x04034b50, true); // local file header
+          local.setUint16(4, 20, true); // version needed: 2.0
+          local.setUint16(6, 0x0800, true);
+          local.setUint16(10, time, true);
+          local.setUint16(12, date, true);
+          local.setUint32(14, crc, true);
+          local.setUint32(18, data.length, true);
+          local.setUint32(22, data.length, true);
+          local.setUint16(26, nameBytes.length, true);
+          const entry = new DataView(new ArrayBuffer(46));
+          entry.setUint32(0, 0x02014b50, true); // central directory header
+          entry.setUint16(4, 20, true); // made by: 2.0
+          entry.setUint16(6, 20, true);
+          entry.setUint16(8, 0x0800, true);
+          entry.setUint16(12, time, true);
+          entry.setUint16(14, date, true);
+          entry.setUint32(16, crc, true);
+          entry.setUint32(20, data.length, true);
+          entry.setUint32(24, data.length, true);
+          entry.setUint16(28, nameBytes.length, true);
+          entry.setUint32(42, offset, true);
+          parts.push(local, nameBytes, data);
+          directory.push(entry, nameBytes);
+          offset += 30 + nameBytes.length + data.length;
+        }
+        const size = directory.reduce((n, part) => n + part.byteLength, 0);
+        const end = new DataView(new ArrayBuffer(22));
+        end.setUint32(0, 0x06054b50, true); // end of central directory
+        end.setUint16(8, files.length, true);
+        end.setUint16(10, files.length, true);
+        end.setUint32(12, size, true);
+        end.setUint32(16, offset, true);
+        return new Blob([...parts, ...directory, end], { type: 'application/zip' });
+      }
+
+      function crc32(bytes) {
+        crcTable ??= Uint32Array.from({ length: 256 }, (_, n) => {
+          let c = n;
+          for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+          return c;
+        });
+        let crc = 0xffffffff;
+        for (let i = 0; i < bytes.length; i++)
+          crc = crcTable[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+        return (crc ^ 0xffffffff) >>> 0;
+      }
+
+      // ZIP entries carry a local MS-DOS timestamp, in 2-second steps.
+      function dosDateTime(d) {
+        return {
+          time: (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1),
+          date: ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate(),
+        };
+      }
+
+      function downloadBlob(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+
+      // Resolves a light-dark() token to a concrete color for one scheme.
+      function resolveColor(token, scheme) {
+        els.probe.style.colorScheme = scheme;
+        els.probe.style.color = `var(${token})`;
+        return getComputedStyle(els.probe).color;
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function readJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw === null ? null : JSON.parse(raw);
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function writeJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (err) {
+          // Storage full or blocked: settings still apply for this visit.
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
