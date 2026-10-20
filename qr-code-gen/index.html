@@ -18,7 +18,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=add_photo_alternate,arrow_outward,brightness_auto,chat,check,code,contact_page,content_copy,dark_mode,delete,download,info,light_mode,link,mail,more_vert,person,sms,visibility,visibility_off,wifi&display=block"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=add_photo_alternate,arrow_outward,brightness_auto,chat,check,code,colorize,contact_page,content_copy,dark_mode,delete,download,info,light_mode,link,mail,more_vert,person,sms,visibility,visibility_off,wifi&display=block"
     />
 
     <style>
@@ -607,6 +607,11 @@
         flex: none;
       }
 
+      /* A swatch group sits beside its label on one line, even on narrow phones. */
+      .row:not(.row-stack) > .row-text:has(+ .swatches) {
+        flex-basis: 0;
+      }
+
       .row-sub {
         color: var(--on-surface-variant);
         font-size: 14px;
@@ -686,6 +691,30 @@
       .swatch:has(:focus-visible) {
         outline: 3px solid var(--secondary);
         outline-offset: 2px;
+      }
+
+      /* The transparent swatch shows a checkerboard instead of a color. */
+      .swatch.clear {
+        background: repeating-conic-gradient(
+            var(--outline-variant) 0 25%,
+            var(--surface-container-highest) 0 50%
+          )
+          0 0 / 12px 12px;
+      }
+
+      /* Until a custom color is picked, the custom swatch shows an eyedropper. */
+      .swatch.custom:not(.selected) {
+        background: var(--surface-container-highest);
+        color: var(--on-surface-variant);
+      }
+
+      .swatch.custom:not(.selected)::after {
+        content: 'colorize';
+        background: none;
+        color: inherit;
+        font-size: 22px;
+        opacity: 1;
+        scale: 1;
       }
 
       /* M3 Expressive slider: a thick track with a slim handle and gaps around it */
@@ -908,13 +937,22 @@
 
       .fields {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+        /* Two equal columns at most, collapsing to one when a column would drop under 220px. */
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(min(100%, max(220px, calc((100% - 12px) / 2))), 1fr)
+        );
         gap: 16px 12px;
         width: 100%;
       }
 
       .fields .full {
         grid-column: 1 / -1;
+      }
+
+      .field:has(input:disabled) {
+        opacity: 0.38;
+        pointer-events: none;
       }
 
       .field textarea.grow {
@@ -1814,11 +1852,16 @@
 
             <div class="row row-stack" data-form="wifi" hidden>
               <div class="fields">
-                <label class="field">
+                <label class="field full">
                   <input id="wifi-ssid" type="text" placeholder=" " autocomplete="off" />
                   <span class="field-label">Network name</span>
                 </label>
-                <label class="field">
+                <div class="seg full" role="radiogroup" aria-label="Security">
+                  <label><input type="radio" name="wifi-sec" value="WPA" checked />WPA/WPA2</label>
+                  <label><input type="radio" name="wifi-sec" value="WEP" />WEP</label>
+                  <label><input type="radio" name="wifi-sec" value="nopass" />None</label>
+                </div>
+                <label class="field full">
                   <input id="wifi-pass" type="password" placeholder=" " autocomplete="off" />
                   <span class="field-label">Password</span>
                   <button
@@ -1831,11 +1874,6 @@
                     <span class="icon" aria-hidden="true">visibility</span>
                   </button>
                 </label>
-                <div class="seg full" role="radiogroup" aria-label="Security">
-                  <label><input type="radio" name="wifi-sec" value="WPA" checked />WPA/WPA2</label>
-                  <label><input type="radio" name="wifi-sec" value="WEP" />WEP</label>
-                  <label><input type="radio" name="wifi-sec" value="nopass" />None</label>
-                </div>
               </div>
             </div>
 
@@ -1919,6 +1957,20 @@
           <!-- Style -->
           <h2 class="sect-title">Style</h2>
           <div class="group">
+            <div class="row">
+              <span class="row-text">Background</span>
+              <div class="swatches" role="radiogroup" aria-label="Background">
+                <label class="swatch clear" title="Transparent"
+                  ><input type="radio" name="bg" value="transparent" aria-label="Transparent"
+                /></label>
+                <label class="swatch" style="--c: #ffffff" title="White"
+                  ><input type="radio" name="bg" value="white" aria-label="White" checked
+                /></label>
+                <label class="swatch custom" id="bg-swatch" title="Custom color"
+                  ><input type="color" id="bg-custom" value="#ffffff" aria-label="Custom color"
+                /></label>
+              </div>
+            </div>
             <div class="row row-stack">
               <span class="row-text">Pattern</span>
               <div class="seg" role="radiogroup" aria-label="Dot pattern">
@@ -1928,22 +1980,9 @@
               </div>
             </div>
             <div class="row">
-              <span class="row-text">Code color</span>
+              <span class="row-text">Color</span>
               <label class="swatch selected" id="dot-swatch" style="--c: #18181b">
-                <input type="color" id="dot-solid" value="#18181b" aria-label="Code color" />
-              </label>
-            </div>
-            <label class="row">
-              <span class="row-text">
-                <span>Transparent background</span>
-                <span class="row-sub">For placing on colored designs</span>
-              </span>
-              <input class="switch" type="checkbox" role="switch" id="bg-transparent" />
-            </label>
-            <div class="row" id="bg-row">
-              <span class="row-text">Background color</span>
-              <label class="swatch selected" id="bg-swatch" style="--c: #ffffff">
-                <input type="color" id="bg-solid" value="#ffffff" aria-label="Background color" />
+                <input type="color" id="dot-solid" value="#18181b" aria-label="Color" />
               </label>
             </div>
             <div class="row row-stack">
@@ -2183,8 +2222,8 @@
         dotStyle: 'square',
         ecc: 'Q',
         dotColor: '#18181b',
-        bgColor: '#ffffff',
-        bgTransparent: false,
+        bg: 'white', // a BG_FILLS key, or 'custom' for bgCustom
+        bgCustom: '#ffffff',
         padding: 0,
         logoSize: 1,
         logoForceSquare: true,
@@ -2208,8 +2247,8 @@
         wifiPass: document.getElementById('wifi-pass'),
         revealBtn: document.getElementById('reveal-btn'),
         dotSwatch: document.getElementById('dot-swatch'),
+        bgSwatches: document.querySelectorAll('input[name="bg"]'),
         bgSwatch: document.getElementById('bg-swatch'),
-        bgRow: document.getElementById('bg-row'),
         paddingVal: document.getElementById('padding-val'),
         logoEmpty: document.getElementById('logo-empty'),
         logoSet: document.getElementById('logo-set'),
@@ -2237,6 +2276,7 @@
         // Browsers can restore form state on reload, so sync the UI to the restored choices.
         switchType(checked('type'));
         renderExportOptions();
+        renderWifiSecurity();
         // The CDN script can fail to load; the rest of the UI (theme, settings) still works.
         if (window.QRCodeStyling) {
           // The constructor encodes right away and throws on text too long for a QR code. A reload
@@ -2283,6 +2323,8 @@
             clearTimeout(updateTimer);
             updateTimer = setTimeout(refresh, 150);
           } else {
+            // Picking a custom color moves the selection off the preset swatches.
+            if (e.target.id === 'bg-custom') for (const r of els.bgSwatches) r.checked = false;
             readStyle();
             refresh();
           }
@@ -2290,6 +2332,7 @@
         els.form.addEventListener('change', (e) => {
           if (e.target.name === 'type') switchType(e.target.value);
           else if (e.target.name === 'export-format') renderExportOptions();
+          else if (e.target.name === 'wifi-sec') renderWifiSecurity();
         });
         els.form.addEventListener('submit', (e) => e.preventDefault());
 
@@ -2450,7 +2493,7 @@
           margin: Math.floor(size * (visuals.padding * 0.02)),
           qrOptions: { errorCorrectionLevel: visuals.ecc },
           dotsOptions: { type: visuals.dotStyle, color: visuals.dotColor },
-          backgroundOptions: { color: visuals.bgTransparent ? 'transparent' : visuals.bgColor },
+          backgroundOptions: { color: bgFill() ?? 'transparent' },
           cornersSquareOptions: { type: corners.square, color: visuals.dotColor },
           cornersDotOptions: { type: corners.dot, color: visuals.dotColor },
           image: logo ? logo.processed || logo.src : undefined,
@@ -2466,12 +2509,19 @@
         };
       }
 
+      const BG_FILLS = { transparent: null, white: '#ffffff' };
+
+      // The background color, or null when it is transparent.
+      function bgFill() {
+        return visuals.bg === 'custom' ? visuals.bgCustom : BG_FILLS[visuals.bg];
+      }
+
       function readStyle() {
         visuals.dotStyle = checked('dot-style');
         visuals.ecc = checked('ecc');
         visuals.dotColor = document.getElementById('dot-solid').value;
-        visuals.bgColor = document.getElementById('bg-solid').value;
-        visuals.bgTransparent = document.getElementById('bg-transparent').checked;
+        visuals.bg = els.form.querySelector('input[name="bg"]:checked')?.value ?? 'custom';
+        visuals.bgCustom = document.getElementById('bg-custom').value;
         visuals.padding = Number(document.getElementById('qr-padding').value);
         visuals.logoSize = Number(document.getElementById('logo-size').value);
         visuals.logoForceSquare = document.getElementById('logo-force-square').checked;
@@ -2592,7 +2642,7 @@
         try {
           const options = getQROptions(ext === 'svg' ? 200 : exportSize(), payload());
           // JPG has no transparency, so a transparent background would come out black.
-          if (ext === 'jpeg') options.backgroundOptions = { color: visuals.bgColor };
+          if (ext === 'jpeg') options.backgroundOptions = { color: bgFill() ?? '#ffffff' };
           const exporter = new QRCodeStyling(options);
           await exporter.download({ name, extension: ext });
           showSnackbar(`Saved ${name}.${ext}`);
@@ -2746,9 +2796,9 @@
 
       function renderStyle() {
         els.dotSwatch.style.setProperty('--c', visuals.dotColor);
-        els.bgSwatch.style.setProperty('--c', visuals.bgColor);
-        els.bgRow.classList.toggle('disabled', visuals.bgTransparent);
-        els.bgRow.inert = visuals.bgTransparent;
+        for (const r of els.bgSwatches) r.closest('.swatch').classList.toggle('selected', r.checked);
+        els.bgSwatch.classList.toggle('selected', visuals.bg === 'custom');
+        els.bgSwatch.style.setProperty('--c', visuals.bgCustom);
         els.paddingVal.textContent = visuals.padding;
         els.logoSizeVal.textContent = visuals.logoSize;
         els.logoPaddingVal.textContent = visuals.logoPadding;
@@ -2762,6 +2812,13 @@
       }
 
       // SVG is resolution-free, so the size choice only applies to PNG and JPG.
+      // An open network has no password, so the field stays put but can't be typed in.
+      function renderWifiSecurity() {
+        const open = checked('wifi-sec') === 'nopass';
+        els.wifiPass.disabled = open;
+        els.revealBtn.disabled = open;
+      }
+
       function renderExportOptions() {
         const svg = checked('export-format') === 'svg';
         els.sizeRow.classList.toggle('disabled', svg);
