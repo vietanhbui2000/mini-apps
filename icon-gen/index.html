@@ -740,6 +740,11 @@
         flex: none;
       }
 
+      /* A swatch group sits beside its label on one line, even on narrow phones. */
+      .row:not(.row-stack) > .row-text:has(+ .swatches) {
+        flex-basis: 0;
+      }
+
       .row-sub {
         color: var(--on-surface-variant);
         font-size: 14px;
@@ -830,6 +835,21 @@
         outline-offset: 2px;
       }
 
+      .swatch:has(:disabled) {
+        opacity: 0.38;
+        pointer-events: none;
+      }
+
+      /* The no-fill swatch shows a checkerboard instead of a color. */
+      .swatch.clear {
+        background: repeating-conic-gradient(
+            var(--outline-variant) 0 25%,
+            var(--surface-container-highest) 0 50%
+          )
+          0 0 / 12px 12px;
+      }
+
+      /* Until a custom color is picked, the custom swatch shows an eyedropper. */
       .swatch.custom:not(.selected) {
         background: var(--surface-container-highest);
         color: var(--on-surface-variant);
@@ -1808,18 +1828,19 @@
 
             <h2 class="sect-title">Background</h2>
             <div class="group">
-              <label class="row">
+              <div class="row">
                 <span class="row-text">
-                  <span>Background color</span>
+                  <span>Color</span>
                   <span class="row-sub" id="bg-sub">Fill the shape behind the image</span>
                 </span>
-                <input class="switch" type="checkbox" role="switch" id="bg" />
-              </label>
-              <div class="row" id="bg-color-row" hidden>
-                <span class="row-text">Color</span>
-                <label class="swatch selected" id="bg-swatch" style="--c: #ffffff">
-                  <input type="color" id="bg-color" value="#ffffff" aria-label="Background color" />
-                </label>
+                <div class="swatches" role="radiogroup" aria-label="Background color">
+                  <label class="swatch clear" title="None"
+                    ><input type="radio" id="bg-off" name="bg" value="off" aria-label="None"
+                  /></label>
+                  <label class="swatch custom" id="bg-swatch" title="Custom color"
+                    ><input type="color" id="bg-color" value="#ffffff" aria-label="Custom color"
+                  /></label>
+                </div>
               </div>
             </div>
           </section>
@@ -1836,7 +1857,7 @@
                   <label><input type="radio" name="variant" value="cutout" />Cutout</label>
                 </div>
               </div>
-              <div class="row row-stack" id="color-row">
+              <div class="row" id="color-row">
                 <span class="row-text">Color</span>
                 <div
                   class="swatches"
@@ -2105,9 +2126,8 @@
         padding: document.getElementById('padding'),
         shadow: document.getElementById('shadow'),
         edgeLight: document.getElementById('edge-light'),
-        bg: document.getElementById('bg'),
+        bgOff: document.getElementById('bg-off'),
         bgSub: document.getElementById('bg-sub'),
-        bgColorRow: document.getElementById('bg-color-row'),
         bgColor: document.getElementById('bg-color'),
         bgSwatch: document.getElementById('bg-swatch'),
         swatches: document.getElementById('swatches'),
@@ -2251,7 +2271,7 @@
         else if (t === els.padding) app.paddingEnabled = t.checked;
         else if (t === els.shadow) app.shadowEnabled = t.checked;
         else if (t === els.edgeLight) app.edgeLightEnabled = t.checked;
-        else if (t === els.bg) app.manualBgEnabled = t.checked;
+        else if (t === els.bgOff) app.manualBgEnabled = false;
         else if (t.name === 'variant') {
           folder.variant = t.value;
           if (t.value === 'cutout') folder.artworkType = 'image';
@@ -2271,8 +2291,10 @@
       // Continuous inputs (colors, slider, text) update the preview as they move.
       function handleInput(e) {
         const t = e.target;
-        if (t === els.bgColor) state.app.bgColor = t.value;
-        else if (t.id === 'folder-custom') {
+        if (t === els.bgColor) {
+          state.app.bgColor = t.value;
+          state.app.manualBgEnabled = true;
+        } else if (t.id === 'folder-custom') {
           state.folder.customColor = t.value;
           state.folder.colorId = 'custom';
         } else if (t === els.zoom) state.folder.zoom = parseFloat(t.value) || 1;
@@ -2567,12 +2589,13 @@
         // App: Fit and Center leave gaps, so they always need a background.
         const forcedBg = app.fittingMode !== 'cover';
         app.bgEnabled = forcedBg || app.manualBgEnabled;
-        els.bg.checked = app.bgEnabled;
-        els.bg.disabled = forcedBg;
+        els.bgOff.checked = !app.bgEnabled;
+        els.bgOff.disabled = forcedBg;
         els.bgSub.textContent = forcedBg
           ? 'Needed with Fit and Center'
           : 'Fill the shape behind the image';
-        els.bgColorRow.hidden = !app.bgEnabled;
+        els.bgOff.parentElement.classList.toggle('selected', !app.bgEnabled);
+        els.bgSwatch.classList.toggle('selected', app.bgEnabled);
         els.bgSwatch.style.setProperty('--c', app.bgColor);
 
         // Folder: the cutout style uses the image itself as the folder.
