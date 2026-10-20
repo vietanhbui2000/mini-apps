@@ -547,8 +547,8 @@
         grid-area: 1 / 1;
         max-width: 100%;
         /* The window less the app bar, the page's top and bottom spacing, the stage padding,
-           the filmstrip, the file name and the actions under it. */
-        max-height: max(240px, calc(100dvh - var(--appbar-h) - 328px));
+           the filmstrip, the two status lines and the actions under it. */
+        max-height: max(240px, calc(100dvh - var(--appbar-h) - 316px));
         border-radius: var(--shape-lg);
         background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
           0 0 / 16px 16px;
@@ -635,25 +635,6 @@
         }
       }
 
-      /* Processing: an M3 wavy linear indicator, always moving, above the file line. */
-      .status {
-        display: flex;
-        justify-content: center;
-      }
-
-      /* The wave keeps its space while nothing runs, so the line under it never moves. */
-      .status.idle .status-line {
-        visibility: hidden;
-      }
-
-      .status-line {
-        display: block;
-        width: min(240px, 100%);
-        height: 12px;
-        overflow: visible;
-        color: var(--primary);
-      }
-
       /* The model download fills its own line in the Model row. The row stays a centered row,
          like its neighbours, and the line wraps under the text at full width. */
       .model-line {
@@ -680,16 +661,37 @@
         stroke: var(--secondary-container);
       }
 
+      /* Two lines: the image and its place in the batch, then its state or result. Each cuts
+         off on its own, and only the name gives way, so a long name never hides the position
+         or the result. */
       .file-name {
-        overflow: hidden;
         color: var(--on-surface-variant);
         font-size: 12px;
         line-height: 16px;
         letter-spacing: 0.4px;
         text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .file-name > span,
+      #file-title {
+        overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-variant-numeric: tabular-nums;
+      }
+
+      .file-name > span {
+        display: block;
+      }
+
+      .file-name > .file-title {
+        display: flex;
+        justify-content: center;
+      }
+
+      #file-position {
+        flex: none;
+        white-space: pre;
       }
 
       /* Filmstrip: every image as a thumbnail, in the order added, then an Add tile. It scrolls
@@ -739,9 +741,12 @@
         }
       }
 
+      /* One grid cell the size of the tile. An auto-sized cell would grow to the photo's
+         shape (84px tall for a portrait one), and the spinner centered in it would sit low. */
       .thumb {
         display: grid;
         flex: none;
+        grid-template: minmax(0, 1fr) / minmax(0, 1fr);
         place-items: center;
         width: 56px;
         height: 56px;
@@ -777,26 +782,40 @@
         opacity: 0.4;
       }
 
-      /* The one in the model gets a spinning ring on a small disc, so it reads over any
-         image. Reduced motion leaves the ring still. */
-      .thumb[data-status='working'] > img {
+      /* The one in progress dims under the M3 Expressive contained loading indicator: a
+         shape on a disc that morphs through seven Material shapes while it spins. The morph
+         keyframes come from addLoaderKeyframes(), since each shape is a 72-point polygon. */
+      .thumb[data-status='working'] > img,
+      .thumb[data-status='working'] > canvas {
         opacity: 0.6;
       }
 
-      .thumb[data-status='working']::after {
-        content: '';
+      .loader {
+        display: none;
         grid-area: 1 / 1;
         z-index: 1;
-        width: 28px;
-        height: 28px;
-        border: 3px solid var(--primary);
-        border-right-color: transparent;
+        place-items: center;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
-        background: var(--surface-container-highest);
-        animation: spin 0.9s linear infinite;
+        background: var(--primary-container);
       }
 
-      @keyframes spin {
+      .thumb[data-status='working'] > .loader {
+        display: grid;
+      }
+
+      .loader::before {
+        content: '';
+        width: 30px;
+        height: 30px;
+        background: var(--on-primary-container);
+        animation:
+          loader-morph 4550ms var(--spring-fast) infinite,
+          loader-spin 4666ms linear infinite;
+      }
+
+      @keyframes loader-spin {
         to {
           rotate: 1turn;
         }
@@ -970,7 +989,16 @@
         flex: none;
       }
 
-      .row-sub {
+      /* A swatch group sits beside its label on one line, even on narrow phones. */
+      .row:not(.row-stack) > .row-text:has(+ .swatches) {
+        flex-basis: 0;
+      }
+
+      /* Supporting text, only where the name and the options don't say enough: .row-sub under
+         a setting's name says what it does; .row-note under its control speaks to the option
+         picked, or how to fill it in. */
+      .row-sub,
+      .row-note {
         color: var(--on-surface-variant);
         font-size: 14px;
         line-height: 20px;
@@ -1367,6 +1395,7 @@
         margin: 0;
         border-radius: 0;
         background: var(--surface);
+        touch-action: none;
       }
 
       .viewer-head {
@@ -1388,16 +1417,27 @@
         white-space: nowrap;
       }
 
+      /* Zoom moves the image alone (see setView()), so the page never zooms under it. */
       .viewer-body {
         position: relative;
         flex: 1;
         min-height: 0;
+        overflow: hidden;
+      }
+
+      .viewer-body.zoomed {
+        cursor: grab;
+      }
+
+      .viewer-body.zoomed:active {
+        cursor: grabbing;
       }
 
       /* Absolutely placed with auto margins, the canvas keeps its ratio, shrinks to fit and
          centers. Small images stay at their own size. */
       .viewer-canvas {
         position: absolute;
+        transform-origin: 0 0;
         inset: 0 16px 16px;
         max-width: calc(100% - 32px);
         max-height: calc(100% - 16px);
@@ -1881,18 +1921,12 @@
               <span class="icon" aria-hidden="true">add</span>
             </button>
           </div>
-          <div class="status" id="status" hidden>
-            <svg
-              class="status-line"
-              id="status-line"
-              role="progressbar"
-              aria-label="Removing backgrounds"
-            >
-              <path class="track" id="status-track" />
-              <path class="wave" id="status-wave" />
-            </svg>
-          </div>
-          <p class="file-name" id="file-name" hidden></p>
+          <p class="file-name" id="file-name" hidden>
+            <span class="file-title"
+              ><span id="file-title"></span><span id="file-position"></span
+            ></span>
+            <span id="file-detail"></span>
+          </p>
           <div class="stage-actions">
             <button class="btn btn-filled state" type="button" data-action="download" disabled>
               <span class="icon" aria-hidden="true">download</span
@@ -1969,14 +2003,11 @@
             even when you're offline. Images never leave your device.
           </p>
 
-          <h2 class="sect-title">Background</h2>
+          <h2 class="sect-title">Adjust</h2>
           <div class="group">
-            <div class="row row-stack">
-              <span class="row-text">
-                <span>Fill</span>
-                <span class="row-sub">What goes behind the subject</span>
-              </span>
-              <div class="swatches" id="swatches" role="radiogroup" aria-label="Background">
+            <div class="row">
+              <span class="row-text">Background fill</span>
+              <div class="swatches" id="swatches" role="radiogroup" aria-label="Background fill">
                 <label class="swatch clear" title="Transparent"
                   ><input
                     type="radio"
@@ -1995,10 +2026,6 @@
                 /></label>
               </div>
             </div>
-          </div>
-
-          <h2 class="sect-title">Output</h2>
-          <div class="group">
             <label class="row">
               <span class="row-text">
                 <span>Crop to subject</span>
@@ -2006,20 +2033,23 @@
               </span>
               <input class="switch" type="checkbox" role="switch" id="crop" />
             </label>
+          </div>
+
+          <h2 class="sect-title">Output</h2>
+          <div class="group">
             <div class="row row-stack">
               <span class="row-text">
                 <span>Format</span>
-                <span class="row-sub">PNG works everywhere, WebP is smaller</span>
               </span>
               <div class="seg" role="radiogroup" aria-label="Format">
                 <label><input type="radio" name="format" value="png" checked />PNG</label>
                 <label><input type="radio" name="format" value="webp" />WebP</label>
               </div>
+              <p class="row-note" id="format-note"></p>
             </div>
             <div class="row row-stack" id="save-as-row" hidden>
               <span class="row-text">
                 <span>Download all as</span>
-                <span class="row-sub">A single ZIP file, or multiple files</span>
               </span>
               <div class="seg" role="radiogroup" aria-label="Download all as">
                 <label><input type="radio" name="saveAs" value="zip" checked />ZIP file</label>
@@ -2074,7 +2104,7 @@
           <span class="icon" aria-hidden="true">close</span>
         </button>
       </div>
-      <div class="viewer-body">
+      <div class="viewer-body" id="viewer-body">
         <canvas class="viewer-canvas" id="viewer-canvas"></canvas>
       </div>
       <div class="actionbar">
@@ -2237,8 +2267,8 @@
       const ALPHA_CUTOFF = 8; // pixels fainter than this don't count as subject when cropping
       const FILLS = { transparent: null, white: '#ffffff', black: '#000000' };
       const FORMATS = {
-        png: { type: 'image/png', ext: 'png', label: 'PNG' },
-        webp: { type: 'image/webp', ext: 'webp', label: 'WebP' },
+        png: { type: 'image/png', ext: 'png', label: 'PNG', note: 'Well-known, opens everywhere' },
+        webp: { type: 'image/webp', ext: 'webp', label: 'WebP', note: 'Web-native, small and fast' },
       };
       const DEFAULT_PREFS = {
         theme: 'auto',
@@ -2253,6 +2283,8 @@
       const DOWNLOAD_GAP_MS = 250;
       const THUMB_PX = 112; // 56px thumbnails, sharp on 2x screens
       const STRIP_FADE = 32; // px, matches .strip.more-start / .more-end
+      const MAX_ZOOM = 8; // the viewer's, times the fitted size
+      const TAP_ZOOM = 2.5; // a double tap's
       const STATUS_LABELS = {
         waiting: 'waiting',
         working: 'processing',
@@ -2280,6 +2312,11 @@
       let loadProgress = { loaded: 0, total: 0 };
       let waveFrame = 0;
       let showOriginal = false;
+      // The viewer's zoom: the canvas's scale, and its offset from where it sits unzoomed.
+      const view = { scale: 1, x: 0, y: 0 };
+      const viewPointers = new Map(); // fingers or the mouse on the viewer, by pointerId
+      let lastTap = null; // { time, x, y } of the last quick tap, for double-tap zoom
+      let gestureScale = 1; // the zoom when a Safari trackpad pinch began
       // Every image added, in order. Each is { id, name, file, url (for its thumbnail),
       // original (ImageBitmap, kept only while it's in the preview), result (ImageBitmap with
       // the background removed), bounds (the subject's box, for cropping), status
@@ -2323,15 +2360,16 @@
         compareBtns: document.querySelectorAll('[data-action="compare"]'),
         viewer: document.getElementById('viewer'),
         viewerTitle: document.getElementById('viewer-title'),
+        viewerBody: document.getElementById('viewer-body'),
         viewerCanvas: document.getElementById('viewer-canvas'),
         status: document.getElementById('status'),
-        statusLine: document.getElementById('status-line'),
-        statusWave: document.getElementById('status-wave'),
-        statusTrack: document.getElementById('status-track'),
         modelLine: document.getElementById('model-line'),
         modelWave: document.getElementById('model-wave'),
         modelTrack: document.getElementById('model-track'),
         fileName: document.getElementById('file-name'),
+        fileTitle: document.getElementById('file-title'),
+        filePosition: document.getElementById('file-position'),
+        fileDetail: document.getElementById('file-detail'),
         fileInput: document.getElementById('file-input'),
         downloadBtns: document.querySelectorAll('[data-action="download"]'),
         downloadLabels: document.querySelectorAll('[data-download-label]'),
@@ -2341,6 +2379,7 @@
         customColor: document.getElementById('custom-color'),
         crop: document.getElementById('crop'),
         modelSub: document.getElementById('model-sub'),
+        formatNote: document.getElementById('format-note'),
         workerSrc: document.getElementById('worker-src'),
         snackbar: document.getElementById('snackbar'),
         snackbarText: document.getElementById('snackbar-text'),
@@ -2351,6 +2390,7 @@
       // --- Initialization ---
       function init() {
         applyTheme();
+        addLoaderKeyframes();
         renderSettings();
         renderAll();
         bindEvents();
@@ -2440,6 +2480,41 @@
             if (e.target.closest('[data-close]')) closeDialog(dialog);
           });
         }
+        // Viewer zoom, on the image alone: pinch, a trackpad pinch (ctrl + wheel, or Safari's
+        // gesture events), or a double tap or click. Dragging and scrolling pan once zoomed.
+        els.viewerBody.addEventListener('pointerdown', (e) => {
+          if (e.button !== 0) return;
+          els.viewerBody.setPointerCapture(e.pointerId);
+          const at = { x: e.clientX, y: e.clientY };
+          viewPointers.set(e.pointerId, { ...at, start: at, time: e.timeStamp });
+        });
+        els.viewerBody.addEventListener('pointermove', moveViewPointer);
+        els.viewerBody.addEventListener('pointerup', endViewPointer);
+        els.viewerBody.addEventListener('pointercancel', (e) => viewPointers.delete(e.pointerId));
+        els.viewer.addEventListener(
+          'wheel',
+          (e) => {
+            e.preventDefault();
+            const lines = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
+            const dx = e.deltaX * lines;
+            const dy = e.deltaY * lines;
+            if (e.ctrlKey) zoomViewAt(e.clientX, e.clientY, view.scale * Math.exp(-dy / 100));
+            else setView(view.scale, view.x - dx, view.y - dy);
+          },
+          { passive: false },
+        );
+        els.viewer.addEventListener('gesturestart', (e) => {
+          e.preventDefault();
+          gestureScale = view.scale;
+        });
+        els.viewer.addEventListener('gesturechange', (e) => {
+          e.preventDefault();
+          // iOS sends these alongside the touches, which zoom already.
+          if (!viewPointers.size) zoomViewAt(e.clientX, e.clientY, gestureScale * e.scale);
+        });
+        window.addEventListener('resize', () => {
+          if (els.viewer.open) setView(view.scale, view.x, view.y);
+        });
         window.addEventListener('popstate', () => {
           if (ignorePopstate) return ignorePopstate--;
           const top = dialogStack.at(-1);
@@ -2865,6 +2940,76 @@
         if (!current?.result) return;
         renderViewer();
         openDialog(els.viewer);
+        setView(1, 0, 0);
+      }
+
+      // One finger or the mouse pans; two pinch, zooming around their midpoint as it moves.
+      function moveViewPointer(e) {
+        const p = viewPointers.get(e.pointerId);
+        if (!p) return;
+        if (viewPointers.size === 2) {
+          const other = [...viewPointers.values()].find((q) => q !== p);
+          const span = () => Math.hypot(p.x - other.x, p.y - other.y);
+          const before = { x: (p.x + other.x) / 2, y: (p.y + other.y) / 2, span: span() };
+          p.x = e.clientX;
+          p.y = e.clientY;
+          const x = (p.x + other.x) / 2;
+          const y = (p.y + other.y) / 2;
+          setView(view.scale, view.x + x - before.x, view.y + y - before.y);
+          zoomViewAt(x, y, (view.scale * span()) / before.span);
+          return;
+        }
+        setView(view.scale, view.x + e.clientX - p.x, view.y + e.clientY - p.y);
+        p.x = e.clientX;
+        p.y = e.clientY;
+      }
+
+      // Two quick taps or clicks in one spot zoom in there, or back out.
+      function endViewPointer(e) {
+        const p = viewPointers.get(e.pointerId);
+        if (!p) return;
+        viewPointers.delete(e.pointerId);
+        const moved = Math.hypot(e.clientX - p.start.x, e.clientY - p.start.y);
+        if (viewPointers.size || e.timeStamp - p.time > 300 || moved > 10) {
+          lastTap = null;
+          return;
+        }
+        const near = lastTap && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30;
+        if (near && e.timeStamp - lastTap.time < 300) {
+          lastTap = null;
+          if (view.scale > 1) setView(1, 0, 0);
+          else zoomViewAt(e.clientX, e.clientY, TAP_ZOOM);
+        } else {
+          lastTap = { time: e.timeStamp, x: e.clientX, y: e.clientY };
+        }
+      }
+
+      // Zooms the viewer to `scale`, keeping the spot under (clientX, clientY) in place.
+      function zoomViewAt(clientX, clientY, scale) {
+        const next = Math.min(MAX_ZOOM, Math.max(1, scale));
+        const box = els.viewerBody.getBoundingClientRect();
+        const x = clientX - box.left - els.viewerCanvas.offsetLeft;
+        const y = clientY - box.top - els.viewerCanvas.offsetTop;
+        const k = next / view.scale;
+        setView(next, x - (x - view.x) * k, y - (y - view.y) * k);
+      }
+
+      // Applies a zoom and offset to the canvas alone. Held so the image never drifts away:
+      // along a side where it's smaller than the viewer it stays centered on its own spot, and
+      // where it's larger its edges can't come inside the viewer's.
+      function setView(scale, x, y) {
+        const canvas = els.viewerCanvas;
+        const hold = (offset, start, size, space) => {
+          const scaled = size * scale;
+          if (scaled <= space) return (size - scaled) / 2;
+          return Math.min(-start, Math.max(space - start - scaled, offset));
+        };
+        view.scale = scale;
+        view.x = hold(x, canvas.offsetLeft, canvas.offsetWidth, els.viewerBody.clientWidth);
+        view.y = hold(y, canvas.offsetTop, canvas.offsetHeight, els.viewerBody.clientHeight);
+        canvas.style.transform =
+          scale === 1 ? '' : `translate(${view.x}px, ${view.y}px) scale(${scale})`;
+        els.viewerBody.classList.toggle('zoomed', scale > 1);
       }
 
       // Draws a cutout over the chosen fill. The preview, the viewer and the export share it.
@@ -3087,6 +3232,7 @@
         }
         els.crop.checked = prefs.crop;
         document.querySelector(`input[name="format"][value="${prefs.format}"]`).checked = true;
+        els.formatNote.textContent = FORMATS[prefs.format].note;
         document.querySelector(`input[name="saveAs"][value="${prefs.saveAs}"]`).checked = true;
       }
 
@@ -3133,6 +3279,7 @@
         els.viewerTitle.textContent = current.name;
         if (showOriginal && current.original) drawOriginal(els.viewerCanvas);
         else drawOutput(els.viewerCanvas);
+        setView(view.scale, view.x, view.y);
       }
 
       // Thumbnails keep their elements: a render only marks them, and moves them when the
@@ -3184,7 +3331,9 @@
         img.decoding = 'async';
         // A file that won't decode shows only its failed mark, not a broken-image icon.
         img.addEventListener('error', () => img.remove());
-        button.append(img);
+        const loader = document.createElement('span');
+        loader.className = 'loader';
+        button.append(img, loader);
         // Picking another image mid-run keeps it in the preview instead of following the queue.
         button.addEventListener('click', () => {
           following = !working || entry === working;
@@ -3209,7 +3358,7 @@
           width * scale,
           height * scale,
         );
-        entry.el.replaceChildren(canvas);
+        entry.el.replaceChildren(canvas, entry.el.querySelector('.loader'));
       }
 
       // Signature moment: the cutout sweeps across the original, left to right, as if the
@@ -3237,20 +3386,20 @@
         });
       }
 
-      // Under the strip: the wave while the model works, then one line about the image in the
-      // preview: its place among several, its name, and its size once done or its state until
-      // then. Both keep their space while there are images, so a batch never shifts the layout.
+      // Under the strip, two lines about the image in the preview: its name and place among
+      // several, then its state, or its size once done. They keep their space while there are
+      // images, so a batch never shifts the layout.
       function renderStatus() {
-        els.status.hidden = !current;
-        els.status.classList.toggle('idle', !working);
         els.fileName.hidden = !current;
         // Following a batch, the line names the working image at once; the preview catches up
         // when that image's photo has decoded.
         const shown = following && working ? working : current;
         if (shown) {
           const position =
-            images.length > 1 ? `${images.indexOf(shown) + 1} of ${images.length} · ` : '';
-          els.fileName.textContent = `${position}${shown.name} · ${imageDetail(shown)}`;
+            images.length > 1 ? ` · ${images.indexOf(shown) + 1} of ${images.length}` : '';
+          els.fileTitle.textContent = shown.name;
+          els.filePosition.textContent = position;
+          els.fileDetail.textContent = imageDetail(shown);
         }
         renderWaves();
       }
@@ -3274,14 +3423,13 @@
         return total ? loaded / total : 0;
       }
 
-      // One frame loop moves both waves while anything is in progress: the preview's keeps
-      // moving at full width, and the Model row's fills up with the download.
+      // The Model row's wave moves and fills up with the download while anything is in
+      // progress.
       function renderWaves() {
         cancelAnimationFrame(waveFrame);
         if (phase === 'idle') return;
         const frame = (now) => {
           const shift = REDUCED_MOTION.matches ? 0 : now / 300;
-          drawLine(els.statusLine, els.statusWave, els.statusTrack, 1, 3, shift);
           const share = downloadShare();
           if (share !== null)
             drawLine(els.modelLine, els.modelWave, els.modelTrack, share, 3, shift);
@@ -3447,6 +3595,68 @@
       }
 
       // --- Utilities ---
+
+      // Writes the loading indicator's morph: the seven shapes M3 Expressive cycles through
+      // (soft burst, 9-sided cookie, pentagon, pill, sunny, 4-sided cookie, oval), each step a
+      // little more than a quarter turn on. CSS morphs polygons only point for point, so each
+      // shape is traced from the center at the same 72 angles, its corners rounded by
+      // averaging nearby radii.
+      function addLoaderKeyframes() {
+        const POINTS = 72;
+        const FINE = 720; // samples per turn before rounding
+        const TAU = Math.PI * 2;
+        const zigzag = (t) => 1 - Math.abs((t - Math.floor(t)) * 2 - 1);
+        const polygon = (n, a) =>
+          Math.cos(Math.PI / n) / Math.cos(((a + Math.PI / 2) % (TAU / n)) - Math.PI / n);
+        // How far a ray at angle `a` goes before it leaves a shape given as an inside test.
+        const trace = (inside, a) => {
+          let lo = 0;
+          let hi = 2;
+          for (let i = 0; i < 24; i++) {
+            const mid = (lo + hi) / 2;
+            if (inside(mid * Math.cos(a), mid * Math.sin(a))) lo = mid;
+            else hi = mid;
+          }
+          return lo;
+        };
+        const pill = (x, y) => Math.hypot(Math.max(Math.abs(x) - 0.4, 0), y) <= 0.6;
+        const oval = (x, y) => x * x + (y / 0.64) ** 2 <= 1;
+        // Each shape: its radius at an angle, and how many fine samples to round over.
+        const shapes = [
+          [(a) => 0.78 + 0.22 * zigzag((a * 10) / TAU + 0.5), 12],
+          [(a) => 0.84 + 0.16 * Math.abs(Math.cos((a * 9) / 2)), 6],
+          [(a) => polygon(5, a), 24],
+          [(a) => trace(pill, a - Math.PI / 4), 0],
+          [(a) => 0.86 + 0.14 * zigzag((a * 8) / TAU + 0.5), 12],
+          [(a) => 0.78 + 0.22 * Math.abs(Math.cos(a * 2)), 16],
+          [(a) => trace(oval, a - Math.PI / 4), 0],
+        ];
+        const toPolygon = ([radius, round]) => {
+          const fine = Array.from({ length: FINE }, (_, i) => radius((i / FINE) * TAU));
+          const radii = Array.from({ length: POINTS }, (_, i) => {
+            const at = (i * FINE) / POINTS;
+            let sum = 0;
+            for (let j = -round; j <= round; j++) sum += fine[(at + j + FINE) % FINE];
+            return sum / (round * 2 + 1);
+          });
+          const max = Math.max(...radii);
+          const points = radii.map((r, i) => {
+            const a = (i / POINTS) * TAU;
+            const x = 50 + (50 * r * Math.cos(a)) / max;
+            const y = 50 + (50 * r * Math.sin(a)) / max;
+            return `${x.toFixed(1)}% ${y.toFixed(1)}%`;
+          });
+          return `polygon(${points.join(', ')})`;
+        };
+        const frames = [...shapes, shapes[0]].map((shape, i) => {
+          const at = ((i / shapes.length) * 100).toFixed(2);
+          const turn = ((i * 720) / shapes.length).toFixed(1);
+          return `${at}% { clip-path: ${toPolygon(shape)}; transform: rotate(${turn}deg); }`;
+        });
+        const style = document.createElement('style');
+        style.textContent = `@keyframes loader-morph { ${frames.join(' ')} }`;
+        document.head.append(style);
+      }
 
       // SVGs are left out: the model needs pixels, and browsers can't decode SVG in a worker.
       function isValidImageFile(file) {
