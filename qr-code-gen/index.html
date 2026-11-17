@@ -18,7 +18,7 @@
     />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=add_photo_alternate,arrow_outward,brightness_auto,chat,check,code,colorize,contact_page,content_copy,dark_mode,delete,download,info,light_mode,link,mail,more_vert,person,sms,visibility,visibility_off,wifi&display=block"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&icon_names=account_balance,add_photo_alternate,arrow_outward,brightness_auto,chat,check,code,colorize,contact_page,content_copy,dark_mode,delete,download,info,light_mode,link,mail,more_vert,person,sms,visibility,visibility_off,wifi&display=block"
     />
 
     <style>
@@ -882,6 +882,28 @@
         opacity: 0.6;
       }
 
+      /* Bank cards replace the code in the preview. They keep the code's width and grow taller,
+         so the code on the card shows at the same size as a plain one. The card sits outside
+         #qr-holder, which the QR library empties on every redraw. */
+      .stage.card .stage-canvas,
+      .stage:not(.card) .card-canvas {
+        display: none;
+      }
+
+      .card-canvas {
+        display: block;
+        width: 256px;
+        height: auto;
+        background: repeating-conic-gradient(var(--surface-container-high) 0 25%, transparent 0 50%)
+          0 0 / 16px 16px;
+      }
+
+      @media (max-width: 899px) {
+        .card-canvas {
+          width: 144px;
+        }
+      }
+
       .stage-meta {
         color: var(--on-surface-variant);
         font-size: 12px;
@@ -952,6 +974,49 @@
 
       .field:has(input:disabled) {
         opacity: 0.38;
+        pointer-events: none;
+      }
+
+      .row-note {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.25px;
+      }
+
+      /* Compact select */
+      .select {
+        position: relative;
+        display: inline-flex;
+        flex: none;
+        max-width: 100%;
+      }
+
+      .select select {
+        max-width: 100%;
+        height: 40px;
+        padding: 0 40px 0 16px;
+        border: 0;
+        border-radius: var(--shape-full);
+        background: var(--secondary-container);
+        color: var(--on-secondary-container);
+        font: 500 14px/20px var(--font);
+        letter-spacing: 0.1px;
+        cursor: pointer;
+        appearance: none;
+      }
+
+      .select::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 14px;
+        width: 12px;
+        height: 12px;
+        background: var(--on-secondary-container);
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+          center / contain no-repeat;
+        translate: 0 -50%;
         pointer-events: none;
       }
 
@@ -1054,7 +1119,6 @@
         top: 8px;
         right: 8px;
       }
-
       @media (hover: hover) and (pointer: fine) {
         .field input:hover {
           border-color: var(--on-surface);
@@ -1777,6 +1841,12 @@
         <div class="stage-col">
           <div class="stage">
             <div class="stage-canvas" id="qr-holder" role="img" aria-label="QR code preview"></div>
+            <canvas
+              class="card-canvas"
+              id="card-canvas"
+              role="img"
+              aria-label="Bank card preview"
+            ></canvas>
           </div>
           <p class="stage-meta" id="char-count"></p>
           <div class="stage-actions">
@@ -1804,6 +1874,13 @@
                     aria-hidden="true"
                     >link</span
                   >Text or link</label
+                >
+                <label
+                  ><input type="radio" name="type" value="bank" /><span
+                    class="icon"
+                    aria-hidden="true"
+                    >account_balance</span
+                  >Bank transfer</label
                 >
                 <label
                   ><input type="radio" name="type" value="wifi" /><span
@@ -1952,13 +2029,73 @@
                 </label>
               </div>
             </div>
+
+            <div class="row" data-form="bank" hidden>
+              <span class="row-text">
+                <span>Bank</span>
+                <span class="row-sub">VietQR, scans in any Vietnamese bank app</span>
+              </span>
+              <span class="select">
+                <select id="bank-bin" aria-label="Bank">
+                  <option value="">Choose a bank</option>
+                </select>
+              </span>
+            </div>
+            <div class="row row-stack" data-form="bank" hidden>
+              <div class="fields">
+                <label class="field">
+                  <input id="bank-account" type="text" placeholder=" " autocomplete="off" />
+                  <span class="field-label">Account number</span>
+                </label>
+                <label class="field">
+                  <input id="bank-holder" type="text" placeholder=" " autocomplete="off" />
+                  <span class="field-label">Account holder (optional)</span>
+                </label>
+                <label class="field">
+                  <input
+                    id="bank-amount"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder=" "
+                    autocomplete="off"
+                  />
+                  <span class="field-label">Amount in VND (optional)</span>
+                </label>
+                <label class="field">
+                  <input id="bank-msg" type="text" placeholder=" " autocomplete="off" />
+                  <span class="field-label">Message (optional)</span>
+                </label>
+                <p class="row-note full">
+                  The holder’s name only shows on the card: bank apps look it up from the account
+                  number. Messages drop accents and symbols and keep the first 25 characters.
+                </p>
+              </div>
+            </div>
           </div>
 
           <!-- Style -->
           <h2 class="sect-title">Style</h2>
           <div class="group">
-            <div class="row">
-              <span class="row-text">Background</span>
+            <div class="row row-stack" data-form="bank" hidden>
+              <span class="row-text">
+                <span>Layout</span>
+                <span class="row-sub"
+                  >Compact adds the bank, holder and account; Full adds the amount and message</span
+                >
+              </span>
+              <div class="seg" role="radiogroup" aria-label="Layout">
+                <label><input type="radio" name="bank-style" value="minimal" />Minimal</label>
+                <label
+                  ><input type="radio" name="bank-style" value="compact" checked />Compact</label
+                >
+                <label><input type="radio" name="bank-style" value="full" />Full</label>
+              </div>
+            </div>
+            <div class="row" id="bg-row">
+              <span class="row-text">
+                <span>Background</span>
+                <span class="row-sub" id="bg-sub" hidden>Bank cards always use white</span>
+              </span>
               <div class="swatches" role="radiogroup" aria-label="Background">
                 <label class="swatch clear" title="Transparent"
                   ><input type="radio" name="bg" value="transparent" aria-label="Transparent"
@@ -1979,14 +2116,20 @@
                 <label><input type="radio" name="dot-style" value="dots" />Dots</label>
               </div>
             </div>
-            <div class="row">
-              <span class="row-text">Color</span>
+            <div class="row" id="color-row">
+              <span class="row-text">
+                <span>Color</span>
+                <span class="row-sub" id="color-sub" hidden>Bank cards always use black</span>
+              </span>
               <label class="swatch selected" id="dot-swatch" style="--c: #18181b">
                 <input type="color" id="dot-solid" value="#18181b" aria-label="Color" />
               </label>
             </div>
-            <div class="row row-stack">
-              <span class="row-text">Margin</span>
+            <div class="row row-stack" id="margin-row">
+              <span class="row-text">
+                <span>Margin</span>
+                <span class="row-sub" id="margin-sub" hidden>Bank cards have their own padding</span>
+              </span>
               <div class="slider-wrap">
                 <input
                   class="slider"
@@ -2201,7 +2344,15 @@
         'sms-msg',
         'wa-phone',
         'wa-msg',
+        'bank-bin',
+        'bank-account',
+        'bank-holder',
+        'bank-amount',
+        'bank-msg',
       ];
+      const VIETQR_URL = 'https://cdn.jsdelivr.net/npm/vietqr@1.2.0/+esm';
+      const BANK_DOT_COLOR = '#18181b'; // the default code color
+      const VIETQR_MSG_MAX = 25; // EMVCo limit for the purpose field (62-08)
       const THEME_CYCLE = ['auto', 'light', 'dark'];
       const THEME_ICONS = { auto: 'brightness_auto', light: 'light_mode', dark: 'dark_mode' };
       const THEME_NAMES = { auto: 'Auto', light: 'Light', dark: 'Dark' };
@@ -2217,7 +2368,11 @@
       let ignorePopstate = 0;
       const dialogStack = [];
       let overflowShown = false; // the "too much text" message shows once per failure state
-      let logo = null; // { src, img, processed, aspect }
+      let logo = null; // { src, img, processed }
+      let vietqr = null; // the vietqr module, once loaded
+      let vietqrLoading = null;
+      const logoCache = new Map(); // bank BIN -> Promise of its logo image (or null)
+      let cardRenderId = 0;
       const visuals = {
         dotStyle: 'square',
         ecc: 'Q',
@@ -2249,6 +2404,12 @@
         dotSwatch: document.getElementById('dot-swatch'),
         bgSwatches: document.querySelectorAll('input[name="bg"]'),
         bgSwatch: document.getElementById('bg-swatch'),
+        bgRow: document.getElementById('bg-row'),
+        bgSub: document.getElementById('bg-sub'),
+        colorRow: document.getElementById('color-row'),
+        colorSub: document.getElementById('color-sub'),
+        marginRow: document.getElementById('margin-row'),
+        marginSub: document.getElementById('margin-sub'),
         paddingVal: document.getElementById('padding-val'),
         logoEmpty: document.getElementById('logo-empty'),
         logoSet: document.getElementById('logo-set'),
@@ -2264,6 +2425,9 @@
         snackbarText: document.getElementById('snackbar-text'),
         snackbarAction: document.getElementById('snackbar-action'),
         probe: document.getElementById('probe'),
+        bankBin: document.getElementById('bank-bin'),
+        stage: document.querySelector('.stage'),
+        cardCanvas: document.getElementById('card-canvas'),
       };
 
       // --- Initialization ---
@@ -2326,6 +2490,7 @@
             // Picking a custom color moves the selection off the preset swatches.
             if (e.target.id === 'bg-custom') for (const r of els.bgSwatches) r.checked = false;
             readStyle();
+            if (e.target.name === 'bank-style') renderBankLocks();
             refresh();
           }
         });
@@ -2467,6 +2632,8 @@
             return `SMSTO:${value('sms-phone')}:${value('sms-msg')}`;
           case 'whatsapp':
             return `https://wa.me/${value('wa-phone').replace(/\D/g, '').replace(/^0+/, '')}?text=${encodeURIComponent(value('wa-msg'))}`;
+          case 'bank':
+            return bankPayload();
           default:
             return value('input-url') || 'https://example.com';
         }
@@ -2480,40 +2647,407 @@
           email: `qr-email-${value('email-to') || 'mail'}`,
           sms: `qr-sms-${value('sms-phone') || 'phone'}`,
           whatsapp: `qr-wa-${value('wa-phone') || 'chat'}`,
+          bank: `qr-bank-${bankAccount() || 'transfer'}`,
         };
         return hints[currentType];
       }
 
+      // Bank transfer ---------------------------------------------------------------------------
+
+      // The vietqr package holds the bank list and builds the NAPAS transfer string. It loads the
+      // first time the Bank transfer type is picked; the bank picker fills in once it arrives.
+      function loadVietqr() {
+        vietqrLoading ??= import(VIETQR_URL)
+          .then((lib) => {
+            vietqr = lib;
+            renderBanks();
+            refresh();
+          })
+          .catch((err) => {
+            console.error(err);
+            vietqrLoading = null; // let the next visit to the type try again
+            showError('Couldn’t load the bank list. Check your connection and try again.');
+          });
+        return vietqrLoading;
+      }
+
+      // An amount makes a one-time code; without one, the payer types the amount in their app.
+      function bankPayload() {
+        if (!vietqr || !els.bankBin.value) return '';
+        return vietqr.genQRText({
+          acqId: els.bankBin.value,
+          accountNo: bankAccount(),
+          amount: bankAmount(),
+          addInfo: bankMessage(),
+        });
+      }
+
+      // Account numbers (or aliases) are 3 to 25 letters and digits; people often type spaces.
+      function bankAccount() {
+        return value('bank-account')
+          .replace(/[^A-Za-z0-9]/g, '')
+          .slice(0, 25);
+      }
+
+      // VND has no decimals, so "50.000" or "50,000" both mean 50000.
+      function bankAmount() {
+        return value('bank-amount').replace(/\D/g, '').replace(/^0+/, '').slice(0, 13);
+      }
+
+      function bankMessage() {
+        return asciiText(value('bank-msg')).slice(0, VIETQR_MSG_MAX).trim();
+      }
+
+      // What the card shows, or null when the code is drawn alone.
+      function cardInfo() {
+        if (currentType !== 'bank' || !vietqr) return null;
+        const style = checked('bank-style');
+        const bank = vietqr.findBank(els.bankBin.value);
+        if (style === 'minimal' || !bank) return null;
+        const full = style === 'full';
+        const amount = full && bankAmount();
+        return {
+          bank,
+          holder: asciiText(value('bank-holder')).toUpperCase(),
+          account: bankAccount(),
+          amount: amount ? `${Number(amount).toLocaleString('vi-VN')} VND` : '',
+          message: full ? bankMessage() : '',
+        };
+      }
+
+      // Logos are stored by BIN in assets/banks: vietqr's own CDN sends no CORS header, and a
+      // cross-origin image would block reading the canvas back for download and copy.
+      function bankLogo(bin) {
+        if (!logoCache.has(bin)) {
+          logoCache.set(
+            bin,
+            new Promise((resolve) => {
+              const img = new Image();
+              img.onload = () => {
+                // Reading pixels fails on a page with no real origin (a file:// page), and a
+                // logo that can't be read there would also block download and copy.
+                try {
+                  resolve(trimLogo(img));
+                } catch (err) {
+                  console.warn(`Bank logo ${bin} not used:`, err);
+                  resolve(null);
+                }
+              };
+              img.onerror = () => resolve(null); // the card shows the bank's name instead
+              img.src = `assets/banks/${bin}.png`;
+            }),
+          );
+        }
+        return logoCache.get(bin);
+      }
+
+      // The logo files are wide canvases with a lot of empty space around the mark, which would
+      // make the logo look small and its spacing uneven. This crops to the visible mark (pixels
+      // that are neither clear nor near-white) and returns it as a canvas plus a data URL for SVG.
+      function trimLogo(img) {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let top = height;
+        let left = width;
+        let bottom = -1;
+        let right = -1;
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const i = (y * width + x) * 4;
+            const blank =
+              data[i + 3] < 16 || (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240);
+            if (blank) continue;
+            if (y < top) top = y;
+            if (y > bottom) bottom = y;
+            if (x < left) left = x;
+            if (x > right) right = x;
+          }
+        }
+        if (bottom < 0) return null;
+        const out = document.createElement('canvas');
+        out.width = right - left + 1;
+        out.height = bottom - top + 1;
+        out.getContext('2d').drawImage(canvas, -left, -top);
+        return {
+          source: out,
+          width: out.width,
+          height: out.height,
+          href: out.toDataURL('image/png'),
+        };
+      }
+
+      // Lays out a bank card of the given width: the code, then the bank logo, holder and
+      // account, then (Full) the amount and message. The canvas and SVG writers both draw from
+      // these steps, so the preview and every export match. Text shrinks to fit the width.
+      function cardLayout(width, info, logoImg) {
+        const pad = Math.round(width * 0.08);
+        const inner = width - pad * 2;
+        const ctx = document.createElement('canvas').getContext('2d');
+        const family = cssVar('--font') || 'sans-serif';
+        const steps = [{ kind: 'qr', x: pad, y: pad, size: inner }];
+        let y = pad + inner + width * 0.05;
+
+        // A text step at baseline y, shrunk to fit maxWidth. Returns its width.
+        const place = (str, size, weight, alpha, align, x, baseline, maxWidth) => {
+          let px = size * width;
+          ctx.font = `${weight} ${px}px ${family}`;
+          const measured = ctx.measureText(str).width;
+          if (measured > maxWidth) px *= maxWidth / measured;
+          const font = `${weight} ${px.toFixed(2)}px ${family}`;
+          steps.push({
+            kind: 'text',
+            x,
+            y: baseline,
+            text: str,
+            font,
+            size: px,
+            weight,
+            alpha,
+            align,
+          });
+          return Math.min(measured, maxWidth);
+        };
+
+        // Spacing is measured from the line above to the tops of capitals and digits (about 72%
+        // of the font size in Google Sans), so every gap looks the same at any text size.
+        const CAP = 0.72;
+        const SECTION = 0.045; // logo to text, and either side of the divider
+        const ROW = 0.04; // between receipt rows
+
+        // A centered line whose capitals start gap (a share of the width) below the last line.
+        const line = (str, size, weight, alpha, gap) => {
+          if (!str) return;
+          y += (gap + size * CAP) * width;
+          place(str, size, weight, alpha, 'center', width / 2, y, inner);
+        };
+
+        // A receipt row: a muted label on the left, its value on the right. Rows are the third
+        // level, so they stay smaller and lighter than the account number above them. The first
+        // row sits as far below the divider as the divider sits below the text above it.
+        let rowGap = SECTION;
+        const pair = (label, val) => {
+          if (!val) return;
+          y += (rowGap + 0.04 * CAP) * width;
+          const labelWidth = place(label, 0.04, 400, 0.6, 'left', pad, y, inner / 2);
+          place(val, 0.04, 600, 1, 'right', width - pad, y, inner - labelWidth - width * 0.04);
+          rowGap = ROW;
+        };
+
+        if (logoImg) {
+          // Trimmed logos fill a box up to 40% of the width and 7% tall, whichever comes first.
+          const scale = Math.min((width * 0.4) / logoImg.width, (width * 0.07) / logoImg.height);
+          const w = logoImg.width * scale;
+          const h = logoImg.height * scale;
+          steps.push({ kind: 'logo', x: (width - w) / 2, y, w, h, img: logoImg.source });
+          y += h;
+        } else {
+          line(info.bank.shortName, 0.046, 600, 0.72, 0);
+        }
+        // Hierarchy: the account number leads (it's always there), the optional holder name
+        // follows in a quieter style, and receipt rows come last.
+        line(info.account, 0.054, 700, 1, SECTION);
+        line(info.holder, 0.04, 400, 0.72, 0.022);
+        if (info.amount || info.message) {
+          y += SECTION * width;
+          steps.push({ kind: 'line', x: pad, y, w: inner, h: Math.max(1, width * 0.002) });
+          pair('Số tiền', info.amount);
+          pair('Nội dung', info.message);
+        }
+        return { width, height: Math.round(y + pad), steps };
+      }
+
+      // Draws a card onto a canvas. qrSource gives the code at the card's inner size.
+      async function drawCard(canvas, width, info, qrSource, fill) {
+        const logoImg = await bankLogo(info.bank.bin);
+        const layout = cardLayout(width, info, logoImg);
+        await loadCardFonts(layout);
+        canvas.width = layout.width;
+        canvas.height = layout.height;
+        const ctx = canvas.getContext('2d');
+        if (fill) {
+          ctx.fillStyle = fill;
+          ctx.fillRect(0, 0, layout.width, layout.height);
+        }
+        const qrImg = await createImageBitmap(await qrSource('png'));
+        ctx.fillStyle = dotColor();
+        for (const step of layout.steps) {
+          if (step.kind === 'qr') ctx.drawImage(qrImg, step.x, step.y, step.size, step.size);
+          else if (step.kind === 'logo') ctx.drawImage(step.img, step.x, step.y, step.w, step.h);
+          else if (step.kind === 'line') {
+            ctx.globalAlpha = 0.2;
+            ctx.fillRect(step.x, step.y, step.w, step.h);
+            ctx.globalAlpha = 1;
+          } else {
+            ctx.globalAlpha = step.alpha;
+            ctx.textAlign = step.align;
+            ctx.font = step.font;
+            ctx.fillText(step.text, step.x, step.y);
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+
+      // The same card as an SVG file. The code and logo are embedded as images; text stays
+      // text, so it uses the viewer's copy of the font (or a fallback) when opened elsewhere.
+      async function cardSvg(width, info, qrSource, fill) {
+        const logoImg = await bankLogo(info.bank.bin);
+        const layout = cardLayout(width, info, logoImg);
+        const qrHref = await blobToDataUrl(await qrSource('svg'));
+        const logoHref = logoImg ? logoImg.href : '';
+        const family = escapeXml(cssVar('--font') || 'sans-serif');
+        const parts = layout.steps.map((step) => {
+          if (step.kind === 'qr') {
+            return `<image href="${qrHref}" x="${step.x}" y="${step.y}" width="${step.size}" height="${step.size}"/>`;
+          }
+          if (step.kind === 'logo') {
+            return `<image href="${logoHref}" x="${step.x}" y="${step.y}" width="${step.w}" height="${step.h}"/>`;
+          }
+          if (step.kind === 'line') {
+            return `<rect x="${step.x}" y="${step.y}" width="${step.w}" height="${step.h}" fill-opacity="0.2"/>`;
+          }
+          const anchor = { left: 'start', center: 'middle', right: 'end' }[step.align];
+          return `<text x="${step.x}" y="${step.y}" text-anchor="${anchor}" font-size="${step.size}" font-weight="${step.weight}" fill-opacity="${step.alpha}">${escapeXml(step.text)}</text>`;
+        });
+        return [
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height}" viewBox="0 0 ${layout.width} ${layout.height}">`,
+          fill ? `<rect width="100%" height="100%" fill="${fill}"/>` : '',
+          `<g font-family="${family}" fill="${dotColor()}">`,
+          ...parts,
+          '</g></svg>',
+        ].join('');
+      }
+
+      // Canvas text doesn't wait for web fonts, and Vietnamese letters live in their own font
+      // file, so each line's font is loaded for its own characters before drawing.
+      async function loadCardFonts(layout) {
+        if (!document.fonts) return;
+        const lines = layout.steps.filter((step) => step.kind === 'text');
+        await Promise.all(lines.map((step) => document.fonts.load(step.font, step.text)));
+      }
+
+      // A QR image source for a card's inner square: the code alone on a clear background.
+      function cardQrSource(width) {
+        const inner = width - Math.round(width * 0.08) * 2;
+        const data = payload();
+        return (ext) =>
+          qrBlob(inner, data, ext, (options) => {
+            options.backgroundOptions = { color: 'transparent' };
+          });
+      }
+
+      // Renders the card into the preview. Each call bumps the id, so a slower, older render
+      // can't paint over a newer one.
+      async function renderCardPreview(info) {
+        const id = ++cardRenderId;
+        const canvas = document.createElement('canvas');
+        await drawCard(canvas, PREVIEW_SIZE, info, cardQrSource(PREVIEW_SIZE), bgFill());
+        if (id !== cardRenderId) return;
+        const ctx = els.cardCanvas.getContext('2d');
+        els.cardCanvas.width = canvas.width;
+        els.cardCanvas.height = canvas.height;
+        ctx.drawImage(canvas, 0, 0);
+      }
+
+      // The card as an image file of the given type, at the export size.
+      async function cardBlob(info, type) {
+        const width = exportSize();
+        // JPG has no transparency, so a transparent background would come out black.
+        const fill = bgFill() ?? (type === 'image/jpeg' ? '#ffffff' : null);
+        const canvas = document.createElement('canvas');
+        await drawCard(canvas, width, info, cardQrSource(width), fill);
+        return canvasBlob(canvas, type);
+      }
+
+      // The code as an image file exactly size pixels wide. getQROptions may draw it slightly
+      // smaller so its modules land on whole pixels; this scales it back up. Nearest-neighbor
+      // scaling keeps module edges sharp (some modules end up one pixel wider than others).
+      async function qrBlob(size, data, ext, adjust) {
+        const options = getQROptions(size, data);
+        adjust?.(options);
+        const blob = await new QRCodeStyling(options).getRawData(ext);
+        if (!blob) throw new Error('No image');
+        if (options.width === size) return blob;
+        if (ext === 'svg') {
+          // The SVG has a viewBox, so setting its size scales the drawing exactly.
+          const svg = (await blob.text()).replace(
+            /(<svg[^>]*?)\swidth="[\d.]+"\sheight="[\d.]+"/,
+            `$1 width="${size}" height="${size}"`,
+          );
+          return new Blob([svg], { type: 'image/svg+xml' });
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(await createImageBitmap(blob), 0, 0, size, size);
+        return canvasBlob(canvas, `image/${ext}`);
+      }
+
+      // qr-code-styling sizes modules in whole pixels and centers the code, so the pixels left
+      // over become a blank border that changes with the code's length (up to about 12% of the
+      // image). Drawing at the largest size the module count divides exactly removes it. The
+      // module count comes from the library's internal _qr, which is safe on the pinned 1.9.2.
+      function fitToModules(options) {
+        let count = 0;
+        try {
+          count = new QRCodeStyling({ ...options, image: undefined })._qr?.getModuleCount() ?? 0;
+        } catch (err) {
+          return options; // too much text: the caller's own render reports it
+        }
+        const area = options.width - options.margin * 2;
+        const fitted = Math.floor(area / count) * count;
+        if (!count || !fitted) return options;
+        options.width = options.height = fitted + options.margin * 2;
+        return options;
+      }
+
+      // Compact and Full cards are always near-black on white with no margin: bank logos are
+      // made for white, and the card's own padding frames the code. Minimal is a plain code, so
+      // it follows the Style settings like every other type.
+      function isCardLayout() {
+        return currentType === 'bank' && checked('bank-style') !== 'minimal';
+      }
+
       function getQROptions(size, data) {
         const corners = cornerStyles(visuals.dotStyle);
-        return {
+        return fitToModules({
           width: size,
           height: size,
           data: utf8Bytes(data),
-          margin: Math.floor(size * (visuals.padding * 0.02)),
+          margin: isCardLayout() ? 0 : Math.floor(size * (visuals.padding * 0.02)),
           qrOptions: { errorCorrectionLevel: visuals.ecc },
-          dotsOptions: { type: visuals.dotStyle, color: visuals.dotColor },
+          dotsOptions: { type: visuals.dotStyle, color: dotColor() },
           backgroundOptions: { color: bgFill() ?? 'transparent' },
-          cornersSquareOptions: { type: corners.square, color: visuals.dotColor },
-          cornersDotOptions: { type: corners.dot, color: visuals.dotColor },
+          cornersSquareOptions: { type: corners.square, color: dotColor() },
+          cornersDotOptions: { type: corners.dot, color: dotColor() },
           image: logo ? logo.processed || logo.src : undefined,
           imageOptions: {
             crossOrigin: 'anonymous',
             hideBackgroundDots: true,
-            imageSize:
-              ([0.15, 0.22, 0.3, 0.38, 0.46][visuals.logoSize - 1] || 0.15) *
-              (visuals.logoForceSquare && logo ? logo.aspect : 1) *
-              (1 + 2 * (visuals.logoPadding * 0.04)),
+            // Logo size alone sets how much of the code the logo space covers. Space around the
+            // logo and Square logo are both drawn inside the logo image (buildLogoImage), so they
+            // shrink or reshape the logo within that space but never make the space bigger.
+            imageSize: [0.15, 0.22, 0.3, 0.38, 0.46][visuals.logoSize - 1] || 0.15,
             margin: 0,
           },
-        };
+        });
       }
 
       const BG_FILLS = { transparent: null, white: '#ffffff' };
 
-      // The background color, or null when it is transparent.
+      // The background color, or null when it is transparent. Bank cards are always white.
       function bgFill() {
+        if (isCardLayout()) return '#ffffff';
         return visuals.bg === 'custom' ? visuals.bgCustom : BG_FILLS[visuals.bg];
+      }
+
+      // The code and card text color. Bank cards always use the default near-black.
+      function dotColor() {
+        return isCardLayout() ? BANK_DOT_COLOR : visuals.dotColor;
       }
 
       function readStyle() {
@@ -2532,9 +3066,17 @@
 
       async function refresh() {
         if (!qrCode) return;
+        const data = payload();
+        // A bank code waits for the bank list and a chosen bank; the last code stays, dimmed.
+        els.holder.classList.toggle('busy', !data);
+        renderMeta();
+        if (!data) return els.stage.classList.remove('card');
+        const card = cardInfo();
         els.holder.classList.add('busy');
         try {
-          await qrCode.update(getQROptions(PREVIEW_SIZE, payload()));
+          await qrCode.update(getQROptions(PREVIEW_SIZE, data));
+          if (card) await renderCardPreview(card);
+          els.stage.classList.toggle('card', Boolean(card));
           overflowShown = false;
         } catch (err) {
           // Text beyond the largest QR version makes the library throw and the preview go blank.
@@ -2544,7 +3086,6 @@
         } finally {
           els.holder.classList.remove('busy');
         }
-        renderMeta();
       }
 
       function switchType(type) {
@@ -2552,6 +3093,8 @@
         els.form.querySelectorAll('[data-form]').forEach((row) => {
           row.hidden = row.dataset.form !== type;
         });
+        if (type === 'bank') loadVietqr();
+        renderBankLocks();
         refresh();
       }
 
@@ -2576,9 +3119,7 @@
         reader.onload = () => {
           const img = new Image();
           img.onload = () => {
-            const max = Math.max(img.width, img.height);
-            const min = Math.min(img.width, img.height);
-            logo = { src: reader.result, img, processed: null, aspect: min ? max / min : 1 };
+            logo = { src: reader.result, img, processed: null };
             els.logoImg.src = reader.result;
             buildLogoImage();
             renderStyle();
@@ -2637,14 +3178,23 @@
       }
 
       async function download() {
+        if (!payload()) return showError('Choose a bank first');
         const ext = checked('export-format');
         const name = els.filename.value.trim() || fileHint();
         try {
-          const options = getQROptions(ext === 'svg' ? 200 : exportSize(), payload());
-          // JPG has no transparency, so a transparent background would come out black.
-          if (ext === 'jpeg') options.backgroundOptions = { color: bgFill() ?? '#ffffff' };
-          const exporter = new QRCodeStyling(options);
-          await exporter.download({ name, extension: ext });
+          const card = cardInfo();
+          if (card && ext === 'svg') {
+            const svg = await cardSvg(1024, card, cardQrSource(1024), bgFill());
+            saveBlob(new Blob([svg], { type: 'image/svg+xml' }), `${name}.svg`);
+          } else if (card) {
+            saveBlob(await cardBlob(card, `image/${ext}`), `${name}.${ext}`);
+          } else {
+            const blob = await qrBlob(ext === 'svg' ? 200 : exportSize(), payload(), ext, (o) => {
+              // JPG has no transparency, so a transparent background would come out black.
+              if (ext === 'jpeg') o.backgroundOptions = { color: bgFill() ?? '#ffffff' };
+            });
+            saveBlob(blob, `${name}.${ext}`);
+          }
           showSnackbar(`Saved ${name}.${ext}`);
         } catch (err) {
           console.error(err);
@@ -2657,12 +3207,11 @@
         if (!navigator.clipboard || !window.ClipboardItem) {
           return showError('This browser can’t copy images');
         }
+        if (!payload()) return showError('Choose a bank first');
+        const card = cardInfo();
         const makeBlob = async () => {
-          const blob = await new QRCodeStyling(getQROptions(exportSize(), payload())).getRawData(
-            'png',
-          );
-          if (!blob) throw new Error('No image');
-          return blob;
+          if (card) return cardBlob(card, 'image/png');
+          return qrBlob(exportSize(), payload(), 'png');
         };
         try {
           await navigator.clipboard.write([new ClipboardItem({ 'image/png': makeBlob() })]);
@@ -2811,12 +3360,36 @@
         els.form.querySelectorAll('[data-logo-option]').forEach((row) => (row.hidden = !logo));
       }
 
+      // Fills the bank picker from vietqr's list, by short name. A bank chosen before a reload
+      // can't be restored, since the options arrive after the browser restores the form.
+      function renderBanks() {
+        const banks = [...vietqr.BANKS].sort((a, b) =>
+          a.shortName.localeCompare(b.shortName, 'en', { sensitivity: 'base' }),
+        );
+        els.bankBin.append(...banks.map((bank) => new Option(bank.shortName, bank.bin)));
+      }
+
       // SVG is resolution-free, so the size choice only applies to PNG and JPG.
       // An open network has no password, so the field stays put but can't be typed in.
       function renderWifiSecurity() {
         const open = checked('wifi-sec') === 'nopass';
         els.wifiPass.disabled = open;
         els.revealBtn.disabled = open;
+      }
+
+      // Background, Color and Margin keep their choices but can't be changed while a Compact or
+      // Full bank card is picked (see isCardLayout).
+      function renderBankLocks() {
+        const locked = isCardLayout();
+        for (const [row, sub] of [
+          [els.bgRow, els.bgSub],
+          [els.colorRow, els.colorSub],
+          [els.marginRow, els.marginSub],
+        ]) {
+          row.classList.toggle('disabled', locked);
+          row.inert = locked;
+          sub.hidden = !locked;
+        }
       }
 
       function renderExportOptions() {
@@ -2921,6 +3494,45 @@
       // vCard text values escape \ ; and , with a backslash, and line breaks as \n.
       function escapeVcard(str) {
         return str.replace(/[\\;,]/g, '\\$&').replace(/\r?\n/g, '\\n');
+      }
+
+      // Saves a file through a temporary link, as the browser's download.
+      function saveBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = Object.assign(document.createElement('a'), { href: url, download: filename });
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function canvasBlob(canvas, type) {
+        return new Promise((resolve, reject) =>
+          canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('No image'))), type, 0.92),
+        );
+      }
+
+      function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      function escapeXml(str) {
+        return str.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+      }
+
+      // Bank transfer messages allow only unaccented letters, digits and spaces.
+      function asciiText(str) {
+        return str
+          .normalize('NFD')
+          .replace(/[̀-ͯ]/g, '')
+          .replace(/đ/g, 'd')
+          .replace(/Đ/g, 'D')
+          .replace(/[^a-zA-Z0-9 ]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
       }
 
       // qr-code-styling writes each character as one Latin-1 byte, which garbles anything outside
