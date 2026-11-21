@@ -20,4 +20,4 @@ A small collection of *mini apps* built with *web technologies*. Vibe-coded with
 
 ---
 
-© Viet Anh Bui 2026.
+MIT license. See [`LICENSE`](./LICENSE) for more information.
